@@ -30,8 +30,8 @@ typedef struct _DFB_CursorData DFB_CursorData;
 struct _DFB_CursorData
 {
     IDirectFBSurface *surf;
-    int 			hotx;
-    int 			hoty;
+    int             hotx;
+    int             hoty;
 };
 
 #define SDL_DFB_CURSORDATA(curs)  DFB_CursorData *curdata = (DFB_CursorData *) ((curs) ? (curs)->driverdata : NULL)

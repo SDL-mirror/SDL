@@ -114,15 +114,7 @@ SDL_QuitQuit(void)
 int
 SDL_SendQuit(void)
 {
-    int posted;
-
-    posted = 0;
-    if (SDL_GetEventState(SDL_QUIT) == SDL_ENABLE) {
-        SDL_Event event;
-        event.type = SDL_QUIT;
-        posted = (SDL_PushEvent(&event) > 0);
-    }
-    return (posted);
+    return SDL_SendAppEvent(SDL_QUIT);
 }
 
 /* vi: set ts=4 sw=4 expandtab: */

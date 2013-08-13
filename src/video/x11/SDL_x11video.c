@@ -32,7 +32,7 @@
 #include "SDL_x11video.h"
 #include "SDL_x11framebuffer.h"
 #include "SDL_x11shape.h"
-#include "SDL_x11touch.h" 
+#include "SDL_x11touch.h"
 #include "SDL_x11xinput2.h"
 
 #if SDL_VIDEO_OPENGL_ES || SDL_VIDEO_OPENGL_ES2
@@ -362,6 +362,8 @@ X11_CreateDevice(int devindex)
     device->SetWindowIcon = X11_SetWindowIcon;
     device->SetWindowPosition = X11_SetWindowPosition;
     device->SetWindowSize = X11_SetWindowSize;
+    device->SetWindowMinimumSize = X11_SetWindowMinimumSize;
+    device->SetWindowMaximumSize = X11_SetWindowMaximumSize;
     device->ShowWindow = X11_ShowWindow;
     device->HideWindow = X11_HideWindow;
     device->RaiseWindow = X11_RaiseWindow;

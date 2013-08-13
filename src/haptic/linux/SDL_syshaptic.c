@@ -99,7 +99,8 @@ EV_IsHaptic(int fd)
     /* Convert supported features to SDL_HAPTIC platform-neutral features. */
     EV_TEST(FF_CONSTANT, SDL_HAPTIC_CONSTANT);
     EV_TEST(FF_SINE, SDL_HAPTIC_SINE);
-    EV_TEST(FF_SQUARE, SDL_HAPTIC_SQUARE);
+    /* !!! FIXME: put this back when we have more bits in 2.1 */
+    /*EV_TEST(FF_SQUARE, SDL_HAPTIC_SQUARE);*/
     EV_TEST(FF_TRIANGLE, SDL_HAPTIC_TRIANGLE);
     EV_TEST(FF_SAW_UP, SDL_HAPTIC_SAWTOOTHUP);
     EV_TEST(FF_SAW_DOWN, SDL_HAPTIC_SAWTOOTHDOWN);
@@ -111,6 +112,7 @@ EV_IsHaptic(int fd)
     EV_TEST(FF_CUSTOM, SDL_HAPTIC_CUSTOM);
     EV_TEST(FF_GAIN, SDL_HAPTIC_GAIN);
     EV_TEST(FF_AUTOCENTER, SDL_HAPTIC_AUTOCENTER);
+    EV_TEST(FF_RUMBLE, SDL_HAPTIC_LEFTRIGHT);
 
     /* Return what it supports. */
     return ret;
@@ -155,7 +157,7 @@ SDL_SYS_HapticInit(void)
 
     numhaptics = 0;
 
-    /* 
+    /*
      * Limit amount of checks to MAX_HAPTICS since we may or may not have
      * permission to some or all devices.
      */
@@ -371,7 +373,7 @@ SDL_SYS_JoystickIsHaptic(SDL_Joystick * joystick)
 int
 SDL_SYS_JoystickSameHaptic(SDL_Haptic * haptic, SDL_Joystick * joystick)
 {
-    /* We are assuming linux is using evdev which should trump the old
+    /* We are assuming Linux is using evdev which should trump the old
      * joystick methods. */
     if (SDL_strcmp(joystick->hwdata->fname, haptic->hwdata->fname) == 0) {
         return 1;
@@ -446,7 +448,7 @@ SDL_SYS_HapticClose(SDL_Haptic * haptic)
 }
 
 
-/* 
+/*
  * Clean up after system specific haptic stuff
  */
 void
@@ -498,44 +500,44 @@ SDL_SYS_ToDirection(SDL_HapticDirection * dir)
     switch (dir->type) {
     case SDL_HAPTIC_POLAR:
         /* Linux directions start from south.
-        		(and range from 0 to 0xFFFF)
-				   Quoting include/linux/input.h, line 926:
-				   Direction of the effect is encoded as follows:
-						0 deg -> 0x0000 (down)
-						90 deg -> 0x4000 (left)
-						180 deg -> 0x8000 (up)
-						270 deg -> 0xC000 (right)
-					*/
-        tmp = (((18000 + dir->dir[0]) % 36000) * 0xFFFF) / 36000; // convert to range [0,0xFFFF]
+                (and range from 0 to 0xFFFF)
+                   Quoting include/linux/input.h, line 926:
+                   Direction of the effect is encoded as follows:
+                        0 deg -> 0x0000 (down)
+                        90 deg -> 0x4000 (left)
+                        180 deg -> 0x8000 (up)
+                        270 deg -> 0xC000 (right)
+                    */
+        tmp = (((18000 + dir->dir[0]) % 36000) * 0xFFFF) / 36000; /* convert to range [0,0xFFFF] */
         return (Uint16) tmp;
 
-	   case SDL_HAPTIC_SPHERICAL:
-   			/*
-   				We convert to polar, because that's the only supported direction on Linux.
-   				The first value of a spherical direction is practically the same as a
-   				Polar direction, except that we have to add 90 degrees. It is the angle
-   				from EAST {1,0} towards SOUTH {0,1}.
-   				--> add 9000
-   				--> finally add 18000 and convert to [0,0xFFFF] as in case SDL_HAPTIC_POLAR.
-   			*/
-		   	tmp = ((dir->dir[0]) + 9000) % 36000;    /* Convert to polars */
-        tmp = (((18000 + tmp) % 36000) * 0xFFFF) / 36000; // convert to range [0,0xFFFF]
+       case SDL_HAPTIC_SPHERICAL:
+            /*
+                We convert to polar, because that's the only supported direction on Linux.
+                The first value of a spherical direction is practically the same as a
+                Polar direction, except that we have to add 90 degrees. It is the angle
+                from EAST {1,0} towards SOUTH {0,1}.
+                --> add 9000
+                --> finally add 18000 and convert to [0,0xFFFF] as in case SDL_HAPTIC_POLAR.
+            */
+            tmp = ((dir->dir[0]) + 9000) % 36000;    /* Convert to polars */
+        tmp = (((18000 + tmp) % 36000) * 0xFFFF) / 36000; /* convert to range [0,0xFFFF] */
         return (Uint16) tmp;
 
     case SDL_HAPTIC_CARTESIAN:
         f = atan2(dir->dir[1], dir->dir[0]);
-					/* 
-					  atan2 takes the parameters: Y-axis-value and X-axis-value (in that order)
-					   - Y-axis-value is the second coordinate (from center to SOUTH)
-					   - X-axis-value is the first coordinate (from center to EAST)
-						We add 36000, because atan2 also returns negative values. Then we practically
-						have the first spherical value. Therefore we proceed as in case
-						SDL_HAPTIC_SPHERICAL and add another 9000 to get the polar value.
-					  --> add 45000 in total
-					  --> finally add 18000 and convert to [0,0xFFFF] as in case SDL_HAPTIC_POLAR.
-					*/
-				tmp = (((int) (f * 18000. / M_PI)) + 45000) % 36000;
-        tmp = (((18000 + tmp) % 36000) * 0xFFFF) / 36000; // convert to range [0,0xFFFF]
+                    /*
+                      atan2 takes the parameters: Y-axis-value and X-axis-value (in that order)
+                       - Y-axis-value is the second coordinate (from center to SOUTH)
+                       - X-axis-value is the first coordinate (from center to EAST)
+                        We add 36000, because atan2 also returns negative values. Then we practically
+                        have the first spherical value. Therefore we proceed as in case
+                        SDL_HAPTIC_SPHERICAL and add another 9000 to get the polar value.
+                      --> add 45000 in total
+                      --> finally add 18000 and convert to [0,0xFFFF] as in case SDL_HAPTIC_POLAR.
+                    */
+                tmp = (((int) (f * 18000. / M_PI)) + 45000) % 36000;
+        tmp = (((18000 + tmp) % 36000) * 0xFFFF) / 36000; /* convert to range [0,0xFFFF] */
         return (Uint16) tmp;
 
     default:
@@ -548,7 +550,7 @@ SDL_SYS_ToDirection(SDL_HapticDirection * dir)
 
 #define  CLAMP(x)    (((x) > 32767) ? 32767 : x)
 /*
- * Initializes the linux effect struct from a haptic_effect.
+ * Initializes the Linux effect struct from a haptic_effect.
  * Values above 32767 (for unsigned) are unspecified so we must clamp.
  */
 static int
@@ -559,6 +561,7 @@ SDL_SYS_ToFFEffect(struct ff_effect *dest, SDL_HapticEffect * src)
     SDL_HapticPeriodic *periodic;
     SDL_HapticCondition *condition;
     SDL_HapticRamp *ramp;
+    SDL_HapticLeftRight *leftright;
 
     /* Clear up */
     SDL_memset(dest, 0, sizeof(struct ff_effect));
@@ -596,7 +599,8 @@ SDL_SYS_ToFFEffect(struct ff_effect *dest, SDL_HapticEffect * src)
         break;
 
     case SDL_HAPTIC_SINE:
-    case SDL_HAPTIC_SQUARE:
+    /* !!! FIXME: put this back when we have more bits in 2.1 */
+    /*case SDL_HAPTIC_SQUARE:*/
     case SDL_HAPTIC_TRIANGLE:
     case SDL_HAPTIC_SAWTOOTHUP:
     case SDL_HAPTIC_SAWTOOTHDOWN:
@@ -620,8 +624,9 @@ SDL_SYS_ToFFEffect(struct ff_effect *dest, SDL_HapticEffect * src)
         /* Periodic */
         if (periodic->type == SDL_HAPTIC_SINE)
             dest->u.periodic.waveform = FF_SINE;
-        else if (periodic->type == SDL_HAPTIC_SQUARE)
-            dest->u.periodic.waveform = FF_SQUARE;
+        /* !!! FIXME: put this back when we have more bits in 2.1 */
+        /*else if (periodic->type == SDL_HAPTIC_SQUARE)
+            dest->u.periodic.waveform = FF_SQUARE;*/
         else if (periodic->type == SDL_HAPTIC_TRIANGLE)
             dest->u.periodic.waveform = FF_TRIANGLE;
         else if (periodic->type == SDL_HAPTIC_SAWTOOTHUP)
@@ -724,6 +729,27 @@ SDL_SYS_ToFFEffect(struct ff_effect *dest, SDL_HapticEffect * src)
         dest->u.ramp.envelope.fade_level = CLAMP(ramp->fade_level);
 
         break;
+
+    case SDL_HAPTIC_LEFTRIGHT:
+        leftright = &src->leftright;
+
+        /* Header */
+        dest->type = FF_RUMBLE;
+        dest->direction = 0;
+
+        /* Replay */
+        dest->replay.length = (leftright->length == SDL_HAPTIC_INFINITY) ?
+            0 : CLAMP(leftright->length);
+
+        /* Trigger */
+        dest->trigger.button = 0;
+        dest->trigger.interval = 0;
+
+        /* Rumble */
+        dest->u.rumble.strong_magnitude = leftright->large_magnitude;
+        dest->u.rumble.weak_magnitude = leftright->small_magnitude;
+
+	break;
 
 
     default:

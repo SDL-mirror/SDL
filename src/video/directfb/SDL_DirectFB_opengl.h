@@ -32,11 +32,11 @@
 typedef struct _DirectFB_GLContext DirectFB_GLContext;
 struct _DirectFB_GLContext
 {
-    IDirectFBGL 		*context;
-    DirectFB_GLContext 	*next;
-    
-    SDL_Window 			*sdl_window;
-    int 				is_locked;
+    IDirectFBGL         *context;
+    DirectFB_GLContext  *next;
+
+    SDL_Window          *sdl_window;
+    int                 is_locked;
 };
 
 /* OpenGL functions */

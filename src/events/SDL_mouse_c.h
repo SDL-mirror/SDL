@@ -39,7 +39,7 @@ typedef struct
     SDL_Cursor *(*CreateCursor) (SDL_Surface * surface, int hot_x, int hot_y);
 
     /* Create a system cursor */
-	SDL_Cursor *(*CreateSystemCursor) (SDL_SystemCursor id);
+    SDL_Cursor *(*CreateSystemCursor) (SDL_SystemCursor id);
 
     /* Show the specified cursor, or hide if cursor is NULL */
     int (*ShowCursor) (SDL_Cursor * cursor);
@@ -73,6 +73,9 @@ typedef struct
     SDL_Cursor *def_cursor;
     SDL_Cursor *cur_cursor;
     SDL_bool cursor_shown;
+
+    /* Driver-dependent data. */
+    void *driverdata;
 } SDL_Mouse;
 
 

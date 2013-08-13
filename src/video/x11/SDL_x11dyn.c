@@ -107,9 +107,9 @@ X11_GetSym(const char *fnname, int *pHasModule)
 /* Define all the function pointers and wrappers... */
 #define SDL_X11_MODULE(modname)
 #define SDL_X11_SYM(rc,fn,params,args,ret) \
-	typedef rc (*SDL_DYNX11FN_##fn) params; \
-	static SDL_DYNX11FN_##fn p##fn = NULL; \
-	rc fn params { ret p##fn args ; }
+    typedef rc (*SDL_DYNX11FN_##fn) params; \
+    static SDL_DYNX11FN_##fn p##fn = NULL; \
+    rc fn params { ret p##fn args ; }
 #include "SDL_x11sym.h"
 #undef SDL_X11_MODULE
 #undef SDL_X11_SYM

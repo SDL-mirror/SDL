@@ -308,8 +308,8 @@ inputCallback(void *inRefCon,
               UInt32 inBusNumber, UInt32 inNumberFrames,
               AudioBufferList * ioData)
 {
-    //err = AudioUnitRender(afr->fAudioUnit, ioActionFlags, inTimeStamp, inBusNumber, inNumberFrames, afr->fAudioBuffer);
-    // !!! FIXME: write me!
+    /* err = AudioUnitRender(afr->fAudioUnit, ioActionFlags, inTimeStamp, inBusNumber, inNumberFrames, afr->fAudioBuffer); */
+    /* !!! FIXME: write me! */
     return noErr;
 }
 
@@ -380,7 +380,7 @@ prepare_audiounit(_THIS, const char *devname, int iscapture,
         return 0;
     }
 #endif
-    
+
     SDL_zero(desc);
     desc.componentType = kAudioUnitType_Output;
     desc.componentManufacturer = kAudioUnitManufacturer_Apple;

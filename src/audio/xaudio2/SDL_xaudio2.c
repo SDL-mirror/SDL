@@ -95,6 +95,13 @@ extern "C" {
 #  define SDL_XAUDIO2_HAS_SDK 1
 #endif
 #if defined(__WIN32__)
+#ifdef __GNUC__
+/* The configure script already did any necessary checking */
+#  define SDL_XAUDIO2_HAS_SDK 1
+#elif defined(__WINRT__)
+/* WinRT always has access to the .the XAudio 2 SD
+#  define SDL_XAUDIO2_HAS_SDK
+#else
 #include <dxsdkver.h> /* XAudio2 exists as of the March 2008 DirectX SDK */
 #if (!defined(_DXSDK_BUILD_MAJOR) || (_DXSDK_BUILD_MAJOR < 1284))
 #  pragma message("Your DirectX SDK is too old. Disabling XAudio2 support.")
@@ -106,10 +113,10 @@ extern "C" {
 #ifdef SDL_XAUDIO2_HAS_SDK
 
 #define INITGUID 1
-#include <XAudio2.h>
+#include <xaudio2.h>
 
 /* Hidden "this" pointer for the audio functions */
-#define _THIS	SDL_AudioDevice *this
+#define _THIS   SDL_AudioDevice *this
 
 #ifdef __cplusplus
 #define this _this
@@ -134,13 +141,12 @@ XAUDIO2_DetectDevices(int iscapture, SDL_AddAudioDevice addfn)
     IXAudio2 *ixa2 = NULL;
     UINT32 devcount = 0;
     UINT32 i = 0;
-    void *ptr = NULL;
 
     if (iscapture) {
         SDL_SetError("XAudio2: capture devices unsupported.");
         return;
     } else if (XAudio2Create(&ixa2, 0, XAUDIO2_DEFAULT_PROCESSOR) != S_OK) {
-        SDL_SetError("XAudio2: XAudio2Create() failed.");
+        SDL_SetError("XAudio2: XAudio2Create() failed at detection.");
         return;
     } else if (IXAudio2_GetDeviceCount(ixa2, &devcount) != S_OK) {
         SDL_SetError("XAudio2: IXAudio2::GetDeviceCount() failed.");
@@ -340,7 +346,7 @@ XAUDIO2_OpenDevice(_THIS, const char *devname, int iscapture)
         VoiceCBOnBufferEnd,
         VoiceCBOnLoopEnd,
         VoiceCBOnVoiceError
-	};
+    };
 
 	static IXAudio2VoiceCallback callbacks = { &callbacks_vtable };
 #endif // ! defined(__cplusplus)
@@ -352,7 +358,7 @@ XAUDIO2_OpenDevice(_THIS, const char *devname, int iscapture)
     if (iscapture) {
         return SDL_SetError("XAudio2: capture devices unsupported.");
     } else if (XAudio2Create(&ixa2, 0, XAUDIO2_DEFAULT_PROCESSOR) != S_OK) {
-        return SDL_SetError("XAudio2: XAudio2Create() failed.");
+        return SDL_SetError("XAudio2: XAudio2Create() failed at open.");
     }
     /*
     XAUDIO2_DEBUG_CONFIGURATION debugConfig;
@@ -546,7 +552,7 @@ XAUDIO2_Init(SDL_AudioDriverImpl * impl)
 #if defined(__WIN32__)
         WIN_CoUninitialize();
 #endif
-        SDL_SetError("XAudio2: XAudio2Create() failed");
+        SDL_SetError("XAudio2: XAudio2Create() failed at initialization");
         return 0;  /* not available. */
     }
     IXAudio2_Release(ixa2);

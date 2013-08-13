@@ -1,7 +1,7 @@
 /*
- *	mixer.c
- *	written by Holmes Futrell
- *	use however you want
+ *  mixer.c
+ *  written by Holmes Futrell
+ *  use however you want
  */
 
 #import "SDL.h"
@@ -100,7 +100,7 @@ loadSound(const char *file, struct sound *s)
     if (result == -1) {
         fatalError("could not build audio CVT");
     } else if (result != 0) {
-        /* 
+        /*
            this happens when the .wav format differs from the output format.
            we convert the .wav buffer here
          */
@@ -171,7 +171,7 @@ render(SDL_Renderer *renderer)
     for (i = 0; i < NUM_DRUMS; i++) {
         SDL_Color color =
             buttons[i].isPressed ? buttons[i].downColor : buttons[i].upColor;
-        SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.unused);
+        SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
         SDL_RenderFillRect(renderer, &buttons[i].rect);
     }
     /* update the screen */
@@ -179,8 +179,8 @@ render(SDL_Renderer *renderer)
 }
 
 /*
-	finds a sound channel in the mixer for a sound
-	and sets it up to start playing
+    finds a sound channel in the mixer for a sound
+    and sets it up to start playing
 */
 int
 playSound(struct sound *s)
@@ -225,9 +225,9 @@ playSound(struct sound *s)
     return selected_channel;
 }
 
-/* 
-	Called from SDL's audio system.  Supplies sound input with data by mixing together all
-	currently playing sound effects.
+/*
+    Called from SDL's audio system.  Supplies sound input with data by mixing together all
+    currently playing sound effects.
 */
 void
 audioCallback(void *userdata, Uint8 * stream, int len)
@@ -273,7 +273,7 @@ main(int argc, char *argv[])
 
     int done;                   /* has user tried to quit ? */
     SDL_Window *window;         /* main window */
-	SDL_Renderer *renderer;
+    SDL_Renderer *renderer;
     SDL_Event event;
     Uint32 startFrame;          /* holds when frame started processing */
     Uint32 endFrame;            /* holds when frame ended processing */

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 1997-2011 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -45,7 +45,7 @@ main(int argc, char *argv[])
     char buffer[BUFSIZ];
     char *ucs4;
     char *test[2];
-    int i, index = 0;
+    int i;
     FILE *file;
     int errors = 0;
 
@@ -84,5 +84,6 @@ main(int argc, char *argv[])
         fputs(test[0], stdout);
         SDL_free(test[0]);
     }
+    fclose(file);
     return (errors ? errors + 1 : 0);
 }

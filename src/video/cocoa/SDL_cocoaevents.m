@@ -41,15 +41,68 @@
 - (void)setAppleMenu:(NSMenu *)menu;
 @end
 
-@interface SDLAppDelegate : NSObject
+@interface SDLAppDelegate : NSObject {
+    BOOL seenFirstActivate;
+}
+
+- (id)init;
 - (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication *)sender;
+- (void)applicationDidBecomeActive:(NSNotification *)aNotification;
 @end
 
 @implementation SDLAppDelegate : NSObject
+- (id)init
+{
+    self = [super init];
+
+    if (self) {
+        seenFirstActivate = NO;
+    }
+
+    return self;
+}
+
 - (NSApplicationTerminateReply)applicationShouldTerminate:(NSApplication *)sender
 {
     SDL_SendQuit();
     return NSTerminateCancel;
+}
+
+- (void)applicationDidBecomeActive:(NSNotification *)aNotification
+{
+    /* HACK: Ignore the first call. The application gets a
+     * applicationDidBecomeActive: a little bit after the first window is
+     * created, and if we don't ignore it, a window that has been created with
+     * SDL_WINDOW_MINIZED will ~immediately be restored.
+     */
+    if (!seenFirstActivate) {
+        seenFirstActivate = YES;
+        return;
+    }
+
+    SDL_VideoDevice *device = SDL_GetVideoDevice();
+    if (device && device->windows)
+    {
+        SDL_Window *window = device->windows;
+        int i;
+        for (i = 0; i < device->num_displays; ++i)
+        {
+            SDL_Window *fullscreen_window = device->displays[i].fullscreen_window;
+            if (fullscreen_window)
+            {
+                if (fullscreen_window->flags & SDL_WINDOW_MINIMIZED) {
+                    SDL_RestoreWindow(fullscreen_window);
+                }
+                return;
+            }
+        }
+
+        if (window->flags & SDL_WINDOW_MINIMIZED) {
+            SDL_RestoreWindow(window);
+        } else {
+            SDL_RaiseWindow(window);
+        }
+    }
 }
 
 - (BOOL)application:(NSApplication *)theApplication openFile:(NSString *)filename
@@ -68,7 +121,7 @@ GetApplicationName(void)
     dict = (NSDictionary *)CFBundleGetInfoDictionary(CFBundleGetMainBundle());
     if (dict)
         appName = [dict objectForKey: @"CFBundleName"];
-    
+
     if (![appName length])
         appName = [[NSProcessInfo processInfo] processName];
 
@@ -84,6 +137,10 @@ CreateApplicationMenus(void)
     NSMenu *serviceMenu;
     NSMenu *windowMenu;
     NSMenuItem *menuItem;
+
+    if (NSApp == nil) {
+        return;
+    }
     
     /* Create the main menu bar */
     [NSApp setMainMenu:[[NSMenu alloc] init]];
@@ -91,7 +148,7 @@ CreateApplicationMenus(void)
     /* Create the application menu */
     appName = GetApplicationName();
     appleMenu = [[NSMenu alloc] initWithTitle:@""];
-    
+
     /* Add menu items */
     title = [@"About " stringByAppendingString:appName];
     [appleMenu addItemWithTitle:title action:@selector(orderFrontStandardAboutPanel:) keyEquivalent:@""];
@@ -123,7 +180,7 @@ CreateApplicationMenus(void)
 
     title = [@"Quit " stringByAppendingString:appName];
     [appleMenu addItemWithTitle:title action:@selector(terminate:) keyEquivalent:@"q"];
-    
+
     /* Put menu into the menubar */
     menuItem = [[NSMenuItem alloc] initWithTitle:@"" action:nil keyEquivalent:@""];
     [menuItem setSubmenu:appleMenu];
@@ -137,10 +194,10 @@ CreateApplicationMenus(void)
 
     /* Create the window menu */
     windowMenu = [[NSMenu alloc] initWithTitle:@"Window"];
-    
+
     /* Add menu items */
     [windowMenu addItemWithTitle:@"Minimize" action:@selector(performMiniaturize:) keyEquivalent:@"m"];
-    
+
     [windowMenu addItemWithTitle:@"Zoom" action:@selector(performZoom:) keyEquivalent:@""];
 
     /* Put menu into the menubar */
@@ -148,7 +205,7 @@ CreateApplicationMenus(void)
     [menuItem setSubmenu:windowMenu];
     [[NSApp mainMenu] addItem:menuItem];
     [menuItem release];
-    
+
     /* Tell the application object that this is now the window menu */
     [NSApp setWindowsMenu:windowMenu];
     [windowMenu release];
@@ -175,7 +232,7 @@ Cocoa_RegisterApp(void)
         }
         [NSApp finishLaunching];
     }
-    if ([NSApp delegate] == nil) {
+    if (NSApp && ![NSApp delegate]) {
         [NSApp setDelegate:[[SDLAppDelegate alloc] init]];
     }
     [pool release];
@@ -203,7 +260,7 @@ Cocoa_PumpEvents(_THIS)
         if ( event == nil ) {
             break;
         }
-		
+
         switch ([event type]) {
         case NSLeftMouseDown:
         case NSOtherMouseDown:

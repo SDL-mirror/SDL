@@ -40,7 +40,7 @@
 #include "SDL_name.h"
 #include "SDL_loadso.h"
 #else
-#define SDL_NAME(X)	X
+#define SDL_NAME(X) X
 #endif
 
 #ifdef SDL_AUDIO_DRIVER_ESD_DYNAMIC
@@ -123,7 +123,7 @@ ESD_WaitDevice(_THIS)
     /* Check to see if the thread-parent process is still alive */
     {
         static int cnt = 0;
-        /* Note that this only works with thread implementations 
+        /* Note that this only works with thread implementations
            that use a different process id for each thread.
          */
         /* Check every 10 loops */

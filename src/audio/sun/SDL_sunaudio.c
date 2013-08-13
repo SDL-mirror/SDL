@@ -47,7 +47,7 @@
 
 /* Open the audio device for playback, and don't block if busy */
 
-#if defined(AUDIO_GETINFO) && !defined(AUDIO_GETBUFINFO) 
+#if defined(AUDIO_GETINFO) && !defined(AUDIO_GETBUFINFO)
 #define AUDIO_GETBUFINFO AUDIO_GETINFO
 #endif
 
@@ -82,7 +82,7 @@ static void
 SUNAUDIO_WaitDevice(_THIS)
 {
 #ifdef AUDIO_GETBUFINFO
-#define SLEEP_FUDGE	10      /* 10 ms scheduling fudge factor */
+#define SLEEP_FUDGE 10      /* 10 ms scheduling fudge factor */
     audio_info_t info;
     Sint32 left;
 

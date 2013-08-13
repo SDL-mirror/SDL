@@ -40,10 +40,10 @@
 #endif
 #endif
 #ifndef _PATH_DEV_DSP24
-#define _PATH_DEV_DSP24	"/dev/sound/dsp"
+#define _PATH_DEV_DSP24 "/dev/sound/dsp"
 #endif
 #ifndef _PATH_DEV_AUDIO
-#define _PATH_DEV_AUDIO	"/dev/audio"
+#define _PATH_DEV_AUDIO "/dev/audio"
 #endif
 
 static inline void

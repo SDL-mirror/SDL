@@ -22,5 +22,7 @@
 	<string>SDLX</string>
 	<key>CFBundleVersion</key>
 	<string>2.0.0</string>
+    <key>CFBundleExecutable</key>
+    <string>${EXECUTABLE_NAME}</string>
 </dict>
 </plist>

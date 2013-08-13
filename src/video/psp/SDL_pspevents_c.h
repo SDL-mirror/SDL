@@ -21,7 +21,7 @@
 
 #include "SDL_pspvideo.h"
 
-/* Variables and functions exported by SDL_sysevents.c to other parts 
+/* Variables and functions exported by SDL_sysevents.c to other parts
    of the native video subsystem (SDL_sysvideo.c)
 */
 extern void PSP_InitOSKeymap(_THIS);

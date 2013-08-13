@@ -194,8 +194,8 @@ X11_CreatePixmapCursor(SDL_Surface * surface, int hot_x, int hot_y)
                                         surface->w, surface->h);
     cursor = XCreatePixmapCursor(display, data_pixmap, mask_pixmap,
                                  &fg, &bg, hot_x, hot_y);
-	XFreePixmap(display, data_pixmap);
-	XFreePixmap(display, mask_pixmap);
+    XFreePixmap(display, data_pixmap);
+    XFreePixmap(display, mask_pixmap);
 
     return cursor;
 }
@@ -236,8 +236,8 @@ X11_CreateSystemCursor(SDL_SystemCursor id)
     default:
         SDL_assert(0);
         return NULL;
-	// X Font Cursors reference:
-	//   http://tronche.com/gui/x/xlib/appendix/b/
+    /* X Font Cursors reference: */
+    /*   http://tronche.com/gui/x/xlib/appendix/b/ */
     case SDL_SYSTEM_CURSOR_ARROW:     shape = XC_left_ptr; break;
     case SDL_SYSTEM_CURSOR_IBEAM:     shape = XC_xterm; break;
     case SDL_SYSTEM_CURSOR_WAIT:      shape = XC_watch; break;
@@ -336,7 +336,7 @@ X11_InitMouse(_THIS)
     SDL_Mouse *mouse = SDL_GetMouse();
 
     mouse->CreateCursor = X11_CreateCursor;
-	mouse->CreateSystemCursor = X11_CreateSystemCursor;
+    mouse->CreateSystemCursor = X11_CreateSystemCursor;
     mouse->ShowCursor = X11_ShowCursor;
     mouse->FreeCursor = X11_FreeCursor;
     mouse->WarpMouse = X11_WarpMouse;

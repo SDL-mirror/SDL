@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 1997-2011 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -105,7 +105,7 @@ WatchGameController(SDL_GameController * gamecontroller)
     /* Create a window to display controller axis position */
     window = SDL_CreateWindow(title, SDL_WINDOWPOS_CENTERED,
                               SDL_WINDOWPOS_CENTERED, SCREEN_WIDTH,
-                              SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
+                              SCREEN_HEIGHT, 0);
     if (window == NULL) {
         fprintf(stderr, "Couldn't create window: %s\n", SDL_GetError());
         return;
@@ -125,7 +125,7 @@ WatchGameController(SDL_GameController * gamecontroller)
 
     /* Print info about the controller we are watching */
     printf("Watching controller %s\n",  name ? name : "Unknown Controller");
-    
+
     /* Loop, getting controller events! */
     while (!done) {
         /* blank screen, set up for drawing this frame. */
@@ -199,7 +199,7 @@ WatchGameController(SDL_GameController * gamecontroller)
         SDL_SetRenderDrawColor(screen, 0x00, 0x00, 0xFF, SDL_ALPHA_OPAQUE);
 
         SDL_RenderPresent(screen);
-        
+
         if ( !done )
             done = SDL_GameControllerGetAttached( gamecontroller ) == 0;
     }

@@ -25,19 +25,17 @@
 #include "../SDL_sysvideo.h"
 #include "SDL_assert.h"
 #include "SDL_hints.h"
-#include "../../SDL_hints_c.h"
 #include "SDL_system.h"
+#include "SDL_main.h"
 
 #include "SDL_uikitappdelegate.h"
 #include "SDL_uikitmodes.h"
 #include "../../events/SDL_events_c.h"
-#include "jumphack.h"
 
 #ifdef main
 #undef main
 #endif
 
-extern int SDL_main(int argc, char *argv[]);
 static int forward_argc;
 static char **forward_argv;
 static int exit_status;
@@ -70,11 +68,10 @@ int main(int argc, char **argv)
     return exit_status;
 }
 
-static void SDL_IdleTimerDisabledChanged(const char *name, const char *oldValue, const char *newValue)
+static void
+SDL_IdleTimerDisabledChanged(void *userdata, const char *name, const char *oldValue, const char *hint)
 {
-    SDL_assert(SDL_strcmp(name, SDL_HINT_IDLE_TIMER_DISABLED) == 0);
-
-    BOOL disable = (*newValue != '0');
+    BOOL disable = (hint && *hint != '0');
     [UIApplication sharedApplication].idleTimerDisabled = disable;
 }
 
@@ -117,7 +114,7 @@ static void SDL_IdleTimerDisabledChanged(const char *name, const char *oldValue,
     if (self->splashLandscape) {
         [self->splashLandscape retain];
     }
- 
+
     [self updateSplashImage:[[UIApplication sharedApplication] statusBarOrientation]];
 
     return self;
@@ -126,8 +123,8 @@ static void SDL_IdleTimerDisabledChanged(const char *name, const char *oldValue,
 - (NSUInteger)supportedInterfaceOrientations
 {
     NSUInteger orientationMask = UIInterfaceOrientationMaskAll;
-    
-    // Don't allow upside-down orientation on the phone, so answering calls is in the natural orientation
+
+    /* Don't allow upside-down orientation on the phone, so answering calls is in the natural orientation */
     if ([[UIDevice currentDevice] userInterfaceIdiom] == UIUserInterfaceIdiomPhone) {
         orientationMask &= ~UIInterfaceOrientationMaskPortraitUpsideDown;
     }
@@ -148,7 +145,7 @@ static void SDL_IdleTimerDisabledChanged(const char *name, const char *oldValue,
 - (void)updateSplashImage:(UIInterfaceOrientation)interfaceOrientation
 {
     UIImage *image;
-    
+
     if (UIInterfaceOrientationIsLandscape(interfaceOrientation)) {
         image = self->splashLandscape;
     } else {
@@ -199,9 +196,10 @@ static void SDL_IdleTimerDisabledChanged(const char *name, const char *oldValue,
     }
 
     /* exit, passing the return status from the user's application */
-    // We don't actually exit to support applications that do setup in
-    // their main function and then allow the Cocoa event loop to run.
-    // exit(exit_status);
+    /* We don't actually exit to support applications that do setup in
+     * their main function and then allow the Cocoa event loop to run.
+     */
+    /* exit(exit_status); */
 }
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions
@@ -218,9 +216,10 @@ static void SDL_IdleTimerDisabledChanged(const char *name, const char *oldValue,
     [[NSFileManager defaultManager] changeCurrentDirectoryPath: [[NSBundle mainBundle] resourcePath]];
 
     /* register a callback for the idletimer hint */
-    SDL_SetHint(SDL_HINT_IDLE_TIMER_DISABLED, "0");
-    SDL_RegisterHintChangedCb(SDL_HINT_IDLE_TIMER_DISABLED, &SDL_IdleTimerDisabledChanged);
+    SDL_AddHintCallback(SDL_HINT_IDLE_TIMER_DISABLED,
+                        SDL_IdleTimerDisabledChanged, NULL);
 
+    SDL_SetMainReady();
     [self performSelector:@selector(postFinishLaunch) withObject:nil afterDelay:0.0];
 
     return YES;
@@ -228,42 +227,48 @@ static void SDL_IdleTimerDisabledChanged(const char *name, const char *oldValue,
 
 - (void)applicationWillTerminate:(UIApplication *)application
 {
-    SDL_SendQuit();
-     /* hack to prevent automatic termination.  See SDL_uikitevents.m for details */
-    longjmp(*(jump_env()), 1);
+    SDL_SendAppEvent(SDL_APP_TERMINATING);
+}
+
+- (void)applicationDidReceiveMemoryWarning:(UIApplication *)application
+{
+    SDL_SendAppEvent(SDL_APP_LOWMEMORY);
 }
 
 - (void) applicationWillResignActive:(UIApplication*)application
 {
-    //NSLog(@"%@", NSStringFromSelector(_cmd));
-
-    // Send every window on every screen a MINIMIZED event.
     SDL_VideoDevice *_this = SDL_GetVideoDevice();
-    if (!_this) {
-        return;
+    if (_this) {
+        SDL_Window *window;
+        for (window = _this->windows; window != nil; window = window->next) {
+            SDL_SendWindowEvent(window, SDL_WINDOWEVENT_FOCUS_LOST, 0, 0);
+            SDL_SendWindowEvent(window, SDL_WINDOWEVENT_MINIMIZED, 0, 0);
+        }
     }
+    SDL_SendAppEvent(SDL_APP_WILLENTERBACKGROUND);
+}
 
-    SDL_Window *window;
-    for (window = _this->windows; window != nil; window = window->next) {
-        SDL_SendWindowEvent(window, SDL_WINDOWEVENT_FOCUS_LOST, 0, 0);
-        SDL_SendWindowEvent(window, SDL_WINDOWEVENT_MINIMIZED, 0, 0);
-    }
+- (void) applicationDidEnterBackground:(UIApplication*)application
+{
+    SDL_SendAppEvent(SDL_APP_DIDENTERBACKGROUND);
+}
+
+- (void) applicationWillEnterForeground:(UIApplication*)application
+{
+    SDL_SendAppEvent(SDL_APP_WILLENTERFOREGROUND);
 }
 
 - (void) applicationDidBecomeActive:(UIApplication*)application
 {
-    //NSLog(@"%@", NSStringFromSelector(_cmd));
+    SDL_SendAppEvent(SDL_APP_DIDENTERFOREGROUND);
 
-    // Send every window on every screen a RESTORED event.
     SDL_VideoDevice *_this = SDL_GetVideoDevice();
-    if (!_this) {
-        return;
-    }
-
-    SDL_Window *window;
-    for (window = _this->windows; window != nil; window = window->next) {
-        SDL_SendWindowEvent(window, SDL_WINDOWEVENT_FOCUS_GAINED, 0, 0);
-        SDL_SendWindowEvent(window, SDL_WINDOWEVENT_RESTORED, 0, 0);
+    if (_this) {
+        SDL_Window *window;
+        for (window = _this->windows; window != nil; window = window->next) {
+            SDL_SendWindowEvent(window, SDL_WINDOWEVENT_FOCUS_GAINED, 0, 0);
+            SDL_SendWindowEvent(window, SDL_WINDOWEVENT_RESTORED, 0, 0);
+        }
     }
 }
 

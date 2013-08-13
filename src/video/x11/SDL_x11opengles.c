@@ -32,11 +32,11 @@
 #define DEFAULT_OGL_ES "libGLESv1_CM.so"
 
 #define LOAD_FUNC(NAME) \
-	*((void**)&_this->gles_data->NAME) = dlsym(handle, #NAME); \
-	if (!_this->gles_data->NAME) \
-	{ \
-		return SDL_SetError("Could not retrieve EGL function " #NAME); \
-	}
+    *((void**)&_this->gles_data->NAME) = dlsym(handle, #NAME); \
+    if (!_this->gles_data->NAME) \
+    { \
+        return SDL_SetError("Could not retrieve EGL function " #NAME); \
+    }
 
 /* GLES implementation of SDL OpenGL support */
 
@@ -54,7 +54,7 @@ X11_GLES_GetProcAddress(_THIS, const char *proc)
             return retval;
         }
     }
-    
+
     handle = _this->gl_config.dll_handle;
 #if defined(__OpenBSD__) && !defined(__ELF__)
 #undef dlsym(x,y);
@@ -212,7 +212,7 @@ X11_GLES_GetVisual(_THIS, Display * display, int screen)
     /* 64 seems nice. */
     EGLint attribs[64];
     EGLint found_configs = 0;
-    VisualID visual_id;
+    EGLint visual_id;
     int i;
 
     if (!_this->gles_data) {
@@ -277,7 +277,7 @@ X11_GLES_GetVisual(_THIS, Display * display, int screen)
     if (_this->gles_data->eglGetConfigAttrib(_this->gles_data->egl_display,
                                              _this->gles_data->egl_config,
                                              EGL_NATIVE_VISUAL_ID,
-                                             (EGLint *) & visual_id) ==
+                                             &visual_id) ==
         EGL_FALSE || !visual_id) {
         /* Use the default visual when all else fails */
         XVisualInfo vi_in;
@@ -379,7 +379,7 @@ X11_GLES_SetSwapInterval(_THIS, int interval)
     status = _this->gles_data->eglSwapInterval(_this->gles_data->egl_display, interval);
     if (status == EGL_TRUE) {
         _this->gles_data->egl_swapinterval = interval;
-        return 0; 
+        return 0;
     }
 
     return SDL_SetError("Unable to set the EGL swap interval");
@@ -406,7 +406,7 @@ void
 X11_GLES_DeleteContext(_THIS, SDL_GLContext context)
 {
     /* Clean up GLES and EGL */
-    if (!_this->gles_data) {  
+    if (!_this->gles_data) {
         return;
     }
 

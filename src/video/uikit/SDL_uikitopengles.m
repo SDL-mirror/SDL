@@ -27,7 +27,6 @@
 #include "SDL_uikitappdelegate.h"
 #include "SDL_uikitmodes.h"
 #include "SDL_uikitwindow.h"
-#include "jumphack.h"
 #include "../SDL_sysvideo.h"
 #include "../../events/SDL_keyboard_c.h"
 #include "../../events/SDL_mouse_c.h"
@@ -80,7 +79,7 @@ UIKit_GL_LoadLibrary(_THIS, const char *path)
 void UIKit_GL_SwapWindow(_THIS, SDL_Window * window)
 {
 #if SDL_POWER_UIKIT
-    // Check once a frame to see if we should turn off the battery monitor.
+    /* Check once a frame to see if we should turn off the battery monitor. */
     SDL_UIKit_UpdateBatteryMonitoring();
 #endif
 
@@ -91,8 +90,10 @@ void UIKit_GL_SwapWindow(_THIS, SDL_Window * window)
     }
     [data->view swapBuffers];
 
-    /* we need to let the event cycle run, or the OS won't update the OpenGL view! */
-    SDL_PumpEvents();
+    /* You need to pump events in order for the OS to make changes visible.
+       We don't pump events here because we don't want iOS application events
+       (low memory, terminate, etc.) to happen inside low level rendering.
+     */
 }
 
 SDL_GLContext UIKit_GL_CreateContext(_THIS, SDL_Window * window)
@@ -103,6 +104,12 @@ SDL_GLContext UIKit_GL_CreateContext(_THIS, SDL_Window * window)
     SDL_DisplayData *displaydata = display->driverdata;
     SDL_DisplayModeData *displaymodedata = display->current_mode.driverdata;
     UIWindow *uiwindow = data->uiwindow;
+    EAGLSharegroup *share_group = nil;
+
+    if (_this->gl_config.share_with_current_context) {
+        SDL_uikitopenglview *view = (SDL_uikitopenglview *) SDL_GL_GetCurrentContext();
+        share_group = [view.context sharegroup];
+    }
 
     /* construct our view, passing in SDL's OpenGL configuration data */
     CGRect frame;
@@ -120,7 +127,8 @@ SDL_GLContext UIKit_GL_CreateContext(_THIS, SDL_Window * window)
                                     aBits: _this->gl_config.alpha_size
                                     depthBits: _this->gl_config.depth_size
                                     stencilBits: _this->gl_config.stencil_size
-                                    majorVersion: _this->gl_config.major_version];
+                                    majorVersion: _this->gl_config.major_version
+                                    shareGroup: share_group];
     if (!view) {
         return NULL;
     }
@@ -132,8 +140,8 @@ SDL_GLContext UIKit_GL_CreateContext(_THIS, SDL_Window * window)
         [view->viewcontroller retain];
     }
     [uiwindow addSubview: view];
-    
-    // The view controller needs to be the root in order to control rotation on iOS 6.0
+
+    /* The view controller needs to be the root in order to control rotation on iOS 6.0 */
     if (uiwindow.rootViewController == nil) {
         uiwindow.rootViewController = view->viewcontroller;
     }

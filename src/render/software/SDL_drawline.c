@@ -32,7 +32,6 @@ SDL_DrawLine1(SDL_Surface * dst, int x1, int y1, int x2, int y2, Uint32 color,
               SDL_bool draw_end)
 {
     if (y1 == y2) {
-        //HLINE(Uint8, DRAW_FASTSETPIXEL1, draw_end);
         int length;
         int pitch = (dst->pitch / dst->format->BytesPerPixel);
         Uint8 *pixel;

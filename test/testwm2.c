@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 1997-2011 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -129,8 +129,8 @@ main(int argc, char *argv[])
     SDL_FreeCursor(cursor);
 
     quit(0);
-	// keep the compiler happy ...
-	return(0);
+    // keep the compiler happy ...
+    return(0);
 }
 
 /* vi: set ts=4 sw=4 expandtab: */

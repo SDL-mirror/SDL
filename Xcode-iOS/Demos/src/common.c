@@ -1,7 +1,7 @@
 /*
- *	common.c
- *	written by Holmes Futrell
- *	use however you want
+ *  common.c
+ *  written by Holmes Futrell
+ *  use however you want
  */
 
 #include "common.h"
@@ -9,8 +9,8 @@
 #include <stdlib.h>
 
 /*
-	Produces a random int x, min <= x <= max 
-	following a uniform distribution
+    Produces a random int x, min <= x <= max
+    following a uniform distribution
 */
 int
 randomInt(int min, int max)
@@ -19,8 +19,8 @@ randomInt(int min, int max)
 }
 
 /*
-	Produces a random float x, min <= x <= max 
-	following a uniform distribution
+    Produces a random float x, min <= x <= max
+    following a uniform distribution
  */
 float
 randomFloat(float min, float max)

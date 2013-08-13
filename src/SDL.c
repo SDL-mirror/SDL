@@ -25,25 +25,29 @@
 #include "SDL.h"
 #include "SDL_bits.h"
 #include "SDL_revision.h"
-#include "SDL_fatal.h"
 #include "SDL_assert_c.h"
+#include "events/SDL_events_c.h"
 #include "haptic/SDL_haptic_c.h"
 #include "joystick/SDL_joystick_c.h"
 
 /* Initialization/Cleanup routines */
 #if !SDL_TIMERS_DISABLED
-extern void SDL_StartTicks(void);
 extern int SDL_TimerInit(void);
 extern void SDL_TimerQuit(void);
+extern void SDL_InitTicks(void);
 #endif
-#if defined(__WIN32__)
+#if SDL_VIDEO_DRIVER_WINDOWS
 extern int SDL_HelperWindowCreate(void);
 extern int SDL_HelperWindowDestroy(void);
 #endif
 
 
 /* The initialized subsystems */
-static Uint32 ticks_started = 0;
+#ifdef SDL_MAIN_NEEDED
+static SDL_bool SDL_MainIsReady = SDL_FALSE;
+#else
+static SDL_bool SDL_MainIsReady = SDL_TRUE;
+#endif
 static SDL_bool SDL_bInMainQuit = SDL_FALSE;
 static Uint8 SDL_SubsystemRefCount[ 32 ];
 
@@ -89,18 +93,60 @@ SDL_PrivateShouldQuitSubsystem(Uint32 subsystem) {
     return SDL_SubsystemRefCount[subsystem_index] == 1 || SDL_bInMainQuit;
 }
 
+void
+SDL_SetMainReady(void)
+{
+    SDL_MainIsReady = SDL_TRUE;
+}
+
 int
 SDL_InitSubSystem(Uint32 flags)
 {
-#if !SDL_TIMERS_DISABLED
-    if (!ticks_started) {
-        SDL_StartTicks();
-        ticks_started = 1;
+    if (!SDL_MainIsReady) {
+        SDL_SetError("Application didn't initialize properly, did you include SDL_main.h in the file containing your main() function?");
+        return -1;
+    }
+
+    /* Clear the error message */
+    SDL_ClearError();
+
+#if SDL_VIDEO_DRIVER_WINDOWS
+    if (SDL_HelperWindowCreate() < 0) {
+        return -1;
     }
 #endif
 
+#if !SDL_TIMERS_DISABLED
+    SDL_InitTicks();
+#endif
+
+    if ((flags & SDL_INIT_GAMECONTROLLER)) {
+        /* game controller implies joystick */
+        flags |= SDL_INIT_JOYSTICK;
+    }
+
+    if ((flags & (SDL_INIT_VIDEO|SDL_INIT_JOYSTICK))) {
+        /* video or joystick implies events */
+        flags |= SDL_INIT_EVENTS;
+    }
+
+    /* Initialize the event subsystem */
+    if ((flags & SDL_INIT_EVENTS)) {
+#if !SDL_EVENTS_DISABLED
+        if (SDL_PrivateShouldInitSubsystem(SDL_INIT_EVENTS)) {
+            if (SDL_StartEventLoop() < 0) {
+                return (-1);
+            }
+            SDL_QuitInit();
+        }
+        SDL_PrivateSubsystemRefCountIncr(SDL_INIT_EVENTS);
+#else
+        return SDL_SetError("SDL not built with events support");
+#endif
+    }
+
     /* Initialize the timer subsystem */
-    if ((flags & SDL_INIT_TIMER) ){
+    if ((flags & SDL_INIT_TIMER)){
 #if !SDL_TIMERS_DISABLED
         if (SDL_PrivateShouldInitSubsystem(SDL_INIT_TIMER)) {
             if (SDL_TimerInit() < 0) {
@@ -113,8 +159,8 @@ SDL_InitSubSystem(Uint32 flags)
 #endif
     }
 
-    /* Initialize the video/event subsystem */
-    if ((flags & SDL_INIT_VIDEO) ){
+    /* Initialize the video subsystem */
+    if ((flags & SDL_INIT_VIDEO)){
 #if !SDL_VIDEO_DISABLED
         if (SDL_PrivateShouldInitSubsystem(SDL_INIT_VIDEO)) {
             if (SDL_VideoInit(NULL) < 0) {
@@ -128,7 +174,7 @@ SDL_InitSubSystem(Uint32 flags)
     }
 
     /* Initialize the audio subsystem */
-    if ((flags & SDL_INIT_AUDIO) ){
+    if ((flags & SDL_INIT_AUDIO)){
 #if !SDL_AUDIO_DISABLED
         if (SDL_PrivateShouldInitSubsystem(SDL_INIT_AUDIO)) {
             if (SDL_AudioInit(NULL) < 0) {
@@ -141,13 +187,8 @@ SDL_InitSubSystem(Uint32 flags)
 #endif
     }
 
-    if ((flags & SDL_INIT_GAMECONTROLLER)) {
-        // Game controller implies Joystick.
-        flags |= SDL_INIT_JOYSTICK;
-    }
-
     /* Initialize the joystick subsystem */
-    if ((flags & SDL_INIT_JOYSTICK) ){
+    if ((flags & SDL_INIT_JOYSTICK)){
 #if !SDL_JOYSTICK_DISABLED
         if (SDL_PrivateShouldInitSubsystem(SDL_INIT_JOYSTICK)) {
            if (SDL_JoystickInit() < 0) {
@@ -160,7 +201,7 @@ SDL_InitSubSystem(Uint32 flags)
 #endif
     }
 
-    if ((flags & SDL_INIT_GAMECONTROLLER) ){
+    if ((flags & SDL_INIT_GAMECONTROLLER)){
 #if !SDL_JOYSTICK_DISABLED
         if (SDL_PrivateShouldInitSubsystem(SDL_INIT_GAMECONTROLLER)) {
             if (SDL_GameControllerInit() < 0) {
@@ -174,7 +215,7 @@ SDL_InitSubSystem(Uint32 flags)
     }
 
     /* Initialize the haptic subsystem */
-    if ((flags & SDL_INIT_HAPTIC) ){
+    if ((flags & SDL_INIT_HAPTIC)){
 #if !SDL_HAPTIC_DISABLED
         if (SDL_PrivateShouldInitSubsystem(SDL_INIT_HAPTIC)) {
             if (SDL_HapticInit() < 0) {
@@ -193,30 +234,7 @@ SDL_InitSubSystem(Uint32 flags)
 int
 SDL_Init(Uint32 flags)
 {
-    if (SDL_AssertionsInit() < 0) {
-        return -1;
-    }
-
-    /* Clear the error message */
-    SDL_ClearError();
-
-#if defined(__WIN32__)
-    if (SDL_HelperWindowCreate() < 0) {
-        return -1;
-    }
-#endif
-
-    /* Initialize the desired subsystems */
-    if (SDL_InitSubSystem(flags) < 0) {
-        return (-1);
-    }
-
-    /* Everything is initialized */
-    if (!(flags & SDL_INIT_NOPARACHUTE)) {
-        SDL_InstallParachute();
-    }
-
-    return (0);
+    return SDL_InitSubSystem(flags);
 }
 
 void
@@ -225,19 +243,22 @@ SDL_QuitSubSystem(Uint32 flags)
     /* Shut down requested initialized subsystems */
 #if !SDL_JOYSTICK_DISABLED
     if ((flags & SDL_INIT_GAMECONTROLLER)) {
-        // Game controller implies Joystick.
+        /* game controller implies joystick */
         flags |= SDL_INIT_JOYSTICK;
 
         if (SDL_PrivateShouldQuitSubsystem(SDL_INIT_GAMECONTROLLER)) {
             SDL_GameControllerQuit();
-		}
+        }
         SDL_PrivateSubsystemRefCountDecr(SDL_INIT_GAMECONTROLLER);
     }
 
     if ((flags & SDL_INIT_JOYSTICK)) {
+        /* joystick implies events */
+        flags |= SDL_INIT_EVENTS;
+
         if (SDL_PrivateShouldQuitSubsystem(SDL_INIT_JOYSTICK)) {
-			SDL_JoystickQuit();
-		}
+            SDL_JoystickQuit();
+        }
         SDL_PrivateSubsystemRefCountDecr(SDL_INIT_JOYSTICK);
     }
 #endif
@@ -245,8 +266,8 @@ SDL_QuitSubSystem(Uint32 flags)
 #if !SDL_HAPTIC_DISABLED
     if ((flags & SDL_INIT_HAPTIC)) {
         if (SDL_PrivateShouldQuitSubsystem(SDL_INIT_HAPTIC)) {
-			SDL_HapticQuit();
-		}
+            SDL_HapticQuit();
+        }
         SDL_PrivateSubsystemRefCountDecr(SDL_INIT_HAPTIC);
     }
 #endif
@@ -254,17 +275,20 @@ SDL_QuitSubSystem(Uint32 flags)
 #if !SDL_AUDIO_DISABLED
     if ((flags & SDL_INIT_AUDIO)) {
         if (SDL_PrivateShouldQuitSubsystem(SDL_INIT_AUDIO)) {
-			SDL_AudioQuit();
-		}
+            SDL_AudioQuit();
+        }
         SDL_PrivateSubsystemRefCountDecr(SDL_INIT_AUDIO);
     }
 #endif
 
 #if !SDL_VIDEO_DISABLED
     if ((flags & SDL_INIT_VIDEO)) {
+        /* video implies events */
+        flags |= SDL_INIT_EVENTS;
+
         if (SDL_PrivateShouldQuitSubsystem(SDL_INIT_VIDEO)) {
-			SDL_VideoQuit();
-		}
+            SDL_VideoQuit();
+        }
         SDL_PrivateSubsystemRefCountDecr(SDL_INIT_VIDEO);
     }
 #endif
@@ -272,9 +296,19 @@ SDL_QuitSubSystem(Uint32 flags)
 #if !SDL_TIMERS_DISABLED
     if ((flags & SDL_INIT_TIMER)) {
         if (SDL_PrivateShouldQuitSubsystem(SDL_INIT_TIMER)) {
-			SDL_TimerQuit();
-		}
+            SDL_TimerQuit();
+        }
         SDL_PrivateSubsystemRefCountDecr(SDL_INIT_TIMER);
+    }
+#endif
+
+#if !SDL_EVENTS_DISABLED
+    if ((flags & SDL_INIT_EVENTS)) {
+        if (SDL_PrivateShouldQuitSubsystem(SDL_INIT_EVENTS)) {
+            SDL_QuitQuit();
+            SDL_StopEventLoop();
+        }
+        SDL_PrivateSubsystemRefCountDecr(SDL_INIT_EVENTS);
     }
 #endif
 }
@@ -310,13 +344,10 @@ SDL_Quit(void)
     SDL_bInMainQuit = SDL_TRUE;
 
     /* Quit all subsystems */
-#if defined(__WIN32__)
+#if SDL_VIDEO_DRIVER_WINDOWS
     SDL_HelperWindowDestroy();
 #endif
     SDL_QuitSubSystem(SDL_INIT_EVERYTHING);
-
-    /* Uninstall any parachute signal handlers */
-    SDL_UninstallParachute();
 
     SDL_ClearHints();
     SDL_AssertionsQuit();
@@ -359,9 +390,6 @@ SDL_GetPlatform()
     return "AIX";
 #elif __ANDROID__
     return "Android";
-#elif __HAIKU__
-/* Haiku must appear here before BeOS, since it also defines __BEOS__ */
-    return "Haiku";
 #elif __BEOS__
     return "BeOS";
 #elif __BSDI__
@@ -370,6 +398,8 @@ SDL_GetPlatform()
     return "Dreamcast";
 #elif __FREEBSD__
     return "FreeBSD";
+#elif __HAIKU__
+    return "Haiku";
 #elif __HPUX__
     return "HP-UX";
 #elif __IRIX__
@@ -399,7 +429,7 @@ SDL_GetPlatform()
 #elif __WIN32__
     return "Windows";
 #elif __IPHONEOS__
-    return "iPhone OS";
+    return "iOS";
 #elif __PSP__
     return "PlayStation Portable";
 #else

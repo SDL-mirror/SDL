@@ -39,6 +39,7 @@
 static SDL_Renderer *SW_CreateRenderer(SDL_Window * window, Uint32 flags);
 static void SW_WindowEvent(SDL_Renderer * renderer,
                            const SDL_WindowEvent *event);
+static int SW_GetOutputSize(SDL_Renderer * renderer, int *w, int *h);
 static int SW_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture);
 static int SW_SetTextureColorMod(SDL_Renderer * renderer,
                                  SDL_Texture * texture);
@@ -54,6 +55,7 @@ static int SW_LockTexture(SDL_Renderer * renderer, SDL_Texture * texture,
 static void SW_UnlockTexture(SDL_Renderer * renderer, SDL_Texture * texture);
 static int SW_SetRenderTarget(SDL_Renderer * renderer, SDL_Texture * texture);
 static int SW_UpdateViewport(SDL_Renderer * renderer);
+static int SW_UpdateClipRect(SDL_Renderer * renderer);
 static int SW_RenderClear(SDL_Renderer * renderer);
 static int SW_RenderDrawPoints(SDL_Renderer * renderer,
                                const SDL_FPoint * points, int count);
@@ -109,9 +111,13 @@ SW_ActivateRenderer(SDL_Renderer * renderer)
         data->surface = data->window;
     }
     if (!data->surface) {
-        data->surface = data->window = SDL_GetWindowSurface(renderer->window);
+        SDL_Surface *surface = SDL_GetWindowSurface(renderer->window);
+        if (surface) {
+            data->surface = data->window = surface;
 
-        SW_UpdateViewport(renderer);
+            SW_UpdateViewport(renderer);
+            SW_UpdateClipRect(renderer);
+        }
     }
     return data->surface;
 }
@@ -142,6 +148,7 @@ SW_CreateRendererForSurface(SDL_Surface * surface)
     data->surface = surface;
 
     renderer->WindowEvent = SW_WindowEvent;
+    renderer->GetOutputSize = SW_GetOutputSize;
     renderer->CreateTexture = SW_CreateTexture;
     renderer->SetTextureColorMod = SW_SetTextureColorMod;
     renderer->SetTextureAlphaMod = SW_SetTextureAlphaMod;
@@ -151,6 +158,7 @@ SW_CreateRendererForSurface(SDL_Surface * surface)
     renderer->UnlockTexture = SW_UnlockTexture;
     renderer->SetRenderTarget = SW_SetRenderTarget;
     renderer->UpdateViewport = SW_UpdateViewport;
+    renderer->UpdateClipRect = SW_UpdateClipRect;
     renderer->RenderClear = SW_RenderClear;
     renderer->RenderDrawPoints = SW_RenderDrawPoints;
     renderer->RenderDrawLines = SW_RenderDrawLines;
@@ -189,6 +197,25 @@ SW_WindowEvent(SDL_Renderer * renderer, const SDL_WindowEvent *event)
     if (event->event == SDL_WINDOWEVENT_SIZE_CHANGED) {
         data->surface = NULL;
         data->window = NULL;
+    }
+}
+
+static int
+SW_GetOutputSize(SDL_Renderer * renderer, int *w, int *h)
+{
+    SDL_Surface *surface = SW_ActivateRenderer(renderer);
+
+    if (surface) {
+        if (w) {
+            *w = surface->w;
+        }
+        if (h) {
+            *h = surface->h;
+        }
+        return 0;
+    } else {
+        SDL_SetError("Software renderer doesn't have an output surface");
+        return -1;
     }
 }
 
@@ -311,12 +338,24 @@ SW_UpdateViewport(SDL_Renderer * renderer)
         return 0;
     }
 
-    if (!renderer->viewport.w && !renderer->viewport.h) {
-        /* There may be no window, so update the viewport directly */
-        renderer->viewport.w = surface->w;
-        renderer->viewport.h = surface->h;
-    }
     SDL_SetClipRect(data->surface, &renderer->viewport);
+    return 0;
+}
+
+static int
+SW_UpdateClipRect(SDL_Renderer * renderer)
+{
+    SW_RenderData *data = (SW_RenderData *) renderer->driverdata;
+    SDL_Surface *surface = data->surface;
+    const SDL_Rect *rect = &renderer->clip_rect;
+
+    if (surface) {
+        if (!SDL_RectEmpty(rect)) {
+            SDL_SetClipRect(surface, rect);
+        } else {
+            SDL_SetClipRect(surface, NULL);
+        }
+    }
     return 0;
 }
 

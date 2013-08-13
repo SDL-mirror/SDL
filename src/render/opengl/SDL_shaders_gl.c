@@ -216,7 +216,7 @@ CompileShaderProgram(GL_ShaderContext *ctx, int index, GL_ShaderData *data)
 
     /* Make sure we use the correct sampler type for our texture type */
     if (ctx->GL_ARB_texture_rectangle_supported) {
-        frag_defines = 
+        frag_defines =
 "#define sampler2D sampler2DRect\n"
 "#define texture2D texture2DRect\n";
     }
@@ -252,7 +252,7 @@ CompileShaderProgram(GL_ShaderContext *ctx, int index, GL_ShaderData *data)
         }
     }
     ctx->glUseProgramObjectARB(0);
-    
+
     return (ctx->glGetError() == GL_NO_ERROR);
 }
 

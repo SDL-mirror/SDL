@@ -21,7 +21,7 @@
 
 /**
  *  \file SDL_test_common.h
- *  
+ *
  *  Include file for SDL test framework.
  *
  *  This code is a part of the SDL2_test library, not the main SDL library.
@@ -69,6 +69,9 @@ typedef struct
     int window_minH;
     int window_maxW;
     int window_maxH;
+    int logical_w;
+    int logical_h;
+    float scale;
     int depth;
     int refresh_rate;
     int num_windows;
@@ -104,14 +107,13 @@ typedef struct
     int gl_accelerated;
     int gl_major_version;
     int gl_minor_version;
+    int gl_debug;
 } SDLTest_CommonState;
 
 #include "begin_code.h"
 /* Set up for C function definitions, even when using C++ */
 #ifdef __cplusplus
-/* *INDENT-OFF* */
 extern "C" {
-/* *INDENT-ON* */
 #endif
 
 /* Function prototypes */
@@ -175,9 +177,7 @@ void SDLTest_CommonQuit(SDLTest_CommonState * state);
 
 /* Ends C function definitions when using C++ */
 #ifdef __cplusplus
-/* *INDENT-OFF* */
 }
-/* *INDENT-ON* */
 #endif
 #include "close_code.h"
 

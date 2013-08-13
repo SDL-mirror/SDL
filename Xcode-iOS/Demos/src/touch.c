@@ -1,7 +1,7 @@
 /*
- *	touch.c
- *	written by Holmes Futrell
- *	use however you want
+ *  touch.c
+ *  written by Holmes Futrell
+ *  use however you want
  */
 
 #include "SDL.h"
@@ -14,8 +14,8 @@
 static SDL_Texture *brush = 0;       /* texture for the brush */
 
 /*
-	draws a line from (startx, starty) to (startx + dx, starty + dy)
-	this is accomplished by drawing several blots spaced PIXELS_PER_ITERATION apart
+    draws a line from (startx, starty) to (startx + dx, starty + dy)
+    this is accomplished by drawing several blots spaced PIXELS_PER_ITERATION apart
 */
 void
 drawLine(SDL_Renderer *renderer, float startx, float starty, float dx, float dy)
@@ -48,7 +48,7 @@ drawLine(SDL_Renderer *renderer, float startx, float starty, float dx, float dy)
 }
 
 /*
-	loads the brush texture
+    loads the brush texture
 */
 void
 initializeTexture(SDL_Renderer *renderer)
@@ -78,7 +78,7 @@ main(int argc, char *argv[])
     Uint8 state;                /* mouse (touch) state */
     SDL_Event event;
     SDL_Window *window;         /* main window */
-	SDL_Renderer *renderer;
+    SDL_Renderer *renderer;
     int done;                   /* does user want to quit? */
 
     /* initialize SDL */
@@ -88,7 +88,7 @@ main(int argc, char *argv[])
 
     /* create main window and renderer */
     window = SDL_CreateWindow(NULL, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT,
-                                SDL_WINDOW_OPENGL | SDL_WINDOW_SHOWN |
+                                SDL_WINDOW_OPENGL |
                                 SDL_WINDOW_BORDERLESS);
     renderer = SDL_CreateRenderer(window, 0, 0);
 

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 1997-2011 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -84,7 +84,7 @@ LoadSprite(char *file, SDL_Renderer *renderer)
 }
 
 void
-MoveSprites(SDL_Window * window, SDL_Renderer * renderer, SDL_Texture * sprite)
+MoveSprites(SDL_Renderer * renderer, SDL_Texture * sprite)
 {
     int i;
     int window_w = WINDOW_WIDTH;
@@ -158,10 +158,12 @@ main(int argc, char *argv[])
                 done = 1;
             }
         }
-        MoveSprites(window, renderer, sprite);
+        MoveSprites(renderer, sprite);
     }
 
     quit(0);
+
+    return 0; /* to prevent compiler warning */
 }
 
 /* vi: set ts=4 sw=4 expandtab: */

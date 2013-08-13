@@ -27,16 +27,15 @@
 
 typedef struct SDL_WindowData SDL_WindowData;
 
-/* *INDENT-OFF* */
-#if MAC_OS_X_VERSION_MIN_REQUIRED >= 1060
 @interface Cocoa_WindowListener : NSResponder <NSWindowDelegate> {
-#else
-@interface Cocoa_WindowListener : NSResponder {
-#endif
     SDL_WindowData *_data;
+    BOOL observingVisible;
+    BOOL wasVisible;
 }
 
 -(void) listen:(SDL_WindowData *) data;
+-(void) pauseVisibleObservation;
+-(void) resumeVisibleObservation;
 -(void) close;
 
 /* Window delegate functionality */
@@ -78,10 +77,13 @@ typedef enum {
 @end
 /* *INDENT-ON* */
 
+@class SDLOpenGLContext;
+
 struct SDL_WindowData
 {
     SDL_Window *window;
     NSWindow *nswindow;
+    NSMutableArray *nscontexts;
     SDL_bool created;
     Cocoa_WindowListener *listener;
     struct SDL_VideoData *videodata;

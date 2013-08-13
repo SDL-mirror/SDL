@@ -24,16 +24,27 @@
 
 #include "SDL_stdinc.h"
 
-#ifdef SDL_malloc
-/* expose the symbol, but use what we figured out elsewhere. */
-#undef SDL_malloc
-#undef SDL_calloc
-#undef SDL_realloc
-#undef SDL_free
-void *SDL_malloc(size_t size) { return SDL_malloc_inline(size); }
-void *SDL_calloc(size_t nmemb, size_t size) { return SDL_calloc_inline(nmemb, size); }
-void *SDL_realloc(void *ptr, size_t size) { return SDL_realloc_inline(ptr, size); }
-void SDL_free(void *ptr) { SDL_free_inline(ptr); }
+#if defined(HAVE_MALLOC)
+
+void *SDL_malloc(size_t size)
+{
+    return malloc(size);
+}
+
+void *SDL_calloc(size_t nmemb, size_t size)
+{
+    return calloc(nmemb, size);
+}
+
+void *SDL_realloc(void *ptr, size_t size)
+{
+    return realloc(ptr, size);
+}
+
+void SDL_free(void *ptr)
+{
+    free(ptr);
+}
 
 #else  /* the rest of this is a LOT of tapdancing to implement malloc. :) */
 
@@ -409,9 +420,9 @@ MALLINFO_FIELD_TYPE        default: size_t
   size_t. The value is used only if  HAVE_USR_INCLUDE_MALLOC_H is not set
 
 REALLOC_ZERO_BYTES_FREES    default: not defined
-  This should be set if a call to realloc with zero bytes should 
-  be the same as a call to free. Some people think it should. Otherwise, 
-  since this malloc returns a unique pointer for malloc(0), so does 
+  This should be set if a call to realloc with zero bytes should
+  be the same as a call to free. Some people think it should. Otherwise,
+  since this malloc returns a unique pointer for malloc(0), so does
   realloc(p, 0).
 
 LACKS_UNISTD_H, LACKS_FCNTL_H, LACKS_SYS_PARAM_H, LACKS_SYS_MMAN_H
@@ -619,12 +630,12 @@ DEFAULT_MMAP_THRESHOLD       default: 256K
 #define MALLINFO_FIELD_TYPE size_t
 #endif /* MALLINFO_FIELD_TYPE */
 
-#define memset	SDL_memset
-#define memcpy	SDL_memcpy
-#define malloc	SDL_malloc
-#define calloc	SDL_calloc
-#define realloc	SDL_realloc
-#define free	SDL_free
+#define memset  SDL_memset
+#define memcpy  SDL_memcpy
+#define malloc  SDL_malloc
+#define calloc  SDL_calloc
+#define realloc SDL_realloc
+#define free    SDL_free
 
 /*
   mallopt tuning options.  SVID/XPG defines four standard parameter
@@ -5239,7 +5250,7 @@ History:
     Trial version Fri Aug 28 13:14:29 1992  Doug Lea  (dl at g.oswego.edu)
       * Based loosely on libg++-1.2X malloc. (It retains some of the overall
          structure of old version,  but most details differ.)
- 
+
 */
 
 #endif /* !HAVE_MALLOC */

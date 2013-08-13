@@ -21,7 +21,7 @@
 
 /**
  *  \file SDL_types.h
- *  
+ *
  *  \deprecated
  */
 

@@ -13,6 +13,7 @@ TARGETS = \
 	testaudioinfo$(EXE) \
 	testautomation$(EXE) \
 	testdraw2$(EXE) \
+	testdrawchessboard$(EXE) \
 	testerror$(EXE) \
 	testfile$(EXE) \
 	testgamecontroller$(EXE) \
@@ -69,22 +70,24 @@ testaudioinfo$(EXE): $(srcdir)/testaudioinfo.c
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
 
 testautomation$(EXE): $(srcdir)/testautomation.c \
+		      $(srcdir)/testautomation_audio.c \
 		      $(srcdir)/testautomation_clipboard.c \
+		      $(srcdir)/testautomation_events.c \
+		      $(srcdir)/testautomation_keyboard.c \
 		      $(srcdir)/testautomation_main.c \
+		      $(srcdir)/testautomation_mouse.c \
+		      $(srcdir)/testautomation_pixels.c \
 		      $(srcdir)/testautomation_platform.c \
 		      $(srcdir)/testautomation_rect.c \
 		      $(srcdir)/testautomation_render.c \
 		      $(srcdir)/testautomation_rwops.c \
-		      $(srcdir)/testautomation_audio.c \
-		      $(srcdir)/testautomation_surface.c \
-		      $(srcdir)/testautomation_events.c \
-		      $(srcdir)/testautomation_keyboard.c \
-		      $(srcdir)/testautomation_video.c \
-		      $(srcdir)/testautomation_syswm.c \
 		      $(srcdir)/testautomation_sdltest.c \
-		      $(srcdir)/testautomation_mouse.c \
-		      $(srcdir)/testautomation_timer.c
-	$(CC) -o $@ $^ $(CFLAGS) -lSDL2_test $(LIBS) 
+		      $(srcdir)/testautomation_stdlib.c \
+		      $(srcdir)/testautomation_surface.c \
+		      $(srcdir)/testautomation_syswm.c \
+		      $(srcdir)/testautomation_timer.c \
+		      $(srcdir)/testautomation_video.c
+	$(CC) -o $@ $^ $(CFLAGS) $(LIBS) 
 
 testmultiaudio$(EXE): $(srcdir)/testmultiaudio.c
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
@@ -99,6 +102,9 @@ testrelative$(EXE): $(srcdir)/testrelative.c
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
 
 testdraw2$(EXE): $(srcdir)/testdraw2.c
+	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
+
+testdrawchessboard$(EXE): $(srcdir)/testdrawchessboard.c
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
 
 testerror$(EXE): $(srcdir)/testerror.c
@@ -149,9 +155,8 @@ testlock$(EXE): $(srcdir)/testlock.c
 ifeq (@ISMACOSX@,true)
 testnative$(EXE): $(srcdir)/testnative.c \
 			$(srcdir)/testnativecocoa.m \
-			$(srcdir)/testnativew32.c \
 			$(srcdir)/testnativex11.c
-	$(CC) -o $@ $^ $(CFLAGS) $(LIBS) -L/usr/X11/lib -lX11 -framework Cocoa
+	$(CC) -o $@ $^ $(CFLAGS) $(LIBS) -framework Cocoa @XLIB@
 endif
 
 ifeq (@ISWINDOWS@,true)
@@ -163,7 +168,7 @@ endif
 ifeq (@ISUNIX@,true)
 testnative$(EXE): $(srcdir)/testnative.c \
 			$(srcdir)/testnativex11.c
-	$(CC) -o $@ $^ $(CFLAGS) $(LIBS) -L/usr/X11/lib -lX11
+	$(CC) -o $@ $^ $(CFLAGS) $(LIBS) @XLIB@
 endif
 
 testoverlay2$(EXE): $(srcdir)/testoverlay2.c

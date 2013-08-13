@@ -30,10 +30,10 @@
 
 #if SDL_IPHONE_KEYBOARD
 #include "keyinfotable.h"
+#endif
 #include "SDL_uikitappdelegate.h"
 #include "SDL_uikitmodes.h"
 #include "SDL_uikitwindow.h"
-#endif
 
 @implementation SDL_uikitview
 
@@ -63,11 +63,11 @@
 {
     CGPoint point = [touch locationInView: self];
 
-    // Get the display scale and apply that to the input coordinates
+    /* Get the display scale and apply that to the input coordinates */
     SDL_Window *window = self->viewcontroller.window;
     SDL_VideoDisplay *display = SDL_GetDisplayForWindow(window);
     SDL_DisplayModeData *displaymodedata = (SDL_DisplayModeData *) display->current_mode.driverdata;
-    
+
     if (normalize) {
         CGRect bounds = [self bounds];
         point.x /= bounds.size.width;
@@ -99,9 +99,10 @@
 
         CGPoint locationInView = [self touchLocation:touch shouldNormalize:YES];
 #ifdef IPHONE_TOUCH_EFFICIENT_DANGEROUS
-        // FIXME: TODO: Using touch as the fingerId is potentially dangerous
-        // It is also much more efficient than storing the UITouch pointer
-        // and comparing it to the incoming event.
+        /* FIXME: TODO: Using touch as the fingerId is potentially dangerous
+         * It is also much more efficient than storing the UITouch pointer
+         * and comparing it to the incoming event.
+         */
         SDL_SendTouch(touchId, (SDL_FingerID)((size_t)touch),
                       SDL_TRUE, locationInView.x, locationInView.y, 1.0f);
 #else

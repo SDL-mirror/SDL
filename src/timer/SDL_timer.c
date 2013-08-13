@@ -26,6 +26,8 @@
 #include "SDL_cpuinfo.h"
 #include "SDL_thread.h"
 
+extern void SDL_StartTicks(void);
+
 /* #define DEBUG_TIMERS */
 
 typedef struct _SDL_Timer
@@ -70,6 +72,16 @@ typedef struct {
 
 static SDL_TimerData SDL_timer_data;
 
+static Uint32 ticks_started = 0;
+
+void
+SDL_InitTicks(void)
+{
+    if (!ticks_started) {
+        SDL_StartTicks();
+        ticks_started = 1;
+    }
+}
 
 /* The idea here is that any thread might add a timer, but a single
  * thread manages the active timer queue, sorted by scheduling time.
@@ -324,7 +336,7 @@ SDL_AddTimer(Uint32 interval, SDL_TimerCallback callback, void *param)
     timer->interval = interval;
     timer->scheduled = SDL_GetTicks() + interval;
     timer->canceled = SDL_FALSE;
- 
+
     entry = (SDL_TimerMap *)SDL_malloc(sizeof(*entry));
     if (!entry) {
         SDL_free(timer);

@@ -23,9 +23,13 @@
 #if SDL_VIDEO_DRIVER_ANDROID
 
 #include "../SDL_sysvideo.h"
+#include "../../events/SDL_keyboard_c.h"
+#include "../../events/SDL_mouse_c.h"
 
 #include "SDL_androidvideo.h"
 #include "SDL_androidwindow.h"
+
+#include "../../core/android/SDL_android.h"
 
 int
 Android_CreateWindow(_THIS, SDL_Window * window)
@@ -47,7 +51,7 @@ Android_CreateWindow(_THIS, SDL_Window * window)
     window->flags |= SDL_WINDOW_FULLSCREEN;     /* window is always fullscreen */
     window->flags &= ~SDL_WINDOW_HIDDEN;
     window->flags |= SDL_WINDOW_SHOWN;          /* only one window on Android */
-    window->flags |= SDL_WINDOW_INPUT_FOCUS;    /* always has input focus */    
+    window->flags |= SDL_WINDOW_INPUT_FOCUS;    /* always has input focus */
 
     /* One window, it always has focus */
     SDL_SetMouseFocus(window);

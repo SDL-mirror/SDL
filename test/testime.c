@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 1997-2011 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -238,7 +238,7 @@ int main(int argc, char *argv[]) {
             }
         }
     }
-    
+
     if (!SDLTest_CommonInit(state)) {
         return 2;
     }
@@ -267,7 +267,7 @@ int main(int argc, char *argv[]) {
         SDL_SetRenderDrawColor(renderer, 0xA0, 0xA0, 0xA0, 0xFF);
         SDL_RenderClear(renderer);
     }
-    Redraw();    
+    Redraw();
     /* Main render loop */
     done = 0;
     while (!done) {
@@ -356,7 +356,7 @@ int main(int argc, char *argv[]) {
                     break;
                 }
                 break;
-                    
+
             }
         }
     }

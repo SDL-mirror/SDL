@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 1997-2011 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -16,15 +16,6 @@
  *                                                                              *
  ********************************************************************************/
 
-#if 1 /* FIXME: Rework this using the 2.0 API */
-#include <stdio.h>
-
-int main(int argc, char *argv[])
-{
-    printf("FIXME\n");
-    return 0;
-}
-#else
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -215,135 +206,6 @@ ConvertRGBtoYV12(Uint8 *rgb, Uint8 *out, int w, int h,
     }
 }
 
-void
-ConvertRGBtoIYUV(SDL_Surface * s, SDL_Overlay * o, int monochrome,
-                 int luminance)
-{
-    int x, y;
-    int yuv[3];
-    Uint8 *p, *op[3];
-
-    SDL_LockSurface(s);
-    SDL_LockYUVOverlay(o);
-
-    /* Convert */
-    for (y = 0; y < s->h && y < o->h; y++) {
-        p = ((Uint8 *) s->pixels) + s->pitch * y;
-        op[0] = o->pixels[0] + o->pitches[0] * y;
-        op[1] = o->pixels[1] + o->pitches[1] * (y / 2);
-        op[2] = o->pixels[2] + o->pitches[2] * (y / 2);
-        for (x = 0; x < s->w && x < o->w; x++) {
-            RGBtoYUV(p, yuv, monochrome, luminance);
-            *(op[0]++) = yuv[0];
-            if (x % 2 == 0 && y % 2 == 0) {
-                *(op[1]++) = yuv[1];
-                *(op[2]++) = yuv[2];
-            }
-            p += s->format->BytesPerPixel;
-        }
-    }
-
-    SDL_UnlockYUVOverlay(o);
-    SDL_UnlockSurface(s);
-}
-
-void
-ConvertRGBtoUYVY(SDL_Surface * s, SDL_Overlay * o, int monochrome,
-                 int luminance)
-{
-    int x, y;
-    int yuv[3];
-    Uint8 *p, *op;
-
-    SDL_LockSurface(s);
-    SDL_LockYUVOverlay(o);
-
-    for (y = 0; y < s->h && y < o->h; y++) {
-        p = ((Uint8 *) s->pixels) + s->pitch * y;
-        op = o->pixels[0] + o->pitches[0] * y;
-        for (x = 0; x < s->w && x < o->w; x++) {
-            RGBtoYUV(p, yuv, monochrome, luminance);
-            if (x % 2 == 0) {
-                *(op++) = yuv[1];
-                *(op++) = yuv[0];
-                *(op++) = yuv[2];
-            } else
-                *(op++) = yuv[0];
-
-            p += s->format->BytesPerPixel;
-        }
-    }
-
-    SDL_UnlockYUVOverlay(o);
-    SDL_UnlockSurface(s);
-}
-
-void
-ConvertRGBtoYVYU(SDL_Surface * s, SDL_Overlay * o, int monochrome,
-                 int luminance)
-{
-    int x, y;
-    int yuv[3];
-    Uint8 *p, *op;
-
-    SDL_LockSurface(s);
-    SDL_LockYUVOverlay(o);
-
-    for (y = 0; y < s->h && y < o->h; y++) {
-        p = ((Uint8 *) s->pixels) + s->pitch * y;
-        op = o->pixels[0] + o->pitches[0] * y;
-        for (x = 0; x < s->w && x < o->w; x++) {
-            RGBtoYUV(p, yuv, monochrome, luminance);
-            if (x % 2 == 0) {
-                *(op++) = yuv[0];
-                *(op++) = yuv[2];
-                op[1] = yuv[1];
-            } else {
-                *op = yuv[0];
-                op += 2;
-            }
-
-            p += s->format->BytesPerPixel;
-        }
-    }
-
-    SDL_UnlockYUVOverlay(o);
-    SDL_UnlockSurface(s);
-}
-
-void
-ConvertRGBtoYUY2(SDL_Surface * s, SDL_Overlay * o, int monochrome,
-                 int luminance)
-{
-    int x, y;
-    int yuv[3];
-    Uint8 *p, *op;
-
-    SDL_LockSurface(s);
-    SDL_LockYUVOverlay(o);
-
-    for (y = 0; y < s->h && y < o->h; y++) {
-        p = ((Uint8 *) s->pixels) + s->pitch * y;
-        op = o->pixels[0] + o->pitches[0] * y;
-        for (x = 0; x < s->w && x < o->w; x++) {
-            RGBtoYUV(p, yuv, monochrome, luminance);
-            if (x % 2 == 0) {
-                *(op++) = yuv[0];
-                *(op++) = yuv[1];
-                op[1] = yuv[2];
-            } else {
-                *op = yuv[0];
-                op += 2;
-            }
-
-            p += s->format->BytesPerPixel;
-        }
-    }
-
-    SDL_UnlockYUVOverlay(o);
-    SDL_UnlockSurface(s);
-}
-
 static void
 PrintUsage(char *argv0)
 {
@@ -384,7 +246,7 @@ main(int argc, char **argv)
     int scale = 5;
     SDL_bool done = SDL_FALSE;
 
-    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_NOPARACHUTE) < 0) {
+    if (SDL_Init(SDL_INIT_VIDEO) < 0) {
         fprintf(stderr, "Couldn't initialize SDL: %s\n", SDL_GetError());
         return 3;
     }
@@ -414,31 +276,6 @@ main(int argc, char **argv)
             nodelay = 1;
             argv += 1;
             argc -= 1;
-        } else if (strcmp(argv[1], "-format") == 0) {
-            if (argv[2]) {
-                if (!strcmp(argv[2], "YV12"))
-                    pixel_format = SDL_PIXELFORMAT_YV12;
-                else if (!strcmp(argv[2], "IYUV"))
-                    pixel_format = SDL_PIXELFORMAT_IYUV;
-                else if (!strcmp(argv[2], "YUY2"))
-                    pixel_format = SDL_PIXELFORMAT_YUY2;
-                else if (!strcmp(argv[2], "UYVY"))
-                    pixel_format = SDL_PIXELFORMAT_UYVY;
-                else if (!strcmp(argv[2], "YVYU"))
-                    pixel_format = SDL_PIXELFORMAT_YVYU;
-                else {
-                    fprintf(stderr,
-                            "The -format option %s is not recognized, see help for info.\n",
-                            argv[2]);
-                    quit(10);
-                }
-                argv += 2;
-                argc -= 2;
-            } else {
-                fprintf(stderr,
-                        "The -format option requires an argument, default is YUY2.\n");
-                quit(10);
-            }
         } else if (strcmp(argv[1], "-scale") == 0) {
             if (argv[2]) {
                 scale = atoi(argv[2]);
@@ -496,7 +333,7 @@ main(int argc, char **argv)
                               SDL_WINDOWPOS_UNDEFINED,
                               SDL_WINDOWPOS_UNDEFINED,
                               window_w, window_h,
-                              SDL_WINDOW_SHOWN|SDL_WINDOW_RESIZABLE);
+                              SDL_WINDOW_RESIZABLE);
     if (!window) {
         fprintf(stderr, "Couldn't set create window: %s\n", SDL_GetError());
         free(RawMooseData);
@@ -516,6 +353,8 @@ main(int argc, char **argv)
         free(RawMooseData);
         quit(5);
     }
+    /* Uncomment this to check vertex color with a YUV texture */
+    /*SDL_SetTextureColorMod(MooseTexture, 0xff, 0x80, 0x80);*/
 
     for (i = 0; i < MOOSEFRAMES_COUNT; i++) {
         Uint8 MooseFrameRGB[MOOSEFRAME_SIZE*3];
@@ -600,6 +439,5 @@ main(int argc, char **argv)
     quit(0);
     return 0;
 }
-#endif
 
 /* vi: set ts=4 sw=4 expandtab: */

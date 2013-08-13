@@ -39,7 +39,7 @@ SDL_TouchInit(void)
 }
 
 int
-SDL_GetNumTouchDevices()
+SDL_GetNumTouchDevices(void)
 {
     return SDL_num_touch;
 }
@@ -165,7 +165,7 @@ SDL_AddTouch(SDL_TouchID touchID, const char *name)
     return index;
 }
 
-static int 
+static int
 SDL_AddFinger(SDL_Touch *touch, SDL_FingerID fingerid, float x, float y, float pressure)
 {
     SDL_Finger *finger;
@@ -258,7 +258,7 @@ SDL_SendTouch(SDL_TouchID id, SDL_FingerID fingerid,
             event.tfinger.touchId =  id;
             event.tfinger.fingerId = fingerid;
             /* I don't trust the coordinates passed on fingerUp */
-            event.tfinger.x = finger->x; 
+            event.tfinger.x = finger->x;
             event.tfinger.y = finger->y;
             event.tfinger.dx = 0;
             event.tfinger.dy = 0;
@@ -287,7 +287,7 @@ SDL_SendTouchMotion(SDL_TouchID id, SDL_FingerID fingerid,
 
     finger = SDL_GetFinger(touch,fingerid);
     if (!finger) {
-        return SDL_SendTouch(id, fingerid, SDL_TRUE, x, y, pressure);        
+        return SDL_SendTouch(id, fingerid, SDL_TRUE, x, y, pressure);
     }
 
     xrel = x - finger->x;
@@ -306,7 +306,7 @@ SDL_SendTouchMotion(SDL_TouchID id, SDL_FingerID fingerid,
     finger->x = x;
     finger->y = y;
     finger->pressure = pressure;
-        
+
     /* Post the event, if desired */
     posted = 0;
     if (SDL_GetEventState(SDL_FINGERMOTION) == SDL_ENABLE) {
@@ -317,7 +317,7 @@ SDL_SendTouchMotion(SDL_TouchID id, SDL_FingerID fingerid,
         event.tfinger.x = x;
         event.tfinger.y = y;
         event.tfinger.dx = xrel;
-        event.tfinger.dy = yrel;            
+        event.tfinger.dy = yrel;
         event.tfinger.pressure = pressure;
         posted = (SDL_PushEvent(&event) > 0);
     }

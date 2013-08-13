@@ -20,14 +20,14 @@
 */
 #include "SDL_config.h"
 
-/* 
+/*
    Code to load and save surfaces in Windows BMP format.
 
    Why support BMP format?  Well, it's a native format for Windows, and
    most image processing programs can read and write it.  It would be nice
    to be able to have at least one image format that we can natively load
    and save, and since PNG is so complex that it would bloat the library,
-   BMP is a good alternative. 
+   BMP is a good alternative.
 
    This code currently supports Win32 DIBs in uncompressed 8 and 24 bpp.
 */
@@ -40,12 +40,41 @@
 
 /* Compression encodings for BMP files */
 #ifndef BI_RGB
-#define BI_RGB		0
-#define BI_RLE8		1
-#define BI_RLE4		2
-#define BI_BITFIELDS	3
+#define BI_RGB      0
+#define BI_RLE8     1
+#define BI_RLE4     2
+#define BI_BITFIELDS    3
 #endif
 
+
+static void CorrectAlphaChannel(SDL_Surface *surface)
+{
+    /* Check to see if there is any alpha channel data */
+    SDL_bool hasAlpha = SDL_FALSE;
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+    int alphaChannelOffset = 0;
+#else
+    int alphaChannelOffset = 3;
+#endif
+    Uint8 *alpha = ((Uint8*)surface->pixels) + alphaChannelOffset;
+    Uint8 *end = alpha + surface->h * surface->pitch;
+
+    while (alpha < end) {
+        if (*alpha != 0) {
+            hasAlpha = SDL_TRUE;
+            break;
+        }
+        alpha += 4;
+    }
+
+    if (!hasAlpha) {
+        alpha = ((Uint8*)surface->pixels) + alphaChannelOffset;
+        while (alpha < end) {
+            *alpha = SDL_ALPHA_OPAQUE;
+            alpha += 4;
+        }
+    }
+}
 
 SDL_Surface *
 SDL_LoadBMP_RW(SDL_RWops * src, int freesrc)
@@ -64,6 +93,7 @@ SDL_LoadBMP_RW(SDL_RWops * src, int freesrc)
     Uint8 *top, *end;
     SDL_bool topDown;
     int ExpandBMP;
+    SDL_bool correctAlpha = SDL_FALSE;
 
     /* The Win32 BMP file header (14 bytes) */
     char magic[2];
@@ -182,6 +212,8 @@ SDL_LoadBMP_RW(SDL_RWops * src, int freesrc)
 #endif
                 break;
             case 32:
+                /* We don't know if this has alpha channel or not */
+                correctAlpha = SDL_TRUE;
                 Amask = 0xFF000000;
                 Rmask = 0x00FF0000;
                 Gmask = 0x0000FF00;
@@ -358,6 +390,9 @@ SDL_LoadBMP_RW(SDL_RWops * src, int freesrc)
             bits -= surface->pitch;
         }
     }
+    if (correctAlpha) {
+        CorrectAlphaChannel(surface);
+    }
   done:
     if (was_error) {
         if (src) {
@@ -439,7 +474,7 @@ SDL_SaveBMP_RW(SDL_Surface * saveme, SDL_RWops * dst, int freedst)
             /* If the surface has a colorkey or alpha channel we'll save a
                32-bit BMP with alpha channel, otherwise save a 24-bit BMP. */
             if (save32bit) {
-                SDL_InitFormat(&format, 
+                SDL_InitFormat(&format,
 #if SDL_BYTEORDER == SDL_LIL_ENDIAN
                                SDL_PIXELFORMAT_ARGB8888
 #else

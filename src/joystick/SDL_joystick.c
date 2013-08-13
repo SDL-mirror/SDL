@@ -22,25 +22,48 @@
 
 /* This is the joystick API for Simple DirectMedia Layer */
 
+#include "SDL.h"
 #include "SDL_events.h"
 #include "SDL_sysjoystick.h"
 #include "SDL_assert.h"
+#include "SDL_hints.h"
 
 #if !SDL_EVENTS_DISABLED
 #include "../events/SDL_events_c.h"
 #endif
 
+static SDL_bool SDL_joystick_allows_background_events = SDL_FALSE;
 static SDL_Joystick *SDL_joysticks = NULL;
 static SDL_Joystick *SDL_updating_joystick = NULL;
+
+static void
+SDL_JoystickAllowBackgroundEventsChanged(void *userdata, const char *name, const char *oldValue, const char *hint)
+{
+    if (hint && *hint == '1') {
+        SDL_joystick_allows_background_events = SDL_TRUE;
+    } else {
+        SDL_joystick_allows_background_events = SDL_FALSE;
+    }
+}
 
 int
 SDL_JoystickInit(void)
 {
     int status;
 
+    /* See if we should allow joystick events while in the background */
+    SDL_AddHintCallback(SDL_HINT_JOYSTICK_ALLOW_BACKGROUND_EVENTS,
+                        SDL_JoystickAllowBackgroundEventsChanged, NULL);
+
+#if !SDL_EVENTS_DISABLED
+    if (SDL_InitSubSystem(SDL_INIT_EVENTS) < 0) {
+        return -1;
+    }
+#endif /* !SDL_EVENTS_DISABLED */
+
     status = SDL_SYS_JoystickInit();
     if (status >= 0) {
-      status = 0;
+        status = 0;
     }
     return (status);
 }
@@ -78,26 +101,26 @@ SDL_Joystick *
 SDL_JoystickOpen(int device_index)
 {
     SDL_Joystick *joystick;
-	SDL_Joystick *joysticklist;
-	const char *joystickname = NULL;
+    SDL_Joystick *joysticklist;
+    const char *joystickname = NULL;
 
     if ((device_index < 0) || (device_index >= SDL_NumJoysticks())) {
         SDL_SetError("There are %d joysticks available", SDL_NumJoysticks());
         return (NULL);
     }
 
-	joysticklist = SDL_joysticks;
-    /* If the joystick is already open, return it 
-	* it is important that we have a single joystick * for each instance id 
-	*/
-	while ( joysticklist )
-	{
-		if ( SDL_SYS_GetInstanceIdOfDeviceIndex(device_index) == joysticklist->instance_id ) {
-				joystick = joysticklist;
-				++joystick->ref_count;
-				return (joystick);
-		}
-		joysticklist = joysticklist->next;
+    joysticklist = SDL_joysticks;
+    /* If the joystick is already open, return it
+    * it is important that we have a single joystick * for each instance id
+    */
+    while ( joysticklist )
+    {
+        if ( SDL_SYS_GetInstanceIdOfDeviceIndex(device_index) == joysticklist->instance_id ) {
+                joystick = joysticklist;
+                ++joystick->ref_count;
+                return (joystick);
+        }
+        joysticklist = joysticklist->next;
     }
 
     /* Create and initialize the joystick */
@@ -113,11 +136,11 @@ SDL_JoystickOpen(int device_index)
         return NULL;
     }
 
-	joystickname = SDL_SYS_JoystickNameForDeviceIndex( device_index );
-	if ( joystickname )
-		joystick->name = SDL_strdup( joystickname );
-	else
-		joystick->name = NULL;
+    joystickname = SDL_SYS_JoystickNameForDeviceIndex( device_index );
+    if ( joystickname )
+        joystick->name = SDL_strdup( joystickname );
+    else
+        joystick->name = NULL;
 
     if (joystick->naxes > 0) {
         joystick->axes = (Sint16 *) SDL_malloc
@@ -159,11 +182,11 @@ SDL_JoystickOpen(int device_index)
 
     /* Add joystick to list */
     ++joystick->ref_count;
-	/* Link the joystick in the list */
-	joystick->next = SDL_joysticks;
-	SDL_joysticks = joystick;
+    /* Link the joystick in the list */
+    joystick->next = SDL_joysticks;
+    SDL_joysticks = joystick;
 
-	SDL_SYS_JoystickUpdate( joystick );
+    SDL_SYS_JoystickUpdate( joystick );
 
     return (joystick);
 }
@@ -183,12 +206,12 @@ SDL_PrivateJoystickValid(SDL_Joystick * joystick)
     } else {
         valid = 1;
     }
-	
-	if ( joystick && joystick->closed )
-	{
-		valid = 0;
-	}
-	
+
+    if ( joystick && joystick->closed )
+    {
+        valid = 0;
+    }
+
     return valid;
 }
 
@@ -330,29 +353,29 @@ SDL_JoystickGetButton(SDL_Joystick * joystick, int button)
 
 /*
  * Return if the joystick in question is currently attached to the system,
- *  \return 0 if not plugged in, 1 if still present.
+ *  \return SDL_FALSE if not plugged in, SDL_TRUE if still present.
  */
 SDL_bool
 SDL_JoystickGetAttached(SDL_Joystick * joystick)
 {
-	if (!SDL_PrivateJoystickValid(joystick)) {
+    if (!SDL_PrivateJoystickValid(joystick)) {
         return SDL_FALSE;
     }
 
-	return SDL_SYS_JoystickAttached(joystick);
+    return SDL_SYS_JoystickAttached(joystick);
 }
 
 /*
  * Get the instance id for this opened joystick
  */
-SDL_JoystickID 
+SDL_JoystickID
 SDL_JoystickInstanceID(SDL_Joystick * joystick)
 {
-	if (!SDL_PrivateJoystickValid(joystick)) {
+    if (!SDL_PrivateJoystickValid(joystick)) {
         return (-1);
     }
 
-	return (joystick->instance_id);
+    return (joystick->instance_id);
 }
 
 /*
@@ -364,7 +387,7 @@ SDL_JoystickName(SDL_Joystick * joystick)
     if (!SDL_PrivateJoystickValid(joystick)) {
         return (NULL);
     }
-	
+
     return (joystick->name);
 }
 
@@ -374,8 +397,8 @@ SDL_JoystickName(SDL_Joystick * joystick)
 void
 SDL_JoystickClose(SDL_Joystick * joystick)
 {
-	SDL_Joystick *joysticklist;
-	SDL_Joystick *joysticklistprev;
+    SDL_Joystick *joysticklist;
+    SDL_Joystick *joysticklistprev;
 
     if (!joystick) {
         return;
@@ -391,31 +414,31 @@ SDL_JoystickClose(SDL_Joystick * joystick)
     }
 
     SDL_SYS_JoystickClose(joystick);
-	
-	joysticklist = SDL_joysticks;
-	joysticklistprev = NULL;
-	while ( joysticklist )
-	{
-		if (joystick == joysticklist) 
-		{
-			if ( joysticklistprev )
-			{
-				// unlink this entry
-				joysticklistprev->next = joysticklist->next;
-			}
-			else
-			{
-				SDL_joysticks = joystick->next;
-			}
 
-			break;
-		}
-		joysticklistprev = joysticklist;
-		joysticklist = joysticklist->next;
-	}
-	
-	if (joystick->name)
-		SDL_free(joystick->name);
+    joysticklist = SDL_joysticks;
+    joysticklistprev = NULL;
+    while ( joysticklist )
+    {
+        if (joystick == joysticklist)
+        {
+            if ( joysticklistprev )
+            {
+                /* unlink this entry */
+                joysticklistprev->next = joysticklist->next;
+            }
+            else
+            {
+                SDL_joysticks = joystick->next;
+            }
+
+            break;
+        }
+        joysticklistprev = joysticklist;
+        joysticklist = joysticklist->next;
+    }
+
+    if (joystick->name)
+        SDL_free(joystick->name);
 
     /* Free the data associated with this joystick */
     if (joystick->axes) {
@@ -440,16 +463,41 @@ SDL_JoystickQuit(void)
     SDL_assert(!SDL_updating_joystick);
 
     /* Stop the event polling */
-	while ( SDL_joysticks )
-	{
-		SDL_joysticks->ref_count = 1;
+    while ( SDL_joysticks )
+    {
+        SDL_joysticks->ref_count = 1;
         SDL_JoystickClose(SDL_joysticks);
- 	}
+    }
 
     /* Quit the joystick setup */
     SDL_SYS_JoystickQuit();
+
+#if !SDL_EVENTS_DISABLED
+    SDL_QuitSubSystem(SDL_INIT_EVENTS);
+#endif
 }
 
+
+static SDL_bool
+SDL_PrivateJoystickShouldIgnoreEvent()
+{
+    if (SDL_joystick_allows_background_events)
+    {
+        return SDL_FALSE;
+    }
+
+    if (SDL_WasInit(SDL_INIT_VIDEO)) {
+        if (SDL_GetKeyboardFocus() == NULL) {
+            // Video is initialized and we don't have focus, ignore the event.
+            return SDL_TRUE;
+        } else {
+            return SDL_FALSE;
+        }
+    }
+
+    // Video subsystem wasn't initialized, always allow the event
+    return SDL_FALSE;
+}
 
 /* These are global for SDL_sysjoystick.c and SDL_events.c */
 
@@ -468,6 +516,15 @@ SDL_PrivateJoystickAxis(SDL_Joystick * joystick, Uint8 axis, Sint16 value)
         return 0;
     }
     joystick->axes[axis] = value;
+
+    /* We ignore events if we don't have keyboard focus, except for centering
+     * events.
+     */
+    if (SDL_PrivateJoystickShouldIgnoreEvent()) {
+        if (!(joystick->closed && joystick->uncentered)) {
+            return 0;
+        }
+    }
 
     /* Post the event, if desired */
     posted = 0;
@@ -497,6 +554,16 @@ SDL_PrivateJoystickHat(SDL_Joystick * joystick, Uint8 hat, Uint8 value)
     /* Update internal joystick state */
     joystick->hats[hat] = value;
 
+    /* We ignore events if we don't have keyboard focus, except for centering
+     * events.
+     */
+    if (SDL_PrivateJoystickShouldIgnoreEvent()) {
+        if (!(joystick->closed && joystick->uncentered)) {
+            return 0;
+        }
+    }
+
+
     /* Post the event, if desired */
     posted = 0;
 #if !SDL_EVENTS_DISABLED
@@ -520,6 +587,11 @@ SDL_PrivateJoystickBall(SDL_Joystick * joystick, Uint8 ball,
 
     /* Make sure we're not getting garbage events */
     if (ball >= joystick->nballs) {
+        return 0;
+    }
+
+    /* We ignore events if we don't have keyboard focus. */
+    if (SDL_PrivateJoystickShouldIgnoreEvent()) {
         return 0;
     }
 
@@ -568,6 +640,12 @@ SDL_PrivateJoystickButton(SDL_Joystick * joystick, Uint8 button, Uint8 state)
         return 0;
     }
 
+    /* We ignore events if we don't have keyboard focus, except for button
+     * release. */
+    if (state == SDL_PRESSED && SDL_PrivateJoystickShouldIgnoreEvent()) {
+        return 0;
+    }
+
     /* Update internal joystick state */
     joystick->buttons[button] = state;
 
@@ -587,25 +665,24 @@ SDL_PrivateJoystickButton(SDL_Joystick * joystick, Uint8 button, Uint8 state)
 void
 SDL_JoystickUpdate(void)
 {
-	SDL_Joystick *joystick;
-		
-	joystick = SDL_joysticks;
-	while ( joystick )
-	{
-		SDL_Joystick *joysticknext;
-		/* save off the next pointer, the Update call may cause a joystick removed event
-		 * and cause our joystick pointer to be freed
-		 */
-		joysticknext = joystick->next;
+    SDL_Joystick *joystick;
+
+    joystick = SDL_joysticks;
+    while ( joystick )
+    {
+        SDL_Joystick *joysticknext;
+        /* save off the next pointer, the Update call may cause a joystick removed event
+         * and cause our joystick pointer to be freed
+         */
+        joysticknext = joystick->next;
 
         SDL_updating_joystick = joystick;
 
         SDL_SYS_JoystickUpdate( joystick );
 
-		if ( joystick->closed && joystick->uncentered )
-		{
-			int i;
-			joystick->uncentered = 0;
+        if ( joystick->closed && joystick->uncentered )
+        {
+            int i;
 
             /* Tell the app that everything is centered/unpressed...  */
             for (i = 0; i < joystick->naxes; i++)
@@ -617,7 +694,8 @@ SDL_JoystickUpdate(void)
             for (i = 0; i < joystick->nhats; i++)
                 SDL_PrivateJoystickHat(joystick, i, SDL_HAT_CENTERED);
 
-		}
+            joystick->uncentered = 0;
+        }
 
         SDL_updating_joystick = NULL;
 
@@ -626,10 +704,13 @@ SDL_JoystickUpdate(void)
             SDL_JoystickClose(joystick);
         }
 
-		joystick = joysticknext;
-	}
+        joystick = joysticknext;
+    }
 
-	SDL_SYS_JoystickDetect();
+    /* this needs to happen AFTER walking the joystick list above, so that any
+       dangling hardware data from removed devices can be free'd
+     */
+    SDL_SYS_JoystickDetect();
 }
 
 int
@@ -665,106 +746,112 @@ SDL_JoystickEventState(int state)
 }
 
 /* return 1 if you want to run the joystick update loop this frame, used by hotplug support */
-SDL_bool 
+SDL_bool
 SDL_PrivateJoystickNeedsPolling()
 {
-	if (SDL_joysticks != NULL) {
-		return SDL_TRUE;
-	} else {
-		return SDL_SYS_JoystickNeedsPolling();
-	}
+    if (SDL_joysticks != NULL) {
+        return SDL_TRUE;
+    } else {
+        return SDL_SYS_JoystickNeedsPolling();
+    }
 }
 
 
 /* return the guid for this index */
 SDL_JoystickGUID SDL_JoystickGetDeviceGUID(int device_index)
 {
-	return SDL_SYS_JoystickGetDeviceGUID( device_index );
+    if ((device_index < 0) || (device_index >= SDL_NumJoysticks())) {
+        SDL_JoystickGUID emptyGUID;
+        SDL_SetError("There are %d joysticks available", SDL_NumJoysticks());
+        SDL_zero( emptyGUID );
+        return emptyGUID;
+    }
+    return SDL_SYS_JoystickGetDeviceGUID( device_index );
 }
 
 /* return the guid for this opened device */
 SDL_JoystickGUID SDL_JoystickGetGUID(SDL_Joystick * joystick)
 {
-	return SDL_SYS_JoystickGetGUID( joystick );
+    return SDL_SYS_JoystickGetGUID( joystick );
 }
 
 /* convert the guid to a printable string */
 void SDL_JoystickGetGUIDString( SDL_JoystickGUID guid, char *pszGUID, int cbGUID )
 {
-	static const char k_rgchHexToASCII[] = "0123456789abcdef";
-	int i;
+    static const char k_rgchHexToASCII[] = "0123456789abcdef";
+    int i;
 
     if ((pszGUID == NULL) || (cbGUID <= 0)) {
         return;
     }
 
-	for ( i = 0; i < sizeof(guid.data) && i < (cbGUID-1); i++ )
-	{
-		// each input byte writes 2 ascii chars, and might write a null byte.
-		// If we don't have room for next input byte, stop
-		unsigned char c = guid.data[i];
+    for ( i = 0; i < sizeof(guid.data) && i < (cbGUID-1); i++ )
+    {
+        /* each input byte writes 2 ascii chars, and might write a null byte. */
+        /* If we don't have room for next input byte, stop */
+        unsigned char c = guid.data[i];
 
-		*pszGUID++ = k_rgchHexToASCII[ c >> 4 ];
-		*pszGUID++ = k_rgchHexToASCII[ c & 0x0F ];
-	}
-	*pszGUID = '\0';
+        *pszGUID++ = k_rgchHexToASCII[ c >> 4 ];
+        *pszGUID++ = k_rgchHexToASCII[ c & 0x0F ];
+    }
+    *pszGUID = '\0';
 }
 
 
-//-----------------------------------------------------------------------------
-// Purpose: Returns the 4 bit nibble for a hex character
-// Input  : c - 
-// Output : unsigned char
-//-----------------------------------------------------------------------------
+/*-----------------------------------------------------------------------------
+ * Purpose: Returns the 4 bit nibble for a hex character
+ * Input  : c -
+ * Output : unsigned char
+ *-----------------------------------------------------------------------------*/
 static unsigned char nibble( char c )
 {
-	if ( ( c >= '0' ) &&
-		( c <= '9' ) )
-	{
-		return (unsigned char)(c - '0');
-	}
+    if ( ( c >= '0' ) &&
+        ( c <= '9' ) )
+    {
+        return (unsigned char)(c - '0');
+    }
 
-	if ( ( c >= 'A' ) &&
-		( c <= 'F' ) )
-	{
-		return (unsigned char)(c - 'A' + 0x0a);
-	}
+    if ( ( c >= 'A' ) &&
+        ( c <= 'F' ) )
+    {
+        return (unsigned char)(c - 'A' + 0x0a);
+    }
 
-	if ( ( c >= 'a' ) &&
-		( c <= 'f' ) )
-	{
-		return (unsigned char)(c - 'a' + 0x0a);
-	}
+    if ( ( c >= 'a' ) &&
+        ( c <= 'f' ) )
+    {
+        return (unsigned char)(c - 'a' + 0x0a);
+    }
 
-	// received an invalid character, and no real way to return an error
-	// AssertMsg1( false, "Q_nibble invalid hex character '%c' ", c );
-	return 0;
+    /* received an invalid character, and no real way to return an error */
+    /* AssertMsg1( false, "Q_nibble invalid hex character '%c' ", c ); */
+    return 0;
 }
 
 
 /* convert the string version of a joystick guid to the struct */
 SDL_JoystickGUID SDL_JoystickGetGUIDFromString(const char *pchGUID)
 {
-	SDL_JoystickGUID guid;
-	int maxoutputbytes= sizeof(guid);
-	int len = SDL_strlen( pchGUID );
-	Uint8 *p;
-	int i;
+    SDL_JoystickGUID guid;
+    int maxoutputbytes= sizeof(guid);
+    int len = SDL_strlen( pchGUID );
+    Uint8 *p;
+    int i;
 
-	// Make sure it's even
-	len = ( len ) & ~0x1;
+    /* Make sure it's even */
+    len = ( len ) & ~0x1;
 
-	SDL_memset( &guid, 0x00, sizeof(guid) );
+    SDL_memset( &guid, 0x00, sizeof(guid) );
 
-	p = (Uint8 *)&guid;
-	for ( i = 0; 
-		( i < len ) && ( ( p - (Uint8 *)&guid ) < maxoutputbytes ); 
-		i+=2, p++ )
-	{
-		*p = ( nibble( pchGUID[i] ) << 4 ) | nibble( pchGUID[i+1] );		
-	}
+    p = (Uint8 *)&guid;
+    for ( i = 0;
+        ( i < len ) && ( ( p - (Uint8 *)&guid ) < maxoutputbytes );
+        i+=2, p++ )
+    {
+        *p = ( nibble( pchGUID[i] ) << 4 ) | nibble( pchGUID[i+1] );
+    }
 
-	return guid;
+    return guid;
 }
 
 

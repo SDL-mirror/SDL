@@ -30,28 +30,28 @@
 typedef struct _DFB_WindowData DFB_WindowData;
 struct _DFB_WindowData
 {
-    IDirectFBSurface 		*window_surface;	/* window surface */
-    IDirectFBSurface 		*surface;			/* client drawing surface */
-    IDirectFBWindow 		*dfbwin;
-    IDirectFBEventBuffer 	*eventbuffer;
-    //SDL_Window 				*sdlwin;
-    SDL_Window	 			*next;
-    Uint8 					opacity;
-    DFBRectangle 			client;
-    DFBDimension 			size;
-    DFBRectangle 			restore;
+    IDirectFBSurface        *window_surface;    /* window surface */
+    IDirectFBSurface        *surface;           /* client drawing surface */
+    IDirectFBWindow         *dfbwin;
+    IDirectFBEventBuffer    *eventbuffer;
+    /*SDL_Window                *sdlwin; */
+    SDL_Window              *next;
+    Uint8                   opacity;
+    DFBRectangle            client;
+    DFBDimension            size;
+    DFBRectangle            restore;
 
     /* WM extras */
-    int 					is_managed;
-    int 					wm_needs_redraw;
-    IDirectFBSurface 		*icon;
-    IDirectFBFont 			*font;
-    DFB_Theme 				theme;
+    int                     is_managed;
+    int                     wm_needs_redraw;
+    IDirectFBSurface        *icon;
+    IDirectFBFont           *font;
+    DFB_Theme               theme;
 
     /* WM moving and sizing */
-    int 					wm_grab;
-    int 					wm_lastx;
-    int 					wm_lasty;
+    int                     wm_grab;
+    int                     wm_lastx;
+    int                     wm_lasty;
 };
 
 extern int DirectFB_CreateWindow(_THIS, SDL_Window * window);

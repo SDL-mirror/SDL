@@ -78,6 +78,7 @@ struct SDL_Renderer
     const void *magic;
 
     void (*WindowEvent) (SDL_Renderer * renderer, const SDL_WindowEvent *event);
+    int (*GetOutputSize) (SDL_Renderer * renderer, int *w, int *h);
     int (*CreateTexture) (SDL_Renderer * renderer, SDL_Texture * texture);
     int (*SetTextureColorMod) (SDL_Renderer * renderer,
                                SDL_Texture * texture);
@@ -93,6 +94,7 @@ struct SDL_Renderer
     void (*UnlockTexture) (SDL_Renderer * renderer, SDL_Texture * texture);
     int (*SetRenderTarget) (SDL_Renderer * renderer, SDL_Texture * texture);
     int (*UpdateViewport) (SDL_Renderer * renderer);
+    int (*UpdateClipRect) (SDL_Renderer * renderer);
     int (*RenderClear) (SDL_Renderer * renderer);
     int (*RenderDrawPoints) (SDL_Renderer * renderer, const SDL_FPoint * points,
                              int count);
@@ -121,7 +123,6 @@ struct SDL_Renderer
     /* The window associated with the renderer */
     SDL_Window *window;
     SDL_bool hidden;
-    SDL_bool resized;
 
     /* The logical resolution for rendering */
     int logical_w;
@@ -132,6 +133,10 @@ struct SDL_Renderer
     /* The drawable area within the window */
     SDL_Rect viewport;
     SDL_Rect viewport_backup;
+
+    /* The clip rectangle within the window */
+    SDL_Rect clip_rect;
+    SDL_Rect clip_rect_backup;
 
     /* The render output coordinate scale */
     SDL_FPoint scale;

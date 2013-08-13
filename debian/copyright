@@ -49,22 +49,6 @@ Files: src/video/x11/imKStoUCS.c
 Copyright: 1994-2003 The XFree86 Project, Inc.
 License: MIT/X11
 
-Files: test/test-automation/*
-Copyright: 2011 Markus Kauppila <markus.kauppila@gmail.com>
-License: zlib/libpng
-
-Files: test/automated/*
-       test/test-automation/src/libSDLtest/common/*
-Copyright: Edgar Simo "bobbens"
-License: PublicDomain_Edgar_Simo
-
-Files: test/automated/common/im*
-Copyright: none
-License: zlib/libpng
-Comment:
- Auto-generated code from images, no specific information about the original
- image
-
 Files: test/testhaptic.c
 Copyright: 1997-2011 Sam Lantinga <slouken@libsdl.org>
            2008 Edgar Simo Serra
@@ -74,10 +58,6 @@ Files: test/testrumble.c
 Copyright: 1997-2011 Sam Lantinga <slouken@libsdl.org>
            2011 Edgar Simo Serra
 License: BSD_3_clause
-
-Files: test/test-automation/src/libSDLtest/fuzzer/utl_md5.*
-Copyright: 1990-1991 RSA Data Security, Inc.
-License: RSA_Data_Security
 
 Files: test/shapes/*
 Copyright: none

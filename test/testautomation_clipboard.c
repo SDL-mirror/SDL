@@ -21,9 +21,9 @@
 int
 clipboard_testHasClipboardText(void *arg)
 {
-	SDL_bool result;
-	result = SDL_HasClipboardText();
-	SDLTest_AssertPass("Call to SDL_HasClipboardText succeeded");
+    SDL_bool result;
+    result = SDL_HasClipboardText();
+    SDLTest_AssertPass("Call to SDL_HasClipboardText succeeded");
 
     return TEST_COMPLETED;
 }
@@ -37,11 +37,11 @@ clipboard_testHasClipboardText(void *arg)
 int
 clipboard_testGetClipboardText(void *arg)
 {
-	char *charResult;
-	charResult = SDL_GetClipboardText();
-	SDLTest_AssertPass("Call to SDL_GetClipboardText succeeded");
+    char *charResult;
+    charResult = SDL_GetClipboardText();
+    SDLTest_AssertPass("Call to SDL_GetClipboardText succeeded");
 
-	if (charResult) SDL_free(charResult);
+    if (charResult) SDL_free(charResult);
 
     return TEST_COMPLETED;
 }
@@ -54,19 +54,19 @@ clipboard_testGetClipboardText(void *arg)
 int
 clipboard_testSetClipboardText(void *arg)
 {
-	char *textRef = SDLTest_RandomAsciiString();
-	char *text = SDL_strdup(textRef);
-	int result;
-	result = SDL_SetClipboardText((const char *)text);
-	SDLTest_AssertPass("Call to SDL_SetClipboardText succeeded");
-	SDLTest_AssertCheck(
-		result == 0,
-		"Validate SDL_SetClipboardText result, expected 0, got %i",
-		result);
-	SDLTest_AssertCheck(
-		SDL_strcmp(textRef, text) == 0,
-		"Verify SDL_SetClipboardText did not modify input string, expected '%s', got '%s'",
-		textRef, text);
+    char *textRef = SDLTest_RandomAsciiString();
+    char *text = SDL_strdup(textRef);
+    int result;
+    result = SDL_SetClipboardText((const char *)text);
+    SDLTest_AssertPass("Call to SDL_SetClipboardText succeeded");
+    SDLTest_AssertCheck(
+        result == 0,
+        "Validate SDL_SetClipboardText result, expected 0, got %i",
+        result);
+    SDLTest_AssertCheck(
+        SDL_strcmp(textRef, text) == 0,
+        "Verify SDL_SetClipboardText did not modify input string, expected '%s', got '%s'",
+        textRef, text);
 
     /* Cleanup */
     if (textRef) SDL_free(textRef);
@@ -85,64 +85,64 @@ clipboard_testSetClipboardText(void *arg)
 int
 clipboard_testClipboardTextFunctions(void *arg)
 {
-	char *textRef = SDLTest_RandomAsciiString();
-	char *text = SDL_strdup(textRef);
-	SDL_bool boolResult;
-	int intResult;
-	char *charResult;
+    char *textRef = SDLTest_RandomAsciiString();
+    char *text = SDL_strdup(textRef);
+    SDL_bool boolResult;
+    int intResult;
+    char *charResult;
 
-	/* Clear clipboard text state */
-	boolResult = SDL_HasClipboardText();
-	SDLTest_AssertPass("Call to SDL_HasClipboardText succeeded");
-	if (boolResult == SDL_TRUE) {
+    /* Clear clipboard text state */
+    boolResult = SDL_HasClipboardText();
+    SDLTest_AssertPass("Call to SDL_HasClipboardText succeeded");
+    if (boolResult == SDL_TRUE) {
         intResult = SDL_SetClipboardText((const char *)NULL);
-		SDLTest_AssertPass("Call to DL_SetClipboardText(NULL) succeeded");
-	    SDLTest_AssertCheck(
-			intResult == 0,
-			"Verify result from SDL_SetClipboardText(NULL), expected 0, got %i",
-			intResult);
-	    charResult = SDL_GetClipboardText();
-		SDLTest_AssertPass("Call to SDL_GetClipboardText succeeded");
-	    boolResult = SDL_HasClipboardText();
-		SDLTest_AssertPass("Call to SDL_HasClipboardText succeeded");
-	    SDLTest_AssertCheck(
+        SDLTest_AssertPass("Call to SDL_SetClipboardText(NULL) succeeded");
+        SDLTest_AssertCheck(
+            intResult == 0,
+            "Verify result from SDL_SetClipboardText(NULL), expected 0, got %i",
+            intResult);
+        charResult = SDL_GetClipboardText();
+        SDLTest_AssertPass("Call to SDL_GetClipboardText succeeded");
+        boolResult = SDL_HasClipboardText();
+        SDLTest_AssertPass("Call to SDL_HasClipboardText succeeded");
+        SDLTest_AssertCheck(
             boolResult == SDL_FALSE,
-	        "Verify SDL_HasClipboardText returned SDL_FALSE, got %s",
-			(boolResult) ? "SDL_TRUE" : "SDL_FALSE");
+            "Verify SDL_HasClipboardText returned SDL_FALSE, got %s",
+            (boolResult) ? "SDL_TRUE" : "SDL_FALSE");
     }
 
     /* Empty clipboard  */
-	charResult = SDL_GetClipboardText();
-	SDLTest_AssertPass("Call to SDL_GetClipboardText succeeded");
-	SDLTest_AssertCheck(
-		charResult != NULL,
-		"Verify SDL_GetClipboardText did not return NULL");
-	SDLTest_AssertCheck(
-		SDL_strlen(charResult) == 0,
-		"Verify SDL_GetClipboardText returned string with length 0, got length %i",
-		SDL_strlen(charResult));
+    charResult = SDL_GetClipboardText();
+    SDLTest_AssertPass("Call to SDL_GetClipboardText succeeded");
+    SDLTest_AssertCheck(
+        charResult != NULL,
+        "Verify SDL_GetClipboardText did not return NULL");
+    SDLTest_AssertCheck(
+        SDL_strlen(charResult) == 0,
+        "Verify SDL_GetClipboardText returned string with length 0, got length %i",
+        SDL_strlen(charResult));
     intResult = SDL_SetClipboardText((const char *)text);
-	SDLTest_AssertPass("Call to SDL_SetClipboardText succeeded");
-	SDLTest_AssertCheck(
-		intResult == 0,
-		"Verify result from SDL_SetClipboardText(NULL), expected 0, got %i",
-		intResult);
-	SDLTest_AssertCheck(
-		SDL_strcmp(textRef, text) == 0,
-		"Verify SDL_SetClipboardText did not modify input string, expected '%s', got '%s'",
-		textRef, text);
-	boolResult = SDL_HasClipboardText();
-	SDLTest_AssertPass("Call to SDL_HasClipboardText succeeded");
-	SDLTest_AssertCheck(
+    SDLTest_AssertPass("Call to SDL_SetClipboardText succeeded");
+    SDLTest_AssertCheck(
+        intResult == 0,
+        "Verify result from SDL_SetClipboardText(NULL), expected 0, got %i",
+        intResult);
+    SDLTest_AssertCheck(
+        SDL_strcmp(textRef, text) == 0,
+        "Verify SDL_SetClipboardText did not modify input string, expected '%s', got '%s'",
+        textRef, text);
+    boolResult = SDL_HasClipboardText();
+    SDLTest_AssertPass("Call to SDL_HasClipboardText succeeded");
+    SDLTest_AssertCheck(
         boolResult == SDL_TRUE,
-	    "Verify SDL_HasClipboardText returned SDL_TRUE, got %s",
-		(boolResult) ? "SDL_TRUE" : "SDL_FALSE");
-	charResult = SDL_GetClipboardText();
-	SDLTest_AssertPass("Call to SDL_GetClipboardText succeeded");
-	SDLTest_AssertCheck(
-		strcmp(textRef, charResult) == 0,
-		"Verify SDL_GetClipboardText returned correct string, expected '%s', got '%s'",
-		textRef, charResult);
+        "Verify SDL_HasClipboardText returned SDL_TRUE, got %s",
+        (boolResult) ? "SDL_TRUE" : "SDL_FALSE");
+    charResult = SDL_GetClipboardText();
+    SDLTest_AssertPass("Call to SDL_GetClipboardText succeeded");
+    SDLTest_AssertCheck(
+        SDL_strcmp(textRef, charResult) == 0,
+        "Verify SDL_GetClipboardText returned correct string, expected '%s', got '%s'",
+        textRef, charResult);
 
     /* Cleanup */
     if (textRef) SDL_free(textRef);
@@ -157,26 +157,26 @@ clipboard_testClipboardTextFunctions(void *arg)
 
 /* Clipboard test cases */
 static const SDLTest_TestCaseReference clipboardTest1 =
-		{ (SDLTest_TestCaseFp)clipboard_testHasClipboardText, "clipboard_testHasClipboardText", "Check call to SDL_HasClipboardText", TEST_ENABLED };
+        { (SDLTest_TestCaseFp)clipboard_testHasClipboardText, "clipboard_testHasClipboardText", "Check call to SDL_HasClipboardText", TEST_ENABLED };
 
 static const SDLTest_TestCaseReference clipboardTest2 =
-		{ (SDLTest_TestCaseFp)clipboard_testGetClipboardText, "clipboard_testGetClipboardText", "Check call to SDL_GetClipboardText", TEST_ENABLED };
+        { (SDLTest_TestCaseFp)clipboard_testGetClipboardText, "clipboard_testGetClipboardText", "Check call to SDL_GetClipboardText", TEST_ENABLED };
 
 static const SDLTest_TestCaseReference clipboardTest3 =
-		{ (SDLTest_TestCaseFp)clipboard_testSetClipboardText, "clipboard_testSetClipboardText", "Check call to SDL_SetClipboardText", TEST_ENABLED };
+        { (SDLTest_TestCaseFp)clipboard_testSetClipboardText, "clipboard_testSetClipboardText", "Check call to SDL_SetClipboardText", TEST_ENABLED };
 
 static const SDLTest_TestCaseReference clipboardTest4 =
-		{ (SDLTest_TestCaseFp)clipboard_testClipboardTextFunctions, "clipboard_testClipboardTextFunctions", "End-to-end test of SDL_xyzClipboardText functions", TEST_ENABLED };
+        { (SDLTest_TestCaseFp)clipboard_testClipboardTextFunctions, "clipboard_testClipboardTextFunctions", "End-to-end test of SDL_xyzClipboardText functions", TEST_ENABLED };
 
 /* Sequence of Clipboard test cases */
 static const SDLTest_TestCaseReference *clipboardTests[] =  {
-	&clipboardTest1, &clipboardTest2, &clipboardTest3, &clipboardTest4, NULL
+    &clipboardTest1, &clipboardTest2, &clipboardTest3, &clipboardTest4, NULL
 };
 
 /* Clipboard test suite (global) */
 SDLTest_TestSuiteReference clipboardTestSuite = {
-	"Clipboard",
-	NULL,
-	clipboardTests,
-	NULL
+    "Clipboard",
+    NULL,
+    clipboardTests,
+    NULL
 };

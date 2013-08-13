@@ -139,7 +139,7 @@ SDL_PixelFormatEnumToMasks(Uint32 format, int *bpp, Uint32 * Rmask,
         SDL_SetError("FOURCC pixel formats are not supported");
         return SDL_FALSE;
     }
- 
+
     /* Initialize the values here */
     if (SDL_BYTESPERPIXEL(format) <= 2) {
         *bpp = SDL_BITSPERPIXEL(format);
@@ -503,6 +503,7 @@ SDL_AllocFormat(Uint32 pixel_format)
     }
     if (SDL_InitFormat(format, pixel_format) < 0) {
         SDL_free(format);
+        SDL_InvalidParamError("format");
         return NULL;
     }
 
@@ -585,6 +586,7 @@ SDL_FreeFormat(SDL_PixelFormat *format)
     SDL_PixelFormat *prev;
 
     if (!format) {
+        SDL_InvalidParamError("format");
         return;
     }
     if (--format->refcount > 0) {
@@ -613,6 +615,12 @@ SDL_Palette *
 SDL_AllocPalette(int ncolors)
 {
     SDL_Palette *palette;
+
+    /* Input validation */
+    if (ncolors < 1) {
+      SDL_InvalidParamError("ncolors");
+      return NULL;
+    }
 
     palette = (SDL_Palette *) SDL_malloc(sizeof(*palette));
     if (!palette) {
@@ -693,6 +701,7 @@ void
 SDL_FreePalette(SDL_Palette * palette)
 {
     if (!palette) {
+        SDL_InvalidParamError("palette");
         return;
     }
     if (--palette->refcount > 0) {
@@ -732,7 +741,7 @@ SDL_DitherColors(SDL_Color * colors, int bpp)
     }
 }
 
-/* 
+/*
  * Calculate the pad-aligned scanline width of a surface
  */
 int
@@ -1046,7 +1055,7 @@ SDL_MapSurface(SDL_Surface * src, SDL_Surface * dst)
            while we're still pointing at it.
 
            A better method would be for the destination surface to keep
-           track of surfaces that are mapped to it and automatically 
+           track of surfaces that are mapped to it and automatically
            invalidate them when it is freed, but this will do for now.
         */
         ++map->dst->refcount;
@@ -1082,8 +1091,18 @@ SDL_CalculateGammaRamp(float gamma, Uint16 * ramp)
 {
     int i;
 
+    /* Input validation */
+    if (gamma < 0.0f ) {
+      SDL_InvalidParamError("gamma");
+      return;
+    }
+    if (ramp == NULL) {
+      SDL_InvalidParamError("ramp");
+      return;
+    }
+
     /* 0.0 gamma is all black */
-    if (gamma <= 0.0f) {
+    if (gamma == 0.0f) {
         for (i = 0; i < 256; ++i) {
             ramp[i] = 0;
         }

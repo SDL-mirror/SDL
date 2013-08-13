@@ -48,7 +48,6 @@ static void Android_VideoQuit(_THIS);
 extern int Android_GL_LoadLibrary(_THIS, const char *path);
 extern void *Android_GL_GetProcAddress(_THIS, const char *proc);
 extern void Android_GL_UnloadLibrary(_THIS);
-//extern int *Android_GL_GetVisual(_THIS, Display * display, int screen);
 extern SDL_GLContext Android_GL_CreateContext(_THIS, SDL_Window * window);
 extern int Android_GL_MakeCurrent(_THIS, SDL_Window * window,
                               SDL_GLContext context);
@@ -60,8 +59,7 @@ extern void Android_GL_DeleteContext(_THIS, SDL_GLContext context);
 /* Android driver bootstrap functions */
 
 
-// These are filled in with real values in Android_SetScreenResolution on 
-// init (before SDL_main())
+/* These are filled in with real values in Android_SetScreenResolution on init (before SDL_main()) */
 int Android_ScreenWidth = 0;
 int Android_ScreenHeight = 0;
 Uint32 Android_ScreenFormat = SDL_PIXELFORMAT_UNKNOWN;
@@ -85,7 +83,6 @@ Android_DeleteDevice(SDL_VideoDevice * device)
 static SDL_VideoDevice *
 Android_CreateDevice(int devindex)
 {
-    printf("Creating video device\n");
     SDL_VideoDevice *device;
     SDL_VideoData *data;
 
@@ -133,8 +130,8 @@ Android_CreateDevice(int devindex)
     device->SetTextInputRect = Android_SetTextInputRect;
 
     /* Screen keyboard */
-    device->SDL_HasScreenKeyboardSupport = Android_HasScreenKeyboardSupport;
-    device->SDL_IsScreenKeyboardShown = Android_IsScreenKeyboardShown;
+    device->HasScreenKeyboardSupport = Android_HasScreenKeyboardSupport;
+    device->IsScreenKeyboardShown = Android_IsScreenKeyboardShown;
 
     /* Clipboard */
     device->SetClipboardText = Android_SetClipboardText;
@@ -182,7 +179,7 @@ void
 Android_SetScreenResolution(int width, int height, Uint32 format)
 {
     Android_ScreenWidth = width;
-    Android_ScreenHeight = height;   
+    Android_ScreenHeight = height;
     Android_ScreenFormat = format;
 
     if (Android_Window) {

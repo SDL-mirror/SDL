@@ -23,24 +23,169 @@
 /* This file contains portable stdlib functions for SDL */
 
 #include "SDL_stdinc.h"
+#include "../libm/math_libm.h"
 
-/* these are always #defined, make them real symbol in the library, too... */
-#undef SDL_ceil
-#undef SDL_abs
-#undef SDL_sinf
-#undef SDL_cosf
-#undef SDL_isdigit
-#undef SDL_isspace
-#undef SDL_toupper
-#undef SDL_tolower
-double SDL_ceil(double x) { return SDL_ceil_inline(x); }
-float SDL_cosf(float x) { return SDL_cosf_inline(x); }
-float SDL_sinf(float x) { return SDL_sinf_inline(x); }
-int SDL_abs(int x) { return SDL_abs_inline(x); }
-int SDL_isdigit(int x) { return SDL_isdigit_inline(x); }
-int SDL_isspace(int x) { return SDL_isspace_inline(x); }
-int SDL_toupper(int x) { return SDL_toupper_inline(x); }
-int SDL_tolower(int x) { return SDL_tolower_inline(x); }
+
+double
+SDL_atan(double x)
+{
+#ifdef HAVE_ATAN
+    return atan(x);
+#else
+    return SDL_uclibc_atan(x);
+#endif /* HAVE_ATAN */
+}
+
+double
+SDL_atan2(double x, double y)
+{
+#if defined(HAVE_ATAN2)
+    return atan2(x, y);
+#else
+    return SDL_uclibc_atan2(x, y);
+#endif /* HAVE_ATAN2 */
+}
+
+double
+SDL_ceil(double x)
+{
+#ifdef HAVE_CEIL
+    return ceil(x);
+#else
+    return (double)(int)((x)+0.5);
+#endif /* HAVE_CEIL */
+}
+
+double
+SDL_copysign(double x, double y)
+{
+#if defined(HAVE_COPYSIGN)
+    return copysign(x, y);
+#else
+    return SDL_uclibc_copysign(x, y);
+#endif /* HAVE_COPYSIGN */
+}
+
+double
+SDL_cos(double x)
+{
+#if defined(HAVE_COS)
+    return cos(x);
+#else
+    return SDL_uclibc_cos(x);
+#endif /* HAVE_COS */
+}
+
+float
+SDL_cosf(float x)
+{
+#ifdef HAVE_COSF
+    return cosf(x);
+#else
+    return (float)SDL_cos((double)x);
+#endif
+}
+
+double
+SDL_fabs(double x)
+{
+#if defined(HAVE_FABS)
+    return fabs(x); 
+#else
+    return SDL_uclibc_fabs(x);
+#endif /* HAVE_FABS */
+}
+
+double
+SDL_floor(double x)
+{
+#if defined(HAVE_FLOOR)
+    return floor(x);
+#else
+    return SDL_uclibc_floor(x);
+#endif /* HAVE_FLOOR */
+}
+
+double
+SDL_log(double x)
+{
+#if defined(HAVE_LOG)
+    return log(x);
+#else
+    return SDL_uclibc_log(x);
+#endif /* HAVE_LOG */
+}
+
+double
+SDL_pow(double x, double y)
+{
+#if defined(HAVE_POW)
+    return pow(x, y);
+#else
+    return SDL_uclibc_pow(x, y);
+#endif /* HAVE_POW */
+}
+
+double
+SDL_scalbn(double x, int n)
+{
+#if defined(HAVE_SCALBN)
+    return scalbn(x, n);
+#else
+    return SDL_uclibc_scalbn(x, n);
+#endif /* HAVE_SCALBN */
+}
+
+double
+SDL_sin(double x)
+{
+#if defined(HAVE_SIN)
+    return sin(x);
+#else
+    return SDL_uclibc_sin(x);
+#endif /* HAVE_SIN */
+}
+
+float 
+SDL_sinf(float x)
+{
+#ifdef HAVE_SINF
+    return sinf(x);
+#else
+    return (float)SDL_sin((double)x);
+#endif /* HAVE_SINF */
+}
+
+double
+SDL_sqrt(double x)
+{
+#if defined(HAVE_SQRT)
+    return sqrt(x);
+#else
+    return SDL_uclibc_sqrt(x);
+#endif
+}
+
+int SDL_abs(int x)
+{
+#ifdef HAVE_ABS
+    return abs(x);
+#else
+    return ((x) < 0 ? -(x) : (x));
+#endif
+}
+
+#ifdef HAVE_CTYPE_H
+int SDL_isdigit(int x) { return isdigit(x); }
+int SDL_isspace(int x) { return isspace(x); }
+int SDL_toupper(int x) { return toupper(x); }
+int SDL_tolower(int x) { return tolower(x); }
+#else
+int SDL_isdigit(int x) { return ((x) >= '0') && ((x) <= '9'); }
+int SDL_isspace(int x) { return ((x) == ' ') || ((x) == '\t') || ((x) == '\r') || ((x) == '\n') || ((x) == '\f') || ((x) == '\v'); }
+int SDL_toupper(int x) { return ((x) >= 'a') && ((x) <= 'z') ? ('A'+((x)-'a')) : (x); }
+int SDL_tolower(int x) { return ((x) >= 'A') && ((x) <= 'Z') ? ('a'+((x)-'A')) : (x); }
+#endif
 
 
 #ifndef HAVE_LIBC
@@ -191,7 +336,7 @@ _allmul()
         pop         esi
         pop         edi
         pop         ebp
-        ret
+        ret         10h
     }
     /* *INDENT-ON* */
 }

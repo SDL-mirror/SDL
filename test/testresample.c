@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 1997-2011 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -30,7 +30,7 @@ main(int argc, char **argv)
         return 1;
     }
 
-    cvtfreq = atoi(argv[3]);
+    cvtfreq = SDL_atoi(argv[3]);
 
     if (SDL_Init(SDL_INIT_AUDIO) == -1) {
         fprintf(stderr, "SDL_Init() failed: %s\n", SDL_GetError());
@@ -52,18 +52,18 @@ main(int argc, char **argv)
     }
 
     cvt.len = len;
-    cvt.buf = (Uint8 *) malloc(len * cvt.len_mult);
+    cvt.buf = (Uint8 *) SDL_malloc(len * cvt.len_mult);
     if (cvt.buf == NULL) {
         fprintf(stderr, "Out of memory.\n");
         SDL_FreeWAV(data);
         SDL_Quit();
         return 5;
     }
-    memcpy(cvt.buf, data, len);
+    SDL_memcpy(cvt.buf, data, len);
 
     if (SDL_ConvertAudio(&cvt) == -1) {
         fprintf(stderr, "Conversion failed: %s\n", SDL_GetError());
-        free(cvt.buf);
+        SDL_free(cvt.buf);
         SDL_FreeWAV(data);
         SDL_Quit();
         return 6;
@@ -73,7 +73,7 @@ main(int argc, char **argv)
     io = SDL_RWFromFile(argv[2], "wb");
     if (io == NULL) {
         fprintf(stderr, "fopen('%s') failed: %s\n", argv[2], SDL_GetError());
-        free(cvt.buf);
+        SDL_free(cvt.buf);
         SDL_FreeWAV(data);
         SDL_Quit();
         return 7;
@@ -100,13 +100,13 @@ main(int argc, char **argv)
 
     if (SDL_RWclose(io) == -1) {
         fprintf(stderr, "fclose('%s') failed: %s\n", argv[2], SDL_GetError());
-        free(cvt.buf);
+        SDL_free(cvt.buf);
         SDL_FreeWAV(data);
         SDL_Quit();
         return 8;
     }                           // if
 
-    free(cvt.buf);
+    SDL_free(cvt.buf);
     SDL_FreeWAV(data);
     SDL_Quit();
     return 0;

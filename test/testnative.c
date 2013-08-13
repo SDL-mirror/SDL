@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 1997-2011 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -12,13 +12,15 @@
 /* Simple program:  Create a native window and attach an SDL renderer */
 
 #include <stdio.h>
+#include <stdlib.h> /* for srand() */
+#include <time.h> /* for time() */
 
 #include "testnative.h"
 
 #define WINDOW_W    640
 #define WINDOW_H    480
 #define NUM_SPRITES 100
-#define MAX_SPEED 	1
+#define MAX_SPEED   1
 
 static NativeWindowFactory *factories[] = {
 #ifdef TEST_NATIVE_WINDOWS
@@ -225,6 +227,8 @@ main(int argc, char *argv[])
     }
 
     quit(0);
+
+    return 0; /* to prevent compiler warning */
 }
 
 /* vi: set ts=4 sw=4 expandtab: */

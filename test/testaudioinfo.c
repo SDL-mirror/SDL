@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 1997-2011 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -21,7 +21,7 @@ print_devices(int iscapture)
     printf("%s devices:\n", typestr);
 
     if (n == -1)
-        printf("  Driver can't detect specific devices.\n\n", typestr);
+        printf("  Driver can't detect specific %s devices.\n\n", typestr);
     else if (n == 0)
         printf("  No %s devices found.\n\n", typestr);
     else {

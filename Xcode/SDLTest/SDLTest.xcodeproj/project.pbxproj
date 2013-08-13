@@ -780,20 +780,6 @@
 			remoteGlobalIDString = BECDF6BE0761BA81005FE872;
 			remoteInfo = "Standard DMG";
 		};
-		003FA64A093FFD41000C53B3 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 003FA63A093FFD41000C53B3 /* SDL.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = BECDF6C30761BA81005FE872;
-			remoteInfo = "Devel Extras Package";
-		};
-		4537747F120914AE002F0F45 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 003FA63A093FFD41000C53B3 /* SDL.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 00D8D9EF1195090700638393;
-			remoteInfo = testsdl;
-		};
 		DB166D6D16A1CEAA00A1396C /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
@@ -877,6 +863,13 @@
 			proxyType = 1;
 			remoteGlobalIDString = DB166E8016A1D78C00A1396C;
 			remoteInfo = teststreaming;
+		};
+		DB1D40D617B3F30D00D74CFC /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 003FA63A093FFD41000C53B3 /* SDL.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = DB31407717554B71006C0E22;
+			remoteInfo = "Shared Library";
 		};
 /* End PBXContainerItemProxy section */
 
@@ -991,13 +984,13 @@
 		0017958F1074216E00F5D044 /* testatomic.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = testatomic.c; path = ../../test/testatomic.c; sourceTree = SOURCE_ROOT; };
 		001795AD107421BF00F5D044 /* testaudioinfo */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = text; path = testaudioinfo; sourceTree = BUILT_PRODUCTS_DIR; };
 		001795B01074222D00F5D044 /* testaudioinfo.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = testaudioinfo.c; path = ../../test/testaudioinfo.c; sourceTree = SOURCE_ROOT; };
-		0017972110742F3200F5D044 /* testgl2 */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = text; path = testgl2; sourceTree = BUILT_PRODUCTS_DIR; };
+		0017972110742F3200F5D044 /* testgl2 */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "compiled.mach-o.executable"; path = testgl2; sourceTree = BUILT_PRODUCTS_DIR; };
 		0017972710742FB900F5D044 /* testgl2.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = testgl2.c; path = ../../test/testgl2.c; sourceTree = SOURCE_ROOT; };
-		00179748107430D600F5D044 /* testhaptic */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = text; path = testhaptic; sourceTree = BUILT_PRODUCTS_DIR; };
+		00179748107430D600F5D044 /* testhaptic */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "compiled.mach-o.executable"; path = testhaptic; sourceTree = BUILT_PRODUCTS_DIR; };
 		0017974E1074315700F5D044 /* testhaptic.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = testhaptic.c; path = ../../test/testhaptic.c; sourceTree = SOURCE_ROOT; };
 		0017976E107431B300F5D044 /* testdraw2 */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = text; path = testdraw2; sourceTree = BUILT_PRODUCTS_DIR; };
 		001797711074320D00F5D044 /* testdraw2.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = testdraw2.c; path = ../../test/testdraw2.c; sourceTree = SOURCE_ROOT; };
-		0017978E107432AE00F5D044 /* testime */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = text; path = testime; sourceTree = BUILT_PRODUCTS_DIR; };
+		0017978E107432AE00F5D044 /* testime */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "compiled.mach-o.executable"; path = testime; sourceTree = BUILT_PRODUCTS_DIR; };
 		00179791107432FA00F5D044 /* testime.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = testime.c; path = ../../test/testime.c; sourceTree = SOURCE_ROOT; };
 		001797AE1074334C00F5D044 /* testintersections */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = text; path = testintersections; sourceTree = BUILT_PRODUCTS_DIR; };
 		001797B31074339C00F5D044 /* testintersections.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = testintersections.c; path = ../../test/testintersections.c; sourceTree = SOURCE_ROOT; };
@@ -1056,13 +1049,13 @@
 		4537749212091504002F0F45 /* testshape */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = testshape; sourceTree = BUILT_PRODUCTS_DIR; };
 		453774A4120915E3002F0F45 /* testshape.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = testshape.c; path = ../../test/testshape.c; sourceTree = SOURCE_ROOT; };
 		BBFC088E164C6820003E6A99 /* testgamecontroller.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = testgamecontroller.c; path = ../../test/testgamecontroller.c; sourceTree = "<group>"; };
-		BBFC08CD164C6862003E6A99 /* testgamecontroller */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = text; path = testgamecontroller; sourceTree = BUILT_PRODUCTS_DIR; };
-		BEC566B60761D90300A33029 /* checkkeys */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = text; path = checkkeys; sourceTree = BUILT_PRODUCTS_DIR; };
+		BBFC08CD164C6862003E6A99 /* testgamecontroller */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "compiled.mach-o.executable"; path = testgamecontroller; sourceTree = BUILT_PRODUCTS_DIR; };
+		BEC566B60761D90300A33029 /* checkkeys */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "compiled.mach-o.executable"; path = checkkeys; sourceTree = BUILT_PRODUCTS_DIR; };
 		BEC566D10761D90300A33029 /* loopwave */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = text; path = loopwave; sourceTree = BUILT_PRODUCTS_DIR; };
 		BEC567060761D90400A33029 /* testerror */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = text; path = testerror; sourceTree = BUILT_PRODUCTS_DIR; };
 		BEC5672E0761D90400A33029 /* testthread */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = text; path = testthread; sourceTree = BUILT_PRODUCTS_DIR; };
-		BEC5673B0761D90400A33029 /* testjoystick */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = text; path = testjoystick; sourceTree = BUILT_PRODUCTS_DIR; };
-		BEC567480761D90400A33029 /* testkeys */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = text; path = testkeys; sourceTree = BUILT_PRODUCTS_DIR; };
+		BEC5673B0761D90400A33029 /* testjoystick */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "compiled.mach-o.executable"; path = testjoystick; sourceTree = BUILT_PRODUCTS_DIR; };
+		BEC567480761D90400A33029 /* testkeys */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "compiled.mach-o.executable"; path = testkeys; sourceTree = BUILT_PRODUCTS_DIR; };
 		BEC567550761D90400A33029 /* testlock */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = text; path = testlock; sourceTree = BUILT_PRODUCTS_DIR; };
 		BEC5677D0761D90500A33029 /* testsem */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = text; path = testsem; sourceTree = BUILT_PRODUCTS_DIR; };
 		BEC567980761D90500A33029 /* testtimer */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = text; path = testtimer; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -1848,9 +1841,8 @@
 			children = (
 				003FA643093FFD41000C53B3 /* SDL2.framework */,
 				003FA645093FFD41000C53B3 /* libSDL2.a */,
+				DB1D40D717B3F30D00D74CFC /* libSDL2.dylib */,
 				003FA649093FFD41000C53B3 /* Standard DMG */,
-				003FA64B093FFD41000C53B3 /* Developer Extras Package */,
-				45377480120914AE002F0F45 /* testsdl.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -2800,18 +2792,11 @@
 			remoteRef = 003FA648093FFD41000C53B3 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		003FA64B093FFD41000C53B3 /* Developer Extras Package */ = {
+		DB1D40D717B3F30D00D74CFC /* libSDL2.dylib */ = {
 			isa = PBXReferenceProxy;
-			fileType = "compiled.mach-o.executable";
-			path = "Developer Extras Package";
-			remoteRef = 003FA64A093FFD41000C53B3 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		45377480120914AE002F0F45 /* testsdl.app */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.application;
-			path = testsdl.app;
-			remoteRef = 4537747F120914AE002F0F45 /* PBXContainerItemProxy */;
+			fileType = "compiled.mach-o.dylib";
+			path = libSDL2.dylib;
+			remoteRef = DB1D40D617B3F30D00D74CFC /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */
@@ -4323,6 +4308,7 @@
 				DB166D8216A1D12400A1396C /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
 		};
 		DB166DBC16A1D2F600A1396C /* Build configuration list for PBXNativeTarget "testgesture" */ = {
 			isa = XCConfigurationList;

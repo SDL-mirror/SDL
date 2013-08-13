@@ -42,29 +42,29 @@
 #include <stdio.h>
 
 typedef struct {
-	unsigned char *data;
-	int format, count;
-	Atom type;
+    unsigned char *data;
+    int format, count;
+    Atom type;
 } SDL_x11Prop;
 
 /* Reads property
    Must call XFree on results
  */
-static void X11_ReadProperty(SDL_x11Prop *p, Display *disp, Window w, Atom prop) 
+static void X11_ReadProperty(SDL_x11Prop *p, Display *disp, Window w, Atom prop)
 {
     unsigned char *ret=NULL;
     Atom type;
     int fmt;
     unsigned long count;
     unsigned long bytes_left;
-    int bytes_fetch = 0;	
-    
+    int bytes_fetch = 0;
+
     do {
         if (ret != 0) XFree(ret);
         XGetWindowProperty(disp, w, prop, 0, bytes_fetch, False, AnyPropertyType, &type, &fmt, &count, &bytes_left, &ret);
         bytes_fetch += bytes_left;
     } while (bytes_left != 0);
-    
+
     p->data=ret;
     p->format=fmt;
     p->count=count;
@@ -99,37 +99,60 @@ static Atom X11_PickTargetFromAtoms(Display *disp, Atom a0, Atom a1, Atom a2)
 }
 /*#define DEBUG_XEVENTS*/
 
+struct KeyRepeatCheckData
+{
+    XEvent *event;
+    SDL_bool found;
+};
+
+static Bool X11_KeyRepeatCheckIfEvent(Display *display, XEvent *chkev,
+    XPointer arg)
+{
+    struct KeyRepeatCheckData *d = (struct KeyRepeatCheckData *) arg;
+    if (chkev->type == KeyPress &&
+        chkev->xkey.keycode == d->event->xkey.keycode &&
+        chkev->xkey.time - d->event->xkey.time < 2)
+        d->found = SDL_TRUE;
+    return False;
+}
+
 /* Check to see if this is a repeated key.
    (idea shamelessly lifted from GII -- thanks guys! :)
  */
 static SDL_bool X11_KeyRepeat(Display *display, XEvent *event)
 {
-    XEvent peekevent;
+    XEvent dummyev;
+    struct KeyRepeatCheckData d;
+    d.event = event;
+    d.found = SDL_FALSE;
+    if (XPending(display))
+        XCheckIfEvent(display, &dummyev, X11_KeyRepeatCheckIfEvent,
+            (XPointer) &d);
+    return d.found;
+}
 
-    if (XPending(display)) {
-        XPeekEvent(display, &peekevent);
-        if ((peekevent.type == KeyPress) &&
-            (peekevent.xkey.keycode == event->xkey.keycode) &&
-            ((peekevent.xkey.time-event->xkey.time) < 2)) {
-            return SDL_TRUE;
-        }
-    }
-    return SDL_FALSE;
+static Bool X11_IsWheelCheckIfEvent(Display *display, XEvent *chkev,
+    XPointer arg)
+{
+    XEvent *event = (XEvent *) arg;
+    if (chkev->type == ButtonRelease &&
+        chkev->xbutton.button == event->xbutton.button &&
+        chkev->xbutton.time == event->xbutton.time)
+        return True;
+    return False;
 }
 
 static SDL_bool X11_IsWheelEvent(Display * display,XEvent * event,int * ticks)
 {
-    XEvent peekevent;
+    XEvent relevent;
     if (XPending(display)) {
         /* according to the xlib docs, no specific mouse wheel events exist.
            however, mouse wheel events trigger a button press and a button release
            immediately. thus, checking if the same button was released at the same
-           time as it was pressed, should be an adequate hack to derive a mouse 
+           time as it was pressed, should be an adequate hack to derive a mouse
            wheel event. */
-        XPeekEvent(display,&peekevent);
-        if ((peekevent.type           == ButtonRelease) &&
-            (peekevent.xbutton.button == event->xbutton.button) &&
-            (peekevent.xbutton.time   == event->xbutton.time)) {
+        if (XCheckIfEvent(display, &relevent, X11_IsWheelCheckIfEvent,
+            (XPointer) event)) {
 
             /* by default, X11 only knows 5 buttons. on most 3 button + wheel mouse,
                Button4 maps to wheel up, Button5 maps to wheel down. */
@@ -139,9 +162,6 @@ static SDL_bool X11_IsWheelEvent(Display * display,XEvent * event,int * ticks)
             else if (event->xbutton.button == Button5) {
                 *ticks = -1;
             }
-
-            /* remove the following release event, as this is now a wheel event */
-            XNextEvent(display,&peekevent);
             return SDL_TRUE;
         }
     }
@@ -187,10 +207,12 @@ static char* X11_URIToLocal(char* uri) {
 #if SDL_VIDEO_DRIVER_X11_SUPPORTS_GENERIC_EVENTS
 static void X11_HandleGenericEvent(SDL_VideoData *videodata,XEvent event)
 {
+    /* event is a union, so cookie == &event, but this is type safe. */
     XGenericEventCookie *cookie = &event.xcookie;
-    XGetEventData(videodata->display, cookie);
-    X11_HandleXinput2Event(videodata,cookie);
-    XFreeEventData(videodata->display,cookie);
+    if (XGetEventData(videodata->display, cookie)) {
+        X11_HandleXinput2Event(videodata, cookie);
+        XFreeEventData(videodata->display, cookie);
+    }
 }
 #endif /* SDL_VIDEO_DRIVER_X11_SUPPORTS_GENERIC_EVENTS */
 
@@ -310,6 +332,10 @@ X11_DispatchEvent(_THIS)
                 printf("Mode: NotifyUngrab\n");
 #endif
             SDL_SetMouseFocus(data->window);
+
+            if (!SDL_GetMouse()->relative_mode) {
+                SDL_SendMouseMotion(data->window, 0, 0, xevent.xcrossing.x, xevent.xcrossing.y);
+            }
         }
         break;
         /* Losing mouse coverage? */
@@ -324,6 +350,10 @@ X11_DispatchEvent(_THIS)
             if (xevent.xcrossing.mode == NotifyUngrab)
                 printf("Mode: NotifyUngrab\n");
 #endif
+            if (!SDL_GetMouse()->relative_mode) {
+                SDL_SendMouseMotion(data->window, 0, 0, xevent.xcrossing.x, xevent.xcrossing.y);
+            }
+
             if (xevent.xcrossing.mode != NotifyGrab &&
                 xevent.xcrossing.mode != NotifyUngrab &&
                 xevent.xcrossing.detail != NotifyInferior) {
@@ -348,7 +378,13 @@ X11_DispatchEvent(_THIS)
                 /* We want to reset the keyboard here, because we may have
                    missed keyboard messages after our previous FocusOut.
                  */
-                SDL_ResetKeyboard();
+                /* Actually, if we do this we clear the ALT key on Unity
+                   because it briefly takes focus for their dashboard.
+
+                   I think it's better to think the ALT key is held down
+                   when it's not, then always lose the ALT modifier on Unity.
+                 */
+                /*SDL_ResetKeyboard();*/
             }
             data->pending_focus = PENDING_FOCUS_IN;
             data->pending_focus_time = SDL_GetTicks() + PENDING_FOCUS_IN_TIME;
@@ -493,7 +529,7 @@ X11_DispatchEvent(_THIS)
     case ClientMessage:{
 
             int xdnd_version=0;
-    
+
             if (xevent.xclient.message_type == videodata->XdndEnter) {
                 SDL_bool use_list = xevent.xclient.data.l[1] & 1;
                 data->xdnd_source = xevent.xclient.data.l[0];
@@ -511,7 +547,7 @@ X11_DispatchEvent(_THIS)
                 }
             }
             else if (xevent.xclient.message_type == videodata->XdndPosition) {
-            
+
                 /* reply with status */
                 XClientMessageEvent m;
                 memset(&m, 0, sizeof(XClientMessageEvent));
@@ -525,7 +561,7 @@ X11_DispatchEvent(_THIS)
                 m.data.l[2] = 0; /* specify an empty rectangle */
                 m.data.l[3] = 0;
                 m.data.l[4] = videodata->XdndActionCopy; /* we only accept copying anyway */
-                
+
                 XSendEvent(display, xevent.xclient.data.l[0], False, NoEventMask, (XEvent*)&m);
                 XFlush(display);
             }
@@ -546,9 +582,9 @@ X11_DispatchEvent(_THIS)
                 } else {
                     /* convert */
                     if(xdnd_version >= 1) {
-                    	XConvertSelection(display, videodata->XdndSelection, data->xdnd_req, videodata->PRIMARY, data->xwindow, xevent.xclient.data.l[2]);
+                        XConvertSelection(display, videodata->XdndSelection, data->xdnd_req, videodata->PRIMARY, data->xwindow, xevent.xclient.data.l[2]);
                     } else {
-                    	XConvertSelection(display, videodata->XdndSelection, data->xdnd_req, videodata->PRIMARY, data->xwindow, CurrentTime);
+                        XConvertSelection(display, videodata->XdndSelection, data->xdnd_req, videodata->PRIMARY, data->xwindow, CurrentTime);
                     }
                 }
             }
@@ -588,7 +624,7 @@ X11_DispatchEvent(_THIS)
         break;
 
     case MotionNotify:{
-            SDL_Mouse *mouse = SDL_GetMouse();  
+            SDL_Mouse *mouse = SDL_GetMouse();
             if(!mouse->relative_mode) {
 #ifdef DEBUG_MOTION
                 printf("window %p: X11 motion: %d,%d\n", xevent.xmotion.x, xevent.xmotion.y);
@@ -763,12 +799,11 @@ X11_DispatchEvent(_THIS)
 #endif
             Atom target = xevent.xselection.target;
             if (target == data->xdnd_req) {
-
                 /* read data */
                 SDL_x11Prop p;
                 X11_ReadProperty(&p, display, data->xwindow, videodata->PRIMARY);
-                
-                if(p.format==8) {
+
+                if (p.format == 8) {
                     SDL_bool expect_lf = SDL_FALSE;
                     char *start = NULL;
                     char *scan = (char*)p.data;
@@ -777,21 +812,24 @@ X11_DispatchEvent(_THIS)
                     int length = 0;
                     while (p.count--) {
                         if (!expect_lf) {
-                            if (*scan==0x0D) {
+                            if (*scan == 0x0D) {
                                 expect_lf = SDL_TRUE;
-                            } else if(start == NULL) {
+                            }
+                            if (start == NULL) {
                                 start = scan;
                                 length = 0;
                             }
                             length++;
                         } else {
-                            if (*scan==0x0A && length>0) {
-                                uri = malloc(length--);
-                                memcpy(uri, start, length);
-                                uri[length] = 0;
+                            if (*scan == 0x0A && length > 0) {
+                                uri = SDL_malloc(length--);
+                                SDL_memcpy(uri, start, length);
+                                uri[length] = '\0';
                                 fn = X11_URIToLocal(uri);
-                                if (fn) SDL_SendDropFile(fn);
-                                free(uri);
+                                if (fn) {
+                                    SDL_SendDropFile(fn);
+                                }
+                                SDL_free(uri);
                             }
                             expect_lf = SDL_FALSE;
                             start = NULL;
@@ -799,28 +837,27 @@ X11_DispatchEvent(_THIS)
                         scan++;
                     }
                 }
-                
+
                 XFree(p.data);
-                
+
                 /* send reply */
                 XClientMessageEvent m;
-                memset(&m, 0, sizeof(XClientMessageEvent));
+                SDL_memset(&m, 0, sizeof(XClientMessageEvent));
                 m.type = ClientMessage;
                 m.display = display;
                 m.window = data->xdnd_source;
                 m.message_type = videodata->XdndFinished;
-                m.format=32;
+                m.format = 32;
                 m.data.l[0] = data->xwindow;
                 m.data.l[1] = 1;
                 m.data.l[2] = videodata->XdndActionCopy;
                 XSendEvent(display, data->xdnd_source, False, NoEventMask, (XEvent*)&m);
-                
+
                 XSync(display, False);
-        
+
             } else {
                 videodata->selection_waiting = SDL_FALSE;
             }
-        
         }
         break;
 
@@ -907,7 +944,7 @@ X11_PumpEvents(_THIS)
 
             data->screensaver_activity = now;
         }
-    }   
+    }
 
     /* Keep processing pending events */
     while (X11_Pending(data->display)) {

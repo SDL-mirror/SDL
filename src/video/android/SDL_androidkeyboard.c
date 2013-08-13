@@ -28,8 +28,9 @@
 
 #include "SDL_androidkeyboard.h"
 
+#include "../../core/android/SDL_android.h"
 
-void Android_InitKeyboard()
+void Android_InitKeyboard(void)
 {
     SDL_Keycode keymap[SDL_NUM_SCANCODES];
 
@@ -259,6 +260,8 @@ static SDL_Scancode Android_Keycodes[] = {
     SDL_SCANCODE_UNKNOWN, /* AKEYCODE_RO */
     SDL_SCANCODE_UNKNOWN, /* AKEYCODE_KANA */
     SDL_SCANCODE_UNKNOWN, /* AKEYCODE_ASSIST */
+    SDL_SCANCODE_BRIGHTNESSDOWN, /* AKEYCODE_BRIGHTNESS_DOWN */
+    SDL_SCANCODE_BRIGHTNESSUP, /* AKEYCODE_BRIGHTNESS_UP */
 };
 
 static SDL_Scancode
@@ -321,7 +324,7 @@ Android_SetTextInputRect(_THIS, SDL_Rect *rect)
         SDL_InvalidParamError("rect");
         return;
     }
-    
+
     videodata->textRect = *rect;
 }
 

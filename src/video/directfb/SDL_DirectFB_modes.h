@@ -31,19 +31,19 @@
 typedef struct _DFB_DisplayData DFB_DisplayData;
 struct _DFB_DisplayData
 {
-    IDirectFBDisplayLayer 	*layer;
-    DFBSurfacePixelFormat 	pixelformat;
-    /* FIXME: support for multiple video layer. 
-     * However, I do not know any card supporting 
+    IDirectFBDisplayLayer   *layer;
+    DFBSurfacePixelFormat   pixelformat;
+    /* FIXME: support for multiple video layer.
+     * However, I do not know any card supporting
      * more than one
      */
-    DFBDisplayLayerID 		vidID;
-    IDirectFBDisplayLayer 	*vidlayer;
+    DFBDisplayLayerID       vidID;
+    IDirectFBDisplayLayer   *vidlayer;
 
-    int 					vidIDinuse;
+    int                     vidIDinuse;
 
-    int 					cw;
-    int 					ch;
+    int                     cw;
+    int                     ch;
 };
 
 

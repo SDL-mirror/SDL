@@ -1,5 +1,5 @@
 syntax:glob
-.svn
+aclocal.m4
 autom4te*
 config.cache
 config.log
@@ -38,6 +38,7 @@ Release
 *.user
 *.ncb
 *.suo
+*.sdf
 
 # for Android
 android-project/local.properties

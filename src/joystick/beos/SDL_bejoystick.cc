@@ -261,7 +261,7 @@ extern "C"
     SDL_JoystickGUID SDL_SYS_JoystickGetDeviceGUID( int device_index )
     {
         SDL_JoystickGUID guid;
-        // the GUID is just the first 16 chars of the name for now
+        /* the GUID is just the first 16 chars of the name for now */
         const char *name = SDL_SYS_JoystickNameForDeviceIndex( device_index );
         SDL_zero( guid );
         SDL_memcpy( &guid, name, SDL_min( sizeof(guid), SDL_strlen( name ) ) );
@@ -271,7 +271,7 @@ extern "C"
     SDL_JoystickGUID SDL_SYS_JoystickGetGUID(SDL_Joystick * joystick)
     {
         SDL_JoystickGUID guid;
-        // the GUID is just the first 16 chars of the name for now
+        /* the GUID is just the first 16 chars of the name for now */
         const char *name = joystick->name;
         SDL_zero( guid );
         SDL_memcpy( &guid, name, SDL_min( sizeof(guid), SDL_strlen( name ) ) );

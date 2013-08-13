@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 1997-2011 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -78,5 +78,5 @@ main(int argc, char *argv[])
         SDL_UnloadObject(lib);
     }
     SDL_Quit();
-    return (0);
+    return retval;
 }

@@ -49,11 +49,16 @@ WIN_CreateDefaultCursor()
 static SDL_Cursor *
 WIN_CreateCursor(SDL_Surface * surface, int hot_x, int hot_y)
 {
+    /* msdn says cursor mask has to be padded out to word alignment. Not sure
+        if that means machine word or WORD, but this handles either case. */
+    const size_t pad = (sizeof (size_t) * 8);  /* 32 or 64, or whatever. */
     SDL_Cursor *cursor;
     HICON hicon;
     HDC hdc;
     BITMAPV4HEADER bmh;
     LPVOID pixels;
+    LPVOID maskbits;
+    size_t maskbitslen;
     ICONINFO ii;
 
     SDL_zero(bmh);
@@ -68,14 +73,25 @@ WIN_CreateCursor(SDL_Surface * surface, int hot_x, int hot_y)
     bmh.bV4GreenMask = 0x0000FF00;
     bmh.bV4BlueMask  = 0x000000FF;
 
+    maskbitslen = ((surface->w + (pad - (surface->w % pad))) / 8) * surface->h;
+    maskbits = SDL_stack_alloc(Uint8,maskbitslen);
+    if (maskbits == NULL) {
+        SDL_OutOfMemory();
+        return NULL;
+    }
+
+    /* AND the cursor against full bits: no change. We already have alpha. */
+    SDL_memset(maskbits, 0xFF, maskbitslen);
+
     hdc = GetDC(NULL);
     SDL_zero(ii);
     ii.fIcon = FALSE;
     ii.xHotspot = (DWORD)hot_x;
     ii.yHotspot = (DWORD)hot_y;
     ii.hbmColor = CreateDIBSection(hdc, (BITMAPINFO*)&bmh, DIB_RGB_COLORS, &pixels, NULL, 0);
-    ii.hbmMask = CreateBitmap(surface->w, surface->h, 1, 1, NULL);
+    ii.hbmMask = CreateBitmap(surface->w, surface->h, 1, 1, maskbits);
     ReleaseDC(NULL, hdc);
+    SDL_stack_free(maskbits);
 
     SDL_assert(surface->format->format == SDL_PIXELFORMAT_ARGB8888);
     SDL_assert(surface->pitch == surface->w * 4);
@@ -180,44 +196,44 @@ static int
 WIN_SetRelativeMouseMode(SDL_bool enabled)
 {
     RAWINPUTDEVICE rawMouse = { 0x01, 0x02, 0, NULL }; /* Mouse: UsagePage = 1, Usage = 2 */
-	HWND hWnd;
-	hWnd = GetActiveWindow();
+    HWND hWnd;
+    hWnd = GetActiveWindow();
 
-	rawMouse.hwndTarget = hWnd;
-	if(!enabled) {
-		rawMouse.dwFlags |= RIDEV_REMOVE;
-		rawMouse.hwndTarget = NULL;
-	}
+    rawMouse.hwndTarget = hWnd;
+    if(!enabled) {
+        rawMouse.dwFlags |= RIDEV_REMOVE;
+        rawMouse.hwndTarget = NULL;
+    }
 
 
-	/* (Un)register raw input for mice */
-	if(RegisterRawInputDevices(&rawMouse, 1, sizeof(RAWINPUTDEVICE)) == FALSE) {
+    /* (Un)register raw input for mice */
+    if(RegisterRawInputDevices(&rawMouse, 1, sizeof(RAWINPUTDEVICE)) == FALSE) {
 
-		/* Only return an error when registering. If we unregister and fail, then
-		it's probably that we unregistered twice. That's OK. */
-		if(enabled) {
-			return SDL_Unsupported();
-		}
-	}
+        /* Only return an error when registering. If we unregister and fail, then
+        it's probably that we unregistered twice. That's OK. */
+        if(enabled) {
+            return SDL_Unsupported();
+        }
+    }
 
-	if(enabled) {
-		LONG cx, cy;
-		RECT rect;
-		GetWindowRect(hWnd, &rect);
+    if(enabled) {
+        LONG cx, cy;
+        RECT rect;
+        GetWindowRect(hWnd, &rect);
 
-		cx = (rect.left + rect.right) / 2;
-		cy = (rect.top + rect.bottom) / 2;
+        cx = (rect.left + rect.right) / 2;
+        cy = (rect.top + rect.bottom) / 2;
 
-		/* Make an absurdly small clip rect */
-		rect.left = cx-1;
-		rect.right = cx+1;
-		rect.top = cy-1;
-		rect.bottom = cy+1;
+        /* Make an absurdly small clip rect */
+        rect.left = cx-1;
+        rect.right = cx+1;
+        rect.top = cy-1;
+        rect.bottom = cy+1;
 
-		ClipCursor(&rect);
-	}
-	else
-		ClipCursor(NULL);
+        ClipCursor(&rect);
+    }
+    else
+        ClipCursor(NULL);
 
     return 0;
 }
@@ -228,7 +244,7 @@ WIN_InitMouse(_THIS)
     SDL_Mouse *mouse = SDL_GetMouse();
 
     mouse->CreateCursor = WIN_CreateCursor;
-	mouse->CreateSystemCursor = WIN_CreateSystemCursor;
+    mouse->CreateSystemCursor = WIN_CreateSystemCursor;
     mouse->ShowCursor = WIN_ShowCursor;
     mouse->FreeCursor = WIN_FreeCursor;
     mouse->WarpMouse = WIN_WarpMouse;
@@ -240,6 +256,12 @@ WIN_InitMouse(_THIS)
 void
 WIN_QuitMouse(_THIS)
 {
+    SDL_Mouse *mouse = SDL_GetMouse();
+    if ( mouse->def_cursor ) {
+        SDL_free(mouse->def_cursor);
+        mouse->def_cursor = NULL;
+        mouse->cur_cursor = NULL;
+    }
 }
 
 #endif /* SDL_VIDEO_DRIVER_WINDOWS */

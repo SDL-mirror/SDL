@@ -24,9 +24,36 @@
 
 #include "SDL_assert.h"
 #include "SDL_events.h"
-#include "SDL_cocoavideo.h"
+#include "SDL_cocoamouse.h"
+#include "SDL_cocoamousetap.h"
 
 #include "../../events/SDL_mouse_c.h"
+
+@implementation NSCursor (InvisibleCursor)
++ (NSCursor *)invisibleCursor
+{
+    static NSCursor *invisibleCursor = NULL;
+    if (!invisibleCursor) {
+        /* RAW 16x16 transparent GIF */
+        static unsigned char cursorBytes[] = {
+            0x47, 0x49, 0x46, 0x38, 0x37, 0x61, 0x10, 0x00, 0x10, 0x00, 0x80,
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x21, 0xF9, 0x04,
+            0x01, 0x00, 0x00, 0x01, 0x00, 0x2C, 0x00, 0x00, 0x00, 0x00, 0x10,
+            0x00, 0x10, 0x00, 0x00, 0x02, 0x0E, 0x8C, 0x8F, 0xA9, 0xCB, 0xED,
+            0x0F, 0xA3, 0x9C, 0xB4, 0xDA, 0x8B, 0xB3, 0x3E, 0x05, 0x00, 0x3B
+        };
+
+        NSData *cursorData = [NSData dataWithBytesNoCopy:&cursorBytes[0]
+                                                  length:sizeof(cursorBytes)
+                                            freeWhenDone:NO];
+        NSImage *cursorImage = [[[NSImage alloc] initWithData:cursorData] autorelease];
+        invisibleCursor = [[NSCursor alloc] initWithImage:cursorImage
+                                                  hotSpot:NSZeroPoint];
+    }
+
+    return invisibleCursor;
+}
+@end
 
 
 static SDL_Cursor *
@@ -68,6 +95,8 @@ Cocoa_CreateCursor(SDL_Surface * surface, int hot_x, int hot_y)
         cursor = SDL_calloc(1, sizeof(*cursor));
         if (cursor) {
             cursor->driverdata = nscursor;
+        } else {
+            [nscursor release];
         }
     }
 
@@ -127,7 +156,7 @@ Cocoa_CreateSystemCursor(SDL_SystemCursor id)
     if (nscursor) {
         cursor = SDL_calloc(1, sizeof(*cursor));
         if (cursor) {
-            // We'll free it later, so retain it here
+            /* We'll free it later, so retain it here */
             [nscursor retain];
             cursor->driverdata = nscursor;
         }
@@ -155,13 +184,15 @@ Cocoa_ShowCursor(SDL_Cursor * cursor)
 {
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 
-    if (cursor) {
-        NSCursor *nscursor = (NSCursor *)cursor->driverdata;
-
-        [nscursor set];
-        [NSCursor unhide];
-    } else {
-        [NSCursor hide];
+    SDL_VideoDevice *device = SDL_GetVideoDevice();
+    SDL_Window *window = (device ? device->windows : NULL);
+    for (; window != NULL; window = window->next) {
+        SDL_WindowData *driverdata = (SDL_WindowData *)window->driverdata;
+        if (driverdata) {
+            [driverdata->nswindow performSelectorOnMainThread:@selector(invalidateCursorRectsForView:)
+                                                   withObject:[driverdata->nswindow contentView]
+                                                waitUntilDone:NO];
+        }
     }
 
     [pool release];
@@ -172,11 +203,39 @@ Cocoa_ShowCursor(SDL_Cursor * cursor)
 static void
 Cocoa_WarpMouse(SDL_Window * window, int x, int y)
 {
-    CGPoint point;
+    SDL_Mouse *mouse = SDL_GetMouse();
+    CGPoint point = CGPointMake(x, y);
 
-    point.x = (float)window->x + x;
-    point.y = (float)window->y + y;
+    if (!(window->flags & SDL_WINDOW_FULLSCREEN))
+    {
+        point.x += window->x;
+        point.y += window->y;
+    }
+
+    {
+        /* This makes Cocoa_HandleMouseEvent ignore this delta in the next
+         * movement event.
+         */
+        SDL_MouseData *driverdata = (SDL_MouseData*)mouse->driverdata;
+        NSPoint location =  [NSEvent mouseLocation];
+        driverdata->deltaXOffset = location.x - point.x;
+        driverdata->deltaYOffset = point.y - location.y;
+    }
+
+    /* According to the docs, this was deprecated in 10.6, but it's still
+     * around. The substitute requires a CGEventSource, but I'm not entirely
+     * sure how we'd procure the right one for this event.
+     */
+    CGSetLocalEventsSuppressionInterval(0.0);
     CGWarpMouseCursorPosition(point);
+    CGSetLocalEventsSuppressionInterval(0.25);
+
+    if (!mouse->relative_mode) {
+        /* CGWarpMouseCursorPosition doesn't generate a window event, unlike our
+         * other implementations' APIs.
+         */
+        SDL_SendMouseMotion(mouse->focus, mouse->mouseID, 0, x, y);
+    }
 }
 
 static int
@@ -200,6 +259,8 @@ Cocoa_InitMouse(_THIS)
 {
     SDL_Mouse *mouse = SDL_GetMouse();
 
+    mouse->driverdata = SDL_calloc(1, sizeof(SDL_MouseData));
+
     mouse->CreateCursor = Cocoa_CreateCursor;
     mouse->CreateSystemCursor = Cocoa_CreateSystemCursor;
     mouse->ShowCursor = Cocoa_ShowCursor;
@@ -208,6 +269,8 @@ Cocoa_InitMouse(_THIS)
     mouse->SetRelativeMouseMode = Cocoa_SetRelativeMouseMode;
 
     SDL_SetDefaultCursor(Cocoa_CreateDefaultCursor());
+
+    Cocoa_InitMouseEventTap(mouse->driverdata);
 }
 
 void
@@ -220,8 +283,11 @@ Cocoa_HandleMouseEvent(_THIS, NSEvent *event)
          [event type] == NSLeftMouseDragged ||
          [event type] == NSRightMouseDragged ||
          [event type] == NSOtherMouseDragged)) {
-        float x = [event deltaX];
-        float y = [event deltaY];
+        SDL_MouseData *driverdata = (SDL_MouseData*)mouse->driverdata;
+        float x = [event deltaX] + driverdata->deltaXOffset;
+        float y = [event deltaY] + driverdata->deltaYOffset;
+        driverdata->deltaXOffset = driverdata->deltaYOffset = 0;
+
         SDL_SendMouseMotion(mouse->focus, mouse->mouseID, 1, (int)x, (int)y);
     }
 }
@@ -250,6 +316,14 @@ Cocoa_HandleMouseWheel(SDL_Window *window, NSEvent *event)
 void
 Cocoa_QuitMouse(_THIS)
 {
+    SDL_Mouse *mouse = SDL_GetMouse();
+    if (mouse) {
+        if (mouse->driverdata) {
+            Cocoa_QuitMouseEventTap(((SDL_MouseData*)mouse->driverdata));
+        }
+
+        SDL_free(mouse->driverdata);
+    }
 }
 
 #endif /* SDL_VIDEO_DRIVER_COCOA */

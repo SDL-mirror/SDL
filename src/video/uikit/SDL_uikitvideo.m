@@ -86,10 +86,12 @@ UIKit_CreateDevice(int devindex)
 
     /* !!! FIXME: implement SetWindowBordered */
 
-    device->SDL_HasScreenKeyboardSupport = UIKit_HasScreenKeyboardSupport;
-    device->SDL_ShowScreenKeyboard = UIKit_ShowScreenKeyboard;
-    device->SDL_HideScreenKeyboard = UIKit_HideScreenKeyboard;
-    device->SDL_IsScreenKeyboardShown = UIKit_IsScreenKeyboardShown;
+#if SDL_IPHONE_KEYBOARD
+    device->HasScreenKeyboardSupport = UIKit_HasScreenKeyboardSupport;
+    device->ShowScreenKeyboard = UIKit_ShowScreenKeyboard;
+    device->HideScreenKeyboard = UIKit_HideScreenKeyboard;
+    device->IsScreenKeyboardShown = UIKit_IsScreenKeyboardShown;
+#endif
 
     /* OpenGL (ES) functions */
     device->GL_MakeCurrent        = UIKit_GL_MakeCurrent;

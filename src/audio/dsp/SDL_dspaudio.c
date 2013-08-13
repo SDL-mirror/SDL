@@ -161,7 +161,7 @@ DSP_OpenDevice(_THIS, const char *devname, int iscapture)
             break;
 #if 0
 /*
- * These formats are not used by any real life systems so they are not 
+ * These formats are not used by any real life systems so they are not
  * needed here.
  */
         case AUDIO_S8:

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 1997-2011 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -63,7 +63,7 @@ report_power(void)
 int
 main(int argc, char *argv[])
 {
-    if (SDL_Init(SDL_INIT_VIDEO) == -1) {
+    if (SDL_Init(0) == -1) {
         fprintf(stderr, "SDL_Init() failed: %s\n", SDL_GetError());
         return 1;
     }

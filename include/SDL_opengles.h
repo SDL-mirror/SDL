@@ -21,7 +21,7 @@
 
 /**
  *  \file SDL_opengles.h
- *  
+ *
  *  This is a simple file to encapsulate the OpenGL ES 1.X API headers.
  */
 

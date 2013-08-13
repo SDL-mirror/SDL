@@ -51,9 +51,9 @@ WIN_DeleteDevice(SDL_VideoDevice * device)
     SDL_VideoData *data = (SDL_VideoData *) device->driverdata;
 
     SDL_UnregisterApp();
-	if (data->userDLL) {
-		SDL_UnloadObject(data->userDLL);
-	}
+    if (data->userDLL) {
+        SDL_UnloadObject(data->userDLL);
+    }
 
     SDL_free(device->driverdata);
     SDL_free(device);
@@ -83,12 +83,12 @@ WIN_CreateDevice(int devindex)
     }
     device->driverdata = data;
 
-	data->userDLL = SDL_LoadObject("USER32.DLL");
-	if (data->userDLL) {
-		data->CloseTouchInputHandle = (BOOL (WINAPI *)( HTOUCHINPUT )) SDL_LoadFunction(data->userDLL, "CloseTouchInputHandle");
-		data->GetTouchInputInfo = (BOOL (WINAPI *)( HTOUCHINPUT, UINT, PTOUCHINPUT, int )) SDL_LoadFunction(data->userDLL, "GetTouchInputInfo");
-		data->RegisterTouchWindow = (BOOL (WINAPI *)( HWND, ULONG )) SDL_LoadFunction(data->userDLL, "RegisterTouchWindow");
-	}
+    data->userDLL = SDL_LoadObject("USER32.DLL");
+    if (data->userDLL) {
+        data->CloseTouchInputHandle = (BOOL (WINAPI *)( HTOUCHINPUT )) SDL_LoadFunction(data->userDLL, "CloseTouchInputHandle");
+        data->GetTouchInputInfo = (BOOL (WINAPI *)( HTOUCHINPUT, UINT, PTOUCHINPUT, int )) SDL_LoadFunction(data->userDLL, "GetTouchInputInfo");
+        data->RegisterTouchWindow = (BOOL (WINAPI *)( HWND, ULONG )) SDL_LoadFunction(data->userDLL, "RegisterTouchWindow");
+    }
 
     /* Set the function pointers */
     device->VideoInit = WIN_VideoInit;
@@ -121,11 +121,12 @@ WIN_CreateDevice(int devindex)
     device->CreateWindowFramebuffer = WIN_CreateWindowFramebuffer;
     device->UpdateWindowFramebuffer = WIN_UpdateWindowFramebuffer;
     device->DestroyWindowFramebuffer = WIN_DestroyWindowFramebuffer;
-    
+    device->OnWindowEnter = WIN_OnWindowEnter;
+
     device->shape_driver.CreateShaper = Win32_CreateShaper;
     device->shape_driver.SetWindowShape = Win32_SetWindowShape;
     device->shape_driver.ResizeWindowShape = Win32_ResizeWindowShape;
-    
+
 #if SDL_VIDEO_OPENGL_WGL
     device->GL_LoadLibrary = WIN_GL_LoadLibrary;
     device->GL_GetProcAddress = WIN_GL_GetProcAddress;

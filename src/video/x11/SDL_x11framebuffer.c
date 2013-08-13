@@ -111,7 +111,7 @@ X11_CreateWindowFramebuffer(_THIS, SDL_Window * window, Uint32 * format,
         if (!shm_error) {
             data->ximage = XShmCreateImage(display, data->visual,
                              vinfo.depth, ZPixmap,
-                             shminfo->shmaddr, shminfo, 
+                             shminfo->shmaddr, shminfo,
                              window->w, window->h);
             if (!data->ximage) {
                 XShmDetach(display, shminfo);
@@ -133,7 +133,7 @@ X11_CreateWindowFramebuffer(_THIS, SDL_Window * window, Uint32 * format,
     }
 
     data->ximage = XCreateImage(display, data->visual,
-                      vinfo.depth, ZPixmap, 0, (char *)(*pixels), 
+                      vinfo.depth, ZPixmap, 0, (char *)(*pixels),
                       window->w, window->h, 32, 0);
     if (!data->ximage) {
         SDL_free(*pixels);

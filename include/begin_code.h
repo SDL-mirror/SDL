@@ -37,23 +37,23 @@
 #ifndef DECLSPEC
 # if defined(__BEOS__) || defined(__HAIKU__)
 #  if defined(__GNUC__)
-#   define DECLSPEC	__declspec(dllexport)
+#   define DECLSPEC __declspec(dllexport)
 #  else
-#   define DECLSPEC	__declspec(export)
+#   define DECLSPEC __declspec(export)
 #  endif
 # elif defined(__WIN32__) || defined(__WINRT__)
 #  ifdef __BORLANDC__
 #   ifdef BUILD_SDL
 #    define DECLSPEC
 #   else
-#    define DECLSPEC	__declspec(dllimport)
+#    define DECLSPEC    __declspec(dllimport)
 #   endif
 #  else
-#   define DECLSPEC	__declspec(dllexport)
+#   define DECLSPEC __declspec(dllexport)
 #  endif
 # else
 #  if defined(__GNUC__) && __GNUC__ >= 4
-#   define DECLSPEC	__attribute__ ((visibility("default")))
+#   define DECLSPEC __attribute__ ((visibility("default")))
 #  else
 #   define DECLSPEC
 #  endif
@@ -106,7 +106,7 @@
     defined(__WATCOMC__) || defined(__LCC__) || \
     defined(__DECC)
 #ifndef __inline__
-#define __inline__	__inline
+#define __inline__  __inline
 #endif
 #define SDL_INLINE_OKAY
 #else

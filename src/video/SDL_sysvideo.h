@@ -25,6 +25,7 @@
 
 #include "SDL_messagebox.h"
 #include "SDL_shape.h"
+#include "SDL_thread.h"
 
 /* The SDL video driver */
 
@@ -35,19 +36,19 @@ typedef struct SDL_VideoDevice SDL_VideoDevice;
 
 /* Define the SDL window-shaper structure */
 struct SDL_WindowShaper
-{   
+{
     /* The window associated with the shaper */
     SDL_Window *window;
-    
+
     /* The user's specified coordinates for the window, for once we give it a shape. */
     Uint32 userx,usery;
-    
+
     /* The parameters for shape calculation. */
     SDL_WindowShapeMode mode;
-    
+
     /* Has this window been assigned a shape? */
     SDL_bool hasshape;
-    
+
     void *driverdata;
 };
 
@@ -72,6 +73,7 @@ struct SDL_Window
     const void *magic;
     Uint32 id;
     char *title;
+    SDL_Surface *icon;
     int x, y;
     int w, h;
     int min_w, min_h;
@@ -82,7 +84,7 @@ struct SDL_Window
     SDL_Rect windowed;
 
     SDL_DisplayMode fullscreen_mode;
-    
+
     float brightness;
     Uint16 *gamma;
     Uint16 *saved_gamma;        /* (just offset into gamma) */
@@ -128,7 +130,7 @@ struct SDL_VideoDisplay
 struct SDL_SysWMinfo;
 
 /* Define the SDL video driver structure */
-#define _THIS	SDL_VideoDevice *_this
+#define _THIS   SDL_VideoDevice *_this
 
 struct SDL_VideoDevice
 {
@@ -201,6 +203,7 @@ struct SDL_VideoDevice
     int (*CreateWindowFramebuffer) (_THIS, SDL_Window * window, Uint32 * format, void ** pixels, int *pitch);
     int (*UpdateWindowFramebuffer) (_THIS, SDL_Window * window, const SDL_Rect * rects, int numrects);
     void (*DestroyWindowFramebuffer) (_THIS, SDL_Window * window);
+    void (*OnWindowEnter) (_THIS, SDL_Window * window);
 
     /* * * */
     /*
@@ -241,10 +244,10 @@ struct SDL_VideoDevice
     void (*SetTextInputRect) (_THIS, SDL_Rect *rect);
 
     /* Screen keyboard */
-    SDL_bool (*SDL_HasScreenKeyboardSupport) (_THIS);
-    void (*SDL_ShowScreenKeyboard) (_THIS, SDL_Window *window);
-    void (*SDL_HideScreenKeyboard) (_THIS, SDL_Window *window);
-    SDL_bool (*SDL_IsScreenKeyboardShown) (_THIS, SDL_Window *window);
+    SDL_bool (*HasScreenKeyboardSupport) (_THIS);
+    void (*ShowScreenKeyboard) (_THIS, SDL_Window *window);
+    void (*HideScreenKeyboard) (_THIS, SDL_Window *window);
+    SDL_bool (*IsScreenKeyboardShown) (_THIS, SDL_Window *window);
 
     /* Clipboard */
     int (*SetClipboardText) (_THIS, const char *text);
@@ -298,8 +301,13 @@ struct SDL_VideoDevice
 
     /* * * */
     /* Cache current GL context; don't call the OS when it hasn't changed. */
+    /* We have the global pointers here so Cocoa continues to work the way
+       it always has, and the thread-local storage for the general case.
+     */
     SDL_Window *current_glwin;
     SDL_GLContext current_glctx;
+    SDL_TLSID current_glwin_tls;
+    SDL_TLSID current_glctx_tls;
 
     /* * * */
     /* Data private to this driver */
@@ -370,12 +378,14 @@ extern void SDL_OnWindowHidden(SDL_Window * window);
 extern void SDL_OnWindowResized(SDL_Window * window);
 extern void SDL_OnWindowMinimized(SDL_Window * window);
 extern void SDL_OnWindowRestored(SDL_Window * window);
+extern void SDL_OnWindowEnter(SDL_Window * window);
+extern void SDL_OnWindowLeave(SDL_Window * window);
 extern void SDL_OnWindowFocusGained(SDL_Window * window);
 extern void SDL_OnWindowFocusLost(SDL_Window * window);
 extern void SDL_UpdateWindowGrab(SDL_Window * window);
 extern SDL_Window * SDL_GetFocusWindow(void);
 
-extern SDL_bool SDL_ShouldAllowTopmost();
+extern SDL_bool SDL_ShouldAllowTopmost(void);
 
 #endif /* _SDL_sysvideo_h */
 

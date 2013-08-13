@@ -27,7 +27,7 @@
 #include <stdio.h>
 
 #define VIDEO_USAGE \
-"[--video driver] [--renderer driver] [--info all|video|modes|render|event] [--log all|error|system|audio|video|render|input] [--display N] [--fullscreen | --fullscreen-desktop | --windows N] [--title title] [--icon icon.bmp] [--center | --position X,Y] [--geometry WxH] [--min-geometry WxH] [--max-geometry WxH] [--depth N] [--refresh R] [--vsync] [--noframe] [--resize] [--minimize] [--maximize] [--grab]"
+"[--video driver] [--renderer driver] [--gldebug] [--info all|video|modes|render|event] [--log all|error|system|audio|video|render|input] [--display N] [--fullscreen | --fullscreen-desktop | --windows N] [--title title] [--icon icon.bmp] [--center | --position X,Y] [--geometry WxH] [--min-geometry WxH] [--max-geometry WxH] [--logical WxH] [--scale N] [--depth N] [--refresh R] [--vsync] [--noframe] [--resize] [--minimize] [--maximize] [--grab]"
 
 #define AUDIO_USAGE \
 "[--rate N] [--format U8|S8|U16|U16LE|U16BE|S16|S16LE|S16BE] [--channels N] [--samples N]"
@@ -74,6 +74,7 @@ SDLTest_CommonCreateState(char **argv, Uint32 flags)
     state->gl_multisamplesamples = 0;
     state->gl_retained_backing = 1;
     state->gl_accelerated = -1;
+    state->gl_debug = 0;
 
     return state;
 }
@@ -98,6 +99,10 @@ SDLTest_CommonArg(SDLTest_CommonState * state, int index)
         }
         state->renderdriver = argv[index];
         return 2;
+    }
+    if (SDL_strcasecmp(argv[index], "--gldebug") == 0) {
+        state->gl_debug = 1;
+        return 1;
     }
     if (SDL_strcasecmp(argv[index], "--info") == 0) {
         ++index;
@@ -296,6 +301,33 @@ SDLTest_CommonArg(SDLTest_CommonState * state, int index)
         state->window_maxH = SDL_atoi(h);
         return 2;
     }
+    if (SDL_strcasecmp(argv[index], "--logical") == 0) {
+        char *w, *h;
+        ++index;
+        if (!argv[index]) {
+            return -1;
+        }
+        w = argv[index];
+        h = argv[index];
+        while (*h && *h != 'x') {
+            ++h;
+        }
+        if (!*h) {
+            return -1;
+        }
+        *h++ = '\0';
+        state->logical_w = SDL_atoi(w);
+        state->logical_h = SDL_atoi(h);
+        return 2;
+    }
+    if (SDL_strcasecmp(argv[index], "--scale") == 0) {
+        ++index;
+        if (!argv[index]) {
+            return -1;
+        }
+        state->scale = (float)SDL_atof(argv[index]);
+        return 2;
+    }
     if (SDL_strcasecmp(argv[index], "--depth") == 0) {
         ++index;
         if (!argv[index]) {
@@ -405,7 +437,7 @@ SDLTest_CommonArg(SDLTest_CommonState * state, int index)
         return -1;
     }
     if (SDL_strcmp(argv[index], "-NSDocumentRevisionsDebugMode") == 0) {
-	/* Debug flag sent by Xcode */
+    /* Debug flag sent by Xcode */
         return 2;
     }
     return 0;
@@ -656,6 +688,9 @@ SDLTest_CommonInit(SDLTest_CommonState * state)
             SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, state->gl_major_version);
             SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, state->gl_minor_version);
         }
+        if (state->gl_debug) {
+            SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_DEBUG_FLAG);
+        }
 
         if (state->verbose & VERBOSE_MODES) {
             SDL_Rect bounds;
@@ -841,6 +876,11 @@ SDLTest_CommonInit(SDLTest_CommonState * state)
                             SDL_GetError());
                     return SDL_FALSE;
                 }
+                if (state->logical_w && state->logical_h) {
+                    SDL_RenderSetLogicalSize(state->renderers[i], state->logical_w, state->logical_h);
+                } else if (state->scale) {
+                    SDL_RenderSetScale(state->renderers[i], state->scale, state->scale);
+                }
                 if (state->verbose & VERBOSE_RENDER) {
                     SDL_RendererInfo info;
 
@@ -890,9 +930,9 @@ SDLTest_CommonInit(SDLTest_CommonState * state)
 static void
 SDLTest_PrintEvent(SDL_Event * event)
 {
-    if (event->type == SDL_MOUSEMOTION) {
-        /* Mouse motion is really spammy */
-        //return;
+    if ((event->type == SDL_MOUSEMOTION) || (event->type == SDL_FINGERMOTION)) {
+        /* Mouse and finger motion are really spammy */
+        return;
     }
 
     fprintf(stderr, "SDL EVENT: ");
@@ -1049,6 +1089,17 @@ SDLTest_PrintEvent(SDL_Event * event)
     case SDL_CLIPBOARDUPDATE:
         fprintf(stderr, "Clipboard updated");
         break;
+
+    case SDL_FINGERDOWN:
+    case SDL_FINGERUP:
+        fprintf(stderr, "Finger: %s touch=%lld, finger=%lld, x=%f, y=%f, dx=%f, dy=%f, pressure=%f",
+                (event->type == SDL_FINGERDOWN) ? "down" : "up",
+                (long long) event->tfinger.touchId,
+                (long long) event->tfinger.fingerId,
+                event->tfinger.x, event->tfinger.y,
+                event->tfinger.dx, event->tfinger.dy, event->tfinger.pressure);
+        break;
+
     case SDL_QUIT:
         fprintf(stderr, "Quit requested");
         break;
@@ -1097,10 +1148,33 @@ SDLTest_ScreenShot(SDL_Renderer *renderer)
     }
 }
 
+static void
+FullscreenTo(int index, int windowId)
+{
+    Uint32 flags;
+    struct SDL_Rect rect = { 0, 0, 0, 0 };
+    SDL_Window *window = SDL_GetWindowFromID(windowId);
+    if (!window) {
+        return;
+    }
+
+    SDL_GetDisplayBounds( index, &rect );
+
+    flags = SDL_GetWindowFlags(window);
+    if (flags & SDL_WINDOW_FULLSCREEN) {
+        SDL_SetWindowFullscreen( window, SDL_FALSE );
+        SDL_Delay( 15 );
+    }
+
+    SDL_SetWindowPosition( window, rect.x, rect.y );
+    SDL_SetWindowFullscreen( window, SDL_TRUE );
+}
+
 void
 SDLTest_CommonEvent(SDLTest_CommonState * state, SDL_Event * event, int *done)
 {
     int i;
+    static SDL_MouseMotionEvent lastEvent;
 
     if (state->verbose & VERBOSE_EVENT) {
         SDLTest_PrintEvent(event);
@@ -1109,31 +1183,13 @@ SDLTest_CommonEvent(SDLTest_CommonState * state, SDL_Event * event, int *done)
     switch (event->type) {
     case SDL_WINDOWEVENT:
         switch (event->window.event) {
-        case SDL_WINDOWEVENT_SIZE_CHANGED:
+        case SDL_WINDOWEVENT_CLOSE:
             {
                 SDL_Window *window = SDL_GetWindowFromID(event->window.windowID);
                 if (window) {
-                    for (i = 0; i < state->num_windows; ++i) {
-                        if (window == state->windows[i] &&
-                            (state->window_flags & SDL_WINDOW_RESIZABLE)) {
-                            SDL_Rect viewport;
-
-                            viewport.x = 0;
-                            viewport.y = 0;
-                            SDL_GetWindowSize(window, &viewport.w, &viewport.h);
-                            SDL_RenderSetViewport(state->renderers[i], &viewport);
-                        }
-                    }
+                    SDL_DestroyWindow(window);
                 }
             }
-            break;
-        case SDL_WINDOWEVENT_CLOSE:
-			{
-                SDL_Window *window = SDL_GetWindowFromID(event->window.windowID);
-                if (window) {
-					SDL_DestroyWindow(window);
-				}
-			}
             break;
         }
         break;
@@ -1153,7 +1209,7 @@ SDLTest_CommonEvent(SDLTest_CommonState * state, SDL_Event * event, int *done)
             break;
         case SDLK_EQUALS:
             if (event->key.keysym.mod & KMOD_CTRL) {
-                /* Ctrt-+ double the size of the window */
+                /* Ctrl-+ double the size of the window */
                 SDL_Window *window = SDL_GetWindowFromID(event->key.windowID);
                 if (window) {
                     int w, h;
@@ -1164,7 +1220,7 @@ SDLTest_CommonEvent(SDLTest_CommonState * state, SDL_Event * event, int *done)
             break;
         case SDLK_MINUS:
             if (event->key.keysym.mod & KMOD_CTRL) {
-                /* Ctrt-- double the size of the window */
+                /* Ctrl-- half the size of the window */
                 SDL_Window *window = SDL_GetWindowFromID(event->key.windowID);
                 if (window) {
                     int w, h;
@@ -1178,6 +1234,26 @@ SDLTest_CommonEvent(SDLTest_CommonState * state, SDL_Event * event, int *done)
                 /* Ctrl-C copy awesome text! */
                 SDL_SetClipboardText("SDL rocks!\nYou know it!");
                 printf("Copied text to clipboard\n");
+            }
+            if (event->key.keysym.mod & KMOD_ALT) {
+                /* Alt-C toggle a render clip rectangle */
+                for (i = 0; i < state->num_windows; ++i) {
+                    int w, h;
+                    if (state->renderers[i]) {
+                        SDL_Rect clip;
+                        SDL_GetWindowSize(state->windows[i], &w, &h);
+                        SDL_RenderGetClipRect(state->renderers[i], &clip);
+                        if (SDL_RectEmpty(&clip)) {
+                            clip.x = w/4;
+                            clip.y = h/4;
+                            clip.w = w/2;
+                            clip.h = h/2;
+                            SDL_RenderSetClipRect(state->renderers[i], &clip);
+                        } else {
+                            SDL_RenderSetClipRect(state->renderers[i], NULL);
+                        }
+                    }
+                }
             }
             break;
         case SDLK_v:
@@ -1197,7 +1273,7 @@ SDLTest_CommonEvent(SDLTest_CommonState * state, SDL_Event * event, int *done)
                 /* Ctrl-G toggle grab */
                 SDL_Window *window = SDL_GetWindowFromID(event->key.windowID);
                 if (window) {
-                    SDL_SetWindowGrab(window, !SDL_GetWindowGrab(window));
+                    SDL_SetWindowGrab(window, !SDL_GetWindowGrab(window) ? SDL_TRUE : SDL_FALSE);
                 }
             }
             break;
@@ -1218,7 +1294,7 @@ SDLTest_CommonEvent(SDLTest_CommonState * state, SDL_Event * event, int *done)
         case SDLK_r:
             if (event->key.keysym.mod & KMOD_CTRL) {
                 /* Ctrl-R toggle mouse relative mode */
-                SDL_SetRelativeMouseMode(!SDL_GetRelativeMouseMode());
+                SDL_SetRelativeMouseMode(!SDL_GetRelativeMouseMode() ? SDL_TRUE : SDL_FALSE);
             }
             break;
         case SDLK_z:
@@ -1242,6 +1318,17 @@ SDLTest_CommonEvent(SDLTest_CommonState * state, SDL_Event * event, int *done)
                         SDL_SetWindowFullscreen(window, SDL_TRUE);
                     }
                 }
+            } else if (event->key.keysym.mod & KMOD_ALT) {
+                /* Alt-Enter toggle fullscreen desktop */
+                SDL_Window *window = SDL_GetWindowFromID(event->key.windowID);
+                if (window) {
+                    Uint32 flags = SDL_GetWindowFlags(window);
+                    if (flags & SDL_WINDOW_FULLSCREEN) {
+                        SDL_SetWindowFullscreen(window, SDL_FALSE);
+                    } else {
+                        SDL_SetWindowFullscreen(window, SDL_WINDOW_FULLSCREEN_DESKTOP);
+                    }
+                }
             }
             break;
         case SDLK_b:
@@ -1250,26 +1337,48 @@ SDLTest_CommonEvent(SDLTest_CommonState * state, SDL_Event * event, int *done)
                 SDL_Window *window = SDL_GetWindowFromID(event->key.windowID);
                 if (window) {
                     const Uint32 flags = SDL_GetWindowFlags(window);
-                    const SDL_bool b = ((flags & SDL_WINDOW_BORDERLESS) != 0);
+                    const SDL_bool b = ((flags & SDL_WINDOW_BORDERLESS) != 0) ? SDL_TRUE : SDL_FALSE;
                     SDL_SetWindowBordered(window, b);
                 }
             }
             break;
-        case SDLK_1:
+        case SDLK_0:
             if (event->key.keysym.mod & KMOD_CTRL) {
                 SDL_Window *window = SDL_GetWindowFromID(event->key.windowID);
                 SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "Test Message", "You're awesome!", window);
             }
             break;
+        case SDLK_1:
+            if (event->key.keysym.mod & KMOD_CTRL) {
+                FullscreenTo(0, event->key.windowID);
+            }
+            break;
+        case SDLK_2:
+            if (event->key.keysym.mod & KMOD_CTRL) {
+                FullscreenTo(1, event->key.windowID);
+            }
+            break;
         case SDLK_ESCAPE:
             *done = 1;
             break;
+        case SDLK_SPACE:
+        {
+            char message[256];
+            SDL_Window *window = SDL_GetWindowFromID(event->key.windowID);
+
+            SDL_snprintf(message, sizeof(message), "(%i, %i), rel (%i, %i)\n", lastEvent.x, lastEvent.y, lastEvent.xrel, lastEvent.yrel);
+            SDL_ShowSimpleMessageBox(SDL_MESSAGEBOX_INFORMATION, "Last mouse position", message, window);
+            break;
+        }
         default:
             break;
         }
         break;
     case SDL_QUIT:
         *done = 1;
+        break;
+    case SDL_MOUSEMOTION:
+        lastEvent = event->motion;
         break;
     }
 }

@@ -21,7 +21,7 @@
 
 /**
  *  \file SDL_touch.h
- *  
+ *
  *  Include file for SDL touch event handling.
  */
 
@@ -35,9 +35,7 @@
 #include "begin_code.h"
 /* Set up for C function definitions, even when using C++ */
 #ifdef __cplusplus
-/* *INDENT-OFF* */
 extern "C" {
-/* *INDENT-ON* */
 #endif
 
 typedef Sint64 SDL_TouchID;
@@ -60,7 +58,7 @@ typedef struct SDL_Finger
 /**
  *  \brief Get the number of registered touch devices.
  */
-extern DECLSPEC int SDLCALL SDL_GetNumTouchDevices();
+extern DECLSPEC int SDLCALL SDL_GetNumTouchDevices(void);
 
 /**
  *  \brief Get the touch ID with the given index, or 0 if the index is invalid.
@@ -79,9 +77,7 @@ extern DECLSPEC SDL_Finger * SDLCALL SDL_GetTouchFinger(SDL_TouchID touchID, int
 
 /* Ends C function definitions when using C++ */
 #ifdef __cplusplus
-/* *INDENT-OFF* */
 }
-/* *INDENT-ON* */
 #endif
 #include "close_code.h"
 

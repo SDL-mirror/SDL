@@ -50,8 +50,8 @@ SDL_GetPowerInfo_BeOS(SDL_PowerState * state, int *seconds, int *percent)
     uint8 battery_flags;
     uint8 battery_life;
     uint32 battery_time;
-	int rc;
-	
+    int rc;
+
     if (fd == -1) {
         return SDL_FALSE;       /* maybe some other method will work? */
     }

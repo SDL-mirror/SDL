@@ -37,13 +37,13 @@
 
 #include <fusionsound/fusionsound_version.h>
 
-//#define SDL_AUDIO_DRIVER_FUSIONSOUND_DYNAMIC "libfusionsound.so"
+/* #define SDL_AUDIO_DRIVER_FUSIONSOUND_DYNAMIC "libfusionsound.so" */
 
 #ifdef SDL_AUDIO_DRIVER_FUSIONSOUND_DYNAMIC
 #include "SDL_name.h"
 #include "SDL_loadso.h"
 #else
-#define SDL_NAME(X)	X
+#define SDL_NAME(X) X
 #endif
 
 #if (FUSIONSOUND_MAJOR_VERSION == 1) && (FUSIONSOUND_MINOR_VERSION < 1)
@@ -51,7 +51,7 @@ typedef DFBResult DirectResult;
 #endif
 
 /* Buffers to use - more than 2 gives a lot of latency */
-#define FUSION_BUFFERS				(2)
+#define FUSION_BUFFERS              (2)
 
 #ifdef SDL_AUDIO_DRIVER_FUSIONSOUND_DYNAMIC
 

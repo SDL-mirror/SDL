@@ -22,15 +22,65 @@
 
 #if SDL_VIDEO_DRIVER_COCOA
 
-#if defined(__APPLE__) && defined(__POWERPC__)
+#if defined(__APPLE__) && defined(__POWERPC__) && !defined(__APPLE_ALTIVEC__)
 #include <altivec.h>
 #undef bool
 #undef vector
 #undef pixel
 #endif
 
+#include "SDL_events.h"
+#include "SDL_timer.h"
 #include "SDL_messagebox.h"
 #include "SDL_cocoavideo.h"
+
+@interface SDLMessageBoxPresenter : NSObject {
+@public
+    NSInteger clicked;
+    NSWindow *nswindow;
+}
+- (id) initWithParentWindow:(SDL_Window *)window;
+- (void) alertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo;
+@end
+
+@implementation SDLMessageBoxPresenter
+- (id) initWithParentWindow:(SDL_Window *)window
+{
+    self = [super init];
+    if (self) {
+        clicked = -1;
+
+        /* Retain the NSWindow because we'll show the alert later on the main thread */
+        if (window) {
+            nswindow = [((SDL_WindowData *) window->driverdata)->nswindow retain];
+        } else {
+            nswindow = NULL;
+        }
+    }
+
+    return self;
+}
+
+- (void)showAlert:(NSAlert*)alert
+{
+    if (nswindow) {
+        [alert beginSheetModalForWindow:nswindow modalDelegate:self didEndSelector:@selector(alertDidEnd:returnCode:contextInfo:) contextInfo:nil];
+        while (clicked < 0) {
+            SDL_PumpEvents();
+            SDL_Delay(100);
+        }
+        [nswindow release];
+    } else {
+        clicked = [alert runModal];
+    }
+}
+
+- (void) alertDidEnd:(NSAlert *)alert returnCode:(NSInteger)returnCode contextInfo:(void *)contextInfo
+{
+    clicked = returnCode;
+}
+
+@end
 
 
 /* Display a Cocoa message box */
@@ -41,7 +91,7 @@ Cocoa_ShowMessageBox(const SDL_MessageBoxData *messageboxdata, int *buttonid)
 
     NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 
-    NSAlert* alert = [[NSAlert alloc] init];
+    NSAlert* alert = [[[NSAlert alloc] init] autorelease];
 
     if (messageboxdata->flags & SDL_MESSAGEBOX_ERROR) {
         [alert setAlertStyle:NSCriticalAlertStyle];
@@ -67,14 +117,27 @@ Cocoa_ShowMessageBox(const SDL_MessageBoxData *messageboxdata, int *buttonid)
         }
     }
 
-    NSInteger clicked = [alert runModal];
-    clicked -= NSAlertFirstButtonReturn;
-    *buttonid = buttons[clicked].buttonid;
-    [alert release];
+    SDLMessageBoxPresenter* presenter = [[[SDLMessageBoxPresenter alloc] initWithParentWindow:messageboxdata->window] autorelease];
+
+    [presenter performSelectorOnMainThread:@selector(showAlert:)
+                                withObject:alert
+                             waitUntilDone:YES];
+
+    int returnValue = 0;
+    NSInteger clicked = presenter->clicked;
+    if (clicked >= NSAlertFirstButtonReturn)
+    {
+        clicked -= NSAlertFirstButtonReturn;
+        *buttonid = buttons[clicked].buttonid;
+    }
+    else
+    {
+        returnValue = SDL_SetError("Did not get a valid `clicked button' id: %d", clicked);
+    }
 
     [pool release];
 
-    return 0;
+    return returnValue;
 }
 
 #endif /* SDL_VIDEO_DRIVER_COCOA */

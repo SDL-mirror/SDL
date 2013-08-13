@@ -21,7 +21,7 @@
   <PropertyGroup Label="Globals">
     <ProjectName>testjoystick</ProjectName>
     <RootNamespace>testjoystick</RootNamespace>
-    <ProjectGuid>{55812185-D13C-4022-9C81-32E0F4A08304}</ProjectGuid>
+    <ProjectGuid>{55812185-D13C-4022-9C81-32E0F4A08BCC}</ProjectGuid>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -215,8 +215,8 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <Library Include="..\..\Sdl\$(Platform)\$(Configuration)\SDL.lib" />
-    <Library Include="..\..\SDLmain\$(Platform)\$(Configuration)\SDLmain.lib" />
+    <Library Include="..\..\SDL\$(Platform)\$(Configuration)\SDL2.lib" />
+    <Library Include="..\..\SDLmain\$(Platform)\$(Configuration)\SDL2main.lib" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\test\testjoystick.c" />

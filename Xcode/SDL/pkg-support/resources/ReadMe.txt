@@ -19,12 +19,6 @@ Copy the SDL2.framework to /Library/Frameworks
 
 You may alternatively install it in <Your home directory>/Library/Frameworks 
 if your access privileges are not high enough. 
-(Be aware that the Xcode templates we provide in the SDL Developer Extras 
-package may require some adjustment for your system if you do this.)
-
-
-Known Issues:
-???
 
 
 Additional References:

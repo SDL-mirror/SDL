@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -97,7 +97,7 @@
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
     <PostBuildEvent>
-      <Command>copy "$(SolutionDir)\SDL\$(Platform)\$(Configuration)\SDL.dll" "$(TargetDir)\SDL.dll"</Command>
+      <Command>copy "$(SolutionDir)\SDL\$(Platform)\$(Configuration)\SDL2.dll" "$(TargetDir)\SDL2.dll"</Command>
     </PostBuildEvent>
     <PostBuildEvent>
       <Message>Copy SDL</Message>
@@ -120,7 +120,7 @@
       <SubSystem>Windows</SubSystem>
     </Link>
     <PostBuildEvent>
-      <Command>copy "$(SolutionDir)\SDL\$(Platform)\$(Configuration)\SDL.dll" "$(TargetDir)\SDL.dll"</Command>
+      <Command>copy "$(SolutionDir)\SDL\$(Platform)\$(Configuration)\SDL2.dll" "$(TargetDir)\SDL2.dll"</Command>
     </PostBuildEvent>
     <PostBuildEvent>
       <Message>Copy SDL</Message>
@@ -147,7 +147,7 @@
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
     <PostBuildEvent>
-      <Command>copy "$(SolutionDir)\SDL\$(Platform)\$(Configuration)\SDL.dll" "$(TargetDir)\SDL.dll"</Command>
+      <Command>copy "$(SolutionDir)\SDL\$(Platform)\$(Configuration)\SDL2.dll" "$(TargetDir)\SDL2.dll"</Command>
     </PostBuildEvent>
     <PostBuildEvent>
       <Message>Copy SDL</Message>
@@ -173,7 +173,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
     </Link>
     <PostBuildEvent>
-      <Command>copy "$(SolutionDir)\SDL\$(Platform)\$(Configuration)\SDL.dll" "$(TargetDir)\SDL.dll"</Command>
+      <Command>copy "$(SolutionDir)\SDL\$(Platform)\$(Configuration)\SDL2.dll" "$(TargetDir)\SDL2.dll"</Command>
     </PostBuildEvent>
     <PostBuildEvent>
       <Message>Copy SDL</Message>
@@ -183,27 +183,29 @@
     <ClCompile Include="..\..\..\test\testautomation.c" />
     <ClCompile Include="..\..\..\test\testautomation_audio.c" />
     <ClCompile Include="..\..\..\test\testautomation_clipboard.c" />
-    <ClCompile Include="..\..\..\test\testautomation_platform.c" />
+    <ClCompile Include="..\..\..\test\testautomation_events.c" />
+    <ClCompile Include="..\..\..\test\testautomation_keyboard.c" />
     <ClCompile Include="..\..\..\test\testautomation_main.c" />
+    <ClCompile Include="..\..\..\test\testautomation_mouse.c" />
+    <ClCompile Include="..\..\..\test\testautomation_pixels.c" />
+    <ClCompile Include="..\..\..\test\testautomation_platform.c" />
     <ClCompile Include="..\..\..\test\testautomation_rect.c" />
     <ClCompile Include="..\..\..\test\testautomation_render.c" />
     <ClCompile Include="..\..\..\test\testautomation_rwops.c" />
-    <ClCompile Include="..\..\..\test\testautomation_surface.c" />
-    <ClCompile Include="..\..\..\test\testautomation_events.c" />
-    <ClCompile Include="..\..\..\test\testautomation_keyboard.c" />
-    <ClCompile Include="..\..\..\test\testautomation_video.c" />
-    <ClCompile Include="..\..\..\test\testautomation_syswm.c" />
     <ClCompile Include="..\..\..\test\testautomation_sdltest.c" />
-    <ClCompile Include="..\..\..\test\testautomation_mouse.c" />
+    <ClCompile Include="..\..\..\test\testautomation_stdlib.c" />
+    <ClCompile Include="..\..\..\test\testautomation_surface.c" />
+    <ClCompile Include="..\..\..\test\testautomation_syswm.c" />
     <ClCompile Include="..\..\..\test\testautomation_timer.c" />
+    <ClCompile Include="..\..\..\test\testautomation_video.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\test\testautomation_suites.h" />
   </ItemGroup>
   <ItemGroup>
-    <Library Include="..\..\SDL\$(Platform)\$(Configuration)\SDL.lib" />
-    <Library Include="..\..\SDLmain\$(Platform)\$(Configuration)\SDLmain.lib" />
-    <Library Include="..\..\SDLtest\$(Platform)\$(Configuration)\SDLtest.lib" />
+    <Library Include="..\..\SDL\$(Platform)\$(Configuration)\SDL2.lib" />
+    <Library Include="..\..\SDLmain\$(Platform)\$(Configuration)\SDL2main.lib" />
+    <Library Include="..\..\SDLtest\$(Platform)\$(Configuration)\SDL2test.lib" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

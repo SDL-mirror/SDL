@@ -1,7 +1,7 @@
 /*
- *	keyboard.c
- *	written by Holmes Futrell
- *	use however you want
+ *  keyboard.c
+ *  written by Holmes Futrell
+ *  use however you want
  */
 
 #import "SDL.h"
@@ -97,14 +97,14 @@ fontMapping map[TABLE_SIZE] = {
 };
 
 /*
-	This function maps an SDL_KeySym to an index in the bitmap font.
-	It does so by scanning through the font mapping table one entry
-	at a time.
- 
-	If a match is found (scancode and allowed modifiers), the proper
-	index is returned.
- 
-	If there is no entry for the key, -1 is returned
+    This function maps an SDL_KeySym to an index in the bitmap font.
+    It does so by scanning through the font mapping table one entry
+    at a time.
+
+    If a match is found (scancode and allowed modifiers), the proper
+    index is returned.
+
+    If there is no entry for the key, -1 is returned
 */
 int
 keyToIndex(SDL_Keysym key)
@@ -125,8 +125,8 @@ keyToIndex(SDL_Keysym key)
     return index;
 }
 
-/* 
-	This function returns and x,y position for a given character number.
+/*
+    This function returns and x,y position for a given character number.
     It is used for positioning each character of text
 */
 void
@@ -168,8 +168,7 @@ void
 drawBlank(int x, int y)
 {
     SDL_Rect rect = { x, y, GLYPH_SIZE_SCREEN, GLYPH_SIZE_SCREEN };
-    SDL_SetRenderDrawColor(renderer, bg_color.r, bg_color.g, bg_color.b,
-                           bg_color.unused);
+    SDL_SetRenderDrawColor(renderer, bg_color.r, bg_color.g, bg_color.b, bg_color.a);
     SDL_RenderFillRect(renderer, &rect);
 }
 
@@ -248,8 +247,7 @@ main(int argc, char *argv[])
     loadFont();
 
     /* draw the background, we'll just paint over it */
-    SDL_SetRenderDrawColor(renderer, bg_color.r, bg_color.g, bg_color.b,
-                           bg_color.unused);
+    SDL_SetRenderDrawColor(renderer, bg_color.r, bg_color.g, bg_color.b, bg_color.a);
     SDL_RenderFillRect(renderer, NULL);
     SDL_RenderPresent(renderer);
 

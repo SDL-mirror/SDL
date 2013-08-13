@@ -30,7 +30,7 @@
 #include "../SDL_shape_internals.h"
 
 typedef struct {
-	SDL_ShapeTree *mask_tree;
+    SDL_ShapeTree *mask_tree;
 } SDL_ShapeData;
 
 extern SDL_WindowShaper* Win32_CreateShaper(SDL_Window * window);

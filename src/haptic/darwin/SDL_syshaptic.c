@@ -35,7 +35,7 @@
 #include <ForceFeedback/ForceFeedbackConstants.h>
 
 #ifndef IO_OBJECT_NULL
-#define IO_OBJECT_NULL	((io_service_t)0)
+#define IO_OBJECT_NULL  ((io_service_t)0)
 #endif
 
 #define MAX_HAPTICS  32
@@ -49,7 +49,7 @@ static struct
     char name[256];             /* Name of the device. */
 
     io_service_t dev;           /* Node we use to create the device. */
-    SDL_Haptic *haptic;         /* Haptic currently assosciated with it. */
+    SDL_Haptic *haptic;         /* Haptic currently associated with it. */
 
     /* Usage pages for determining if it's a mouse or not. */
     long usage;
@@ -83,7 +83,7 @@ static void SDL_SYS_HapticFreeFFEFFECT(FFEFFECT * effect, int type);
 static int HIDGetDeviceProduct(io_service_t dev, char *name);
 
 
-/* 
+/*
  * Like strerror but for force feedback errors.
  */
 static const char *
@@ -259,7 +259,7 @@ HIDGetDeviceProduct(io_service_t dev, char *name)
     }
 
     /* Mac OS X currently is not mirroring all USB properties to HID page so need to look at USB device page also
-     * get dictionary for usb properties: step up two levels and get CF dictionary for USB properties
+     * get dictionary for USB properties: step up two levels and get CF dictionary for USB properties
      */
     if ((KERN_SUCCESS ==
          IORegistryEntryGetParentEntry(dev, kIOServicePlane, &parent1))
@@ -272,7 +272,7 @@ HIDGetDeviceProduct(io_service_t dev, char *name)
         if (usbProperties) {
             CFTypeRef refCF = 0;
             /* get device info
-             * try hid dictionary first, if fail then go to usb dictionary
+             * try hid dictionary first, if fail then go to USB dictionary
              */
 
 
@@ -342,7 +342,8 @@ GetSupportedFeatures(SDL_Haptic * haptic)
     /* Test for effects. */
     FF_TEST(FFCAP_ET_CONSTANTFORCE, SDL_HAPTIC_CONSTANT);
     FF_TEST(FFCAP_ET_RAMPFORCE, SDL_HAPTIC_RAMP);
-    FF_TEST(FFCAP_ET_SQUARE, SDL_HAPTIC_SQUARE);
+    /* !!! FIXME: put this back when we have more bits in 2.1 */
+    /*FF_TEST(FFCAP_ET_SQUARE, SDL_HAPTIC_SQUARE);*/
     FF_TEST(FFCAP_ET_SINE, SDL_HAPTIC_SINE);
     FF_TEST(FFCAP_ET_TRIANGLE, SDL_HAPTIC_TRIANGLE);
     FF_TEST(FFCAP_ET_SAWTOOTHUP, SDL_HAPTIC_SAWTOOTHUP);
@@ -562,7 +563,7 @@ SDL_SYS_HapticClose(SDL_Haptic * haptic)
 }
 
 
-/* 
+/*
  * Clean up after system specific haptic stuff
  */
 void
@@ -708,7 +709,7 @@ SDL_SYS_ToFFEFFECT(SDL_Haptic * haptic, FFEFFECT * dest,
     }
 
 
-    /* The big type handling switch, even bigger then linux's version. */
+    /* The big type handling switch, even bigger then Linux's version. */
     switch (src->type) {
     case SDL_HAPTIC_CONSTANT:
         hap_constant = &src->constant;
@@ -750,7 +751,8 @@ SDL_SYS_ToFFEFFECT(SDL_Haptic * haptic, FFEFFECT * dest,
         break;
 
     case SDL_HAPTIC_SINE:
-    case SDL_HAPTIC_SQUARE:
+    /* !!! FIXME: put this back when we have more bits in 2.1 */
+    /*case SDL_HAPTIC_SQUARE:*/
     case SDL_HAPTIC_TRIANGLE:
     case SDL_HAPTIC_SAWTOOTHUP:
     case SDL_HAPTIC_SAWTOOTHDOWN:
@@ -978,8 +980,9 @@ SDL_SYS_HapticEffectType(Uint16 type)
     case SDL_HAPTIC_RAMP:
         return kFFEffectType_RampForce_ID;
 
-    case SDL_HAPTIC_SQUARE:
-        return kFFEffectType_Square_ID;
+    /* !!! FIXME: put this back when we have more bits in 2.1 */
+    /*case SDL_HAPTIC_SQUARE:
+        return kFFEffectType_Square_ID;*/
 
     case SDL_HAPTIC_SINE:
         return kFFEffectType_Sine_ID;

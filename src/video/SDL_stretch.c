@@ -54,12 +54,12 @@
 #endif
 
 #if defined(_M_IX86) || defined(i386)
-#define PREFIX16	0x66
-#define STORE_BYTE	0xAA
-#define STORE_WORD	0xAB
-#define LOAD_BYTE	0xAC
-#define LOAD_WORD	0xAD
-#define RETURN		0xC3
+#define PREFIX16    0x66
+#define STORE_BYTE  0xAA
+#define STORE_WORD  0xAB
+#define LOAD_BYTE   0xAC
+#define LOAD_WORD   0xAD
+#define RETURN      0xC3
 #else
 #error Need assembly opcodes for this architecture
 #endif
@@ -148,23 +148,23 @@ generate_rowbytes(int src_w, int dst_w, int bpp)
 
 #endif /* USE_ASM_STRETCH */
 
-#define DEFINE_COPY_ROW(name, type)			\
-static void name(type *src, int src_w, type *dst, int dst_w)	\
-{							\
-	int i;						\
-	int pos, inc;					\
-	type pixel = 0;					\
-							\
-	pos = 0x10000;					\
-	inc = (src_w << 16) / dst_w;			\
-	for ( i=dst_w; i>0; --i ) {			\
-		while ( pos >= 0x10000L ) {		\
-			pixel = *src++;			\
-			pos -= 0x10000L;		\
-		}					\
-		*dst++ = pixel;				\
-		pos += inc;				\
-	}						\
+#define DEFINE_COPY_ROW(name, type)         \
+static void name(type *src, int src_w, type *dst, int dst_w)    \
+{                                           \
+    int i;                                  \
+    int pos, inc;                           \
+    type pixel = 0;                         \
+                                            \
+    pos = 0x10000;                          \
+    inc = (src_w << 16) / dst_w;            \
+    for ( i=dst_w; i>0; --i ) {             \
+        while ( pos >= 0x10000L ) {         \
+            pixel = *src++;                 \
+            pos -= 0x10000L;                \
+        }                                   \
+        *dst++ = pixel;                     \
+        pos += inc;                         \
+    }                                       \
 }
 /* *INDENT-OFF* */
 DEFINE_COPY_ROW(copy_row1, Uint8)
@@ -220,7 +220,7 @@ SDL_SoftStretch(SDL_Surface * src, const SDL_Rect * srcrect,
 #endif /* USE_ASM_STRETCH */
     const int bpp = dst->format->BytesPerPixel;
 
-    if (src->format->BitsPerPixel != dst->format->BitsPerPixel) {
+    if (src->format->format != dst->format->format) {
         return SDL_SetError("Only works with same format surfaces");
     }
 

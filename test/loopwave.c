@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 1997-2011 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -12,8 +12,8 @@
 
 /* Program to load a wave file and loop playing it using SDL sound */
 
-/* loopwaves.c is much more robust in handling WAVE files -- 
-	This is only for simple WAVEs
+/* loopwaves.c is much more robust in handling WAVE files --
+    This is only for simple WAVEs
 */
 #include "SDL_config.h"
 

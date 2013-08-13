@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 1997-2011 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -145,7 +145,7 @@ main(int argc, char **argv)
     /* Now we'll try a SAWTOOTHUP */
     if (supported & SDL_HAPTIC_SAWTOOTHUP) {
         printf("   effect %d: Sawtooth Up\n", nefx);
-        efx[nefx].type = SDL_HAPTIC_SQUARE;
+        efx[nefx].type = SDL_HAPTIC_SAWTOOTHUP;
         efx[nefx].periodic.period = 500;
         efx[nefx].periodic.magnitude = 0x5000;
         efx[nefx].periodic.length = 5000;
@@ -213,6 +213,22 @@ main(int argc, char **argv)
         nefx++;
     }
 
+    /* Finally we'll try a left/right effect. */
+    if (supported & SDL_HAPTIC_LEFTRIGHT) {
+        printf("   effect %d: Left/Right\n", nefx);
+        efx[nefx].type = SDL_HAPTIC_LEFTRIGHT;
+        efx[nefx].leftright.length = 5000;
+        efx[nefx].leftright.large_magnitude = 0x3000;
+        efx[nefx].leftright.small_magnitude = 0xFFFF;
+        id[nefx] = SDL_HapticNewEffect(haptic, &efx[nefx]);
+        if (id[nefx] < 0) {
+            printf("UPLOADING EFFECT ERROR: %s\n", SDL_GetError());
+            abort_execution();
+        }
+        nefx++;
+    }
+
+
     printf
         ("\nNow playing effects for 5 seconds each with 1 second delay between\n");
     for (i = 0; i < nefx; i++) {
@@ -260,8 +276,9 @@ HapticPrintSupported(SDL_Haptic * haptic)
         printf("      constant\n");
     if (supported & SDL_HAPTIC_SINE)
         printf("      sine\n");
-    if (supported & SDL_HAPTIC_SQUARE)
-        printf("      square\n");
+    /* !!! FIXME: put this back when we have more bits in 2.1 */
+    /*if (supported & SDL_HAPTIC_SQUARE)
+        printf("      square\n");*/
     if (supported & SDL_HAPTIC_TRIANGLE)
         printf("      triangle\n");
     if (supported & SDL_HAPTIC_SAWTOOTHUP)
@@ -280,6 +297,8 @@ HapticPrintSupported(SDL_Haptic * haptic)
         printf("      intertia\n");
     if (supported & SDL_HAPTIC_CUSTOM)
         printf("      custom\n");
+    if (supported & SDL_HAPTIC_LEFTRIGHT)
+        printf("      left/right\n");
     printf("   Supported capabilities:\n");
     if (supported & SDL_HAPTIC_GAIN)
         printf("      gain\n");

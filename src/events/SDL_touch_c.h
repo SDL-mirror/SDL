@@ -38,17 +38,17 @@ extern int SDL_TouchInit(void);
 
 /* Add a touch, returning the index of the touch, or -1 if there was an error. */
 extern int SDL_AddTouch(SDL_TouchID id, const char *name);
-                     
+
 /* Get the touch with a given id */
 extern SDL_Touch *SDL_GetTouch(SDL_TouchID id);
 
 /* Send a touch down/up event for a touch */
-extern int SDL_SendTouch(SDL_TouchID id, SDL_FingerID fingerid, 
-			             SDL_bool down, float x, float y, float pressure);
+extern int SDL_SendTouch(SDL_TouchID id, SDL_FingerID fingerid,
+                         SDL_bool down, float x, float y, float pressure);
 
 /* Send a touch motion event for a touch */
 extern int SDL_SendTouchMotion(SDL_TouchID id, SDL_FingerID fingerid,
-			                   float x, float y, float pressure);
+                               float x, float y, float pressure);
 
 /* Remove a touch */
 extern void SDL_DelTouch(SDL_TouchID id);

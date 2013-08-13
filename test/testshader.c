@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 1997-2011 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -11,15 +11,7 @@
 */
 /* This is a simple example of using GLSL shaders with SDL */
 
-#if 1 /* FIXME: Rework this using the 2.0 API */
-#include <stdio.h>
-
-int main(int argc, char *argv[])
-{
-    printf("FIXME\n");
-    return 0;
-}
-#else
+#include <stdio.h> /* for printf() */
 #include "SDL.h"
 
 #ifdef HAVE_OPENGL
@@ -119,7 +111,7 @@ static ShaderData shaders[NUM_SHADERS] = {
 "}"
     },
 };
-    
+
 static PFNGLATTACHOBJECTARBPROC glAttachObjectARB;
 static PFNGLCOMPILESHADERARBPROC glCompileShaderARB;
 static PFNGLCREATEPROGRAMOBJECTARBPROC glCreateProgramObjectARB;
@@ -195,7 +187,7 @@ static SDL_bool CompileShaderProgram(ShaderData *data)
         }
     }
     glUseProgramObjectARB(0);
- 
+
     return (glGetError() == GL_NO_ERROR);
 }
 
@@ -290,8 +282,7 @@ SDL_GL_LoadTexture(SDL_Surface * surface, GLfloat * texcoord)
     int w, h;
     SDL_Surface *image;
     SDL_Rect area;
-    Uint32 saved_flags;
-    Uint8 saved_alpha;
+    SDL_BlendMode saved_mode;
 
     /* Use the surface width and height expanded to powers of 2 */
     w = power_of_two(surface->w);
@@ -315,11 +306,8 @@ SDL_GL_LoadTexture(SDL_Surface * surface, GLfloat * texcoord)
     }
 
     /* Save the alpha blending attributes */
-    saved_flags = surface->flags & (SDL_SRCALPHA | SDL_RLEACCELOK);
-    SDL_GetSurfaceAlphaMod(surface, &saved_alpha);
-    if ((saved_flags & SDL_SRCALPHA) == SDL_SRCALPHA) {
-        SDL_SetAlpha(surface, 0, 0);
-    }
+    SDL_GetSurfaceBlendMode(surface, &saved_mode);
+    SDL_SetSurfaceBlendMode(surface, SDL_BLENDMODE_NONE);
 
     /* Copy the surface into the GL texture image */
     area.x = 0;
@@ -329,9 +317,7 @@ SDL_GL_LoadTexture(SDL_Surface * surface, GLfloat * texcoord)
     SDL_BlitSurface(surface, &area, image, &area);
 
     /* Restore the alpha blending attributes */
-    if ((saved_flags & SDL_SRCALPHA) == SDL_SRCALPHA) {
-        SDL_SetAlpha(surface, saved_flags, saved_alpha);
-    }
+    SDL_SetSurfaceBlendMode(surface, saved_mode);
 
     /* Create an OpenGL texture for the image */
     glGenTextures(1, &texture);
@@ -368,7 +354,7 @@ void InitGL(int Width, int Height)                    // We call this right afte
 }
 
 /* The main drawing function. */
-void DrawGLScene(GLuint texture, GLfloat * texcoord)
+void DrawGLScene(SDL_Window *window, GLuint texture, GLfloat * texcoord)
 {
     /* Texture coordinate lookup, to make it simple */
     enum {
@@ -382,7 +368,7 @@ void DrawGLScene(GLuint texture, GLfloat * texcoord)
     glLoadIdentity();                // Reset The View
 
     glTranslatef(-1.5f,0.0f,0.0f);        // Move Left 1.5 Units
-    
+
     // draw a triangle (in smooth coloring mode)
     glBegin(GL_POLYGON);                // start drawing a polygon
     glColor3f(1.0f,0.0f,0.0f);            // Set The Color To Red
@@ -390,8 +376,8 @@ void DrawGLScene(GLuint texture, GLfloat * texcoord)
     glColor3f(0.0f,1.0f,0.0f);            // Set The Color To Green
     glVertex3f( 1.0f,-1.0f, 0.0f);        // Bottom Right
     glColor3f(0.0f,0.0f,1.0f);            // Set The Color To Blue
-    glVertex3f(-1.0f,-1.0f, 0.0f);        // Bottom Left    
-    glEnd();                    // we're done with the polygon (smooth color interpolation)    
+    glVertex3f(-1.0f,-1.0f, 0.0f);        // Bottom Left
+    glEnd();                    // we're done with the polygon (smooth color interpolation)
 
     glTranslatef(3.0f,0.0f,0.0f);         // Move Right 3 Units
 
@@ -416,7 +402,7 @@ void DrawGLScene(GLuint texture, GLfloat * texcoord)
     glTexCoord2f(texcoord[MAXX], texcoord[MAXY]);
     glVertex3f( 1.0f,-1.0f, 0.0f);        // Bottom Right
     glTexCoord2f(texcoord[MINX], texcoord[MAXY]);
-    glVertex3f(-1.0f,-1.0f, 0.0f);        // Bottom Left    
+    glVertex3f(-1.0f,-1.0f, 0.0f);        // Bottom Left
     glEnd();                    // done with the polygon
 
     if (shaders_supported) {
@@ -425,12 +411,13 @@ void DrawGLScene(GLuint texture, GLfloat * texcoord)
     glDisable(GL_TEXTURE_2D);
 
     // swap buffers to display, since we're double buffered.
-    SDL_GL_SwapBuffers();
+    SDL_GL_SwapWindow(window);
 }
 
-int main(int argc, char **argv) 
-{    
+int main(int argc, char **argv)
+{
     int done;
+    SDL_Window *window;
     SDL_Surface *surface;
     GLuint texture;
     GLfloat texcoords[4];
@@ -442,14 +429,18 @@ int main(int argc, char **argv)
     }
 
     /* Create a 640x480 OpenGL screen */
-    if ( SDL_SetVideoMode(640, 480, 0, SDL_OPENGL) == NULL ) {
-        fprintf(stderr, "Unable to create OpenGL screen: %s\n", SDL_GetError());
+    window = SDL_CreateWindow( "Shader Demo", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 640, 480, SDL_WINDOW_OPENGL );
+    if ( !window ) {
+        fprintf(stderr, "Unable to create OpenGL window: %s\n", SDL_GetError());
         SDL_Quit();
         exit(2);
     }
 
-    /* Set the title bar in environments that support it */
-    SDL_WM_SetCaption("Shader Demo", NULL);
+    if ( !SDL_GL_CreateContext(window)) {
+        fprintf(stderr, "Unable to create OpenGL context: %s\n", SDL_GetError());
+        SDL_Quit();
+        exit(2);
+    }
 
     surface = SDL_LoadBMP("icon.bmp");
     if ( ! surface ) {
@@ -469,7 +460,7 @@ int main(int argc, char **argv)
     }
     done = 0;
     while ( ! done ) {
-        DrawGLScene(texture, texcoords);
+        DrawGLScene(window, texture, texcoords);
 
         /* This could go in a separate function */
         { SDL_Event event;
@@ -503,6 +494,5 @@ main(int argc, char *argv[])
 }
 
 #endif /* HAVE_OPENGL */
-#endif
 
 /* vi: set ts=4 sw=4 expandtab: */

@@ -21,7 +21,6 @@
 #include "SDL_config.h"
 
 #if SDL_VIDEO_DRIVER_DIRECTFB
-//#include "SDL_DirectFB_video.h"
 #include "SDL_DirectFB_window.h"
 #include "SDL_DirectFB_modes.h"
 
@@ -30,8 +29,6 @@
 
 #include "../SDL_sysvideo.h"
 #include "../../render/SDL_sysrender.h"
-//#include "../SDL_rect_c.h"
-//#include "../SDL_yuv_sw_c.h"
 
 #ifndef DFB_VERSION_ATLEAST
 
@@ -116,6 +113,7 @@ static int DirectFB_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * r
 static int DirectFB_RenderWritePixels(SDL_Renderer * renderer, const SDL_Rect * rect,
                       Uint32 format, const void * pixels, int pitch);
 static int DirectFB_UpdateViewport(SDL_Renderer * renderer);
+static int DirectFB_UpdateClipRect(SDL_Renderer * renderer);
 static int DirectFB_SetRenderTarget(SDL_Renderer * renderer, SDL_Texture * texture);
 
 static int PrepareDraw(SDL_Renderer * renderer);
@@ -241,7 +239,7 @@ SetBlendMode(DirectFB_RenderData * data, int blendMode,
 {
     IDirectFBSurface *destsurf = data->target;
 
-    //FIXME: check for format change
+    /* FIXME: check for format change */
     if (1 || data->lastBlendMode != blendMode) {
         switch (blendMode) {
         case SDL_BLENDMODE_NONE:
@@ -268,9 +266,9 @@ SetBlendMode(DirectFB_RenderData * data, int blendMode,
         case SDL_BLENDMODE_ADD:
             data->blitFlags = DSBLIT_BLEND_ALPHACHANNEL;
             data->drawFlags = DSDRAW_BLEND;
-            // FIXME: SRCALPHA kills performance on radeon ...
-            // It will be cheaper to copy the surface to
-            // a temporay surface and premultiply
+            /* FIXME: SRCALPHA kills performance on radeon ... */
+             * It will be cheaper to copy the surface to a temporary surface and premultiply
+             */
             if (source && TextureHasAlpha(source))
                 SDL_DFB_CHECK(destsurf->SetSrcBlendFunction(destsurf, DSBF_SRCALPHA));
             else
@@ -280,9 +278,6 @@ SetBlendMode(DirectFB_RenderData * data, int blendMode,
         case SDL_BLENDMODE_MOD:
             data->blitFlags = DSBLIT_BLEND_ALPHACHANNEL;
             data->drawFlags = DSDRAW_BLEND;
-            //SDL_DFB_CHECK(destsurf->SetSrcBlendFunction(destsurf, DSBF_DESTCOLOR));
-            //SDL_DFB_CHECK(destsurf->SetDstBlendFunction(destsurf, DSBF_ZERO));
-            //data->glBlendFunc(GL_ZERO, GL_SRC_COLOR);
             SDL_DFB_CHECK(destsurf->SetSrcBlendFunction(destsurf, DSBF_ZERO));
             SDL_DFB_CHECK(destsurf->SetDstBlendFunction(destsurf, DSBF_SRCCOLOR));
 
@@ -331,8 +326,8 @@ DirectFB_WindowEvent(SDL_Renderer * renderer, const SDL_WindowEvent *event)
 
     if (event->event == SDL_WINDOWEVENT_SIZE_CHANGED) {
         /* Rebind the context to the window area and update matrices */
-        //SDL_CurrentContext = NULL;
-        //data->updateSize = SDL_TRUE;
+        /*SDL_CurrentContext = NULL; */
+        /*data->updateSize = SDL_TRUE; */
         renddata->size_changed = SDL_TRUE;
    }
 }
@@ -361,7 +356,6 @@ DirectFB_CreateRenderer(SDL_Window * window, Uint32 flags)
     SDL_Renderer *renderer = NULL;
     DirectFB_RenderData *data = NULL;
     DFBSurfaceCapabilities scaps;
-    //char *p;
 
     SDL_DFB_ALLOC_CLEAR(renderer, sizeof(*renderer));
     SDL_DFB_ALLOC_CLEAR(data, sizeof(*data));
@@ -380,18 +374,17 @@ DirectFB_CreateRenderer(SDL_Window * window, Uint32 flags)
     /* SetDrawColor - no needed */
     renderer->RenderFillRects = DirectFB_RenderFillRects;
 
-    /* RenderDrawEllipse - no reference implementation yet */
-    /* RenderFillEllipse - no reference implementation yet */
     renderer->RenderCopy = DirectFB_RenderCopy;
     renderer->RenderPresent = DirectFB_RenderPresent;
 
     /* FIXME: Yet to be tested */
     renderer->RenderReadPixels = DirectFB_RenderReadPixels;
-    //renderer->RenderWritePixels = DirectFB_RenderWritePixels;
+    /*renderer->RenderWritePixels = DirectFB_RenderWritePixels; */
 
     renderer->DestroyTexture = DirectFB_DestroyTexture;
     renderer->DestroyRenderer = DirectFB_DestroyRenderer;
     renderer->UpdateViewport = DirectFB_UpdateViewport;
+    renderer->UpdateClipRect = DirectFB_UpdateClipRect;
     renderer->SetRenderTarget = DirectFB_SetRenderTarget;
 
 #if 0
@@ -458,7 +451,6 @@ DirectFB_ActivateRenderer(SDL_Renderer * renderer)
     SDL_DFB_WINDOWDATA(window);
 
     if (renddata->size_changed /*|| windata->wm_needs_redraw*/) {
-        //DirectFB_AdjustWindowSurface(window);
         renddata->size_changed = SDL_FALSE;
     }
 }
@@ -467,7 +459,6 @@ DirectFB_ActivateRenderer(SDL_Renderer * renderer)
 static int
 DirectFB_AcquireVidLayer(SDL_Renderer * renderer, SDL_Texture * texture)
 {
-    //SDL_DFB_RENDERERDATA(renderer);
     SDL_Window *window = renderer->window;
     SDL_VideoDisplay *display = SDL_GetDisplayForWindow(window);
     SDL_DFB_DEVICEDATA(display->device);
@@ -586,7 +577,7 @@ DirectFB_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
              * Creating a new palette does not help.
              */
             DFBPaletteDescription pal_desc;
-            pal_desc.flags = DPDESC_SIZE; // | DPDESC_ENTRIES
+            pal_desc.flags = DPDESC_SIZE; /* | DPDESC_ENTRIES */
             pal_desc.size = 256;
             SDL_DFB_CHECKERR(devdata->dfb->CreatePalette(devdata->dfb, &pal_desc,&data->palette));
             SDL_DFB_CHECKERR(data->surface->SetPalette(data->surface, data->palette));
@@ -710,7 +701,7 @@ DirectFB_SetTextureBlendMode(SDL_Renderer * renderer, SDL_Texture * texture)
 {
     switch (texture->blendMode) {
     case SDL_BLENDMODE_NONE:
-    //case SDL_BLENDMODE_MASK:
+    /*case SDL_BLENDMODE_MASK: */
     case SDL_BLENDMODE_BLEND:
     case SDL_BLENDMODE_ADD:
     case SDL_BLENDMODE_MOD:
@@ -726,7 +717,7 @@ DirectFB_SetDrawBlendMode(SDL_Renderer * renderer)
 {
     switch (renderer->blendMode) {
     case SDL_BLENDMODE_NONE:
-    //case SDL_BLENDMODE_MASK:
+    /*case SDL_BLENDMODE_MASK: */
     case SDL_BLENDMODE_BLEND:
     case SDL_BLENDMODE_ADD:
     case SDL_BLENDMODE_MOD:
@@ -778,7 +769,7 @@ DirectFB_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
     int row;
     size_t length;
     int bpp = DFB_BYTES_PER_PIXEL(DirectFB_SDLToDFBPixelFormat(texture->format));
-    // FIXME: SDL_BYTESPERPIXEL(texture->format) broken for yuv yv12 3 planes
+    /* FIXME: SDL_BYTESPERPIXEL(texture->format) broken for yuv yv12 3 planes */
 
     DirectFB_ActivateRenderer(renderer);
 
@@ -925,7 +916,7 @@ PrepareDraw(SDL_Renderer * renderer)
 
     switch (renderer->blendMode) {
     case SDL_BLENDMODE_NONE:
-    //case SDL_BLENDMODE_MASK:
+    /*case SDL_BLENDMODE_MASK: */
     case SDL_BLENDMODE_BLEND:
         break;
     case SDL_BLENDMODE_ADD:
@@ -1035,7 +1026,7 @@ DirectFB_RenderFillRects(SDL_Renderer * renderer, const SDL_FRect * rects, int c
 
     destsurf->GetClip(destsurf, &clip_region);
     for (i=0; i<count; i++) {
-        SDL_Rect dst = {rects[i].x, rects[i].y, rects[i].w, rects[i].h};        
+        SDL_Rect dst = {rects[i].x, rects[i].y, rects[i].w, rects[i].h};
         dst.x += clip_region.x1;
         dst.y += clip_region.y1;
         SDL_DFB_CHECKERR(destsurf->FillRectangle(destsurf, dst.x, dst.y,
@@ -1137,7 +1128,7 @@ DirectFB_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
         SDL_DFB_CHECKERR(destsurf->
                          SetColor(destsurf, r, g, b, alpha));
 
-        // ???? flags |= DSBLIT_SRC_PREMULTCOLOR;
+        /* ???? flags |= DSBLIT_SRC_PREMULTCOLOR; */
 
         SetBlendMode(data, texture->blendMode, texturedata);
 
@@ -1208,7 +1199,6 @@ DirectFB_DestroyTexture(SDL_Renderer * renderer, SDL_Texture * texture)
     if (!data) {
         return;
     }
-    //SDL_FreeDirtyRects(&data->dirty);
     SDL_DFB_RELEASE(data->palette);
     SDL_DFB_RELEASE(data->surface);
     if (data->display) {
@@ -1256,6 +1246,28 @@ DirectFB_UpdateViewport(SDL_Renderer * renderer)
 
     winsurf->SetClip(winsurf, &dreg);
     return 0;
+}
+
+static int
+DirectFB_UpdateClipRect(SDL_Renderer * renderer)
+{
+    const SDL_Rect *rect = &renderer->clip_rect;
+    DirectFB_RenderData *data = (DirectFB_RenderData *) renderer->driverdata;
+    IDirectFBSurface *destsurf = get_dfb_surface(data->window);
+    DFBRegion region;
+
+    if (!SDL_RectEmpty(rect)) {
+        region.x1 = rect->x;
+        region.x2 = rect->x + rect->w;
+        region.y1 = rect->y;
+        region.y2 = rect->y + rect->h;
+        SDL_DFB_CHECKERR(destsurf->SetClip(destsurf, &region));
+    } else {
+        SDL_DFB_CHECKERR(destsurf->SetClip(destsurf, NULL));
+    }
+    return 0;
+  error:
+    return -1;
 }
 
 static int

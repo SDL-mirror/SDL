@@ -38,6 +38,8 @@ set(SDL_VERSION "${SDL_MAJOR_VERSION}.${SDL_MINOR_VERSION}.${SDL_MICRO_VERSION}"
 math(EXPR LT_CURRENT "${SDL_MICRO_VERSION} - ${SDL_INTERFACE_AGE}")
 math(EXPR LT_AGE "${SDL_BINARY_AGE} - ${SDL_INTERFACE_AGE}")
 set(LT_REVISION "${SDL_INTERFACE_AGE}")
+set(LT_RELEASE "${SDL_MAJOR_VERSION}.${SDL_MINOR_VERSION}")
+set(LT_VERSION "${LT_CURRENT}.${LT_REVISION}.${LT_AGE}")
 
 # General settings & flags
 set(LIBRARY_OUTPUT_DIRECTORY "build")
@@ -103,6 +105,12 @@ if(UNIX AND NOT APPLE)
 else()
   set(UNIX_SYS OFF)
 endif(UNIX AND NOT APPLE)
+
+if(UNIX OR APPLE)
+  set(UNIX_OR_MAC_SYS ON)
+else()
+  set(UNIX_OR_MAC_SYS OFF)
+endif(UNIX OR APPLE)
 
 # Default option knobs
 if(APPLE OR ARCH_64)
@@ -190,7 +198,7 @@ dep_option(FUSIONSOUND_SHARED  "Dynamically load fusionsound audio support" ON "
 set_option(VIDEO_DUMMY         "Use dummy video driver" ON)
 set_option(VIDEO_OPENGL        "Include OpenGL support" ON)
 set_option(VIDEO_OPENGLES      "Include OpenGL ES support" ON)
-set_option(PTHREADS            "Use POSIX threads for multi-threading" ${UNIX_SYS})
+set_option(PTHREADS            "Use POSIX threads for multi-threading" ${UNIX_OR_MAC_SYS})
 dep_option(PTHREADS_SEM        "Use pthread semaphores" ON "PTHREADS" OFF)
 set_option(SDL_DLOPEN          "Use dlopen for shared object loading" ON)
 set_option(OSS                 "Support the OSS audio API" ${UNIX_SYS})
@@ -203,6 +211,7 @@ dep_option(PULSEAUDIO_SHARED   "Dynamically load PulseAudio support" ON "PULSEAU
 set_option(ARTS                "Support the Analog Real Time Synthesizer" ${UNIX_SYS})
 dep_option(ARTS_SHARED         "Dynamically load aRts audio support" ON "ARTS" OFF)
 set_option(NAS                 "Support the NAS audio API" ${UNIX_SYS})
+set_option(SNDIO               "Support the sndio audio API" ${UNIX_SYS})
 set_option(RPATH               "Use an rpath when linking SDL" ${UNIX_SYS})
 set_option(CLOCK_GETTIME       "Use clock_gettime() instead of gettimeofday()" OFF)
 set_option(INPUT_TSLIB         "Use the Touchscreen library for input" ${UNIX_SYS})
@@ -621,6 +630,7 @@ if(UNIX AND NOT APPLE)
     CheckESD()
     CheckARTS()
     CheckNAS()
+    CheckSNDIO()
     CheckFusionSound()
   endif(SDL_AUDIO)
 
@@ -793,6 +803,7 @@ elseif(WINDOWS)
       ${SDL2_SOURCE_DIR}/src/thread/windows/SDL_sysmutex.c
       ${SDL2_SOURCE_DIR}/src/thread/windows/SDL_syssem.c
       ${SDL2_SOURCE_DIR}/src/thread/windows/SDL_systhread.c
+      ${SDL2_SOURCE_DIR}/src/thread/windows/SDL_systls.c
       ${SDL2_SOURCE_DIR}/src/thread/generic/SDL_syscond.c)
     set(HAVE_SDL_THREADS TRUE)
   endif(SDL_THREADS)
@@ -1135,9 +1146,17 @@ set(_INSTALL_LIBS "SDL2main")
 
 if(SDL_SHARED)
   add_library(SDL2 SHARED ${SOURCE_FILES})
-  set_target_properties(SDL2 PROPERTIES
-    VERSION ${SDL_VERSION}
-    SOVERSION ${LT_CURRENT})
+  if(UNIX)
+    set_target_properties(SDL2 PROPERTIES
+      VERSION ${LT_VERSION}
+      SOVERSION ${LT_CURRENT}
+      OUTPUT_NAME "SDL2-${LT_RELEASE}")
+  else(UNIX)
+    set_target_properties(SDL2 PROPERTIES
+      VERSION ${SDL_VERSION}
+      SOVERSION ${LT_CURRENT}
+      OUTPUT_NAME "SDL2")
+  endif(UNIX)
  set(_INSTALL_LIBS "SDL2" ${_INSTALL_LIBS})
  target_link_libraries(SDL2 ${EXTRA_LIBS} ${EXTRA_LDFLAGS})
 endif(SDL_SHARED)
@@ -1165,6 +1184,13 @@ endforeach()
 list(APPEND INCLUDE_FILES ${BIN_INCLUDE_FILES})
 install(FILES ${INCLUDE_FILES} DESTINATION include/SDL2)
 
+if(SDL_SHARED)
+  install(CODE "
+    execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink
+    \"libSDL2-2.0.so\" \"libSDL2.so\")")
+  install(FILES ${SDL2_BINARY_DIR}/libSDL2.so DESTINATION "lib${LIB_SUFFIX}")
+endif(SDL_SHARED)
+
 if(NOT WINDOWS OR CYGWIN)
   if(FREEBSD)
     # FreeBSD uses ${PREFIX}/libdata/pkgconfig
@@ -1175,4 +1201,5 @@ if(NOT WINDOWS OR CYGWIN)
   endif(FREEBSD)
   install(PROGRAMS ${SDL2_BINARY_DIR}/sdl2-config DESTINATION bin)
   # TODO: what about the .spec file? Is it only needed for RPM creation?
+  install(FILES "${SDL2_SOURCE_DIR}/sdl2.m4" DESTINATION "share/aclocal")
 endif(NOT WINDOWS OR CYGWIN)

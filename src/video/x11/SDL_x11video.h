@@ -110,9 +110,9 @@ typedef struct SDL_VideoData
     Atom XdndDrop;
     Atom XdndFinished;
     Atom XdndSelection;
-    
+
     SDL_Scancode key_layout[256];
-    SDL_bool selection_waiting;    
+    SDL_bool selection_waiting;
 
 #if SDL_USE_LIBDBUS
     DBusConnection *dbus;

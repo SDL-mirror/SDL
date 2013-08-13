@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 1997-2011 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2013 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -195,9 +195,9 @@ main(int argc, char *argv[])
 
         consumed = SDLTest_CommonArg(state, i);
         if (consumed == 0) {
-            if (SDL_strcasecmp(argv[i], "--fsaa") == 0) {
-                ++fsaa;
-                consumed = 1;
+            if (SDL_strcasecmp(argv[i], "--fsaa") == 0 && i+1 < argc) {
+                fsaa = atoi(argv[i+1]);
+                consumed = 2;
             } else if (SDL_strcasecmp(argv[i], "--accel") == 0 && i+1 < argc) {
                 accel = atoi(argv[i+1]);
                 consumed = 2;
@@ -206,7 +206,7 @@ main(int argc, char *argv[])
             }
         }
         if (consumed < 0) {
-            fprintf(stderr, "Usage: %s %s [--fsaa] [--accel n]\n", argv[0],
+            fprintf(stderr, "Usage: %s %s [--fsaa n] [--accel n]\n", argv[0],
                     SDLTest_CommonUsage(state));
             quit(1);
         }
@@ -255,6 +255,7 @@ main(int argc, char *argv[])
     printf("Vendor        : %s\n", glGetString(GL_VENDOR));
     printf("Renderer      : %s\n", glGetString(GL_RENDERER));
     printf("Version       : %s\n", glGetString(GL_VERSION));
+    printf("Extensions    : %s\n", glGetString(GL_EXTENSIONS));
     printf("\n");
 
     status = SDL_GL_GetAttribute(SDL_GL_RED_SIZE, &value);
