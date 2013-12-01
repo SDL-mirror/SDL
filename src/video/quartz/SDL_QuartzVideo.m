@@ -1635,6 +1635,10 @@ int QZ_GetGamma (_THIS, float *red, float *green, float *blue)
 
 int QZ_SetGammaRamp (_THIS, Uint16 *ramp)
 {
+    /* These no longer work on Mac OS X, and crash on some drivers (Intel HD
+        4000 on Mac OS X 10.9, for example). */
+    return -1;
+#if 0
     const uint32_t tableSize = 256;
     CGGammaValue redTable[tableSize];
     CGGammaValue greenTable[tableSize];
@@ -1657,10 +1661,15 @@ int QZ_SetGammaRamp (_THIS, Uint16 *ramp)
         return 0;
     else
         return -1;
+#endif
 }
 
 int QZ_GetGammaRamp (_THIS, Uint16 *ramp)
 {
+    /* These no longer work on Mac OS X, and crash on some drivers (Intel HD
+        4000 on Mac OS X 10.9, for example). */
+    return -1;
+#if 0
     const uint32_t tableSize = 256;
     CGGammaValue redTable[tableSize];
     CGGammaValue greenTable[tableSize];
@@ -1685,5 +1694,6 @@ int QZ_GetGammaRamp (_THIS, Uint16 *ramp)
         ramp[i] = blueTable[i % tableSize] * 65535.0;
 
     return 0;
+#endif
 }
 
