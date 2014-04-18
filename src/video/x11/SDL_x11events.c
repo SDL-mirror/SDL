@@ -395,6 +395,8 @@ static int X11_DispatchEvent(_THIS)
 {
 	int posted;
 	XEvent xevent;
+	int orig_event_type;
+	KeyCode orig_keycode;
 
 	SDL_memset(&xevent, '\0', sizeof (XEvent));  /* valgrind fix. --ryan. */
 	XNextEvent(SDL_Display, &xevent);
@@ -410,9 +412,29 @@ static int X11_DispatchEvent(_THIS)
 #ifdef X_HAVE_UTF8_STRING
 	/* If we are translating with IM, we need to pass all events
 	   to XFilterEvent, and discard those filtered events immediately.  */
+	orig_event_type = xevent.type;
+	if (orig_event_type == KeyPress || orig_event_type == KeyRelease) {
+	     orig_keycode = xevent.xkey.keycode;
+	} else {
+	     orig_keycode = 0;
+	}
 	if ( SDL_TranslateUNICODE
 	     && SDL_IM != NULL
 	     && XFilterEvent(&xevent, None) ) {
+	        if (orig_keycode) {
+	            SDL_keysym keysym;
+	            static XComposeStatus state;
+	            char keybuf[32];
+
+	            keysym.scancode = xevent.xkey.keycode;
+	            keysym.sym = X11_TranslateKeycode(SDL_Display, xevent.xkey.keycode);
+	            keysym.mod = KMOD_NONE;
+	            keysym.unicode = 0;
+	            if (orig_event_type == KeyPress && XLookupString(&xevent.xkey, keybuf, sizeof(keybuf), NULL, &state))
+	                keysym.unicode = (Uint8)keybuf[0];
+
+	            SDL_PrivateKeyboard(orig_event_type == KeyPress ? SDL_PRESSED : SDL_RELEASED, &keysym);
+	        }
 		return 0;
 	}
 #endif
