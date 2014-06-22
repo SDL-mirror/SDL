@@ -345,11 +345,12 @@ static void QZ_DoKey (_THIS, int state, NSEvent *event) {
         the scancode/keysym.
     */
     if (SDL_TranslateUNICODE && state == SDL_PRESSED) {
-        [field_edit interpretKeyEvents:[NSArray arrayWithObject:event]];
+/*        [field_edit interpretKeyEvents:[NSArray arrayWithObject:event]]; */
         chars = [ event characters ];
         numChars = [ chars length ];
+/*
         if (numChars > 0)
-            [field_edit setString:@""];
+            [field_edit setString:@""];*/
     } else {
         numChars = 0;
     }
