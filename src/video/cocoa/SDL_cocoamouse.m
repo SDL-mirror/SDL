@@ -307,6 +307,39 @@ Cocoa_SetRelativeMouseMode(SDL_bool enabled)
     return 0;
 }
 
+static int
+Cocoa_CaptureMouse(SDL_Window *window)
+{
+    /* our Cocoa event code already tracks the mouse outside the window,
+        so all we have to do here is say "okay" and do what we always do. */
+    return 0;
+}
+
+static Uint32
+Cocoa_GetGlobalMouseState(int *x, int *y)
+{
+    const NSUInteger cocoaButtons = [NSEvent pressedMouseButtons];
+    const NSPoint cocoaLocation = [NSEvent mouseLocation];
+    Uint32 retval = 0;
+
+    for (NSScreen *screen in [NSScreen screens]) {
+        NSRect frame = [screen frame];
+        if (NSPointInRect(cocoaLocation, frame)) {
+            *x = (int) cocoaLocation.x;
+            *y = (int) ((frame.origin.y + frame.size.height) - cocoaLocation.y);
+            break;
+        }
+    }
+
+    retval |= (cocoaButtons & (1 << 0)) ? SDL_BUTTON_LMASK : 0;
+    retval |= (cocoaButtons & (1 << 1)) ? SDL_BUTTON_RMASK : 0;
+    retval |= (cocoaButtons & (1 << 2)) ? SDL_BUTTON_MMASK : 0;
+    retval |= (cocoaButtons & (1 << 3)) ? SDL_BUTTON_X1MASK : 0;
+    retval |= (cocoaButtons & (1 << 4)) ? SDL_BUTTON_X2MASK : 0;
+
+    return retval;
+}
+
 void
 Cocoa_InitMouse(_THIS)
 {
@@ -321,6 +354,8 @@ Cocoa_InitMouse(_THIS)
     mouse->WarpMouse = Cocoa_WarpMouse;
     mouse->WarpMouseGlobal = Cocoa_WarpMouseGlobal;
     mouse->SetRelativeMouseMode = Cocoa_SetRelativeMouseMode;
+    mouse->CaptureMouse = Cocoa_CaptureMouse;
+    mouse->GetGlobalMouseState = Cocoa_GetGlobalMouseState;
 
     SDL_SetDefaultCursor(Cocoa_CreateDefaultCursor());
 

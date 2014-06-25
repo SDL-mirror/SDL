@@ -84,6 +84,7 @@ test/testgesture
 test/testgl2
 test/testgles
 test/testhaptic
+test/testhittesting
 test/testiconv
 test/testime
 test/testintersections

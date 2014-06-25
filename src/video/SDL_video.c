@@ -1428,6 +1428,11 @@ SDL_RecreateWindow(SDL_Window * window, Uint32 flags)
         SDL_SetWindowIcon(window, icon);
         SDL_FreeSurface(icon);
     }
+
+    if (window->hit_test) {
+        _this->SetWindowHitTest(window, SDL_TRUE);
+    }
+
     SDL_FinishWindowCreation(window, flags);
 
     return 0;
@@ -3292,12 +3297,17 @@ SDL_ShowMessageBox(const SDL_MessageBoxData *messageboxdata, int *buttonid)
     int retval = -1;
     SDL_bool relative_mode;
     int show_cursor_prev;
+    SDL_bool mouse_captured;
+    SDL_Window *current_window;
 
     if (!messageboxdata) {
         return SDL_InvalidParamError("messageboxdata");
     }
 
+    current_window = SDL_GetKeyboardFocus();
+    mouse_captured = current_window && ((SDL_GetWindowFlags(current_window) & SDL_WINDOW_MOUSE_CAPTURE) != 0);
     relative_mode = SDL_GetRelativeMouseMode();
+    SDL_CaptureMouse(SDL_FALSE);
     SDL_SetRelativeMouseMode(SDL_FALSE);
     show_cursor_prev = SDL_ShowCursor(1);
 
@@ -3349,6 +3359,13 @@ SDL_ShowMessageBox(const SDL_MessageBoxData *messageboxdata, int *buttonid)
         SDL_SetError("No message system available");
     }
 
+    if (current_window) {
+        SDL_RaiseWindow(current_window);
+        if (mouse_captured) {
+            SDL_CaptureMouse(SDL_TRUE);
+        }
+    }
+
     SDL_ShowCursor(show_cursor_prev);
     SDL_SetRelativeMouseMode(relative_mode);
 
@@ -3389,6 +3406,23 @@ SDL_ShouldAllowTopmost(void)
         }
     }
     return SDL_TRUE;
+}
+
+int
+SDL_SetWindowHitTest(SDL_Window * window, SDL_HitTest callback, void *userdata)
+{
+    CHECK_WINDOW_MAGIC(window, -1);
+
+    if (!_this->SetWindowHitTest) {
+        return SDL_Unsupported();
+    } else if (_this->SetWindowHitTest(window, callback != NULL) == -1) {
+        return -1;
+    }
+
+    window->hit_test = callback;
+    window->hit_test_data = userdata;
+
+    return 0;
 }
 
 /* vi: set ts=4 sw=4 expandtab: */

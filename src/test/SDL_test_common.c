@@ -1379,6 +1379,14 @@ SDLTest_CommonEvent(SDLTest_CommonState * state, SDL_Event * event, int *done)
                     }
                 }
             }
+            if (withShift) {
+                SDL_Window *current_win = SDL_GetKeyboardFocus();
+                if (current_win) {
+                    const SDL_bool shouldCapture = (SDL_GetWindowFlags(current_win) & SDL_WINDOW_MOUSE_CAPTURE) == 0;
+                    const int rc = SDL_CaptureMouse(shouldCapture);
+                    SDL_Log("%sapturing mouse %s!\n", shouldCapture ? "C" : "Unc", (rc == 0) ? "succeeded" : "failed");
+                }
+            }
             break;
         case SDLK_v:
             if (withControl) {
@@ -1476,6 +1484,19 @@ SDLTest_CommonEvent(SDLTest_CommonState * state, SDL_Event * event, int *done)
                     const SDL_bool b = ((flags & SDL_WINDOW_BORDERLESS) != 0) ? SDL_TRUE : SDL_FALSE;
                     SDL_SetWindowBordered(window, b);
                 }
+            }
+            break;
+        case SDLK_a:
+            if (withControl) {
+                /* Ctrl-A reports absolute mouse position. */
+                int x, y;
+                const Uint32 mask = SDL_GetGlobalMouseState(&x, &y);
+                SDL_Log("ABSOLUTE MOUSE: (%d, %d)%s%s%s%s%s\n", x, y,
+                        (mask & SDL_BUTTON_LMASK) ? " [LBUTTON]" : "",
+                        (mask & SDL_BUTTON_MMASK) ? " [MBUTTON]" : "",
+                        (mask & SDL_BUTTON_RMASK) ? " [RBUTTON]" : "",
+                        (mask & SDL_BUTTON_X1MASK) ? " [X2BUTTON]" : "",
+                        (mask & SDL_BUTTON_X2MASK) ? " [X2BUTTON]" : "");
             }
             break;
         case SDLK_0:

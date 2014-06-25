@@ -339,6 +339,62 @@ X11_SetRelativeMouseMode(SDL_bool enabled)
     return -1;
 }
 
+static int
+X11_CaptureMouse(SDL_Window *window)
+{
+    Display *display = GetDisplay();
+
+    if (window) {
+        SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
+        const unsigned int mask = ButtonPressMask | ButtonReleaseMask | PointerMotionMask | FocusChangeMask;
+        const int rc = X11_XGrabPointer(display, data->xwindow, False,
+                                        mask, GrabModeAsync, GrabModeAsync,
+                                        None, None, CurrentTime);
+        if (rc != GrabSuccess) {
+            return SDL_SetError("X server refused mouse capture");
+        }
+    } else {
+        X11_XUngrabPointer(display, CurrentTime);
+    }
+
+    X11_XSync(display, False);
+
+    return 0;
+}
+
+static Uint32
+X11_GetGlobalMouseState(int *x, int *y)
+{
+    Display *display = GetDisplay();
+    const int num_screens = SDL_GetNumVideoDisplays();
+    int i;
+
+    /* !!! FIXME: should we XSync() here first? */
+
+    for (i = 0; i < num_screens; i++) {
+        SDL_DisplayData *data = (SDL_DisplayData *) SDL_GetDisplayDriverData(i);
+        if (data != NULL) {
+            Window root, child;
+            int rootx, rooty, winx, winy;
+            unsigned int mask;
+            if (X11_XQueryPointer(display, RootWindow(display, data->screen), &root, &child, &rootx, &rooty, &winx, &winy, &mask)) {
+                Uint32 retval = 0;
+                retval |= (mask & Button1Mask) ? SDL_BUTTON_LMASK : 0;
+                retval |= (mask & Button2Mask) ? SDL_BUTTON_MMASK : 0;
+                retval |= (mask & Button3Mask) ? SDL_BUTTON_RMASK : 0;
+                *x = data->x + rootx;
+                *y = data->y + rooty;
+                return retval;
+            }
+        }
+    }
+
+    SDL_assert(0 && "The pointer wasn't on any X11 screen?!");
+
+    return 0;
+}
+
+
 void
 X11_InitMouse(_THIS)
 {
@@ -351,6 +407,8 @@ X11_InitMouse(_THIS)
     mouse->WarpMouse = X11_WarpMouse;
     mouse->WarpMouseGlobal = X11_WarpMouseGlobal;
     mouse->SetRelativeMouseMode = X11_SetRelativeMouseMode;
+    mouse->CaptureMouse = X11_CaptureMouse;
+    mouse->GetGlobalMouseState = X11_GetGlobalMouseState;
 
     SDL_SetDefaultCursor(X11_CreateDefaultCursor());
 }

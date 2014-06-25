@@ -192,6 +192,7 @@ SetWindowStyle(SDL_Window * window, unsigned int style)
     inFullscreenTransition = NO;
     pendingWindowOperation = PENDING_OPERATION_NONE;
     isMoving = NO;
+    isDragAreaRunning = NO;
 
     center = [NSNotificationCenter defaultCenter];
 
@@ -663,9 +664,47 @@ SetWindowStyle(SDL_Window * window, unsigned int style)
     /*Cocoa_HandleKeyEvent(SDL_GetVideoDevice(), theEvent);*/
 }
 
+/* We'll respond to selectors by doing nothing so we don't beep.
+ * The escape key gets converted to a "cancel" selector, etc.
+ */
+- (void)doCommandBySelector:(SEL)aSelector
+{
+    /*NSLog(@"doCommandBySelector: %@\n", NSStringFromSelector(aSelector));*/
+}
+
+- (BOOL)processHitTest:(NSEvent *)theEvent
+{
+    SDL_assert(isDragAreaRunning == [_data->nswindow isMovableByWindowBackground]);
+
+    if (_data->window->hit_test) {  /* if no hit-test, skip this. */
+        const NSPoint location = [theEvent locationInWindow];
+        const SDL_Point point = { (int) location.x, _data->window->h - (((int) location.y)-1) };
+        const SDL_HitTestResult rc = _data->window->hit_test(_data->window, &point, _data->window->hit_test_data);
+        if (rc == SDL_HITTEST_DRAGGABLE) {
+            if (!isDragAreaRunning) {
+                isDragAreaRunning = YES;
+                [_data->nswindow setMovableByWindowBackground:YES];
+            }
+            return YES;  /* dragging! */
+        }
+    }
+
+    if (isDragAreaRunning) {
+        isDragAreaRunning = NO;
+        [_data->nswindow setMovableByWindowBackground:NO];
+        return YES;  /* was dragging, drop event. */
+    }
+
+    return NO;  /* not a special area, carry on. */
+}
+
 - (void)mouseDown:(NSEvent *)theEvent
 {
     int button;
+
+    if ([self processHitTest:theEvent]) {
+        return;  /* dragging, drop event. */
+    }
 
     switch ([theEvent buttonNumber]) {
     case 0:
@@ -704,6 +743,10 @@ SetWindowStyle(SDL_Window * window, unsigned int style)
 - (void)mouseUp:(NSEvent *)theEvent
 {
     int button;
+
+    if ([self processHitTest:theEvent]) {
+        return;  /* stopped dragging, drop event. */
+    }
 
     switch ([theEvent buttonNumber]) {
     case 0:
@@ -744,6 +787,10 @@ SetWindowStyle(SDL_Window * window, unsigned int style)
     NSPoint point;
     int x, y;
 
+    if ([self processHitTest:theEvent]) {
+        return;  /* dragging, drop event. */
+    }
+
     if (mouse->relative_mode) {
         return;
     }
@@ -752,8 +799,8 @@ SetWindowStyle(SDL_Window * window, unsigned int style)
     x = (int)point.x;
     y = (int)(window->h - point.y);
 
-    if (x < 0 || x >= window->w || y < 0 || y >= window->h) {
-        if (window->flags & SDL_WINDOW_INPUT_GRABBED) {
+    if (window->flags & SDL_WINDOW_INPUT_GRABBED) {
+        if (x < 0 || x >= window->w || y < 0 || y >= window->h) {
             if (x < 0) {
                 x = 0;
             } else if (x >= window->w) {
@@ -890,12 +937,21 @@ SetWindowStyle(SDL_Window * window, unsigned int style)
 
 /* The default implementation doesn't pass rightMouseDown to responder chain */
 - (void)rightMouseDown:(NSEvent *)theEvent;
+- (BOOL)mouseDownCanMoveWindow;
 @end
 
 @implementation SDLView
 - (void)rightMouseDown:(NSEvent *)theEvent
 {
     [[self nextResponder] rightMouseDown:theEvent];
+}
+
+- (BOOL)mouseDownCanMoveWindow
+{
+    /* Always say YES, but this doesn't do anything until we call
+       -[NSWindow setMovableByWindowBackground:YES], which we ninja-toggle
+       during mouse events when we're using a drag area. */
+    return YES;
 }
 
 - (void)resetCursorRects
@@ -995,6 +1051,7 @@ SetupWindowData(_THIS, SDL_Window * window, NSWindow *nswindow, SDL_bool created
 
     /* All done! */
     [pool release];
+    window->driverdata = data;
     return 0;
 }
 
@@ -1564,6 +1621,12 @@ Cocoa_SetWindowFullscreenSpace(SDL_Window * window, SDL_bool state)
     [pool release];
 
     return succeeded;
+}
+
+int
+Cocoa_SetWindowHitTest(SDL_Window * window, SDL_bool enabled)
+{
+    return 0;  /* just succeed, the real work is done elsewhere. */
 }
 
 #endif /* SDL_VIDEO_DRIVER_COCOA */

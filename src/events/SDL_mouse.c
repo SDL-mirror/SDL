@@ -140,14 +140,14 @@ static SDL_bool
 SDL_UpdateMouseFocus(SDL_Window * window, int x, int y, Uint32 buttonstate)
 {
     SDL_Mouse *mouse = SDL_GetMouse();
-    int w, h;
-    SDL_bool inWindow;
+    SDL_bool inWindow = SDL_TRUE;
 
-    SDL_GetWindowSize(window, &w, &h);
-    if (x < 0 || y < 0 || x >= w || y >= h) {
-        inWindow = SDL_FALSE;
-    } else {
-        inWindow = SDL_TRUE;
+    if ((window->flags & SDL_WINDOW_MOUSE_CAPTURE) == 0) {
+        int w, h;
+        SDL_GetWindowSize(window, &w, &h);
+        if (x < 0 || y < 0 || x >= w || y >= h) {
+            inWindow = SDL_FALSE;
+        }
     }
 
 /* Linux doesn't give you mouse events outside your window unless you grab
@@ -246,24 +246,29 @@ SDL_PrivateSendMouseMotion(SDL_Window * window, SDL_MouseID mouseID, int relativ
         mouse->y += yrel;
     }
 
-    /* !!! FIXME: shouldn't this be (window) instead of (mouse->focus)? */
-    SDL_GetWindowSize(mouse->focus, &x_max, &y_max);
-    --x_max;
-    --y_max;
+    /* make sure that the pointers find themselves inside the windows,
+       unless we have the mouse captured. */
+    if ((window->flags & SDL_WINDOW_MOUSE_CAPTURE) == 0) {
+        int x_max = 0, y_max = 0;
 
-    /* make sure that the pointers find themselves inside the windows */
-    if (mouse->x > x_max) {
-        mouse->x = x_max;
-    }
-    if (mouse->x < 0) {
-        mouse->x = 0;
-    }
+        // !!! FIXME: shouldn't this be (window) instead of (mouse->focus)?
+        SDL_GetWindowSize(mouse->focus, &x_max, &y_max);
+        --x_max;
+        --y_max;
 
-    if (mouse->y > y_max) {
-        mouse->y = y_max;
-    }
-    if (mouse->y < 0) {
-        mouse->y = 0;
+        if (mouse->x > x_max) {
+            mouse->x = x_max;
+        }
+        if (mouse->x < 0) {
+            mouse->x = 0;
+        }
+
+        if (mouse->y > y_max) {
+            mouse->y = y_max;
+        }
+        if (mouse->y < 0) {
+            mouse->y = 0;
+        }
     }
 
     mouse->xdelta += xrel;
@@ -426,6 +431,7 @@ SDL_MouseQuit(void)
     SDL_Cursor *cursor, *next;
     SDL_Mouse *mouse = SDL_GetMouse();
 
+    SDL_CaptureMouse(SDL_FALSE);
     SDL_SetRelativeMouseMode(SDL_FALSE);
     SDL_ShowCursor(1);
 
@@ -477,16 +483,42 @@ SDL_GetRelativeMouseState(int *x, int *y)
     return mouse->buttonstate;
 }
 
+Uint32
+SDL_GetGlobalMouseState(int *x, int *y)
+{
+    SDL_Mouse *mouse = SDL_GetMouse();
+    int tmpx, tmpy;
+
+    /* make sure these are never NULL for the backend implementations... */
+    if (!x) {
+        x = &tmpx;
+    }
+    if (!y) {
+        y = &tmpy;
+    }
+
+    *x = *y = 0;
+
+    if (!mouse->GetGlobalMouseState) {
+        SDL_assert(0 && "This should really be implemented for every target.");
+        return 0;
+    }
+
+    return mouse->GetGlobalMouseState(x, y);
+}
+
 void
 SDL_WarpMouseInWindow(SDL_Window * window, int x, int y)
 {
     SDL_Mouse *mouse = SDL_GetMouse();
 
-    if (window == NULL)
+    if (window == NULL) {
         window = mouse->focus;
+    }
 
-    if (window == NULL)
+    if (window == NULL) {
         return;
+    }
 
     if (mouse->WarpMouse) {
         mouse->WarpMouse(window, x, y);

@@ -97,6 +97,9 @@ struct SDL_Window
 
     SDL_WindowShaper *shaper;
 
+    SDL_HitTest hit_test;
+    void *hit_test_data;
+
     SDL_WindowUserData *data;
 
     void *driverdata;
@@ -260,6 +263,9 @@ struct SDL_VideoDevice
 
     /* MessageBox */
     int (*ShowMessageBox) (_THIS, const SDL_MessageBoxData *messageboxdata, int *buttonid);
+
+    /* Hit-testing */
+    int (*SetWindowHitTest)(SDL_Window * window, SDL_bool enabled);
 
     /* * * */
     /* Data common to all drivers */

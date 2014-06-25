@@ -584,3 +584,6 @@
 #define SDL_sqrtf SDL_sqrtf_REAL
 #define SDL_tan SDL_tan_REAL
 #define SDL_tanf SDL_tanf_REAL
+#define SDL_CaptureMouse SDL_CaptureMouse_REAL
+#define SDL_SetWindowHitTest SDL_SetWindowHitTest_REAL
+#define SDL_GetGlobalMouseState SDL_GetGlobalMouseState_REAL

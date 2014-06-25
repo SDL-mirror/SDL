@@ -66,6 +66,12 @@ typedef struct
     /* Set relative mode */
     int (*SetRelativeMouseMode) (SDL_bool enabled);
 
+    /* Set mouse capture */
+    int (*CaptureMouse) (SDL_Window * window);
+
+    /* Get absolute mouse coordinates. (x) and (y) are never NULL and set to zero before call. */
+    Uint32 (*GetGlobalMouseState) (int *x, int *y);
+
     /* Data common to all mice */
     SDL_MouseID mouseID;
     SDL_Window *focus;
