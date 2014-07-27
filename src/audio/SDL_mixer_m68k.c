@@ -82,6 +82,7 @@ void SDL_MixAudio_m68k_S8(char* dst, char* src, long len, long volume)
 "	moveq	#0,%%d1\n"
 
 "	moveb	%1@+,%%d0\n"	/* d0 = *src++ */
+"	extw	%%d0\n"
 "	muls	%3,%%d0\n"	/* d0 *= volume (0<=volume<=128) */
 "	moveb	%0@,%%d1\n"	/* d1 = *dst */
 "	asr	#7,%%d0\n"	/* d0 /= 128 (SDL_MIX_MAXVOLUME) */
