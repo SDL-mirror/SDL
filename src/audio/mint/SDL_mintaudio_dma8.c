@@ -37,7 +37,7 @@
 #include "../SDL_audio_c.h"
 #include "../SDL_sysaudio.h"
 
-#include "../../video/ataricommon/SDL_atarimxalloc_c.h"
+#include "../../video/ataricommon/SDL_atarisuper.h"
 
 #include "SDL_mintaudio.h"
 #include "SDL_mintaudio_dma8.h"
@@ -70,8 +70,10 @@ static void Mint_UnlockAudio(_THIS);
 
 /* To check/init hardware audio */
 static int Mint_CheckAudio(_THIS, SDL_AudioSpec *spec);
+static void Mint_SwapBuffers(Uint8 *nextbuf, int nextsize);
 
 /* Functions called in supervisor mode */
+static void Mint_SwapBuffersSuper(Uint8 *nextbuf, int nextsize);
 static void Mint_InitDma(void);
 static void Mint_StopReplay(void);
 static void Mint_StartReplay(void);
@@ -180,19 +182,7 @@ static void Mint_CloseAudio(_THIS)
 
 	DEBUG_PRINT((DEBUG_NAME "closeaudio: interrupt disabled\n"));
 
-	/* Wait if currently playing sound */
-	while (SDL_MintAudio_mutex != 0) {
-	}
-
-	DEBUG_PRINT((DEBUG_NAME "closeaudio: no more interrupt running\n"));
-
-	/* Clear buffers */
-	if (SDL_MintAudio_audiobuf[0]) {
-		Mfree(SDL_MintAudio_audiobuf[0]);
-		SDL_MintAudio_audiobuf[0] = SDL_MintAudio_audiobuf[1] = NULL;
-	}
-
-	DEBUG_PRINT((DEBUG_NAME "closeaudio: buffers freed\n"));
+	SDL_MintAudio_FreeBuffers();
 }
 
 static int Mint_CheckAudio(_THIS, SDL_AudioSpec *spec)
@@ -271,26 +261,11 @@ static int Mint_OpenAudio(_THIS, SDL_AudioSpec *spec)
 		return -1;
 	}
 
-	SDL_CalculateAudioSpec(spec);
-
-	/* Allocate memory for audio buffers in DMA-able RAM */
-	DEBUG_PRINT((DEBUG_NAME "buffer size=%d\n", spec->size));
-
-	SDL_MintAudio_audiobuf[0] = Atari_SysMalloc(spec->size *2, MX_STRAM);
-	if (SDL_MintAudio_audiobuf[0]==NULL) {
-		SDL_SetError("MINT_OpenAudio: Not enough memory for audio buffer");
-		return (-1);
+	if (!SDL_MintAudio_InitBuffers(spec)) {
+		return -1;
 	}
-	SDL_MintAudio_audiobuf[1] = SDL_MintAudio_audiobuf[0] + spec->size ;
-	SDL_MintAudio_numbuf=0;
-	SDL_memset(SDL_MintAudio_audiobuf[0], spec->silence, spec->size *2);
-	SDL_MintAudio_audiosize = spec->size;
-	SDL_MintAudio_mutex = 0;
 
-	DEBUG_PRINT((DEBUG_NAME "buffer 0 at 0x%08x\n", SDL_MintAudio_audiobuf[0]));
-	DEBUG_PRINT((DEBUG_NAME "buffer 1 at 0x%08x\n", SDL_MintAudio_audiobuf[1]));
-
-	SDL_MintAudio_CheckFpu();
+	MINTAUDIO_swapbuf = Mint_SwapBuffers;
 
 	/* Set replay tracks */
 	if (cookie_snd & SND_16BIT) {
@@ -316,26 +291,44 @@ static int Mint_OpenAudio(_THIS, SDL_AudioSpec *spec)
     return(1);	/* We don't use threaded audio */
 }
 
+static void Mint_SwapBuffers(Uint8 *nextbuf, int nextsize)
+{
+	void *old_stack;
+
+	/* Set first ticks value */
+	old_stack = (void *)Super(0);
+
+	Mint_SwapBuffersSuper(nextbuf, nextsize);
+
+	SuperToUser(old_stack);
+}
+
 /* Functions called in supervisor mode */
 
-static void Mint_InitDma(void)
+static void Mint_SwapBuffersSuper(Uint8 *nextbuf, int nextsize)
 {
 	unsigned long buffer;
-	unsigned char mode;
-	SDL_AudioDevice *this = SDL_MintAudio_device;
 
-	Mint_StopReplay();
-
-	/* Set buffer */
-	buffer = (unsigned long) SDL_MintAudio_audiobuf[SDL_MintAudio_numbuf];
+	buffer = (unsigned long) nextbuf;
 	DMAAUDIO_IO.start_high = (buffer>>16) & 255;
 	DMAAUDIO_IO.start_mid = (buffer>>8) & 255;
 	DMAAUDIO_IO.start_low = buffer & 255;
 
-	buffer += SDL_MintAudio_audiosize;
+	buffer += nextsize;
 	DMAAUDIO_IO.end_high = (buffer>>16) & 255;
 	DMAAUDIO_IO.end_mid = (buffer>>8) & 255;
 	DMAAUDIO_IO.end_low = buffer & 255;
+}
+
+static void Mint_InitDma(void)
+{
+	SDL_AudioDevice *this = SDL_MintAudio_device;
+	unsigned char mode;
+
+	Mint_StopReplay();
+
+	/* Set buffer */
+	Mint_SwapBuffersSuper(MINTAUDIO_audiobuf[0], MINTAUDIO_audiosize);
 
 	mode = 3-MINTAUDIO_frequencies[MINTAUDIO_numfreq].predivisor;
 	if (this->spec.channels==1) {

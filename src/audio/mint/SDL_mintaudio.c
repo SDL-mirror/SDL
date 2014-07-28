@@ -35,19 +35,24 @@
 #include <mint/cookie.h>
 
 #include "SDL_audio.h"
+#include "../SDL_audio_c.h"
+#include "../SDL_sysaudio.h"
+
+#include "../../video/ataricommon/SDL_atarimxalloc_c.h"
+
 #include "SDL_mintaudio.h"
-#include "SDL_mintaudio_stfa.h"
 
 /* The audio device */
 
+#define MAX_DMA_BUF	8
+
 SDL_AudioDevice *SDL_MintAudio_device;
-Uint8 *SDL_MintAudio_audiobuf[2];	/* Pointers to buffers */
-unsigned long SDL_MintAudio_audiosize;		/* Length of audio buffer=spec->size */
-volatile unsigned short SDL_MintAudio_numbuf;		/* Buffer to play */
-volatile unsigned short SDL_MintAudio_mutex;
-volatile unsigned long SDL_MintAudio_clocktics;
-cookie_stfa_t	*SDL_MintAudio_stfa;
-unsigned short SDL_MintAudio_hasfpu;
+
+static int SDL_MintAudio_num_upd;	/* Number of calls to update function */
+static int SDL_MintAudio_max_buf;	/* Number of buffers to use */
+static int SDL_MintAudio_numbuf;	/* Buffer to play */
+
+static void SDL_MintAudio_Callback(void);
 
 /* MiNT thread variables */
 SDL_bool SDL_MintAudio_mint_present;
@@ -55,34 +60,129 @@ SDL_bool SDL_MintAudio_quit_thread;
 SDL_bool SDL_MintAudio_thread_finished;
 long SDL_MintAudio_thread_pid;
 
+/* Debug print info */
+#define DEBUG_NAME "audio:mint: "
+#if 0
+#define DEBUG_PRINT(what) \
+	{ \
+		printf what; \
+	}
+#else
+#define DEBUG_PRINT(what)
+#endif
+
+/* Initialize DMA buffers */
+
+int SDL_MintAudio_InitBuffers(SDL_AudioSpec *spec)
+{
+	SDL_AudioDevice *this = SDL_MintAudio_device;
+
+	SDL_CalculateAudioSpec(spec);
+	MINTAUDIO_audiosize = spec->size * MAX_DMA_BUF;
+
+	/* Allocate memory for audio buffers in DMA-able RAM */
+	MINTAUDIO_audiobuf[0] = Atari_SysMalloc(2 * MINTAUDIO_audiosize, MX_STRAM);
+	if (MINTAUDIO_audiobuf[0]==NULL) {
+		SDL_SetError("SDL_MintAudio_OpenAudio: Not enough memory for audio buffer");
+		return (0);
+	}
+	MINTAUDIO_audiobuf[1] = MINTAUDIO_audiobuf[0] + MINTAUDIO_audiosize;
+	SDL_memset(MINTAUDIO_audiobuf[0], spec->silence, 2 * MINTAUDIO_audiosize);
+
+	DEBUG_PRINT((DEBUG_NAME "buffer 0 at 0x%p\n", MINTAUDIO_audiobuf[0]));
+	DEBUG_PRINT((DEBUG_NAME "buffer 1 at 0x%p\n", MINTAUDIO_audiobuf[1]));
+
+	SDL_MintAudio_numbuf = SDL_MintAudio_num_its = SDL_MintAudio_num_upd = 0;
+	SDL_MintAudio_max_buf = MAX_DMA_BUF;
+
+	return (1);
+}
+
+/* Destroy DMA buffers */
+
+void SDL_MintAudio_FreeBuffers(void)
+{
+	SDL_AudioDevice *this = SDL_MintAudio_device;
+
+	if (MINTAUDIO_audiobuf[0]) {
+		Mfree(MINTAUDIO_audiobuf[0]);
+		MINTAUDIO_audiobuf[0] = MINTAUDIO_audiobuf[1] = NULL;
+	}
+}
+
+/* Update buffers */
+
+void SDL_AtariMint_UpdateAudio(void)
+{
+	SDL_AudioDevice *this = SDL_MintAudio_device;
+
+	++SDL_MintAudio_num_upd;
+
+	/* No interrupt triggered? still playing current buffer */
+	if (SDL_MintAudio_num_its==0) {
+		return;
+	}
+
+	if (SDL_MintAudio_num_upd < (SDL_MintAudio_num_its<<2)) {
+		/* Too many interrupts per update, increase latency */
+		if (SDL_MintAudio_max_buf < MAX_DMA_BUF) {
+			SDL_MintAudio_max_buf <<= 1;
+		}
+	} else if (SDL_MintAudio_num_its < (SDL_MintAudio_num_upd<<2)) {
+		/* Too many updates per interrupt, decrease latency */
+		if (SDL_MintAudio_max_buf > 1) {
+			SDL_MintAudio_max_buf >>= 1;
+		}
+	}
+	MINTAUDIO_audiosize = this->spec.size * SDL_MintAudio_max_buf;
+
+	SDL_MintAudio_num_its = 0;
+	SDL_MintAudio_num_upd = 0;
+
+	SDL_MintAudio_numbuf ^= 1;
+
+	/* Fill new buffer */
+	SDL_MintAudio_Callback();
+
+	/* And swap to it */
+	(*MINTAUDIO_swapbuf)(MINTAUDIO_audiobuf[SDL_MintAudio_numbuf], MINTAUDIO_audiosize);
+}
+
 /* The callback function, called by each driver whenever needed */
 
-void SDL_MintAudio_Callback(void)
+static void SDL_MintAudio_Callback(void)
 {
+	SDL_AudioDevice *this = SDL_MintAudio_device;
 	Uint8 *buffer;
-	SDL_AudioDevice *audio = SDL_MintAudio_device;
+	int i;
 
- 	buffer = SDL_MintAudio_audiobuf[SDL_MintAudio_numbuf];
-	SDL_memset(buffer, audio->spec.silence, audio->spec.size);
+ 	buffer = MINTAUDIO_audiobuf[SDL_MintAudio_numbuf];
+	SDL_memset(buffer, this->spec.silence, this->spec.size * SDL_MintAudio_max_buf);
 
-	if (audio->paused)
+	if (this->paused)
 		return;
 
-	if (audio->convert.needed) {
-		int silence;
+	for (i=0; i<SDL_MintAudio_max_buf; i++) {
+		if (this->convert.needed) {
+			int silence;
 
-		if ( audio->convert.src_format == AUDIO_U8 ) {
-			silence = 0x80;
+			if ( this->convert.src_format == AUDIO_U8 ) {
+				silence = 0x80;
+			} else {
+				silence = 0;
+			}
+			SDL_memset(this->convert.buf, silence, this->convert.len);
+			this->spec.callback(this->spec.userdata,
+				(Uint8 *)this->convert.buf,this->convert.len);
+			SDL_ConvertAudio(&this->convert);
+			SDL_memcpy(buffer, this->convert.buf, this->convert.len_cvt);
+
+			buffer += this->convert.len_cvt;
 		} else {
-			silence = 0;
+			this->spec.callback(this->spec.userdata, buffer, this->spec.size);
+
+			buffer += this->spec.size;
 		}
-		SDL_memset(audio->convert.buf, silence, audio->convert.len);
-		audio->spec.callback(audio->spec.userdata,
-			(Uint8 *)audio->convert.buf,audio->convert.len);
-		SDL_ConvertAudio(&audio->convert);
-		SDL_memcpy(buffer, audio->convert.buf, audio->convert.len_cvt);
-	} else {
-		audio->spec.callback(audio->spec.userdata, buffer, audio->spec.size);
 	}
 }
 
@@ -141,45 +241,26 @@ int SDL_MintAudio_SearchFrequency(_THIS, int desired_freq)
 	return MINTAUDIO_freqcount-1;
 }
 
-/* Check if FPU is present */
-void SDL_MintAudio_CheckFpu(void)
-{
-	long cookie_fpu;
-
-	SDL_MintAudio_hasfpu = 0;
-	if (Getcookie(C__FPU, &cookie_fpu) != C_FOUND) {
-		return;
-	}
-	switch ((cookie_fpu>>16)&0xfffe) {
-		case 2:
-		case 4:
-		case 6:
-		case 8:
-		case 16:
-			SDL_MintAudio_hasfpu = 1;
-			break;
-	}
-}
-
 /* The thread function, used under MiNT with xbios */
 int SDL_MintAudio_Thread(long param)
 {
 	SndBufPtr	pointers;
 	SDL_bool	buffers_filled[2] = {SDL_FALSE, SDL_FALSE};
+	SDL_AudioDevice *this = SDL_MintAudio_device;
 
 	SDL_MintAudio_thread_finished = SDL_FALSE;
 	while (!SDL_MintAudio_quit_thread) {
 		if (Buffptr(&pointers)!=0)
 			continue;
 
-		if (( (unsigned long)pointers.play>=(unsigned long)SDL_MintAudio_audiobuf[0])
-			&& ( (unsigned long)pointers.play<=(unsigned long)SDL_MintAudio_audiobuf[1])) 
+		if (( (unsigned long)pointers.play>=(unsigned long)MINTAUDIO_audiobuf[0])
+			&& ( (unsigned long)pointers.play<=(unsigned long)MINTAUDIO_audiobuf[1])) 
 		{
 			/* DMA is reading buffer #0, setup buffer #1 if not already done */
 			if (!buffers_filled[1]) {
 				SDL_MintAudio_numbuf = 1;
 				SDL_MintAudio_Callback();
-				Setbuffer(0, SDL_MintAudio_audiobuf[1], SDL_MintAudio_audiobuf[1] + SDL_MintAudio_audiosize);
+				Setbuffer(0, MINTAUDIO_audiobuf[1], MINTAUDIO_audiobuf[1] + MINTAUDIO_audiosize);
 				buffers_filled[1]=SDL_TRUE;
 				buffers_filled[0]=SDL_FALSE;
 			}
@@ -188,7 +269,7 @@ int SDL_MintAudio_Thread(long param)
 			if (!buffers_filled[0]) {
 				SDL_MintAudio_numbuf = 0;
 				SDL_MintAudio_Callback();
-				Setbuffer(0, SDL_MintAudio_audiobuf[0], SDL_MintAudio_audiobuf[0] + SDL_MintAudio_audiosize);
+				Setbuffer(0, MINTAUDIO_audiobuf[0], MINTAUDIO_audiobuf[0] + MINTAUDIO_audiosize);
 				buffers_filled[0]=SDL_TRUE;
 				buffers_filled[1]=SDL_FALSE;
 			}

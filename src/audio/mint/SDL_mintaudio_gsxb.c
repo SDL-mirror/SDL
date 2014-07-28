@@ -37,8 +37,6 @@
 #include "../SDL_audio_c.h"
 #include "../SDL_sysaudio.h"
 
-#include "../../video/ataricommon/SDL_atarimxalloc_c.h"
-
 #include "SDL_mintaudio.h"
 #include "SDL_mintaudio_gsxb.h"
 
@@ -71,6 +69,7 @@ static void Mint_UnlockAudio(_THIS);
 /* To check/init hardware audio */
 static int Mint_CheckAudio(_THIS, SDL_AudioSpec *spec);
 static void Mint_InitAudio(_THIS, SDL_AudioSpec *spec);
+static void Mint_SwapBuffers(Uint8 *nextbuf, int nextsize);
 
 /* GSXB callbacks */
 static void Mint_GsxbInterrupt(void);
@@ -183,15 +182,7 @@ static void Mint_CloseAudio(_THIS)
 		DEBUG_PRINT((DEBUG_NAME "NSetinterrupt() failed in close\n"));
 	}
 
-	/* Wait if currently playing sound */
-	while (SDL_MintAudio_mutex != 0) {
-	}
-
-	/* Clear buffers */
-	if (SDL_MintAudio_audiobuf[0]) {
-		Mfree(SDL_MintAudio_audiobuf[0]);
-		SDL_MintAudio_audiobuf[0] = SDL_MintAudio_audiobuf[1] = NULL;
-	}
+	SDL_MintAudio_FreeBuffers();
 
 	/* Unlock sound system */
 	Unlocksnd();
@@ -200,11 +191,11 @@ static void Mint_CloseAudio(_THIS)
 static int Mint_CheckAudio(_THIS, SDL_AudioSpec *spec)
 {
 	long snd_format = 0;
-	int i, resolution, format_signed, format_bigendian;
+	int i, /*resolution,*/ format_signed, format_bigendian;
     Uint16 test_format = SDL_FirstAudioFormat(spec->format);
     int valid_datatype = 0;
 
-	resolution = spec->format & 0x00ff;
+	/*resolution = spec->format & 0x00ff;*/
 	format_signed = ((spec->format & 0x8000)!=0);
 	format_bigendian = ((spec->format & 0x1000)!=0);
 
@@ -222,7 +213,7 @@ static int Mint_CheckAudio(_THIS, SDL_AudioSpec *spec)
         /* Check formats available */
         snd_format = Sndstatus(SND_QUERYFORMATS);
         spec->format = test_format;
-        resolution = spec->format & 0xff;
+        /*resolution = spec->format & 0xff;*/
         format_signed = (spec->format & (1<<15));
         format_bigendian = (spec->format & (1<<12));
         switch (test_format) {
@@ -320,7 +311,6 @@ static int Mint_CheckAudio(_THIS, SDL_AudioSpec *spec)
 static void Mint_InitAudio(_THIS, SDL_AudioSpec *spec)
 {
 	int channels_mode, prediv;
-	void *buffer;
 
 	/* Stop currently playing sound */
 	Buffoper(0);
@@ -357,10 +347,7 @@ static void Mint_InitAudio(_THIS, SDL_AudioSpec *spec)
 	Devconnect(DMAPLAY, DAC, CLKEXT, prediv, 1);
 
 	/* Set buffer */
-	buffer = SDL_MintAudio_audiobuf[SDL_MintAudio_numbuf];
-	if (Setbuffer(0, buffer, buffer + spec->size)<0) {
-		DEBUG_PRINT((DEBUG_NAME "Setbuffer() failed\n"));
-	}
+	Mint_SwapBuffers(MINTAUDIO_audiobuf[0], MINTAUDIO_audiosize);
 	
 	/* Install interrupt */
 	if (NSetinterrupt(2, SI_PLAY, Mint_GsxbInterrupt)<0) {
@@ -387,48 +374,27 @@ static int Mint_OpenAudio(_THIS, SDL_AudioSpec *spec)
 		return -1;
 	}
 
-	SDL_CalculateAudioSpec(spec);
-
-	/* Allocate memory for audio buffers in DMA-able RAM */
-	DEBUG_PRINT((DEBUG_NAME "buffer size=%d\n", spec->size));
-
-	SDL_MintAudio_audiobuf[0] = Atari_SysMalloc(spec->size *2, MX_STRAM);
-	if (SDL_MintAudio_audiobuf[0]==NULL) {
-		SDL_SetError("MINT_OpenAudio: Not enough memory for audio buffer");
-		return (-1);
+	if (!SDL_MintAudio_InitBuffers(spec)) {
+		return -1;
 	}
-	SDL_MintAudio_audiobuf[1] = SDL_MintAudio_audiobuf[0] + spec->size ;
-	SDL_MintAudio_numbuf=0;
-	SDL_memset(SDL_MintAudio_audiobuf[0], spec->silence, spec->size *2);
-	SDL_MintAudio_audiosize = spec->size;
-	SDL_MintAudio_mutex = 0;
-
-	DEBUG_PRINT((DEBUG_NAME "buffer 0 at 0x%08x\n", SDL_MintAudio_audiobuf[0]));
-	DEBUG_PRINT((DEBUG_NAME "buffer 1 at 0x%08x\n", SDL_MintAudio_audiobuf[1]));
-
-	SDL_MintAudio_CheckFpu();
 
 	/* Setup audio hardware */
+	MINTAUDIO_swapbuf = Mint_SwapBuffers;
 	Mint_InitAudio(this, spec);
 
     return(1);	/* We don't use threaded audio */
 }
 
+static void Mint_SwapBuffers(Uint8 *nextbuf, int nextsize)
+{
+	unsigned long buffer = (unsigned long) nextbuf;
+
+	Setbuffer(0, buffer, buffer + nextsize);
+}
+
 static void Mint_GsxbInterrupt(void)
 {
-	Uint8 *newbuf;
-
-	if (SDL_MintAudio_mutex)
-		return;
-
-	SDL_MintAudio_mutex=1;
-
-	SDL_MintAudio_numbuf ^= 1;
-	SDL_MintAudio_Callback();
-	newbuf = SDL_MintAudio_audiobuf[SDL_MintAudio_numbuf];
-	Setbuffer(0, newbuf, newbuf + SDL_MintAudio_audiosize);
-
-	SDL_MintAudio_mutex=0;
+	++SDL_MintAudio_num_its;
 }
 
 static void Mint_GsxbNullInterrupt(void)

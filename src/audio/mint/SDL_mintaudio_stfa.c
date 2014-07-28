@@ -37,8 +37,6 @@
 #include "../SDL_audio_c.h"
 #include "../SDL_sysaudio.h"
 
-#include "../../video/ataricommon/SDL_atarimxalloc_c.h"
-
 #include "SDL_mintaudio.h"
 #include "SDL_mintaudio_stfa.h"
 
@@ -79,6 +77,7 @@ static void Mint_UnlockAudio(_THIS);
 /* To check/init hardware audio */
 static int Mint_CheckAudio(_THIS, SDL_AudioSpec *spec);
 static void Mint_InitAudio(_THIS, SDL_AudioSpec *spec);
+static void Mint_SwapBuffers(Uint8 *nextbuf, int nextsize);
 
 /*--- Audio driver bootstrap functions ---*/
 
@@ -109,8 +108,6 @@ static int Audio_Available(void)
 		return(0);
 	}
 	cookie_stfa = (cookie_stfa_t *) dummy;
-
-	SDL_MintAudio_stfa = cookie_stfa;
 
 	DEBUG_PRINT((DEBUG_NAME "STFA audio available!\n"));
 	return(1);
@@ -171,15 +168,7 @@ static void Mint_CloseAudio(_THIS)
 {
 	cookie_stfa->sound_enable=STFA_PLAY_DISABLE;
 
-	/* Wait if currently playing sound */
-	while (SDL_MintAudio_mutex != 0) {
-	}
-
-	/* Clear buffers */
-	if (SDL_MintAudio_audiobuf[0]) {
-		Mfree(SDL_MintAudio_audiobuf[0]);
-		SDL_MintAudio_audiobuf[0] = SDL_MintAudio_audiobuf[1] = NULL;
-	}
+	SDL_MintAudio_FreeBuffers();
 }
 
 static int Mint_CheckAudio(_THIS, SDL_AudioSpec *spec)
@@ -225,10 +214,6 @@ static int Mint_CheckAudio(_THIS, SDL_AudioSpec *spec)
 
 static void Mint_InitAudio(_THIS, SDL_AudioSpec *spec)
 {
-	void *buffer;
-
-	buffer = SDL_MintAudio_audiobuf[SDL_MintAudio_numbuf];
-
 	/* Stop replay */
 	cookie_stfa->sound_enable=STFA_PLAY_DISABLE;
 
@@ -256,8 +241,7 @@ static void Mint_InitAudio(_THIS, SDL_AudioSpec *spec)
 	}
 
 	/* Set buffer */
-	cookie_stfa->sound_start = (unsigned long) buffer;
-	cookie_stfa->sound_end = (unsigned long) (buffer + spec->size);
+	Mint_SwapBuffers(MINTAUDIO_audiobuf[0], MINTAUDIO_audiosize);
 
 	/* Set interrupt */
 	cookie_stfa->stfa_it = SDL_MintAudio_StfaInterrupt;
@@ -277,29 +261,19 @@ static int Mint_OpenAudio(_THIS, SDL_AudioSpec *spec)
 		return -1;
 	}
 
-	SDL_CalculateAudioSpec(spec);
-
-	/* Allocate memory for audio buffers in DMA-able RAM */
-	DEBUG_PRINT((DEBUG_NAME "buffer size=%d\n", spec->size));
-
-	SDL_MintAudio_audiobuf[0] = Atari_SysMalloc(spec->size *2, MX_STRAM);
-	if (SDL_MintAudio_audiobuf[0]==NULL) {
-		SDL_SetError("MINT_OpenAudio: Not enough memory for audio buffer");
-		return (-1);
+	if (!SDL_MintAudio_InitBuffers(spec)) {
+		return -1;
 	}
-	SDL_MintAudio_audiobuf[1] = SDL_MintAudio_audiobuf[0] + spec->size ;
-	SDL_MintAudio_numbuf=0;
-	SDL_memset(SDL_MintAudio_audiobuf[0], spec->silence, spec->size *2);
-	SDL_MintAudio_audiosize = spec->size;
-	SDL_MintAudio_mutex = 0;
-
-	DEBUG_PRINT((DEBUG_NAME "buffer 0 at 0x%08x\n", SDL_MintAudio_audiobuf[0]));
-	DEBUG_PRINT((DEBUG_NAME "buffer 1 at 0x%08x\n", SDL_MintAudio_audiobuf[1]));
-
-	SDL_MintAudio_CheckFpu();
 
 	/* Setup audio hardware */
+	MINTAUDIO_swapbuf = Mint_SwapBuffers;
 	Mint_InitAudio(this, spec);
 
     return(1);	/* We don't use threaded audio */
+}
+
+static void Mint_SwapBuffers(Uint8 *nextbuf, int nextsize)
+{
+	cookie_stfa->sound_start = (unsigned long) nextbuf;
+	cookie_stfa->sound_end = cookie_stfa->sound_start + nextsize;
 }
