@@ -302,7 +302,7 @@ void SDL_XBIOS_AddMode(_THIS, int actually_add, const xbiosmode_t *modeinfo)
 		if ( saved_rect[b].w && saved_rect[b].h ) {
 		    for ( ++j; SDL_modelist[i][j]->w; ++j ) {
 			saved_rect[!b] = *SDL_modelist[i][j];
-			memcpy(&saved_mode[!b], SDL_xbiosmode[i][j], sizeof(xbiosmode_t));
+			SDL_memcpy(&saved_mode[!b], SDL_xbiosmode[i][j], sizeof(xbiosmode_t));
 			*SDL_modelist[i][j] = saved_rect[b];
 			SDL_memcpy(SDL_xbiosmode[i][j], &saved_mode[b], sizeof(xbiosmode_t));
 			b = !b;
