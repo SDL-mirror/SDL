@@ -34,12 +34,16 @@
 
 #include "../../events/SDL_sysevents.h"
 #include "../../events/SDL_events_c.h"
+#include "../../timer/SDL_timer_c.h"
 
 #include "SDL_atarikeys.h"
 #include "SDL_atarievents_c.h"
 #include "SDL_biosevents_c.h"
 #include "SDL_gemdosevents_c.h"
 #include "SDL_ikbdevents_c.h"
+
+/* from src/timer/mint/SDL_systimer.c */
+void SDL_AtariMint_CheckTimer(void);
 
 enum {
 	MCH_ST=0,
@@ -231,4 +235,9 @@ SDL_keysym *SDL_Atari_TranslateKey(int scancode, SDL_keysym *keysym,
 	}
 
 	return(keysym);
+}
+
+void SDL_AtariMint_BackgroundTasks(void)
+{
+	if (SDL_timer_running) SDL_AtariMint_CheckTimer();
 }

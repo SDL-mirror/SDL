@@ -44,6 +44,8 @@ extern void Atari_PumpEvents(_THIS);
 
 extern void SDL_Atari_InitInternalKeymap(_THIS);
 
+extern void SDL_AtariMint_BackgroundTasks(void);
+
 /* Atari to Unicode charset translation table */
 extern Uint16 SDL_AtariToUnicodeTable[256];
 SDL_keysym *SDL_Atari_TranslateKey(int scancode, SDL_keysym *keysym,

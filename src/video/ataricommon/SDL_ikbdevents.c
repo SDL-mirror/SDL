@@ -73,6 +73,8 @@ void AtariIkbd_PumpEvents(_THIS)
 	int i;
 	SDL_keysym keysym;
 
+	SDL_AtariMint_BackgroundTasks();
+
 	/*--- Send keyboard events ---*/
 
 	for (i=0; i<ATARIBIOS_MAXKEYS; i++) {

@@ -72,6 +72,8 @@ void AtariGemdos_PumpEvents(_THIS)
 	int i;
 	SDL_keysym keysym;
 
+	SDL_AtariMint_BackgroundTasks();
+
 	/* Update pressed keys */
 	SDL_memset(gemdos_currentkeyboard, 0, ATARIBIOS_MAXKEYS);
 

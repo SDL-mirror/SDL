@@ -86,6 +86,8 @@ void GEM_PumpEvents(_THIS)
 
 		quit = 0;
 
+		SDL_AtariMint_BackgroundTasks();
+
 		resultat = evnt_multi(
 			MU_MESAG|MU_TIMER|MU_KEYBD,
 			0,0,0,

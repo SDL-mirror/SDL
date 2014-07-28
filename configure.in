@@ -2865,7 +2865,6 @@ case "$host" in
             else
                 AC_DEFINE(SDL_TIMER_MINT)
                 SOURCES="$SOURCES $srcdir/src/timer/mint/*.c"
-                SOURCES="$SOURCES $srcdir/src/timer/mint/*.S"
             fi
             have_timers=yes
         fi
