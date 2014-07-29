@@ -22,9 +22,10 @@
 #include "SDL_config.h"
 
 /*
-	Milan Xbios video functions
+	Milan/CTPCI Xbios video functions
 
 	Patrice Mandin
+	Pawel Goralski
 */
 
 #ifndef _SDL_xbios_milan_h
@@ -35,9 +36,11 @@
 /*--- Defines ---*/
 
 /* Vsetscreen() parameters */
-#define MI_MAGIC	0x4D49 
+#define MI_MAGIC	0x4D49	/* Milan */
+#define VN_MAGIC	0x564E	/* CTPCI */
 
 enum {
+	/* Milan/CTPCI */
 	CMD_GETMODE=0,
 	CMD_SETMODE,
 	CMD_GETINFO,
@@ -47,7 +50,19 @@ enum {
 	CMD_ALLOCMEM,
 	CMD_FREEMEM,
 	CMD_SETADR,
-	CMD_ENUMMODES
+	CMD_ENUMMODES,
+
+	/* CTPCI only */
+	CMD_TESTMODE,
+	CMD_COPYPAGE,
+	CMD_FILLMEM,
+	CMD_COPYMEM,
+	CMD_TEXTUREMEM,
+	CMD_GETVERSION,
+	CMD_LINEMEM,
+	CMD_CLIPMEM,
+	CMD_SYNCMEM,
+	CMD_BLANK
 };
 
 enum {
@@ -59,6 +74,26 @@ enum {
 	BLK_ERR=0,
 	BLK_OK,
 	BLK_CLEARED
+};
+
+/* CTPCI block operations */
+enum {
+	BLK_CLEAR,
+	BLK_AND,
+	BLK_ANDREVERSE,
+	BLK_COPY,
+	BLK_ANDINVERTED,
+	BLK_NOOP,
+	BLK_XOR,
+	BLK_OR,
+	BLK_XNOR,
+	BLK_EQUIV,
+	BLK_INVERT,
+	BLK_ORREVERSE,
+	BLK_COPYINVERTED,
+	BLK_ORINVERTED,
+	BLK_NAND,
+	BLK_SET 
 };
 
 /* scrFlags */
@@ -113,7 +148,7 @@ typedef struct screeninfo {
 	unsigned long	greenBits;	/* Mask of Green Bits */ 
 	unsigned long	blueBits;	/* Mask of Blue Bits */ 
 	unsigned long	alphaBits;	/* Mask of Alpha Bits */ 
-	unsigned long	genlockBits;/* Mask of Genlock Bits */ 
+	unsigned long	genlockBits;	/* Mask of Genlock Bits */ 
 	unsigned long	unusedBits;	/* Mask of unused Bits */ 
 	unsigned long	bitFlags;	/* Bits organisation flags */ 
 	unsigned long	maxmem;		/* max. memory in this mode */ 
@@ -121,6 +156,58 @@ typedef struct screeninfo {
 	unsigned long	max_x;		/* max. possible width */ 
 	unsigned long	max_y;		/* max. possible heigth */ 
 } SCREENINFO; 
+
+typedef struct _scrfillblk {
+	long size;	/* size of structure           */
+	long blk_status;/* status bits of blk          */
+	long blk_op;	/* mode operation              */
+	long blk_color;	/* background fill color       */
+	long blk_x;	/* x pos in total screen       */
+	long blk_y;	/* y pos in total screen       */
+	long blk_w;	/* width                       */
+	long blk_h;	/* height                      */
+	long blk_unused;
+} SCRFILLMEMBLK;
+             
+typedef struct _scrcopyblk {
+	long size;	/* size of structure            */
+	long blk_status;/* status bits of blk           */
+	long blk_src_x;	/* x pos source in total screen */
+	long blk_src_y;	/* y pos source in total screen */
+	long blk_dst_x;	/* x pos dest in total screen   */
+	long blk_dst_y;	/* y pos dest in total screen   */
+	long blk_w;	/* width                        */
+	long blk_h;	/* height                       */
+	long blk_op;	/* block operation */
+} SCRCOPYMEMBLK;
+
+typedef struct _scrtextureblk {
+	long size;		/* size of structure             */
+	long blk_status;	/* status bits of blk            */
+	long blk_src_x;		/* x pos source                  */
+	long blk_src_y;		/* y pos source                  */
+	long blk_dst_x;		/* x pos dest in total screen    */
+	long blk_dst_y;		/* y pos dest in total screen    */
+	long blk_w;		/* width                         */
+	long blk_h;		/* height                        */
+	long blk_op;		/* mode operation                */
+	long blk_src_tex;	/* source texture address        */
+	long blk_w_tex;		/* width texture                 */
+	long blk_h_tex;		/* height texture                */
+} SCRTEXTUREMEMBLK;
+
+typedef struct _scrlineblk {
+	long size;		/* size of structure            */
+	long blk_status;	/* status bits of blk           */
+	long blk_fgcolor;	/* foreground fill color        */
+	long blk_bgcolor;	/* background fill color        */
+	long blk_x1;		/* x1 pos dest in total screen  */
+	long blk_y1;		/* y1 pos dest in total screen  */
+	long blk_x2;		/* x2 pos dest in total screen  */
+	long blk_y2;		/* y2 pos dest in total screen  */
+	long blk_op;		/* mode operation               */
+	long blk_pattern;	/* pattern (-1: solid line)     */
+} SCRLINEMEMBLK;
 
 /*--- Functions prototypes ---*/
 
