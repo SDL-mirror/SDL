@@ -46,8 +46,6 @@
 #include "../ataricommon/SDL_atarimxalloc_c.h"
 #include "../ataricommon/SDL_atarigl_c.h"
 #include "SDL_xbios.h"
-#include "SDL_xbios_blowup.h"
-#include "SDL_xbios_centscreen.h"
 #include "SDL_xbios_sb3.h"
 #include "SDL_xbios_tveille.h"
 #include "SDL_xbios_milan.h"
@@ -74,7 +72,6 @@
 static int XBIOS_VideoInit(_THIS, SDL_PixelFormat *vformat);
 static SDL_Rect **XBIOS_ListModes(_THIS, SDL_PixelFormat *format, Uint32 flags);
 static SDL_Surface *XBIOS_SetVideoMode(_THIS, SDL_Surface *current, int width, int height, int bpp, Uint32 flags);
-static int XBIOS_SetColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors);
 static void XBIOS_VideoQuit(_THIS);
 
 /* Hardware surface functions */
@@ -89,36 +86,6 @@ static void XBIOS_UpdateRects(_THIS, int numrects, SDL_Rect *rects);
 /* OpenGL functions */
 static void XBIOS_GL_SwapBuffers(_THIS);
 #endif
-
-/* Default list of video modes */
-
-static const xbiosmode_t falconrgbmodes[16]={
-	{BPS16|COL80|OVERSCAN|VERTFLAG,768,480,16,0},
-	{BPS16|COL80|OVERSCAN,768,240,16,0},
-	{BPS16|COL80|VERTFLAG,640,400,16,0},
-	{BPS16|COL80,640,200,16,0},
-	{BPS16|OVERSCAN|VERTFLAG,384,480,16,0},
-	{BPS16|OVERSCAN,384,240,16,0},
-	{BPS16|VERTFLAG,320,400,16,0},
-	{BPS16,320,200,16,0},
-	{BPS8|COL80|OVERSCAN|VERTFLAG,768,480,8,XBIOSMODE_C2P},
-	{BPS8|COL80|OVERSCAN,768,240,8,XBIOSMODE_C2P},
-	{BPS8|COL80|VERTFLAG,640,400,8,XBIOSMODE_C2P},
-	{BPS8|COL80,640,200,8,XBIOSMODE_C2P},
-	{BPS8|OVERSCAN|VERTFLAG,384,480,8,XBIOSMODE_C2P},
-	{BPS8|OVERSCAN,384,240,8,XBIOSMODE_C2P},
-	{BPS8|VERTFLAG,320,400,8,XBIOSMODE_C2P},
-	{BPS8,320,200,8,XBIOSMODE_C2P}
-};
-
-static const xbiosmode_t falconvgamodes[6]={
-	{BPS16,320,480,16,0},
-	{BPS16|VERTFLAG,320,240,16,0},
-	{BPS8|COL80,640,480,8,XBIOSMODE_C2P},
-	{BPS8|COL80|VERTFLAG,640,240,8,XBIOSMODE_C2P},
-	{BPS8,320,480,8,XBIOSMODE_C2P},
-	{BPS8|VERTFLAG,320,240,8,XBIOSMODE_C2P}
-};
 
 /* Xbios driver bootstrap functions */
 
@@ -213,7 +180,7 @@ static SDL_VideoDevice *XBIOS_CreateDevice(int devindex)
 	device->VideoInit = XBIOS_VideoInit;
 	device->ListModes = XBIOS_ListModes;
 	device->SetVideoMode = XBIOS_SetVideoMode;
-	device->SetColors = XBIOS_SetColors;
+	device->SetColors = NULL;	/* Defined by each device specific backend */
 	device->UpdateRects = NULL;
 	device->VideoQuit = XBIOS_VideoQuit;
 	device->AllocHWSurface = XBIOS_AllocHWSurface;
@@ -252,7 +219,7 @@ static SDL_VideoDevice *XBIOS_CreateDevice(int devindex)
 			SDL_XBIOS_VideoInit_TT(device);
 			break;
 		case VDO_F30:
-			device->SetColors = XBIOS_SetColors;
+			SDL_XBIOS_VideoInit_F30(device);
 			break;
 		case VDO_MILAN:
 			SDL_XBIOS_VideoInit_Milan(device);
@@ -324,51 +291,15 @@ void SDL_XBIOS_AddMode(_THIS, int actually_add, const xbiosmode_t *modeinfo)
 	}
 }
 
-static void XBIOS_ListFalconRgbModes(_THIS, int actually_add)
-{
-	int i;
-
-	for (i=0; i<16; i++) {
-		xbiosmode_t modeinfo;
-
-		SDL_memcpy(&modeinfo, &falconrgbmodes[i], sizeof(xbiosmode_t));
-		modeinfo.number &= ~(VGA|PAL);
-		modeinfo.number |= XBIOS_oldvmode & (VGA|PAL);
-
-		SDL_XBIOS_AddMode(this, actually_add, &modeinfo);
-	}
-}
-
-static void XBIOS_ListFalconVgaModes(_THIS, int actually_add)
-{
-	int i;
-
-	for (i=0; i<6; i++) {
-		xbiosmode_t modeinfo;
-
-		SDL_memcpy(&modeinfo, &falconvgamodes[i], sizeof(xbiosmode_t));
-		modeinfo.number &= ~(VGA|PAL);
-		modeinfo.number |= XBIOS_oldvmode & (VGA|PAL);
-
-		SDL_XBIOS_AddMode(this, actually_add, &modeinfo);
-	}
-}
-
 static int XBIOS_VideoInit(_THIS, SDL_PixelFormat *vformat)
 {
 	int i;
-	long cookie_blow, cookie_scpn, cookie_cnts;
 
 	/* Initialize all variables that we clean on shutdown */
 	for ( i=0; i<NUM_MODELISTS; ++i ) {
 		SDL_nummodes[i] = 0;
 		SDL_modelist[i] = NULL;
 		SDL_xbiosmode[i] = NULL;
-	}
-
-	/* Cookie _VDO present ? if not, assume ST machine */
-	if (Getcookie(C__VDO, &XBIOS_cvdo) != C_FOUND) {
-		XBIOS_cvdo = VDO_ST << 16;
 	}
 
 	/* Allocate memory for old palette */
@@ -378,11 +309,6 @@ static int XBIOS_VideoInit(_THIS, SDL_PixelFormat *vformat)
 		return(-1);
 	}
 
-	/* Initialize video mode list */
-	/* and save current screen status (palette, screen address, video mode) */
-	XBIOS_centscreen = SDL_FALSE;
-	XBIOS_oldvbase = Physbase();
-
 	/* Determine the current screen size */
 	this->info.current_w = 0;
 	this->info.current_h = 0;
@@ -390,62 +316,11 @@ static int XBIOS_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	/* Determine the screen depth (use default 8-bit depth) */
 	vformat->BitsPerPixel = 8;
 
+	/* Save current mode, may update current screen size or preferred depth */
+	(*XBIOS_saveMode)(this, vformat);
+
 	/* First allocate room for needed video modes */
-	switch (XBIOS_cvdo >>16) {
-		case VDO_ST:
-		case VDO_STE:
-			(*XBIOS_saveMode)(this, vformat);
-			(*XBIOS_listModes)(this, 0);
-			break;
-		case VDO_TT:
-			(*XBIOS_saveMode)(this, vformat);
-			(*XBIOS_listModes)(this, 0);
-			break;
-		case VDO_F30:
-			XBIOS_oldvmode=VsetMode(-1);
-
-			XBIOS_oldnumcol= 1<< (1 << (XBIOS_oldvmode & NUMCOLS));
-			if (XBIOS_oldnumcol > 256) {
-				XBIOS_oldnumcol = 0;
-			}
-			if (XBIOS_oldnumcol) {
-				VgetRGB(0, XBIOS_oldnumcol, XBIOS_oldpalette);
-			}
-
-			vformat->BitsPerPixel = 16;
-
-			/* ScreenBlaster 3 ? */
-			if (Getcookie(C_SCPN, &cookie_scpn) == C_FOUND) {
-				SDL_XBIOS_ListSB3Modes(this, 0, (scpn_cookie_t *)cookie_scpn);
-			} else
-			/* Centscreen ? */
-			if (Getcookie(C_CNTS, &cookie_cnts) == C_FOUND) {
-				XBIOS_oldvmode = SDL_XBIOS_ListCentscreenModes(this, 0);
-				XBIOS_centscreen = SDL_TRUE;
-			} else
-			/* Standard, with or without Blowup */
-			{
-				switch (VgetMonitor())
-				{
-					case MONITOR_RGB:
-					case MONITOR_TV:
-						XBIOS_ListFalconRgbModes(this, 0);
-						break;
-					case MONITOR_VGA:
-						XBIOS_ListFalconVgaModes(this, 0);
-						break;
-				}
-
-				if (Getcookie(C_BLOW, &cookie_blow) == C_FOUND) {
-					SDL_XBIOS_ListBlowupModes(this, 0, (blow_cookie_t *)cookie_blow);
-				}
-			}
-			break;
-		case VDO_MILAN:
-			(*XBIOS_saveMode)(this, vformat);
-			(*XBIOS_listModes)(this, 0);
-			break;
-	}
+	(*XBIOS_listModes)(this, 0);
 
 	for ( i=0; i<NUM_MODELISTS; ++i ) {
 		int j;
@@ -484,46 +359,7 @@ static int XBIOS_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	}
 
 	/* Now fill the mode list */
-	switch (XBIOS_cvdo >>16) {
-		case VDO_ST:
-		case VDO_STE:
-			(*XBIOS_listModes)(this, 1);
-			break;
-		case VDO_TT:
-			(*XBIOS_listModes)(this, 1);
-			break;
-		case VDO_F30:
-			/* ScreenBlaster 3 ? */
-			if (Getcookie(C_SCPN, &cookie_scpn) == C_FOUND) {
-				SDL_XBIOS_ListSB3Modes(this, 1, (scpn_cookie_t *)cookie_scpn);
-			} else
-			/* Centscreen ? */
-			if (Getcookie(C_CNTS, &cookie_cnts) == C_FOUND) {
-				XBIOS_oldvmode = SDL_XBIOS_ListCentscreenModes(this, 1);
-				XBIOS_centscreen = SDL_TRUE;
-			} else
-			/* Standard, with or without Blowup */
-			{
-				switch (VgetMonitor())
-				{
-					case MONITOR_RGB:
-					case MONITOR_TV:
-						XBIOS_ListFalconRgbModes(this, 1);
-						break;
-					case MONITOR_VGA:
-						XBIOS_ListFalconVgaModes(this, 1);
-						break;
-				}
-
-				if (Getcookie(C_BLOW, &cookie_blow) == C_FOUND) {
-					SDL_XBIOS_ListBlowupModes(this, 1, (blow_cookie_t *)cookie_blow);
-				}
-			}
-			break;
-		case VDO_MILAN:
-			(*XBIOS_listModes)(this, 1);
-			break;
-	}
+	(*XBIOS_listModes)(this, 1);
 
 	XBIOS_screens[0]=NULL;
 	XBIOS_screens[1]=NULL;
@@ -633,7 +469,7 @@ static SDL_Surface *XBIOS_SetVideoMode(_THIS, SDL_Surface *current,
 		}
 	}
 #endif
-	if ((flags & SDL_DOUBLEBUF) && ((XBIOS_cvdo>>16) != VDO_MILAN)) {
+	if (flags & SDL_DOUBLEBUF) {
 		num_buffers = 2;
 		modeflags |= SDL_DOUBLEBUF;
 	}
@@ -682,35 +518,7 @@ static SDL_Surface *XBIOS_SetVideoMode(_THIS, SDL_Surface *current,
 
 #ifndef DEBUG_VIDEO_XBIOS
 	/* Now set the video mode */
-	if ((XBIOS_cvdo>>16) != VDO_MILAN) {
-		Setscreen(-1,XBIOS_screens[0],-1);
-	}
-
-	switch(XBIOS_cvdo >> 16) {
-		case VDO_ST:
-		case VDO_STE:
-			(*XBIOS_setMode)(this, new_video_mode);
-			break;
-		case VDO_TT:
-			(*XBIOS_setMode)(this, new_video_mode);
-			break;
-		case VDO_F30:
-			if (XBIOS_centscreen) {
-				SDL_XBIOS_CentscreenSetmode(this, width, height, new_depth);
-			} else {
-				VsetMode(new_video_mode->number);
-			}
-
-			/* Set hardware palette to black in True Colour */
-			if (new_depth > 8) {
-				SDL_memset(F30_palette, 0, sizeof(F30_palette));
-				VsetRGB(0,256,F30_palette);
-			}
-			break;
-		case VDO_MILAN:
-			(*XBIOS_setMode)(this, new_video_mode);
-			break;
-	}
+	(*XBIOS_setMode)(this, new_video_mode);
 
 	Vsync();
 #endif
@@ -838,30 +646,6 @@ static int XBIOS_FlipHWSurface(_THIS, SDL_Surface *surface)
 	return(0);
 }
 
-static int XBIOS_SetColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors)
-{
-#ifndef DEBUG_VIDEO_XBIOS
-	int		i;
-	int		r,v,b;
-
-	switch( XBIOS_cvdo >> 16) {
-		case VDO_F30:
-			for(i = 0; i < ncolors; i++)
-			{
-				r = colors[i].r;	
-				v = colors[i].g;
-				b = colors[i].b;
-
-				F30_palette[i]=(r<<16)|(v<<8)|b;
-			}
-			VsetRGB(firstcolor,ncolors,F30_palette);
-			break;
-	}
-#endif
-
-	return(1);
-}
-
 /* Note:  If we are terminated, this could be called in the middle of
    another SDL video routine -- notably UpdateRects.
 */
@@ -873,29 +657,8 @@ static void XBIOS_VideoQuit(_THIS)
 
 	/* Restore video mode and palette */
 #ifndef DEBUG_VIDEO_XBIOS
-	switch(XBIOS_cvdo >> 16) {
-		case VDO_ST:
-		case VDO_STE:
-			(*XBIOS_restoreMode)(this);
-			break;
-		case VDO_TT:
-			(*XBIOS_restoreMode)(this);
-			break;
-		case VDO_F30:
-			Setscreen(-1, XBIOS_oldvbase, -1);
-			if (XBIOS_centscreen) {
-				SDL_XBIOS_CentscreenRestore(this, XBIOS_oldvmode);
-			} else {
-				VsetMode(XBIOS_oldvmode);
-			}
-			if (XBIOS_oldnumcol) {
-				VsetRGB(0, XBIOS_oldnumcol, XBIOS_oldpalette);
-			}
-			break;
-		case VDO_MILAN:
-			(*XBIOS_restoreMode)(this);
-			break;
-	}
+	(*XBIOS_restoreMode)(this);
+
 	Vsync();
 #endif
 

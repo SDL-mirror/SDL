@@ -46,7 +46,6 @@ typedef struct
 #define NUM_MODELISTS	4		/* 8, 16, 24, and 32 bits-per-pixel */
 
 struct SDL_PrivateVideoData {
-	long cookie_vdo;
 	long old_video_mode;				/* Old video mode before entering SDL */
 	void *old_video_base;			/* Old pointer to screen buffer */
 	void *old_palette;				/* Old palette */
@@ -57,8 +56,6 @@ struct SDL_PrivateVideoData {
 	void *shadowscreen;		/* Shadow screen for c2p conversion */
 	int frame_number;		/* Number of frame for double buffer */
 	int pitch;				/* Destination line width for C2P */
-
-	SDL_bool centscreen;	/* Centscreen extension present ? */
 
 	xbiosmode_t *current;	/* Current set mode */
 	int SDL_nummodes[NUM_MODELISTS];
@@ -103,8 +100,6 @@ enum {
 #define SDL_nummodes		(this->hidden->SDL_nummodes)
 #define SDL_modelist		(this->hidden->SDL_modelist)
 #define SDL_xbiosmode		(this->hidden->SDL_xbiosmode)
-#define XBIOS_mutex		    (this->hidden->mutex)
-#define XBIOS_cvdo		    (this->hidden->cookie_vdo)
 #define XBIOS_oldpalette	(this->hidden->old_palette)
 #define XBIOS_oldnumcol		(this->hidden->old_num_colors)
 #define XBIOS_oldvbase		(this->hidden->old_video_base)
@@ -114,7 +109,6 @@ enum {
 #define XBIOS_shadowscreen	(this->hidden->shadowscreen)
 #define XBIOS_fbnum			(this->hidden->frame_number)
 #define XBIOS_pitch			(this->hidden->pitch)
-#define XBIOS_centscreen	(this->hidden->centscreen)
 #define XBIOS_current		(this->hidden->current)
 
 #define TT_palette		(this->hidden->palette.pal16)
@@ -137,6 +131,9 @@ void SDL_XBIOS_VideoInit_ST(_THIS, unsigned long cookie_cvdo);
 
 /* SDL_xbios_tt.c */
 void SDL_XBIOS_VideoInit_TT(_THIS);
+
+/* SDL_xbios_f30.c */
+void SDL_XBIOS_VideoInit_F30(_THIS);
 
 /* SDL_xbios_milan.c */
 void SDL_XBIOS_VideoInit_Milan(_THIS);
