@@ -64,6 +64,19 @@ struct SDL_PrivateVideoData {
 	int SDL_nummodes[NUM_MODELISTS];
 	SDL_Rect **SDL_modelist[NUM_MODELISTS];
 	xbiosmode_t **SDL_xbiosmode[NUM_MODELISTS];
+
+	union {
+		Uint16 pal16[16];
+		Uint32 pal32[256];
+	} palette;
+
+	void (*listModes)(_THIS, int actually_add);	/* List video modes */
+	void (*saveMode)(_THIS, SDL_PixelFormat *vformat);	/* Save mode,palette,vbase change format if needed */
+	void (*setMode)(_THIS, xbiosmode_t *new_video_mode);	/* Set mode */
+	void (*restoreMode)(_THIS);	/* Restore system mode */
+	void (*swapVbuffers)(_THIS);	/* Swap video buffers */
+	int (*allocVbuffers)(_THIS, int num_buffers, int bufsize);	/* Allocate video buffers */
+	void (*freeVbuffers)(_THIS);	/* Free video buffers */
 };
 
 /* _VDO cookie values */
@@ -104,8 +117,22 @@ enum {
 #define XBIOS_centscreen	(this->hidden->centscreen)
 #define XBIOS_current		(this->hidden->current)
 
+#define TT_palette		(this->hidden->palette.pal16)
+#define F30_palette		(this->hidden->palette.pal32)
+
+#define XBIOS_listModes		(this->hidden->listModes)
+#define XBIOS_saveMode		(this->hidden->saveMode)
+#define XBIOS_setMode		(this->hidden->setMode)
+#define XBIOS_restoreMode	(this->hidden->restoreMode)
+#define XBIOS_swapVbuffers	(this->hidden->swapVbuffers)
+#define XBIOS_allocVbuffers	(this->hidden->allocVbuffers)
+#define XBIOS_freeVbuffers	(this->hidden->freeVbuffers)
+
 /*--- Functions prototypes ---*/
 
 void SDL_XBIOS_AddMode(_THIS, int actually_add, const xbiosmode_t *modeinfo);
+
+/* SDL_xbios_milan.c */
+void SDL_XBIOS_VideoInit_Milan(_THIS);
 
 #endif /* _SDL_xbios_h */

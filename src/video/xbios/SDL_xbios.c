@@ -90,11 +90,6 @@ static void XBIOS_UpdateRects(_THIS, int numrects, SDL_Rect *rects);
 static void XBIOS_GL_SwapBuffers(_THIS);
 #endif
 
-/* To setup palette */
-
-static unsigned short	TT_palette[256];
-static unsigned long	F30_palette[256];
-
 /* Default list of video modes */
 
 static const xbiosmode_t stmodes[1]={
@@ -202,6 +197,7 @@ static void XBIOS_DeleteDevice(SDL_VideoDevice *device)
 static SDL_VideoDevice *XBIOS_CreateDevice(int devindex)
 {
 	SDL_VideoDevice *device;
+	long cookie_cvdo;
 
 	/* Initialize all variables that we clean on shutdown */
 	device = (SDL_VideoDevice *)SDL_malloc(sizeof(SDL_VideoDevice));
@@ -249,6 +245,17 @@ static SDL_VideoDevice *XBIOS_CreateDevice(int devindex)
 	device->PumpEvents = Atari_PumpEvents;
 
 	device->free = XBIOS_DeleteDevice;
+
+	/* Setup device specific functions, default to ST for everything */
+	if (Getcookie(C__VDO, &cookie_cvdo) != C_FOUND) {
+		cookie_cvdo = VDO_ST << 16;
+	}
+
+	switch (cookie_cvdo>>16) {
+		case VDO_MILAN:
+			SDL_XBIOS_VideoInit_Milan(device);
+			break;
+	}
 
 	return device;
 }
@@ -489,32 +496,8 @@ static int XBIOS_VideoInit(_THIS, SDL_PixelFormat *vformat)
 			}
 			break;
 		case VDO_MILAN:
-			{
-				SCREENINFO si;
-
-				/* Read infos about current mode */ 
-				VsetScreen(-1, &XBIOS_oldvmode, MI_MAGIC, CMD_GETMODE);
-
-				si.size = sizeof(SCREENINFO);
-				si.devID = XBIOS_oldvmode;
-				si.scrFlags = 0;
-				VsetScreen(-1, &si, MI_MAGIC, CMD_GETINFO);
-
-				this->info.current_w = si.scrWidth;
-				this->info.current_h = si.scrHeight;
-
-				XBIOS_oldnumcol = 0;
-				if (si.scrFlags & SCRINFO_OK) {
-					if (si.scrPlanes <= 8) {
-						XBIOS_oldnumcol = 1<<si.scrPlanes;
-					}
-				}
-				if (XBIOS_oldnumcol) {
-					VgetRGB(0, XBIOS_oldnumcol, XBIOS_oldpalette);
-				}
-
-				SDL_XBIOS_ListMilanModes(this, 0);
-			}
+			(*XBIOS_saveMode)(this, vformat);
+			(*XBIOS_listModes)(this, 0);
 			break;
 	}
 
@@ -592,7 +575,7 @@ static int XBIOS_VideoInit(_THIS, SDL_PixelFormat *vformat)
 			}
 			break;
 		case VDO_MILAN:
-			SDL_XBIOS_ListMilanModes(this, 1);
+			(*XBIOS_listModes)(this, 1);
 			break;
 	}
 
@@ -629,13 +612,11 @@ static void XBIOS_FreeBuffers(_THIS)
 {
 	int i;
 
-	for (i=0;i<2;i++) {
-		if (XBIOS_screensmem[i]!=NULL) {
-			if ((XBIOS_cvdo>>16) == VDO_MILAN) {
-				if (i==1) {
-					VsetScreen(-1, -1, MI_MAGIC, CMD_FREEPAGE);
-				}
-			} else {
+	if ((XBIOS_cvdo>>16) == VDO_MILAN) {
+		(*XBIOS_freeVbuffers)(this);
+	} else {
+		for (i=0;i<2;i++) {
+			if (XBIOS_screensmem[i]!=NULL) {
 				Mfree(XBIOS_screensmem[i]);
 			}
 			XBIOS_screensmem[i]=NULL;
@@ -723,25 +704,24 @@ static SDL_Surface *XBIOS_SetVideoMode(_THIS, SDL_Surface *current,
 	}
 
 	/* Allocate buffers */
-	for (i=0; i<num_buffers; i++) {
-		if ((XBIOS_cvdo>>16) == VDO_MILAN) {
-			if (i==0) {
-				XBIOS_screensmem[i] = XBIOS_oldvbase;
-			} else {
-				VsetScreen(-1, &XBIOS_screensmem[i], MI_MAGIC, CMD_ALLOCPAGE);
-			}
-		} else {
-			XBIOS_screensmem[i] = Atari_SysMalloc(new_screen_size, MX_STRAM);
-		}
-
-		if (XBIOS_screensmem[i]==NULL) {
+	if ((XBIOS_cvdo>>16) == VDO_MILAN) {
+		if (!(*XBIOS_allocVbuffers)(this, num_buffers, new_screen_size)) {
 			XBIOS_FreeBuffers(this);
-			SDL_SetError("Can not allocate %d KB for buffer %d", new_screen_size>>10, i);
 			return (NULL);
 		}
-		SDL_memset(XBIOS_screensmem[i], 0, new_screen_size);
+	} else {
+		for (i=0; i<num_buffers; i++) {
+			XBIOS_screensmem[i] = Atari_SysMalloc(new_screen_size, MX_STRAM);
 
-		XBIOS_screens[i]=(void *) (( (long) XBIOS_screensmem[i]+256) & 0xFFFFFF00UL);
+			if (XBIOS_screensmem[i]==NULL) {
+				XBIOS_FreeBuffers(this);
+				SDL_SetError("Can not allocate %d KB for buffer %d", new_screen_size>>10, i);
+				return (NULL);
+			}
+			SDL_memset(XBIOS_screensmem[i], 0, new_screen_size);
+
+			XBIOS_screens[i]=(void *) (( (long) XBIOS_screensmem[i]+256) & 0xFFFFFF00UL);
+		}
 	}
 
 	/* Allocate the new pixel format for the screen */
@@ -782,9 +762,7 @@ static SDL_Surface *XBIOS_SetVideoMode(_THIS, SDL_Surface *current,
 
 #ifndef DEBUG_VIDEO_XBIOS
 	/* Now set the video mode */
-	if ((XBIOS_cvdo>>16) == VDO_MILAN) {
-		VsetScreen(-1, XBIOS_screens[0], MI_MAGIC, CMD_SETADR);
-	} else {
+	if ((XBIOS_cvdo>>16) != VDO_MILAN) {
 		Setscreen(-1,XBIOS_screens[0],-1);
 	}
 
@@ -828,13 +806,7 @@ static SDL_Surface *XBIOS_SetVideoMode(_THIS, SDL_Surface *current,
 			}
 			break;
 		case VDO_MILAN:
-			VsetScreen(-1, new_video_mode->number, MI_MAGIC, CMD_SETMODE);
-
-			/* Set hardware palette to black in True Colour */
-			if (new_depth > 8) {
-				SDL_memset(F30_palette, 0, sizeof(F30_palette));
-				VsetRGB(0,256,F30_palette);
-			}
+			(*XBIOS_setMode)(this, new_video_mode);
 			break;
 	}
 
@@ -910,7 +882,7 @@ static void XBIOS_UpdateRects(_THIS, int numrects, SDL_Rect *rects)
 
 #ifndef DEBUG_VIDEO_XBIOS
 	if ((XBIOS_cvdo>>16) == VDO_MILAN) {
-		VsetScreen(-1, XBIOS_screens[XBIOS_fbnum], MI_MAGIC, CMD_SETADR);
+		(*XBIOS_swapVbuffers)(this);
 	} else {
 		Setscreen(-1,XBIOS_screens[XBIOS_fbnum],-1);
 	}
@@ -954,7 +926,7 @@ static int XBIOS_FlipHWSurface(_THIS, SDL_Surface *surface)
 
 #ifndef DEBUG_VIDEO_XBIOS
 	if ((XBIOS_cvdo>>16) == VDO_MILAN) {
-		VsetScreen(-1, XBIOS_screens[XBIOS_fbnum], MI_MAGIC, CMD_SETADR);
+		(*XBIOS_swapVbuffers)(this);
 	} else {
 		Setscreen(-1,XBIOS_screens[XBIOS_fbnum],-1);
 	}
@@ -1003,7 +975,6 @@ static int XBIOS_SetColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors
 			EsetPalette(firstcolor,ncolors,TT_palette);
 			break;
 		case VDO_F30:
-		case VDO_MILAN:
 			for(i = 0; i < ncolors; i++)
 			{
 				r = colors[i].r;	
@@ -1058,11 +1029,7 @@ static void XBIOS_VideoQuit(_THIS)
 			}
 			break;
 		case VDO_MILAN:
-			VsetScreen(-1, &XBIOS_oldvbase, MI_MAGIC, CMD_SETADR);
-			VsetScreen(-1, &XBIOS_oldvmode, MI_MAGIC, CMD_SETMODE);
-			if (XBIOS_oldnumcol) {
-				VsetRGB(0, XBIOS_oldnumcol, XBIOS_oldpalette);
-			}
+			(*XBIOS_restoreMode)(this);
 			break;
 	}
 	Vsync();

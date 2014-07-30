@@ -209,8 +209,4 @@ typedef struct _scrlineblk {
 	long blk_pattern;	/* pattern (-1: solid line)     */
 } SCRLINEMEMBLK;
 
-/*--- Functions prototypes ---*/
-
-void SDL_XBIOS_ListMilanModes(_THIS, int actually_add);
-
 #endif /* _SDL_xbios_milan_h */
