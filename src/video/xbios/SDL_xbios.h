@@ -135,6 +135,9 @@ void SDL_XBIOS_AddMode(_THIS, int actually_add, const xbiosmode_t *modeinfo);
 /* SDL_xbios_st.c */
 void SDL_XBIOS_VideoInit_ST(_THIS, unsigned long cookie_cvdo);
 
+/* SDL_xbios_tt.c */
+void SDL_XBIOS_VideoInit_TT(_THIS);
+
 /* SDL_xbios_milan.c */
 void SDL_XBIOS_VideoInit_Milan(_THIS);
 

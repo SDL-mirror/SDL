@@ -92,11 +92,6 @@ static void XBIOS_GL_SwapBuffers(_THIS);
 
 /* Default list of video modes */
 
-static const xbiosmode_t ttmodes[2]={
-	{TT_LOW,320,480,8, XBIOSMODE_C2P},
-	{TT_LOW,320,240,8, XBIOSMODE_C2P|XBIOSMODE_DOUBLELINE}
-};
-
 static const xbiosmode_t falconrgbmodes[16]={
 	{BPS16|COL80|OVERSCAN|VERTFLAG,768,480,16,0},
 	{BPS16|COL80|OVERSCAN,768,240,16,0},
@@ -254,6 +249,8 @@ static SDL_VideoDevice *XBIOS_CreateDevice(int devindex)
 			/* Already done as default */
 			break;
 		case VDO_TT:
+			SDL_XBIOS_VideoInit_TT(device);
+			break;
 		case VDO_F30:
 			device->SetColors = XBIOS_SetColors;
 			break;
@@ -324,15 +321,6 @@ void SDL_XBIOS_AddMode(_THIS, int actually_add, const xbiosmode_t *modeinfo)
 		}
 	} else {
 		++SDL_nummodes[i];
-	}
-}
-
-static void XBIOS_ListTTModes(_THIS, int actually_add)
-{
-	int i;
-
-	for (i=0; i<2; i++) {
-		SDL_XBIOS_AddMode(this, actually_add, &ttmodes[i]);
 	}
 }
 
@@ -410,29 +398,8 @@ static int XBIOS_VideoInit(_THIS, SDL_PixelFormat *vformat)
 			(*XBIOS_listModes)(this, 0);
 			break;
 		case VDO_TT:
-			XBIOS_oldvmode=EgetShift();
-
-			switch(XBIOS_oldvmode & ES_MODE) {
-				case TT_LOW:
-					XBIOS_oldnumcol=256;
-					break;
-				case ST_LOW:
-				case TT_MED:
-					XBIOS_oldnumcol=16;
-					break;
-				case ST_MED:
-					XBIOS_oldnumcol=4;
-					break;
-				case ST_HIGH:
-				case TT_HIGH:
-					XBIOS_oldnumcol=2;
-					break;
-			}
-			if (XBIOS_oldnumcol) {
-				EgetPalette(0, XBIOS_oldnumcol, XBIOS_oldpalette);
-			}
-
-			XBIOS_ListTTModes(this, 0);
+			(*XBIOS_saveMode)(this, vformat);
+			(*XBIOS_listModes)(this, 0);
 			break;
 		case VDO_F30:
 			XBIOS_oldvmode=VsetMode(-1);
@@ -523,7 +490,7 @@ static int XBIOS_VideoInit(_THIS, SDL_PixelFormat *vformat)
 			(*XBIOS_listModes)(this, 1);
 			break;
 		case VDO_TT:
-			XBIOS_ListTTModes(this, 1);
+			(*XBIOS_listModes)(this, 1);
 			break;
 		case VDO_F30:
 			/* ScreenBlaster 3 ? */
@@ -725,7 +692,7 @@ static SDL_Surface *XBIOS_SetVideoMode(_THIS, SDL_Surface *current,
 			(*XBIOS_setMode)(this, new_video_mode);
 			break;
 		case VDO_TT:
-			EsetShift(new_video_mode->number);
+			(*XBIOS_setMode)(this, new_video_mode);
 			break;
 		case VDO_F30:
 			if (XBIOS_centscreen) {
@@ -878,17 +845,6 @@ static int XBIOS_SetColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors
 	int		r,v,b;
 
 	switch( XBIOS_cvdo >> 16) {
-		case VDO_TT:
-			for(i = 0; i < ncolors; i++)
-			{
-				r = colors[i].r;	
-				v = colors[i].g;
-				b = colors[i].b;
-					
-				TT_palette[i]=((r>>4)<<8)|((v>>4)<<4)|(b>>4);
-			}
-			EsetPalette(firstcolor,ncolors,TT_palette);
-			break;
 		case VDO_F30:
 			for(i = 0; i < ncolors; i++)
 			{
@@ -923,11 +879,7 @@ static void XBIOS_VideoQuit(_THIS)
 			(*XBIOS_restoreMode)(this);
 			break;
 		case VDO_TT:
-			Setscreen(-1,XBIOS_oldvbase,-1);
-			EsetShift(XBIOS_oldvmode);
-			if (XBIOS_oldnumcol) {
-				EsetPalette(0, XBIOS_oldnumcol, XBIOS_oldpalette);
-			}
+			(*XBIOS_restoreMode)(this);
 			break;
 		case VDO_F30:
 			Setscreen(-1, XBIOS_oldvbase, -1);
