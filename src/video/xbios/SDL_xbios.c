@@ -181,7 +181,7 @@ static SDL_VideoDevice *XBIOS_CreateDevice(int devindex)
 	device->ListModes = XBIOS_ListModes;
 	device->SetVideoMode = XBIOS_SetVideoMode;
 	device->SetColors = NULL;	/* Defined by each device specific backend */
-	device->UpdateRects = NULL;
+	device->UpdateRects = XBIOS_UpdateRects;
 	device->VideoQuit = XBIOS_VideoQuit;
 	device->AllocHWSurface = XBIOS_AllocHWSurface;
 	device->LockHWSurface = XBIOS_LockHWSurface;
@@ -394,7 +394,7 @@ static void XBIOS_FreeBuffers(_THIS)
 {
 	(*XBIOS_freeVbuffers)(this);
 
-	if (XBIOS_shadowscreen!=NULL) {
+	if (XBIOS_shadowscreen) {
 		Mfree(XBIOS_shadowscreen);
 		XBIOS_shadowscreen=NULL;
 	}
@@ -495,7 +495,7 @@ static SDL_Surface *XBIOS_SetVideoMode(_THIS, SDL_Surface *current,
 	/* this is for C2P conversion */
 	XBIOS_pitch = (new_video_mode->width * new_video_mode->depth)>>3;
 
-	if (new_video_mode->flags & XBIOSMODE_C2P)
+	if (XBIOS_shadowscreen)
 		current->pixels = XBIOS_shadowscreen;
 	else
 		current->pixels = XBIOS_screens[0];
@@ -522,8 +522,6 @@ static SDL_Surface *XBIOS_SetVideoMode(_THIS, SDL_Surface *current,
 
 	Vsync();
 #endif
-
-	this->UpdateRects = XBIOS_UpdateRects;
 
 	return (current);
 }

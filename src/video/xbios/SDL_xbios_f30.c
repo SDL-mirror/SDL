@@ -72,7 +72,7 @@ static int setColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors);
 
 void SDL_XBIOS_VideoInit_F30(_THIS)
 {
-	long cookie_cnts, cookie_scpn;
+	long cookie_cnts, cookie_scpn, cookie_dummy;
 
 	XBIOS_listModes = listModes;
 	XBIOS_saveMode = saveMode;
@@ -81,6 +81,13 @@ void SDL_XBIOS_VideoInit_F30(_THIS)
 
 	this->SetColors = setColors;
 
+	/* CTPCI ? */
+	if ((Getcookie(C_CT60, &cookie_dummy) == C_FOUND)
+	    && (Getcookie(C__PCI, &cookie_dummy) == C_FOUND)
+	    && ((unsigned long)Physbase()>=0x01000000UL))
+	{
+		SDL_XBIOS_VideoInit_Ctpci(this);
+	} else
 	/* ScreenBlaster 3 ? */
 	if (Getcookie(C_SCPN, &cookie_scpn) == C_FOUND) {
 		SDL_XBIOS_VideoInit_SB3(this);

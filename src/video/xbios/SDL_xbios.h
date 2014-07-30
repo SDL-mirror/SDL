@@ -138,4 +138,7 @@ void SDL_XBIOS_VideoInit_F30(_THIS);
 /* SDL_xbios_milan.c */
 void SDL_XBIOS_VideoInit_Milan(_THIS);
 
+/* SDL_xbios_ctpci.c */
+void SDL_XBIOS_VideoInit_Ctpci(_THIS);
+
 #endif /* _SDL_xbios_h */
