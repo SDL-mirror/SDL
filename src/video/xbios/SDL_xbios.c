@@ -253,6 +253,10 @@ static SDL_VideoDevice *XBIOS_CreateDevice(int devindex)
 		case VDO_STE:
 			/* Already done as default */
 			break;
+		case VDO_TT:
+		case VDO_F30:
+			device->SetColors = XBIOS_SetColors;
+			break;
 		case VDO_MILAN:
 			SDL_XBIOS_VideoInit_Milan(device);
 			break;
