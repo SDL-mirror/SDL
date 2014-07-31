@@ -296,10 +296,14 @@ static void updateRects(_THIS, int numrects, SDL_Rect *rects)
 		}
 	}
 
+	VsetScreen(-1L, -1L, VN_MAGIC, CMD_FLIPPAGE);
 	Vsync();
 
 	if ((surface->flags & SDL_DOUBLEBUF) == SDL_DOUBLEBUF) {
 		XBIOS_fbnum ^= 1;
+		if ((XBIOS_current->flags & XBIOSMODE_C2P) == 0) {
+			surface->pixels=XBIOS_screens[XBIOS_fbnum];
+		}
 	}
 }
 
@@ -317,6 +321,9 @@ static int flipHWSurface(_THIS, SDL_Surface *surface)
   
 	if ((surface->flags & SDL_DOUBLEBUF) == SDL_DOUBLEBUF) {
 		XBIOS_fbnum ^= 1;
+		if ((XBIOS_current->flags & XBIOSMODE_C2P) == 0) {
+			surface->pixels=XBIOS_screens[XBIOS_fbnum];
+		}
 	}
 
 	return(0);
