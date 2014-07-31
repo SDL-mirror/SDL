@@ -31,10 +31,21 @@
 #include <mint/osbind.h>
 #include <mint/falcon.h>
 
+#include "../SDL_sysvideo.h"
+
+#include "../ataricommon/SDL_atarimxalloc_c.h"
+
 #include "SDL_xbios.h"
 #include "SDL_xbios_blowup.h"
 #include "SDL_xbios_sb3.h"
 #include "SDL_xbios_centscreen.h"
+
+/* Supervidel 1 byte/pixel mode */
+#define BPS8c	0x07
+
+#ifndef C_SupV
+#define C_SupV 0x53757056L
+#endif
 
 static const xbiosmode_t rgb_modes[]={
 	{BPS16|COL80|OVERSCAN|VERTFLAG,768,480,16,0},
@@ -64,11 +75,17 @@ static const xbiosmode_t vga_modes[]={
 	{BPS8|VERTFLAG,320,240,8,XBIOSMODE_C2P}
 };
 
+static int has_supervidel;
+
 static void listModes(_THIS, int actually_add);
 static void saveMode(_THIS, SDL_PixelFormat *vformat);
 static void setMode(_THIS, xbiosmode_t *new_video_mode);
 static void restoreMode(_THIS);
 static int setColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors);
+
+static int allocVbuffers_SV(_THIS, int num_buffers, int bufsize);
+static void updateRects_SV(_THIS, int numrects, SDL_Rect *rects);
+static int flipHWSurface_SV(_THIS, SDL_Surface *surface);
 
 void SDL_XBIOS_VideoInit_F30(_THIS)
 {
@@ -81,6 +98,14 @@ void SDL_XBIOS_VideoInit_F30(_THIS)
 
 	this->SetColors = setColors;
 
+	/* Supervidel ? */
+	has_supervidel = 0;
+	if (Getcookie(C_SupV, &cookie_dummy) == C_FOUND) {
+		XBIOS_allocVbuffers = allocVbuffers_SV;
+		XBIOS_updRects = updateRects_SV;
+		this->FlipHWSurface = flipHWSurface_SV;
+		has_supervidel = 1;
+	} else
 	/* CTPCI ? */
 	if ((Getcookie(C_CT60, &cookie_dummy) == C_FOUND)
 	    && (Getcookie(C__PCI, &cookie_dummy) == C_FOUND)
@@ -121,6 +146,12 @@ static void listModes(_THIS, int actually_add)
 		SDL_memcpy(&modeinfo, &f30_modes[i], sizeof(xbiosmode_t));
 		modeinfo.number &= ~(VGA|PAL);
 		modeinfo.number |= XBIOS_oldvmode & (VGA|PAL);
+
+		if (has_supervidel && (modeinfo.depth==8)) {
+			modeinfo.number &= ~NUMCOLS;
+			modeinfo.number |= BPS8c;
+			modeinfo.flags &= ~XBIOSMODE_C2P;
+		}
 
 		SDL_XBIOS_AddMode(this, actually_add, &modeinfo);
 	}
@@ -183,4 +214,108 @@ static int setColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors)
 	VsetRGB(firstcolor,ncolors,F30_palette);
 
 	return 1;
+}
+
+static int allocVbuffers_SV(_THIS, int num_buffers, int bufsize)
+{
+	int i;
+	Uint32 tmp;
+
+	for (i=0; i<num_buffers; i++) {
+		XBIOS_screensmem[i] = Atari_SysMalloc(bufsize, MX_STRAM);
+
+		if (XBIOS_screensmem[i]==NULL) {
+			SDL_SetError("Can not allocate %d KB for buffer %d", bufsize>>10, i);
+			return (0);
+		}
+		SDL_memset(XBIOS_screensmem[i], 0, bufsize);
+
+		/* Align on 256byte boundary and map to Supervidel memory */
+		tmp = ( (Uint32) XBIOS_screensmem[i]+256) & 0xFFFFFF00UL;
+		tmp |= 0xA0000000UL;	/* Map to SV memory */
+		XBIOS_screens[i] = (void *) tmp;
+	}
+
+	/*--- Always use shadow buffer ---*/
+	if (XBIOS_shadowscreen) {
+		Mfree(XBIOS_shadowscreen);
+		XBIOS_shadowscreen=NULL;
+	}
+
+	/* allocate shadow buffer in TT-RAM */
+	XBIOS_shadowscreen = Atari_SysMalloc(bufsize, MX_PREFTTRAM);
+
+	if (XBIOS_shadowscreen == NULL) {
+		SDL_SetError("Can not allocate %d KB for shadow buffer", bufsize>>10);
+		return (0);
+	}
+	SDL_memset(XBIOS_shadowscreen, 0, bufsize);
+
+	return (1);
+}
+
+static void updateRects_SV(_THIS, int numrects, SDL_Rect *rects)
+{
+	SDL_Surface *surface;
+	int i;
+	/*unsigned long offset,size;*/
+	  
+	surface = this->screen;
+
+	/* Center on destination screen */
+	/*offset=XBIOS_pitch * ((newScreenInfo.virtHeight - surface->h) >> 1);
+	offset=offset+(newScreenInfo.scrPlanes>>3)*((newScreenInfo.virtWidth - surface->w) >> 1);
+	destscr =  (void *)((unsigned long)destscr+offset);*/
+
+	for (i=0;i<numrects;i++) {
+		Uint8 *blockSrcStart, *blockDstStart;
+		int y;
+		
+		blockSrcStart = (Uint8 *) surface->pixels;
+		blockSrcStart += surface->pitch*rects[i].y;
+		blockSrcStart += surface->format->BytesPerPixel*rects[i].x;
+
+		blockDstStart = (Uint8 *) XBIOS_screens[XBIOS_fbnum];
+		blockDstStart += XBIOS_pitch*rects[i].y;
+		blockDstStart += surface->format->BytesPerPixel*rects[i].x;
+
+		for(y=0;y<rects[i].h;y++){
+			SDL_memcpy(blockDstStart,blockSrcStart,surface->pitch);
+
+			blockSrcStart += surface->pitch;
+			blockDstStart += XBIOS_pitch;
+		}
+	}
+
+	Setscreen(-1,XBIOS_screens[XBIOS_fbnum],-1);
+	Vsync();
+
+	if ((surface->flags & SDL_DOUBLEBUF) == SDL_DOUBLEBUF) {
+		XBIOS_fbnum ^= 1;
+		if ((XBIOS_current->flags & XBIOSMODE_C2P) == 0) {
+			surface->pixels=XBIOS_screens[XBIOS_fbnum];
+		}
+	}
+}
+
+static int flipHWSurface_SV(_THIS, SDL_Surface *surface)
+{
+	/* Center on destination screen */
+	/*offset=XBIOS_pitch * ((newScreenInfo.virtHeight - surface->h) >> 1);
+	offset=offset+(newScreenInfo.scrPlanes>>3)*((newScreenInfo.virtWidth - surface->w) >> 1);
+	destscr = (void *)((unsigned long)destscr+offset);*/
+
+	SDL_memcpy(XBIOS_screens[XBIOS_fbnum], surface->pixels, surface->h * surface->pitch);
+	  
+	Setscreen(-1,XBIOS_screens[XBIOS_fbnum],-1);
+	Vsync();
+  
+	if ((surface->flags & SDL_DOUBLEBUF) == SDL_DOUBLEBUF) {
+		XBIOS_fbnum ^= 1;
+		if ((XBIOS_current->flags & XBIOSMODE_C2P) == 0) {
+			surface->pixels=XBIOS_screens[XBIOS_fbnum];
+		}
+	}
+
+	return(0);
 }
