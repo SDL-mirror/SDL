@@ -89,7 +89,7 @@ void SDL_XBIOS_VideoInit_Ctpci(_THIS)
 	XBIOS_allocVbuffers = allocVbuffers;
 	XBIOS_freeVbuffers = freeVbuffers;
 
-	this->UpdateRects = updateRects;
+	XBIOS_updRects = updateRects;
 	this->FlipHWSurface = flipHWSurface;
 }
 

@@ -181,7 +181,7 @@ static SDL_VideoDevice *XBIOS_CreateDevice(int devindex)
 	device->ListModes = XBIOS_ListModes;
 	device->SetVideoMode = XBIOS_SetVideoMode;
 	device->SetColors = NULL;	/* Defined by each device specific backend */
-	device->UpdateRects = XBIOS_UpdateRects;
+	device->UpdateRects = NULL;	/* Defined once video mode set */
 	device->VideoQuit = XBIOS_VideoQuit;
 	device->AllocHWSurface = XBIOS_AllocHWSurface;
 	device->LockHWSurface = XBIOS_LockHWSurface;
@@ -209,6 +209,7 @@ static SDL_VideoDevice *XBIOS_CreateDevice(int devindex)
 		cookie_cvdo = VDO_ST << 16;
 	}
 	SDL_XBIOS_VideoInit_ST(device, cookie_cvdo);
+	device->hidden->updRects = XBIOS_UpdateRects;
 
 	switch (cookie_cvdo>>16) {
 		case VDO_ST:
@@ -523,6 +524,7 @@ static SDL_Surface *XBIOS_SetVideoMode(_THIS, SDL_Surface *current,
 	Vsync();
 #endif
 
+	this->UpdateRects = XBIOS_updRects;
 	return (current);
 }
 
