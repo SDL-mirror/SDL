@@ -32,6 +32,7 @@
 
 #include <gem.h>
 
+#include "SDL_timer.h"
 #include "../../events/SDL_sysevents.h"
 #include "../../events/SDL_events_c.h"
 #include "SDL_gemvideo.h"
@@ -42,21 +43,27 @@
 #include "../ataricommon/SDL_xbiosevents_c.h"
 #include "../ataricommon/SDL_ataridevmouse_c.h"
 
+/* Duration after which we consider key released */
+
+#define KEY_PRESS_DURATION 100
+
 /* Variables */
 
 static unsigned char gem_currentkeyboard[ATARIBIOS_MAXKEYS];
 static unsigned char gem_previouskeyboard[ATARIBIOS_MAXKEYS];
+static Uint32 keyboard_ticks[ATARIBIOS_MAXKEYS];
 
 static short prevmx=0,prevmy=0,prevmb=0;
 
 /* Functions prototypes */
 
 static int do_messages(_THIS, short *message);
-static void do_keyboard(short kc);
-static void do_keyboard_special(short ks);
+static void do_keyboard(short kc, Uint32 tick);
+static void do_keyboard_special(short ks, Uint32 tick);
 static void do_mouse_motion(_THIS, short mx, short my);
 static void do_mouse_buttons(_THIS, short mb);
 static int mouse_in_work_area(int winhandle, short mx, short my);
+static void clearKeyboardState(Uint32 tick);
 
 /* Functions */
 
@@ -64,6 +71,7 @@ void GEM_InitOSKeymap(_THIS)
 {
 	SDL_memset(gem_currentkeyboard, 0, sizeof(gem_currentkeyboard));
 	SDL_memset(gem_previouskeyboard, 0, sizeof(gem_previouskeyboard));
+	SDL_memset(keyboard_ticks, 0, sizeof(keyboard_ticks));
 
 	/* Mouse init */
 	GEM_mouse_relative = SDL_FALSE;
@@ -76,8 +84,10 @@ void GEM_PumpEvents(_THIS)
 	short prevkc=0, mousex, mousey, mouseb, kstate;
 	int i;
 	SDL_keysym keysym;
+	Uint32 cur_tick;
 
-	SDL_memset(gem_currentkeyboard,0,sizeof(gem_currentkeyboard));
+	cur_tick = SDL_GetTicks();
+	clearKeyboardState(cur_tick);
 
 	for (;;)
 	{
@@ -104,9 +114,9 @@ void GEM_PumpEvents(_THIS)
 
 		/* Keyboard event ? */
 		if (resultat & MU_KEYBD) {
-			do_keyboard_special(kstate);
+			do_keyboard_special(kstate, cur_tick);
 			if (prevkc != kc) {
-				do_keyboard(kc);
+				do_keyboard(kc, cur_tick);
 				prevkc = kc;
 			} else {
 				/* Avoid looping, if repeating same key */
@@ -121,7 +131,7 @@ void GEM_PumpEvents(_THIS)
 
 	/* Update mouse state */
 	graf_mkstate(&mousex, &mousey, &mouseb, &kstate);
-	do_keyboard_special(kstate);
+	do_keyboard_special(kstate, cur_tick);
 	do_mouse_motion(this, mousex, mousey);
 	do_mouse_buttons(this, mouseb);
 
@@ -259,27 +269,35 @@ static int do_messages(_THIS, short *message)
 	return quit;
 }
 
-static void do_keyboard(short kc)
+static void do_keyboard(short kc, Uint32 tick)
 {
 	int scancode;
 
 	if (kc) {
 		scancode=(kc>>8) & (ATARIBIOS_MAXKEYS-1);
 		gem_currentkeyboard[scancode]=0xFF;
+		keyboard_ticks[scancode]=tick;
 	}
 }
 
-static void do_keyboard_special(short ks)
+static void do_keyboard_special(short ks, Uint32 tick)
 {
+	int scancode=0;
+
 	/* Read special keys */
 	if (ks & K_RSHIFT)
-		gem_currentkeyboard[SCANCODE_RIGHTSHIFT]=0xFF;
+		scancode=SCANCODE_RIGHTSHIFT;
 	if (ks & K_LSHIFT)
-		gem_currentkeyboard[SCANCODE_LEFTSHIFT]=0xFF;
+		scancode=SCANCODE_LEFTSHIFT;
 	if (ks & K_CTRL)
-		gem_currentkeyboard[SCANCODE_LEFTCONTROL]=0xFF;
+		scancode=SCANCODE_LEFTCONTROL;
 	if (ks & K_ALT)
-		gem_currentkeyboard[SCANCODE_LEFTALT]=0xFF;
+		scancode=SCANCODE_LEFTALT;
+
+	if (scancode) {
+		gem_currentkeyboard[scancode]=0xFF;
+		keyboard_ticks[scancode]=tick;
+	}
 }
 
 static void do_mouse_motion(_THIS, short mx, short my)
@@ -386,4 +404,20 @@ static int mouse_in_work_area(int winhandle, short mx, short my)
 	}
 
 	return 0;
+}
+
+/* Clear key state for which we did not receive events for a while */
+
+static void clearKeyboardState(Uint32 tick)
+{
+	int i;
+
+	for (i=0; i<ATARIBIOS_MAXKEYS; i++) {
+		if (keyboard_ticks[i]) {
+			if (tick-keyboard_ticks[i] > KEY_PRESS_DURATION) {
+				gem_currentkeyboard[i]=0;
+				keyboard_ticks[i]=0;
+			}
+		}
+	}
 }
