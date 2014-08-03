@@ -73,6 +73,7 @@ static void listModes(_THIS, int actually_add);
 static void saveMode(_THIS, SDL_PixelFormat *vformat);
 static void setMode(_THIS, xbiosmode_t *new_video_mode);
 static void restoreMode(_THIS);
+static int getLineWidth(_THIS, xbiosmode_t *new_video_mode, int width, int bpp);
 static void swapVbuffers(_THIS);
 static int allocVbuffers(_THIS, int num_buffers, int bufsize);
 static void freeVbuffers(_THIS);
@@ -85,6 +86,7 @@ void SDL_XBIOS_VideoInit_Ctpci(_THIS)
 	XBIOS_saveMode = saveMode;
 	XBIOS_setMode = setMode;
 	XBIOS_restoreMode = restoreMode;
+	XBIOS_getLineWidth = getLineWidth;
 	XBIOS_swapVbuffers = swapVbuffers;
 	XBIOS_allocVbuffers = allocVbuffers;
 	XBIOS_freeVbuffers = freeVbuffers;
@@ -170,8 +172,6 @@ static void saveMode(_THIS, SDL_PixelFormat *vformat)
 
 static void setMode(_THIS, xbiosmode_t *new_video_mode)
 {
-	SCREENINFO si;
-
 	VsetScreen(-1, XBIOS_screens[0], VN_MAGIC, CMD_SETADR);
 
 	VsetScreen(-1, new_video_mode->number, VN_MAGIC, CMD_SETMODE);
@@ -180,15 +180,6 @@ static void setMode(_THIS, xbiosmode_t *new_video_mode)
 	if (new_video_mode->depth > 8) {
 		SDL_memset(F30_palette, 0, sizeof(F30_palette));
 		VsetRGB(0,256,F30_palette);
-	}
-
-	/* Set pitch of new mode */
-	si.size = sizeof(SCREENINFO);
-	si.devID = new_video_mode->number;
-	si.scrFlags = 0;
-	VsetScreen(-1, &si, VN_MAGIC, CMD_GETINFO);
-	if (si.scrFlags & SCRINFO_OK) {
-		XBIOS_pitch = si.lineWrap;
 	}
 }
 
@@ -199,6 +190,23 @@ static void restoreMode(_THIS)
 	if (XBIOS_oldnumcol) {
 		VsetRGB(0, XBIOS_oldnumcol, XBIOS_oldpalette);
 	}
+}
+
+static int getLineWidth(_THIS, xbiosmode_t *new_video_mode, int width, int bpp)
+{
+	SCREENINFO si;
+	int retvalue = width * (((bpp==15) ? 16 : bpp)>>3);
+
+	/* Set pitch of new mode */
+	si.size = sizeof(SCREENINFO);
+	si.devID = new_video_mode->number;
+	si.scrFlags = 0;
+	VsetScreen(-1, &si, VN_MAGIC, CMD_GETINFO);
+	if (si.scrFlags & SCRINFO_OK) {
+		retvalue = si.lineWrap;
+	}
+
+	return (retvalue);
 }
 
 static void swapVbuffers(_THIS)

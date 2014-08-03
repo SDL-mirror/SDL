@@ -180,7 +180,7 @@ static void setMode(_THIS, xbiosmode_t *new_video_mode)
 {
 	Setscreen(-1,XBIOS_screens[0],-1);
 
-	VsetMode(new_video_mode->number);
+	(void) VsetMode(new_video_mode->number);
 
 	/* Set hardware palette to black in True Colour */
 	if (new_video_mode->depth > 8) {
@@ -193,7 +193,7 @@ static void restoreMode(_THIS)
 {
 	Setscreen(-1,XBIOS_oldvbase,-1);
 
-	VsetMode(XBIOS_oldvmode);
+	(void) VsetMode(XBIOS_oldvmode);
 
 	if (XBIOS_oldnumcol) {
 		VsetRGB(0, XBIOS_oldnumcol, XBIOS_oldpalette);

@@ -409,6 +409,7 @@ static SDL_Surface *XBIOS_SetVideoMode(_THIS, SDL_Surface *current,
 	xbiosmode_t *new_video_mode;
 	Uint32 new_screen_size;
 	Uint32 modeflags;
+	Uint32 lineWidth;
 
 	/* Free current buffers */
 	XBIOS_FreeBuffers(this);
@@ -442,7 +443,9 @@ static SDL_Surface *XBIOS_SetVideoMode(_THIS, SDL_Surface *current,
 		modeflags |= SDL_HWSURFACE;
 	}
 
-	new_screen_size = width * height * ((new_depth)>>3);
+	lineWidth = (*XBIOS_getLineWidth)(this, new_video_mode, width, new_depth);
+
+	new_screen_size = lineWidth * height;
 	new_screen_size += 256; /* To align on a 256 byte adress */	
 
 	if (new_video_mode->flags & XBIOSMODE_C2P) {
@@ -491,10 +494,10 @@ static SDL_Surface *XBIOS_SetVideoMode(_THIS, SDL_Surface *current,
 	XBIOS_current = new_video_mode;
 	current->w = width;
 	current->h = height;
-	current->pitch = (width * new_depth)>>3;
+	current->pitch = lineWidth;
 
 	/* this is for C2P conversion */
-	XBIOS_pitch = (new_video_mode->width * new_video_mode->depth)>>3;
+	XBIOS_pitch = (*XBIOS_getLineWidth)(this, new_video_mode, new_video_mode->width, new_video_mode->depth);
 
 	if (XBIOS_shadowscreen)
 		current->pixels = XBIOS_shadowscreen;

@@ -45,6 +45,7 @@ static void saveMode(_THIS, SDL_PixelFormat *vformat);
 static void setMode_ST(_THIS, xbiosmode_t *new_video_mode);
 static void setMode_STE(_THIS, xbiosmode_t *new_video_mode);
 static void restoreMode(_THIS);
+static int getLineWidth(_THIS, xbiosmode_t *new_video_mode, int width, int bpp);
 static void swapVbuffers(_THIS);
 static int allocVbuffers(_THIS, int num_buffers, int bufsize);
 static void freeVbuffers(_THIS);
@@ -56,6 +57,7 @@ void SDL_XBIOS_VideoInit_ST(_THIS, unsigned long cookie_cvdo)
 	XBIOS_saveMode = saveMode;
 	XBIOS_setMode = setMode_ST;
 	XBIOS_restoreMode = restoreMode;
+	XBIOS_getLineWidth = getLineWidth;
 	XBIOS_swapVbuffers = swapVbuffers;
 	XBIOS_allocVbuffers = allocVbuffers;
 	XBIOS_freeVbuffers = freeVbuffers;
@@ -138,6 +140,11 @@ static void restoreMode(_THIS)
 	if (XBIOS_oldnumcol) {
 		Setpalette(XBIOS_oldpalette);
 	}
+}
+
+static int getLineWidth(_THIS, xbiosmode_t *new_video_mode, int width, int bpp)
+{
+	return (width * (((bpp==15) ? 16 : bpp)>>3));
 }
 
 static void swapVbuffers(_THIS)
