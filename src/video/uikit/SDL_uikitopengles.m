@@ -53,15 +53,8 @@ int
 UIKit_GL_MakeCurrent(_THIS, SDL_Window * window, SDL_GLContext context)
 {
     @autoreleasepool {
-        if (context) {
-            SDL_WindowData *data = (__bridge SDL_WindowData *)window->driverdata;
-            [data.view setCurrentContext];
-        }
-        else {
-            [EAGLContext setCurrentContext: nil];
-        }
+        [EAGLContext setCurrentContext:(__bridge EAGLContext *)context];
     }
-
     return 0;
 }
 
@@ -169,8 +162,9 @@ UIKit_GL_CreateContext(_THIS, SDL_Window * window)
             uiwindow.rootViewController = view.viewcontroller;
         }
 
-        if (UIKit_GL_MakeCurrent(_this, window, (__bridge SDL_GLContext)(view)) < 0) {
-            UIKit_GL_DeleteContext(_this, (SDL_GLContext) CFBridgingRetain(view));
+        EAGLContext *context = view.context;
+        if (UIKit_GL_MakeCurrent(_this, window, (__bridge SDL_GLContext) context) < 0) {
+            UIKit_GL_DeleteContext(_this, (SDL_GLContext) CFBridgingRetain(context));
             return NULL;
         }
 
@@ -180,7 +174,7 @@ UIKit_GL_CreateContext(_THIS, SDL_Window * window)
             SDL_SetKeyboardFocus(window);
         }
 
-        return (SDL_GLContext) CFBridgingRetain(view);
+        return (SDL_GLContext) CFBridgingRetain(context);
     }
 }
 
@@ -188,16 +182,29 @@ void
 UIKit_GL_DeleteContext(_THIS, SDL_GLContext context)
 {
     @autoreleasepool {
-        /* the delegate has retained the view, this will release him */
-        SDL_uikitopenglview *view = (SDL_uikitopenglview *)CFBridgingRelease(context);
-        if (view.viewcontroller) {
-            UIWindow *uiwindow = (UIWindow *)view.superview;
-            if (uiwindow.rootViewController == view.viewcontroller) {
-                uiwindow.rootViewController = nil;
+        SDL_Window *window;
+        EAGLContext *eaglcontext = (EAGLContext *) CFBridgingRelease(context);
+
+        /* Find the view associated with this context */
+        for (window = _this->windows; window; window = window->next) {
+            SDL_WindowData *data = (__bridge SDL_WindowData *) window->driverdata;
+            SDL_uikitopenglview *view = data.view;
+            if (view.context == eaglcontext) {
+                /* the delegate has retained the view, this will release him */
+                if (view.viewcontroller) {
+                    UIWindow *uiwindow = (UIWindow *)view.superview;
+                    if (uiwindow.rootViewController == view.viewcontroller) {
+                        uiwindow.rootViewController = nil;
+                    }
+                    view.viewcontroller.view = nil;
+                    view.viewcontroller = nil;
+                }
+                [view removeFromSuperview];
+
+                data.view = nil;
+                return;
             }
-            view.viewcontroller.view = nil;
         }
-        [view removeFromSuperview];
     }
 }
 
