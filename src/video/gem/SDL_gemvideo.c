@@ -220,7 +220,7 @@ static void VDI_ReadExtInfo(_THIS, short *work_out)
 	Uint16 clut_type;
 
 	/* Read EdDI informations */
-	if  (Getcookie(C_EdDI, &cookie_EdDI) == C_NOTFOUND) {
+	if  (Getcookie(C_EdDI, &cookie_EdDI) != C_FOUND) {
 		return;
 	}
 	
