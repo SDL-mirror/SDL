@@ -63,8 +63,7 @@ struct SDL_PrivateVideoData {
 	void *screen;				/* Screen address */
 	Uint32 red, green, blue, alpha;	/* Screen components */
 	Uint32 screensize;
-	short	blit_coords[8];		/* Coordinates for bitblt */
-	MFDB	src_mfdb, dst_mfdb;	/* VDI MFDB for bitblt */
+	MFDB	dst_mfdb;		/* VDI MFDB for bitblt */
 	Uint16 old_palette[256][3];	/* Saved current palette */
 	Uint16 cur_palette[256][3];	/* SDL application palette */
 								/* Function to set/restore palette */
@@ -113,9 +112,7 @@ struct SDL_PrivateVideoData {
 #define VDI_bluemask		(this->hidden->blue)
 #define VDI_alphamask		(this->hidden->alpha)
 #define VDI_screensize		(this->hidden->screensize)
-#define VDI_src_mfdb		(this->hidden->src_mfdb)
 #define VDI_dst_mfdb		(this->hidden->dst_mfdb)
-#define VDI_blit_coords		(this->hidden->blit_coords)
 
 #define GEM_desk_x			(this->hidden->desk_x)
 #define GEM_desk_y			(this->hidden->desk_y)
