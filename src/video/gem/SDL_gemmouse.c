@@ -168,7 +168,8 @@ void GEM_WarpWMCursor(_THIS, Uint16 x, Uint16 y)
 void GEM_CheckMouseMode(_THIS)
 {
 	const Uint8 full_focus = (SDL_APPACTIVE|SDL_APPINPUTFOCUS|SDL_APPMOUSEFOCUS);
-	int set_system_cursor = 1, show_system_cursor = 1;
+	int set_system_cursor = 1;
+	SDL_bool hide_system_cursor = SDL_FALSE;
 
 #ifdef DEBUG_VIDEO_GEM
 	printf("sdl:video:gem: check mouse mode\n");
@@ -187,18 +188,22 @@ void GEM_CheckMouseMode(_THIS)
 				graf_mouse(USER_DEF, GEM_cursor->mform_p);
 				set_system_cursor = 0;
 			} else {
-				show_system_cursor = 0;
+				hide_system_cursor = SDL_TRUE;
 			}
 		}
 	} else {
 		/* Mouse cursor hidden only over the application window */
 		if ((SDL_GetAppState() & full_focus) == full_focus) {
 			set_system_cursor = 0;
-			show_system_cursor = 0;
+			hide_system_cursor = SDL_TRUE;
 		}
 	}
 
-	graf_mouse(show_system_cursor ? M_ON : M_OFF, NULL);
+	if (hide_system_cursor != GEM_cursor_hidden) {
+		graf_mouse(hide_system_cursor ? M_OFF : M_ON, NULL);
+		GEM_cursor_hidden = hide_system_cursor;
+	}
+
 	if (set_system_cursor) {
 		graf_mouse(ARROW, NULL);
 	}
