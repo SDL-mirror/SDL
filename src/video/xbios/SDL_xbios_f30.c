@@ -40,6 +40,9 @@
 #include "SDL_xbios_sb3.h"
 #include "SDL_xbios_centscreen.h"
 
+/* Use shadow buffer on Supervidel */
+/*#define ENABLE_SV_SHADOWBUF 1*/
+
 /* Supervidel 1 byte/pixel mode */
 #define BPS8c	0x07
 
@@ -84,8 +87,10 @@ static void restoreMode(_THIS);
 static int setColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors);
 
 static int allocVbuffers_SV(_THIS, int num_buffers, int bufsize);
+#ifdef ENABLE_SV_SHADOWBUF
 static void updateRects_SV(_THIS, int numrects, SDL_Rect *rects);
 static int flipHWSurface_SV(_THIS, SDL_Surface *surface);
+#endif
 
 void SDL_XBIOS_VideoInit_F30(_THIS)
 {
@@ -102,8 +107,10 @@ void SDL_XBIOS_VideoInit_F30(_THIS)
 	has_supervidel = 0;
 	if (Getcookie(C_SupV, &cookie_dummy) == C_FOUND) {
 		XBIOS_allocVbuffers = allocVbuffers_SV;
+#ifdef ENABLE_SV_SHADOWBUF
 		XBIOS_updRects = updateRects_SV;
 		this->FlipHWSurface = flipHWSurface_SV;
+#endif
 		has_supervidel = 1;
 	} else
 	/* CTPCI ? */
@@ -236,6 +243,7 @@ static int allocVbuffers_SV(_THIS, int num_buffers, int bufsize)
 		XBIOS_screens[i] = (void *) tmp;
 	}
 
+#ifdef ENABLE_SV_SHADOWBUF
 	/*--- Always use shadow buffer ---*/
 	if (XBIOS_shadowscreen) {
 		Mfree(XBIOS_shadowscreen);
@@ -250,10 +258,12 @@ static int allocVbuffers_SV(_THIS, int num_buffers, int bufsize)
 		return (0);
 	}
 	SDL_memset(XBIOS_shadowscreen, 0, bufsize);
+#endif
 
 	return (1);
 }
 
+#ifdef ENABLE_SV_SHADOWBUF
 static void updateRects_SV(_THIS, int numrects, SDL_Rect *rects)
 {
 	SDL_Surface *surface;
@@ -319,3 +329,4 @@ static int flipHWSurface_SV(_THIS, SDL_Surface *surface)
 
 	return(0);
 }
+#endif
