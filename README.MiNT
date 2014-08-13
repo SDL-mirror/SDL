@@ -187,7 +187,10 @@ Xbios video:
 		320x480x8 and 320x240x8 (software double-lined mode).
 	Falcon:
 		All modes supported by the current monitor (RVB or VGA).
-		BlowUp and Centscreen extended modes, ScreenBlaster 3 current mode.
+		BlowUp and Centscreen: Extended modes.
+		ScreenBlaster 3: Only current mode.
+		Supervidel: Same resolutions as standard Falcon.
+		CTPCI: Experimental support.
 	Milan:
 		Experimental support
 	Clones and any machine with monochrome monitor:
