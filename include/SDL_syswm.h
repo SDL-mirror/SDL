@@ -208,20 +208,20 @@ struct SDL_SysWMinfo
 #if defined(SDL_VIDEO_DRIVER_COCOA)
         struct
         {
-#if defined(__OBJC__) && __has_feature(objc_arc)
-            NSWindow * __unsafe_unretained window; /* The Cocoa window */
+#if defined(__OBJC__) && defined(__has_feature) && __has_feature(objc_arc)
+            NSWindow __unsafe_unretained *window; /* The Cocoa window */
 #else
-            NSWindow *window;                      /* The Cocoa window */
+            NSWindow *window;                     /* The Cocoa window */
 #endif
         } cocoa;
 #endif
 #if defined(SDL_VIDEO_DRIVER_UIKIT)
         struct
         {
-#if defined(__OBJC__) && __has_feature(objc_arc)
-            UIWindow * __unsafe_unretained window; /* The UIKit window */
+#if defined(__OBJC__) && defined(__has_feature) && __has_feature(objc_arc)
+            UIWindow __unsafe_unretained *window; /* The UIKit window */
 #else
-            UIWindow *window;                      /* The UIKit window */
+            UIWindow *window;                     /* The UIKit window */
 #endif
         } uikit;
 #endif

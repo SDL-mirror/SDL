@@ -20,22 +20,43 @@
 */
 #include "../../SDL_internal.h"
 
-/* OpenGL shader implementation */
+#ifdef SDL_FILESYSTEM_ANDROID
 
-typedef enum {
-    SHADER_NONE,
-    SHADER_SOLID,
-    SHADER_RGB,
-    SHADER_YUV,
-    SHADER_NV12,
-    SHADER_NV21,
-    NUM_SHADERS
-} GL_Shader;
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+/* System dependent filesystem routines                                */
 
-typedef struct GL_ShaderContext GL_ShaderContext;
+#include <unistd.h>
+#include <errno.h>
 
-extern GL_ShaderContext * GL_CreateShaderContext();
-extern void GL_SelectShader(GL_ShaderContext *ctx, GL_Shader shader);
-extern void GL_DestroyShaderContext(GL_ShaderContext *ctx);
+#include "SDL_error.h"
+#include "SDL_filesystem.h"
+#include "SDL_system.h"
+
+
+char *
+SDL_GetBasePath(void)
+{
+    /* The current working directory is / on Android */
+    return NULL;
+}
+
+char *
+SDL_GetPrefPath(const char *org, const char *app)
+{
+    const char *path = SDL_AndroidGetInternalStoragePath();
+    if (path) {
+        size_t pathlen = SDL_strlen(path)+2;
+        char *fullpath = (char *)SDL_malloc(pathlen);
+        if (!fullpath) {
+            SDL_OutOfMemory();
+            return NULL;
+        }
+        SDL_snprintf(fullpath, pathlen, "%s/", path);
+        return fullpath;
+    }
+    return NULL;
+}
+
+#endif /* SDL_FILESYSTEM_ANDROID */
 
 /* vi: set ts=4 sw=4 expandtab: */

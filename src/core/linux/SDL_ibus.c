@@ -22,10 +22,16 @@
 
 #ifdef HAVE_IBUS_IBUS_H
 #include "SDL.h"
+#include "SDL_syswm.h"
 #include "SDL_ibus.h"
 #include "SDL_dbus.h"
 #include "../../video/SDL_sysvideo.h"
 #include "../../events/SDL_keyboard_c.h"
+
+#if SDL_VIDEO_DRIVER_X11
+    #include "../../video/x11/SDL_x11video.h"
+#endif
+
 #include <sys/inotify.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -39,7 +45,7 @@ static char *input_ctx_path = NULL;
 static SDL_Rect ibus_cursor_rect = {0};
 static DBusConnection *ibus_conn = NULL;
 static char *ibus_addr_file = NULL;
-int inotify_fd = -1;
+int inotify_fd = -1, inotify_wd = -1;
 
 static Uint32
 IBus_ModState(void)
@@ -160,13 +166,16 @@ IBus_MessageFilter(DBusConnection *conn, DBusMessage *msg, void *user_data)
                 i += sz;
                 cursor += chars;
             }
-        } else {
-            SDL_SendEditingText("", 0, 0);
         }
         
         SDL_IBus_UpdateTextRect(NULL);
         
         return DBUS_HANDLER_RESULT_HANDLED;
+    }
+    
+    if(dbus->message_is_signal(msg, IBUS_INPUT_INTERFACE, "HidePreeditText")){
+    	SDL_SendEditingText("", 0, 0);
+    	return DBUS_HANDLER_RESULT_HANDLED;
     }
     
     return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
@@ -279,6 +288,41 @@ IBus_GetDBusAddressFilename(void)
     return SDL_strdup(file_path);
 }
 
+static SDL_bool IBus_CheckConnection(SDL_DBusContext *dbus);
+
+static void
+IBus_SetCapabilities(void *data, const char *name, const char *old_val,
+                                                   const char *internal_editing)
+{
+    SDL_DBusContext *dbus = SDL_DBus_GetContext();
+    
+    if(IBus_CheckConnection(dbus)){
+
+        DBusMessage *msg = dbus->message_new_method_call(IBUS_SERVICE,
+                                                         input_ctx_path,
+                                                         IBUS_INPUT_INTERFACE,
+                                                         "SetCapabilities");
+        if(msg){
+            Uint32 caps = IBUS_CAP_FOCUS;
+            if(!(internal_editing && *internal_editing == '1')){
+                caps |= IBUS_CAP_PREEDIT_TEXT;
+            }
+            
+            dbus->message_append_args(msg,
+                                      DBUS_TYPE_UINT32, &caps,
+                                      DBUS_TYPE_INVALID);
+        }
+        
+        if(msg){
+            if(dbus->connection_send(ibus_conn, msg, NULL)){
+                dbus->connection_flush(ibus_conn);
+            }
+            dbus->message_unref(msg);
+        }
+    }
+}
+
+
 static SDL_bool
 IBus_SetupConnection(SDL_DBusContext *dbus, const char* addr)
 {
@@ -331,30 +375,14 @@ IBus_SetupConnection(SDL_DBusContext *dbus, const char* addr)
     }
 
     if(result){
-        msg = dbus->message_new_method_call(IBUS_SERVICE,
-                                            input_ctx_path,
-                                            IBUS_INPUT_INTERFACE,
-                                            "SetCapabilities");
-        if(msg){
-            Uint32 caps = IBUS_CAP_FOCUS | IBUS_CAP_PREEDIT_TEXT;
-            dbus->message_append_args(msg,
-                                      DBUS_TYPE_UINT32, &caps,
-                                      DBUS_TYPE_INVALID);
-        }
-        
-        if(msg){
-            if(dbus->connection_send(ibus_conn, msg, NULL)){
-                dbus->connection_flush(ibus_conn);
-            }
-            dbus->message_unref(msg);
-        }
+        SDL_AddHintCallback(SDL_HINT_IME_INTERNAL_EDITING, &IBus_SetCapabilities, NULL);
         
         dbus->bus_add_match(ibus_conn, "type='signal',interface='org.freedesktop.IBus.InputContext'", NULL);
         dbus->connection_add_filter(ibus_conn, &IBus_MessageFilter, dbus, NULL);
         dbus->connection_flush(ibus_conn);
     }
 
-    SDL_IBus_SetFocus(SDL_GetFocusWindow() != NULL);
+    SDL_IBus_SetFocus(SDL_GetKeyboardFocus() != NULL);
     SDL_IBus_UpdateTextRect(NULL);
     
     return result;
@@ -369,7 +397,7 @@ IBus_CheckConnection(SDL_DBusContext *dbus)
         return SDL_TRUE;
     }
     
-    if(inotify_fd != -1){
+    if(inotify_fd > 0 && inotify_wd > 0){
         char buf[1024];
         ssize_t readsize = read(inotify_fd, buf, sizeof(buf));
         if(readsize > 0){
@@ -422,15 +450,17 @@ SDL_IBus_Init(void)
         
         char *addr = IBus_ReadAddressFromFile(addr_file);
         
-        inotify_fd = inotify_init();
-        fcntl(inotify_fd, F_SETFL, O_NONBLOCK);
+        if(inotify_fd < 0){
+            inotify_fd = inotify_init();
+            fcntl(inotify_fd, F_SETFL, O_NONBLOCK);
+        }
         
         char *addr_file_dir = SDL_strrchr(addr_file, '/');
         if(addr_file_dir){
             *addr_file_dir = 0;
         }
         
-        inotify_add_watch(inotify_fd, addr_file, IN_CREATE | IN_MODIFY);
+        inotify_wd = inotify_add_watch(inotify_fd, addr_file, IN_CREATE | IN_MODIFY);
         SDL_free(addr_file);
         
         result = IBus_SetupConnection(dbus, addr);
@@ -459,6 +489,13 @@ SDL_IBus_Quit(void)
         dbus->connection_close(ibus_conn);
         dbus->connection_unref(ibus_conn);
     }
+    
+    if(inotify_fd > 0 && inotify_wd > 0){
+        inotify_rm_watch(inotify_fd, inotify_wd);
+        inotify_wd = -1;
+    }
+    
+    SDL_DelHintCallback(SDL_HINT_IME_INTERNAL_EDITING, &IBus_SetCapabilities, NULL);
     
     SDL_memset(&ibus_cursor_rect, 0, sizeof(ibus_cursor_rect));
 }
@@ -532,6 +569,8 @@ SDL_IBus_ProcessKeyEvent(Uint32 keysym, Uint32 keycode)
         
     }
     
+    SDL_IBus_UpdateTextRect(NULL);
+
     return result;
 }
 
@@ -542,12 +581,34 @@ SDL_IBus_UpdateTextRect(SDL_Rect *rect)
         SDL_memcpy(&ibus_cursor_rect, rect, sizeof(ibus_cursor_rect));
     }
     
-    SDL_Window *focused_win = SDL_GetFocusWindow();
+    SDL_Window *focused_win = SDL_GetKeyboardFocus();
 
     if(!focused_win) return;
-
+    
+    SDL_SysWMinfo info;
+    SDL_VERSION(&info.version);
+    
+    if(!SDL_GetWindowWMInfo(focused_win, &info)) return;
+    
     int x = 0, y = 0;
+    
     SDL_GetWindowPosition(focused_win, &x, &y);
+   
+#if SDL_VIDEO_DRIVER_X11    
+    if(info.subsystem == SDL_SYSWM_X11){
+        SDL_DisplayData *displaydata =
+            (SDL_DisplayData *) SDL_GetDisplayForWindow(focused_win)->driverdata;
+            
+        Display *x_disp = info.info.x11.display;
+        Window x_win = info.info.x11.window;
+        int x_screen = displaydata->screen;
+        Window unused;
+            
+        X11_XTranslateCoordinates(x_disp, x_win, RootWindow(x_disp, x_screen),
+            0, 0, &x, &y, &unused);
+    }
+#endif
+
     x += ibus_cursor_rect.x;
     y += ibus_cursor_rect.y;
         
