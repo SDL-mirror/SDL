@@ -623,7 +623,7 @@ static void XBIOS_UpdateRects(_THIS, int numrects, SDL_Rect *rects)
 	if ((surface->flags & SDL_DOUBLEBUF) == SDL_DOUBLEBUF) {
 		XBIOS_fbnum ^= 1;
 		if ((XBIOS_current->flags & XBIOSMODE_C2P) == 0) {
-			surface->pixels=((Uint8 *) XBIOS_screens[XBIOS_fbnum]) + surface->offset;
+			surface->pixels=XBIOS_screens[XBIOS_fbnum];
 		}
 	}
 }
@@ -658,7 +658,7 @@ static int XBIOS_FlipHWSurface(_THIS, SDL_Surface *surface)
 	if ((surface->flags & SDL_DOUBLEBUF) == SDL_DOUBLEBUF) {
 		XBIOS_fbnum ^= 1;
 		if ((XBIOS_current->flags & XBIOSMODE_C2P) == 0) {
-			surface->pixels=((Uint8 *) XBIOS_screens[XBIOS_fbnum]) + surface->offset;
+			surface->pixels=XBIOS_screens[XBIOS_fbnum];
 		}
 	}
 
