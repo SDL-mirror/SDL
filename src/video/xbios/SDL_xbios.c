@@ -597,7 +597,7 @@ static void XBIOS_UpdateRects(_THIS, int numrects, SDL_Rect *rects)
 			source += surface->pitch * rects[i].y;
 			source += x1;
 
-			destination = ((Uint8 *) XBIOS_screens[XBIOS_fbnum]) + surface->offset;
+			destination = XBIOS_screens[XBIOS_fbnum];
 			destination += XBIOS_pitch * rects[i].y;
 			destination += x1;
 
@@ -622,9 +622,11 @@ static void XBIOS_UpdateRects(_THIS, int numrects, SDL_Rect *rects)
 
 	if ((surface->flags & SDL_DOUBLEBUF) == SDL_DOUBLEBUF) {
 		XBIOS_fbnum ^= 1;
-		if ((XBIOS_current->flags & XBIOSMODE_C2P) == 0) {
-			surface->pixels=XBIOS_screens[XBIOS_fbnum];
-		}
+	}
+	if (XBIOS_shadowscreen) {
+		surface->pixels=((Uint8 *) XBIOS_shadowscreen) + surface->offset;
+	} else {
+		surface->pixels=((Uint8 *) XBIOS_screens[XBIOS_fbnum]) + surface->offset;
 	}
 }
 
@@ -657,9 +659,11 @@ static int XBIOS_FlipHWSurface(_THIS, SDL_Surface *surface)
 
 	if ((surface->flags & SDL_DOUBLEBUF) == SDL_DOUBLEBUF) {
 		XBIOS_fbnum ^= 1;
-		if ((XBIOS_current->flags & XBIOSMODE_C2P) == 0) {
-			surface->pixels=XBIOS_screens[XBIOS_fbnum];
-		}
+	}
+	if (XBIOS_shadowscreen) {
+		surface->pixels=((Uint8 *) XBIOS_shadowscreen) + surface->offset;
+	} else {
+		surface->pixels=((Uint8 *) XBIOS_screens[XBIOS_fbnum]) + surface->offset;
 	}
 
 	return(0);
