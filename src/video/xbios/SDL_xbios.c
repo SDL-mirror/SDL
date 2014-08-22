@@ -528,6 +528,8 @@ static SDL_Surface *XBIOS_SetVideoMode(_THIS, SDL_Surface *current,
 #endif
 
 	this->UpdateRects = XBIOS_updRects;
+	XBIOS_recoffset = 2;
+
 	return (current);
 }
 
@@ -552,6 +554,21 @@ static void XBIOS_UnlockHWSurface(_THIS, SDL_Surface *surface)
 	return;
 }
 
+static void recalc_offset(_THIS)
+{
+	int offset_x;
+
+	offset_x = (XBIOS_current->width - this->screen->w)>>1;
+	offset_x &= ~15;
+
+	this->offset_x = offset_x;
+
+	this->screen->offset = this->offset_y*this->screen->pitch +
+				this->offset_x*this->screen->format->BytesPerPixel;
+
+	--XBIOS_recoffset;
+}
+
 static void XBIOS_UpdateRects(_THIS, int numrects, SDL_Rect *rects)
 {
 	SDL_Surface *surface;
@@ -562,8 +579,12 @@ static void XBIOS_UpdateRects(_THIS, int numrects, SDL_Rect *rects)
 		int i;
 		int doubleline = (XBIOS_current->flags & XBIOSMODE_DOUBLELINE ? 1 : 0);
 
+		if (XBIOS_recoffset>0) {
+			recalc_offset(this);
+		}
+
 		for (i=0;i<numrects;i++) {
-			void *source,*destination;
+			Uint8 *source,*destination;
 			int x1,x2;
 
 			x1 = rects[i].x & ~15;
@@ -576,7 +597,7 @@ static void XBIOS_UpdateRects(_THIS, int numrects, SDL_Rect *rects)
 			source += surface->pitch * rects[i].y;
 			source += x1;
 
-			destination = XBIOS_screens[XBIOS_fbnum];
+			destination = ((Uint8 *) XBIOS_screens[XBIOS_fbnum]) + surface->offset;
 			destination += XBIOS_pitch * rects[i].y;
 			destination += x1;
 
@@ -602,7 +623,7 @@ static void XBIOS_UpdateRects(_THIS, int numrects, SDL_Rect *rects)
 	if ((surface->flags & SDL_DOUBLEBUF) == SDL_DOUBLEBUF) {
 		XBIOS_fbnum ^= 1;
 		if ((XBIOS_current->flags & XBIOSMODE_C2P) == 0) {
-			surface->pixels=XBIOS_screens[XBIOS_fbnum];
+			surface->pixels=((Uint8 *) XBIOS_screens[XBIOS_fbnum]) + surface->offset;
 		}
 	}
 }
@@ -610,21 +631,16 @@ static void XBIOS_UpdateRects(_THIS, int numrects, SDL_Rect *rects)
 static int XBIOS_FlipHWSurface(_THIS, SDL_Surface *surface)
 {
 	if (XBIOS_current->flags & XBIOSMODE_C2P) {
-		void *destscr;
-		int destx;
 		int doubleline = (XBIOS_current->flags & XBIOSMODE_DOUBLELINE ? 1 : 0);
 			
-		/* Center on destination screen */
-		destscr = XBIOS_screens[XBIOS_fbnum];
-		destscr += XBIOS_pitch * ((XBIOS_current->height - surface->h) >> 1);
-		destx = (XBIOS_current->width - surface->w) >> 1;
-		destx &= ~15;
-		destscr += destx;
+		if (XBIOS_recoffset>0) {
+			recalc_offset(this);
+		}
 
 		/* Convert chunky to planar screen */
 		SDL_Atari_C2pConvert(
 			surface->pixels,
-			destscr,
+			((Uint8 *) XBIOS_screens[XBIOS_fbnum]) + surface->offset,
 			surface->w,
 			surface->h,
 			doubleline,
@@ -642,7 +658,7 @@ static int XBIOS_FlipHWSurface(_THIS, SDL_Surface *surface)
 	if ((surface->flags & SDL_DOUBLEBUF) == SDL_DOUBLEBUF) {
 		XBIOS_fbnum ^= 1;
 		if ((XBIOS_current->flags & XBIOSMODE_C2P) == 0) {
-			surface->pixels=XBIOS_screens[XBIOS_fbnum];
+			surface->pixels=((Uint8 *) XBIOS_screens[XBIOS_fbnum]) + surface->offset;
 		}
 	}
 

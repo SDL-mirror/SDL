@@ -268,14 +268,8 @@ static void updateRects_SV(_THIS, int numrects, SDL_Rect *rects)
 {
 	SDL_Surface *surface;
 	int i;
-	/*unsigned long offset,size;*/
 	  
 	surface = this->screen;
-
-	/* Center on destination screen */
-	/*offset=XBIOS_pitch * ((newScreenInfo.virtHeight - surface->h) >> 1);
-	offset=offset+(newScreenInfo.scrPlanes>>3)*((newScreenInfo.virtWidth - surface->w) >> 1);
-	destscr =  (void *)((unsigned long)destscr+offset);*/
 
 	for (i=0;i<numrects;i++) {
 		Uint8 *blockSrcStart, *blockDstStart;
@@ -285,7 +279,7 @@ static void updateRects_SV(_THIS, int numrects, SDL_Rect *rects)
 		blockSrcStart += surface->pitch*rects[i].y;
 		blockSrcStart += surface->format->BytesPerPixel*rects[i].x;
 
-		blockDstStart = (Uint8 *) XBIOS_screens[XBIOS_fbnum];
+		blockDstStart = ((Uint8 *) XBIOS_screens[XBIOS_fbnum]) + surface->offset;
 		blockDstStart += XBIOS_pitch*rects[i].y;
 		blockDstStart += surface->format->BytesPerPixel*rects[i].x;
 
@@ -302,29 +296,29 @@ static void updateRects_SV(_THIS, int numrects, SDL_Rect *rects)
 
 	if ((surface->flags & SDL_DOUBLEBUF) == SDL_DOUBLEBUF) {
 		XBIOS_fbnum ^= 1;
-		if ((XBIOS_current->flags & XBIOSMODE_C2P) == 0) {
-			surface->pixels=XBIOS_screens[XBIOS_fbnum];
-		}
 	}
 }
 
 static int flipHWSurface_SV(_THIS, SDL_Surface *surface)
 {
-	/* Center on destination screen */
-	/*offset=XBIOS_pitch * ((newScreenInfo.virtHeight - surface->h) >> 1);
-	offset=offset+(newScreenInfo.scrPlanes>>3)*((newScreenInfo.virtWidth - surface->w) >> 1);
-	destscr = (void *)((unsigned long)destscr+offset);*/
+	int i;
+	Uint8 *src, *dst;
 
-	SDL_memcpy(XBIOS_screens[XBIOS_fbnum], surface->pixels, surface->h * surface->pitch);
-	  
+	src = surface->pixels;
+	dst = ((Uint8 *) XBIOS_screens[XBIOS_fbnum]) + surface->offset;
+
+	for (i=0; i<surface->h; i++) {
+		SDL_memcpy(dst, src, surface->w * surface->format->BytesPerPixel);
+		src += surface->pitch;
+		dst += XBIOS_pitch;
+		
+	}
+
 	Setscreen(-1,XBIOS_screens[XBIOS_fbnum],-1);
 	Vsync();
   
 	if ((surface->flags & SDL_DOUBLEBUF) == SDL_DOUBLEBUF) {
 		XBIOS_fbnum ^= 1;
-		if ((XBIOS_current->flags & XBIOSMODE_C2P) == 0) {
-			surface->pixels=XBIOS_screens[XBIOS_fbnum];
-		}
 	}
 
 	return(0);

@@ -56,6 +56,7 @@ struct SDL_PrivateVideoData {
 	void *shadowscreen;		/* Shadow screen for c2p conversion */
 	int frame_number;		/* Number of frame for double buffer */
 	int pitch;				/* Destination line width for C2P */
+	int recalc_offset;		/* Recalculate SDL_Surface offset for C2P */
 
 	xbiosmode_t *current;	/* Current set mode */
 	int SDL_nummodes[NUM_MODELISTS];
@@ -113,6 +114,7 @@ enum {
 #define XBIOS_fbnum			(this->hidden->frame_number)
 #define XBIOS_pitch			(this->hidden->pitch)
 #define XBIOS_current		(this->hidden->current)
+#define XBIOS_recoffset		(this->hidden->recalc_offset)
 
 #define TT_palette		(this->hidden->palette.pal16)
 #define F30_palette		(this->hidden->palette.pal32)
