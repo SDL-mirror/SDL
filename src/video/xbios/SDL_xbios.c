@@ -428,19 +428,15 @@ static SDL_Surface *XBIOS_SetVideoMode(_THIS, SDL_Surface *current,
 	}
 	new_video_mode = SDL_xbiosmode[bpp][mode];
 
-	modeflags = SDL_FULLSCREEN | SDL_PREALLOC;
+	modeflags = SDL_FULLSCREEN | SDL_PREALLOC | SDL_HWPALETTE | SDL_HWSURFACE;
 
 	/* Allocate needed buffers: simple/double buffer and shadow surface */
 	new_depth = new_video_mode->depth;
 	if (new_depth == 4) {
 		SDL_Atari_C2pConvert = SDL_Atari_C2pConvert4;
 		new_depth=8;
-		modeflags |= SDL_SWSURFACE|SDL_HWPALETTE;
 	} else if (new_depth == 8) {
 		SDL_Atari_C2pConvert = SDL_Atari_C2pConvert8;
-		modeflags |= SDL_SWSURFACE|SDL_HWPALETTE;
-	} else {
-		modeflags |= SDL_HWSURFACE;
 	}
 
 	lineWidth = (*XBIOS_getLineWidth)(this, new_video_mode, width, new_depth);
@@ -554,21 +550,6 @@ static void XBIOS_UnlockHWSurface(_THIS, SDL_Surface *surface)
 	return;
 }
 
-static void recalc_offset(_THIS)
-{
-	int offset_x;
-
-	offset_x = (XBIOS_current->width - this->screen->w)>>1;
-	offset_x &= ~15;
-
-	this->offset_x = offset_x;
-
-	this->screen->offset = this->offset_y*this->screen->pitch +
-				this->offset_x*this->screen->format->BytesPerPixel;
-
-	--XBIOS_recoffset;
-}
-
 static void XBIOS_UpdateRects(_THIS, int numrects, SDL_Rect *rects)
 {
 	SDL_Surface *surface;
@@ -578,10 +559,6 @@ static void XBIOS_UpdateRects(_THIS, int numrects, SDL_Rect *rects)
 	if (XBIOS_current->flags & XBIOSMODE_C2P) {
 		int i;
 		int doubleline = (XBIOS_current->flags & XBIOSMODE_DOUBLELINE ? 1 : 0);
-
-		if (XBIOS_recoffset>0) {
-			recalc_offset(this);
-		}
 
 		for (i=0;i<numrects;i++) {
 			Uint8 *source,*destination;
@@ -622,27 +599,29 @@ static void XBIOS_UpdateRects(_THIS, int numrects, SDL_Rect *rects)
 
 	if ((surface->flags & SDL_DOUBLEBUF) == SDL_DOUBLEBUF) {
 		XBIOS_fbnum ^= 1;
-	}
-	if (XBIOS_shadowscreen) {
-		surface->pixels=((Uint8 *) XBIOS_shadowscreen) + surface->offset;
-	} else {
-		surface->pixels=((Uint8 *) XBIOS_screens[XBIOS_fbnum]) + surface->offset;
+		if (!XBIOS_shadowscreen) {
+			int src_offset = (surface->locked ? surface->offset : 0);
+			surface->pixels=((Uint8 *) XBIOS_screens[XBIOS_fbnum]) + src_offset;
+		}
 	}
 }
 
 static int XBIOS_FlipHWSurface(_THIS, SDL_Surface *surface)
 {
+	int src_offset;
+
 	if (XBIOS_current->flags & XBIOSMODE_C2P) {
 		int doubleline = (XBIOS_current->flags & XBIOSMODE_DOUBLELINE ? 1 : 0);
-			
-		if (XBIOS_recoffset>0) {
-			recalc_offset(this);
-		}
+		int dst_offset;
+
+		src_offset = (surface->locked ? 0 : surface->offset);
+		dst_offset = this->offset_y * XBIOS_pitch +
+				(this->offset_x & ~15) * this->screen->format->BytesPerPixel;
 
 		/* Convert chunky to planar screen */
 		SDL_Atari_C2pConvert(
-			surface->pixels,
-			((Uint8 *) XBIOS_screens[XBIOS_fbnum]) + surface->offset,
+			surface->pixels + src_offset,
+			((Uint8 *) XBIOS_screens[XBIOS_fbnum]) + dst_offset,
 			surface->w,
 			surface->h,
 			doubleline,
@@ -659,11 +638,10 @@ static int XBIOS_FlipHWSurface(_THIS, SDL_Surface *surface)
 
 	if ((surface->flags & SDL_DOUBLEBUF) == SDL_DOUBLEBUF) {
 		XBIOS_fbnum ^= 1;
-	}
-	if (XBIOS_shadowscreen) {
-		surface->pixels=((Uint8 *) XBIOS_shadowscreen) + surface->offset;
-	} else {
-		surface->pixels=((Uint8 *) XBIOS_screens[XBIOS_fbnum]) + surface->offset;
+		if (!XBIOS_shadowscreen) {
+			src_offset = (surface->locked ? surface->offset : 0);
+			surface->pixels=((Uint8 *) XBIOS_screens[XBIOS_fbnum]) + src_offset;
+		}
 	}
 
 	return(0);
