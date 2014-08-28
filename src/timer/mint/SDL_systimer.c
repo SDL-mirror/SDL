@@ -55,8 +55,6 @@ static Uint32 readHz200Timer(void);
 /* The first ticks value of the application */
 static Uint32 start;
 
-static int mint_present; /* can we use Syield() ? */
-
 /* Timer  SDL_arraysize(Timer ),start/reset time */
 static Uint32 timerStart;
 
@@ -66,8 +64,6 @@ void SDL_StartTicks(void)
 
 	/* Set first ticks value, one _hz_200 tic is 5ms */
 	start = readHz200Timer() * 5;
-
-	mint_present = (Getcookie(C_MiNT, &dummy) == C_FOUND);
 }
 
 Uint32 SDL_GetTicks (void)
@@ -79,23 +75,32 @@ Uint32 SDL_GetTicks (void)
 
 void SDL_Delay (Uint32 ms)
 {
-	Uint32 now;
+	static Uint32 prev_now = 0;
+	Uint32 now, cur_tick;
+	int ran_bg_task = 0;
+
+	now = cur_tick = SDL_GetTicks();
 
 	/* No need to loop for delay below resolution */
 	if (ms<5) {
-		SDL_AtariMint_BackgroundTasks();
-		if (mint_present) {
-			Syield();
+		if (prev_now != now) {
+			SDL_AtariMint_BackgroundTasks();
+			prev_now = now;
 		}
 		return;
 	}
 
-	now = SDL_GetTicks();
-	while ((SDL_GetTicks()-now)<ms){
-		SDL_AtariMint_BackgroundTasks();
-		if (mint_present) {
-			Syield();
+	while (cur_tick-now<ms){
+		if (prev_now != cur_tick) {
+			SDL_AtariMint_BackgroundTasks();
+			prev_now = cur_tick;
+			ran_bg_task = 1;
 		}
+		cur_tick = SDL_GetTicks();
+	}
+
+	if (!ran_bg_task) {
+		SDL_AtariMint_BackgroundTasks();
 	}
 }
 
