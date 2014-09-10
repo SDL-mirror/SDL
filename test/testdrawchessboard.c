@@ -14,25 +14,22 @@
 
 /* Sample program:  Draw a Chess Board  by using SDL_CreateSoftwareRenderer API */
 
-#include <stdlib.h>
-#include <stdio.h>
-
 #include "SDL.h"
 
 void
 DrawChessBoard(SDL_Renderer * renderer)
 {
-	int row = 0,coloum = 0,x = 0;
+	int row = 0,column = 0,x = 0;
 	SDL_Rect rect, darea;
 
 	/* Get the Size of drawing surface */
 	SDL_RenderGetViewport(renderer, &darea);
 
-	for(row; row < 8; row++)
+	for( ; row < 8; row++)
 	{
-		coloum = row%2;
-		x = x + coloum;
-		for(coloum; coloum < 4+(row%2); coloum++)
+		column = row%2;
+		x = x + column;
+		for( ; column < 4+(row%2); column++)
 		{
 			SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0xFF);
 

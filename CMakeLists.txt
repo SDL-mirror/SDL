@@ -29,9 +29,9 @@ include(${SDL2_SOURCE_DIR}/cmake/sdlchecks.cmake)
 # set SDL_BINARY_AGE and SDL_INTERFACE_AGE to 0.
 set(SDL_MAJOR_VERSION 2)
 set(SDL_MINOR_VERSION 0)
-set(SDL_MICRO_VERSION 3)
-set(SDL_INTERFACE_AGE 1)
-set(SDL_BINARY_AGE 3)
+set(SDL_MICRO_VERSION 4)
+set(SDL_INTERFACE_AGE 0)
+set(SDL_BINARY_AGE 4)
 set(SDL_VERSION "${SDL_MAJOR_VERSION}.${SDL_MINOR_VERSION}.${SDL_MICRO_VERSION}")
 
 # Calculate a libtool-like version number
@@ -247,6 +247,7 @@ endforeach()
 set_option(VIDEO_COCOA         "Use Cocoa video driver" ${APPLE})
 set_option(DIRECTX             "Use DirectX for Windows audio/video" ${WINDOWS})
 set_option(RENDER_D3D          "Enable the Direct3D render driver" ${WINDOWS})
+set_option(VIDEO_MX6           "Use Freescale i.MX6 video driver" OFF)
 
 # TODO: We should (should we?) respect cmake's ${BUILD_SHARED_LIBS} flag here
 # The options below are for compatibility to configure's default behaviour.
@@ -678,6 +679,7 @@ if(UNIX AND NOT APPLE)
     CheckOpenGLX11()
     CheckOpenGLESX11()
     CheckWayland()
+    CheckMX6()
   endif()
 
   if(LINUX)
@@ -970,6 +972,7 @@ elseif(APPLE)
     set_source_files_properties(${EXTRA_SOURCES} PROPERTIES LANGUAGE C)
     set(HAVE_SDL_FILE TRUE)
     set(SDL_FRAMEWORK_COCOA 1)
+    set(SDL_FRAMEWORK_COREVIDEO 1)
   else()
     message_error("SDL_FILE must be enabled to build on MacOS X")
   endif()
@@ -1029,6 +1032,10 @@ elseif(APPLE)
   endif()
 
   # Actually load the frameworks at the end so we don't duplicate include.
+  if(SDL_FRAMEWORK_COREVIDEO)
+    find_library(COREVIDEO CoreVideo)
+    list(APPEND EXTRA_LIBS ${COREVIDEO})
+  endif()
   if(SDL_FRAMEWORK_COCOA)
     find_library(COCOA_LIBRARY Cocoa)
     list(APPEND EXTRA_LIBS ${COCOA_LIBRARY})
