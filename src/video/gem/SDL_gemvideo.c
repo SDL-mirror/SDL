@@ -1097,6 +1097,12 @@ static int GEM_ToggleFullScreen(_THIS, int on)
 */
 void GEM_VideoQuit(_THIS)
 {
+	/* Restore mouse cursor */
+	if (GEM_cursor_hidden) {
+		graf_mouse(M_ON, NULL);
+	}
+	graf_mouse(ARROW, NULL);
+
 	SDL_AtariXbios_RestoreVectors();
 	if (GEM_usedevmouse) {
 		SDL_AtariDevMouse_Close();

@@ -129,6 +129,8 @@ void GEM_PumpEvents(_THIS)
 			break;
 	}
 
+	GEM_CheckMouseMode(this);
+
 	/* Update mouse state */
 	graf_mkstate(&mousex, &mousey, &mouseb, &kstate);
 	do_keyboard_special(kstate, cur_tick);
@@ -167,10 +169,10 @@ void GEM_PumpEvents(_THIS)
 
 static int do_messages(_THIS, short *message)
 {
-	int quit, check_mouse_mode;
+	int quit;
 	short x2,y2,w2,h2;
 
-	quit = check_mouse_mode = 0;
+	quit = 0;
 	switch (message[0]) {
 		case WM_CLOSED:
 		case AP_TERM:    
@@ -188,7 +190,6 @@ static int do_messages(_THIS, short *message)
 			if (VDI_setpalette) {
 				VDI_setpalette(this, VDI_curpalette);
 			}
-			check_mouse_mode = 1;
 			break;
 		case WM_REDRAW:
 			if (!GEM_lock_redraw) {
@@ -208,7 +209,6 @@ static int do_messages(_THIS, short *message)
 				wind_set(GEM_handle,WF_NAME,(short)(((unsigned long)GEM_icon_name)>>16),(short)(((unsigned long)GEM_icon_name) & 0xffff),0,0);
 				GEM_refresh_name = SDL_FALSE;
 			}
-			check_mouse_mode = 1;
 			break;
 		case WM_UNICONIFY:
 			wind_set(message[3],WF_UNICONIFY,message[4],message[5],message[6],message[7]);
@@ -221,7 +221,6 @@ static int do_messages(_THIS, short *message)
 				wind_set(GEM_handle,WF_NAME,(short)(((unsigned long)GEM_title_name)>>16),(short)(((unsigned long)GEM_title_name) & 0xffff),0,0);
 				GEM_refresh_name = SDL_FALSE;
 			}
-			check_mouse_mode = 1;
 			break;
 		case WM_SIZED:
 			wind_set (message[3], WF_CURRXYWH, message[4], message[5], message[6], message[7]);
@@ -258,12 +257,7 @@ static int do_messages(_THIS, short *message)
 			if (VDI_setpalette) {
 				VDI_setpalette(this, VDI_oldpalette);
 			}
-			check_mouse_mode = 1;
 			break;
-	}
-
-	if (check_mouse_mode) {
-		GEM_CheckMouseMode(this);
 	}
 	
 	return quit;
