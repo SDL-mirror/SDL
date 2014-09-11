@@ -47,6 +47,8 @@
 
 #define KEY_PRESS_DURATION 100
 
+#define MSG_SDL_ID	(('S'<<8)|'D')
+
 /* Variables */
 
 static unsigned char gem_currentkeyboard[ATARIBIOS_MAXKEYS];
@@ -54,10 +56,11 @@ static unsigned char gem_previouskeyboard[ATARIBIOS_MAXKEYS];
 static Uint32 keyboard_ticks[ATARIBIOS_MAXKEYS];
 
 static short prevmx=0,prevmy=0,prevmb=0;
+static short dummy_msgbuf[8] = {MSG_SDL_ID,0,0,0, 0,0,0,0};
 
 /* Functions prototypes */
 
-static int do_messages(_THIS, short *message);
+static int do_messages(_THIS, short *message, short latest_msg_id);
 static void do_keyboard(short kc, Uint32 tick);
 static void do_keyboard_special(short ks, Uint32 tick);
 static void do_mouse_motion(_THIS, short mx, short my);
@@ -82,21 +85,38 @@ void GEM_InitOSKeymap(_THIS)
 void GEM_PumpEvents(_THIS)
 {
 	short prevkc=0, mousex, mousey, mouseb, kstate;
-	int i;
+	int i, quit = 0;
 	SDL_keysym keysym;
 	Uint32 cur_tick;
+	static Uint32 prev_now = 0, prev_msg = 0;
+	static short latest_msg_id = 0;
 
 	cur_tick = SDL_GetTicks();
+	if (prev_now == cur_tick) {
+		return;
+	}
+	prev_now = cur_tick;
+
+	SDL_AtariMint_BackgroundTasks();
 	clearKeyboardState(cur_tick);
 
-	for (;;)
-	{
-		int quit, resultat;
+	if (prev_msg) {
+		/* Wait at least 20ms before each event processing loop */
+		if (cur_tick-prev_msg < 20) {
+			return;
+		}
+	}
+	prev_msg = cur_tick;
+
+	dummy_msgbuf[1] = ++latest_msg_id;
+	if (appl_write(GEM_ap_id, sizeof(dummy_msgbuf), dummy_msgbuf) == 0) {
+		/* If it fails, wait for previous id */
+		--latest_msg_id;
+	}
+
+	while (!quit) {
+		int resultat;
 		short buffer[8], kc, dummy;
-
-		quit = 0;
-
-		SDL_AtariMint_BackgroundTasks();
 
 		resultat = evnt_multi(
 			MU_MESAG|MU_TIMER|MU_KEYBD,
@@ -104,13 +124,13 @@ void GEM_PumpEvents(_THIS)
 			0,0,0,0,0,
 			0,0,0,0,0,
 			buffer,
-			10,
+			1000,
 			&dummy,&dummy,&dummy,&kstate,&kc,&dummy
 		);
 
 		/* Message event ? */
 		if (resultat & MU_MESAG)
-			quit = do_messages(this, buffer);
+			quit = do_messages(this, buffer, latest_msg_id);
 
 		/* Keyboard event ? */
 		if (resultat & MU_KEYBD) {
@@ -118,15 +138,13 @@ void GEM_PumpEvents(_THIS)
 			if (prevkc != kc) {
 				do_keyboard(kc, cur_tick);
 				prevkc = kc;
-			} else {
-				/* Avoid looping, if repeating same key */
-				quit = 1;
 			}
 		}
 
-		/* Timer event ? */
-		if ((resultat & MU_TIMER) || quit)
-			break;
+		/* Timer event ? Just used as a safeguard */
+		if (resultat & MU_TIMER) {
+			quit = 1;
+		}
 	}
 
 	GEM_CheckMouseMode(this);
@@ -167,13 +185,16 @@ void GEM_PumpEvents(_THIS)
 	}
 }
 
-static int do_messages(_THIS, short *message)
+static int do_messages(_THIS, short *message, short latest_msg_id)
 {
 	int quit;
 	short x2,y2,w2,h2;
 
 	quit = 0;
 	switch (message[0]) {
+		case MSG_SDL_ID:
+			quit=(message[1] == latest_msg_id);
+			break;
 		case WM_CLOSED:
 		case AP_TERM:    
 			SDL_PrivateQuit();
