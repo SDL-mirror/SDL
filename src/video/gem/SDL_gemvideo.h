@@ -70,6 +70,7 @@ struct SDL_PrivateVideoData {
 	void (*setpalette)(_THIS, Uint16 newpal[256][3]);
 
 	/* GEM infos */
+	short ap_id;
 	short desk_x, desk_y;		/* Desktop properties */
 	short desk_w, desk_h;
 	short win_handle;			/* Our window handle */
@@ -114,6 +115,7 @@ struct SDL_PrivateVideoData {
 #define VDI_screensize		(this->hidden->screensize)
 #define VDI_dst_mfdb		(this->hidden->dst_mfdb)
 
+#define GEM_ap_id		(this->hidden->ap_id)
 #define GEM_desk_x			(this->hidden->desk_x)
 #define GEM_desk_y			(this->hidden->desk_y)
 #define GEM_desk_w			(this->hidden->desk_w)

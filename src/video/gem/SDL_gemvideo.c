@@ -304,7 +304,8 @@ int GEM_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	short work_in[12], work_out[272], dummy;
 
 	/* Open AES (Application Environment Services) */
-	if (appl_init() == -1) {
+	GEM_ap_id = appl_init();
+	if (GEM_ap_id == -1) {
 		fprintf(stderr,"Can not open AES\n");
 		return 1;
 	}
