@@ -606,7 +606,7 @@ SDL_GameControllerAddMappingsFromRW(SDL_RWops * rw, int freerw)
         if (freerw) {
             SDL_RWclose(rw);
         }
-        return SDL_SetError("Could allocate space to not read DB into memory");
+        return SDL_SetError("Could not allocate space to read DB into memory");
     }
     
     if (SDL_RWread(rw, buf, db_size, 1) != 1) {
@@ -668,6 +668,10 @@ SDL_GameControllerAddMapping(const char *mappingString)
     SDL_JoystickGUID jGUID;
     ControllerMapping_t *pControllerMapping;
     SDL_bool is_xinput_mapping = SDL_FALSE;
+
+    if (!mappingString) {
+        return SDL_InvalidParamError("mappingString");
+    }
 
     pchGUID = SDL_PrivateGetControllerGUIDFromMappingString(mappingString);
     if (!pchGUID) {
@@ -735,6 +739,10 @@ SDL_GameControllerMappingForGUID(SDL_JoystickGUID guid)
         /* allocate enough memory for GUID + ',' + name + ',' + mapping + \0 */
         needed = SDL_strlen(pchGUID) + 1 + SDL_strlen(mapping->name) + 1 + SDL_strlen(mapping->mapping) + 1;
         pMappingString = SDL_malloc(needed);
+        if (!pMappingString) {
+            SDL_OutOfMemory();
+            return NULL;
+        }
         SDL_snprintf(pMappingString, needed, "%s,%s,%s", pchGUID, mapping->name, mapping->mapping);
     }
     return pMappingString;
@@ -746,6 +754,10 @@ SDL_GameControllerMappingForGUID(SDL_JoystickGUID guid)
 char *
 SDL_GameControllerMapping(SDL_GameController * gamecontroller)
 {
+    if (!gamecontroller) {
+        return NULL;
+    }
+
     return SDL_GameControllerMappingForGUID(gamecontroller->mapping.guid);
 }
 
@@ -992,9 +1004,6 @@ SDL_GameControllerGetAttached(SDL_GameController * gamecontroller)
 }
 
 
-/*
- * Get the number of multi-dimensional axis controls on a joystick
- */
 const char *
 SDL_GameControllerName(SDL_GameController * gamecontroller)
 {
@@ -1066,9 +1075,6 @@ SDL_GameControllerButtonBind SDL_GameControllerGetBindForButton(SDL_GameControll
 }
 
 
-/*
- * Close a joystick previously opened with SDL_JoystickOpen()
- */
 void
 SDL_GameControllerClose(SDL_GameController * gamecontroller)
 {

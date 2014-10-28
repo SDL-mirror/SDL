@@ -38,7 +38,7 @@
 #define DEFAULT_OGL_ES_PVR "/opt/vc/lib/libGLES_CM.so"
 #define DEFAULT_OGL_ES "/opt/vc/lib/libGLESv1_CM.so"
 
-#elif SDL_VIDEO_DRIVER_ANDROID
+#elif SDL_VIDEO_DRIVER_ANDROID || SDL_VIDEO_DRIVER_VIVANTE
 /* Android */
 #define DEFAULT_EGL "libEGL.so"
 #define DEFAULT_OGL_ES2 "libGLESv2.so"
@@ -62,7 +62,7 @@
 #endif /* SDL_VIDEO_DRIVER_RPI */
 
 #define LOAD_FUNC(NAME) \
-*((void**)&_this->egl_data->NAME) = SDL_LoadFunction(_this->egl_data->dll_handle, #NAME); \
+_this->egl_data->NAME = SDL_LoadFunction(_this->egl_data->dll_handle, #NAME); \
 if (!_this->egl_data->NAME) \
 { \
     return SDL_SetError("Could not retrieve EGL function " #NAME); \

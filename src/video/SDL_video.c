@@ -62,6 +62,12 @@ static VideoBootStrap *bootstrap[] = {
 #if SDL_VIDEO_DRIVER_MIR
     &MIR_bootstrap,
 #endif
+#if SDL_VIDEO_DRIVER_WAYLAND
+    &Wayland_bootstrap,
+#endif
+#if SDL_VIDEO_DRIVER_VIVANTE
+    &VIVANTE_bootstrap,
+#endif
 #if SDL_VIDEO_DRIVER_DIRECTFB
     &DirectFB_bootstrap,
 #endif
@@ -89,14 +95,8 @@ static VideoBootStrap *bootstrap[] = {
 #if SDL_VIDEO_DRIVER_RPI
     &RPI_bootstrap,
 #endif 
-#if SDL_VIDEO_DRIVER_WAYLAND
-    &Wayland_bootstrap,
-#endif
 #if SDL_VIDEO_DRIVER_NACL
     &NACL_bootstrap,
-#endif
-#if SDL_VIDEO_DRIVER_MX6
-    &MX6_bootstrap,
 #endif
 #if SDL_VIDEO_DRIVER_DUMMY
     &DUMMY_bootstrap,
@@ -1339,6 +1339,10 @@ SDL_CreateWindowFrom(const void *data)
         SDL_UninitializedVideo();
         return NULL;
     }
+    if (!_this->CreateWindowFrom) {
+        SDL_Unsupported();
+        return NULL;
+    }
     window = (SDL_Window *)SDL_calloc(1, sizeof(*window));
     if (!window) {
         SDL_OutOfMemory();
@@ -1356,8 +1360,7 @@ SDL_CreateWindowFrom(const void *data)
     }
     _this->windows = window;
 
-    if (!_this->CreateWindowFrom ||
-        _this->CreateWindowFrom(_this, window, data) < 0) {
+    if (_this->CreateWindowFrom(_this, window, data) < 0) {
         SDL_DestroyWindow(window);
         return NULL;
     }
@@ -3181,11 +3184,13 @@ SDL_GetWindowWMInfo(SDL_Window * window, struct SDL_SysWMinfo *info)
     CHECK_WINDOW_MAGIC(window, SDL_FALSE);
 
     if (!info) {
+        SDL_InvalidParamError("info");
         return SDL_FALSE;
     }
     info->subsystem = SDL_SYSWM_UNKNOWN;
 
     if (!_this->GetWindowWMInfo) {
+        SDL_Unsupported();
         return SDL_FALSE;
     }
     return (_this->GetWindowWMInfo(_this, window, info));
@@ -3265,6 +3270,9 @@ SDL_IsScreenKeyboardShown(SDL_Window *window)
     return SDL_FALSE;
 }
 
+#if SDL_VIDEO_DRIVER_ANDROID
+#include "android/SDL_androidmessagebox.h"
+#endif
 #if SDL_VIDEO_DRIVER_WINDOWS
 #include "windows/SDL_windowsmessagebox.h"
 #endif
@@ -3329,6 +3337,12 @@ SDL_ShowMessageBox(const SDL_MessageBoxData *messageboxdata, int *buttonid)
     }
 
     /* It's completely fine to call this function before video is initialized */
+#if SDL_VIDEO_DRIVER_ANDROID
+    if (retval == -1 &&
+        Android_ShowMessageBox(messageboxdata, buttonid) == 0) {
+        retval = 0;
+    }
+#endif
 #if SDL_VIDEO_DRIVER_WINDOWS
     if (retval == -1 &&
         SDL_MessageboxValidForDriver(messageboxdata, SDL_SYSWM_WINDOWS) &&

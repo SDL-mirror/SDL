@@ -20,22 +20,28 @@
 */
 #include "../../SDL_internal.h"
 
-#ifndef _SDL_androidaudio_h
-#define _SDL_androidaudio_h
+#if SDL_VIDEO_DRIVER_VIVANTE && SDL_VIDEO_OPENGL_EGL
 
-#include "../SDL_sysaudio.h"
+#include "SDL_vivanteopengles.h"
+#include "SDL_vivantevideo.h"
 
-/* Hidden "this" pointer for the audio functions */
-#define _THIS   SDL_AudioDevice *this
+/* EGL implementation of SDL OpenGL support */
 
-struct SDL_PrivateAudioData
+int
+VIVANTE_GLES_LoadLibrary(_THIS, const char *path)
 {
-    /* Resume device if it was paused automatically */
-    int resume;
-};
+    SDL_DisplayData *displaydata;
 
-static void AndroidAUD_CloseDevice(_THIS);
+    displaydata = SDL_GetDisplayDriverData(0);
 
-#endif /* _SDL_androidaudio_h */
+    return SDL_EGL_LoadLibrary(_this, path, displaydata->native_display);
+}
+
+SDL_EGL_CreateContext_impl(VIVANTE)
+SDL_EGL_SwapWindow_impl(VIVANTE)
+SDL_EGL_MakeCurrent_impl(VIVANTE)
+
+#endif /* SDL_VIDEO_DRIVER_VIVANTE && SDL_VIDEO_OPENGL_EGL */
 
 /* vi: set ts=4 sw=4 expandtab: */
+

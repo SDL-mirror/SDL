@@ -20,22 +20,25 @@
 */
 #include "../../SDL_internal.h"
 
-#ifndef _SDL_androidaudio_h
-#define _SDL_androidaudio_h
+#if SDL_VIDEO_DRIVER_VIVANTE
 
-#include "../SDL_sysaudio.h"
+#include "SDL_vivanteplatform.h"
 
-/* Hidden "this" pointer for the audio functions */
-#define _THIS   SDL_AudioDevice *this
+#ifdef VIVANTE_PLATFORM_GENERIC
 
-struct SDL_PrivateAudioData
+int
+VIVANTE_SetupPlatform(_THIS)
 {
-    /* Resume device if it was paused automatically */
-    int resume;
-};
+    return 0;
+}
 
-static void AndroidAUD_CloseDevice(_THIS);
+void
+VIVANTE_CleanupPlatform(_THIS)
+{
+}
 
-#endif /* _SDL_androidaudio_h */
+#endif /* VIVANTE_PLATFORM_GENERIC */
+
+#endif /* SDL_VIDEO_DRIVER_VIVANTE */
 
 /* vi: set ts=4 sw=4 expandtab: */

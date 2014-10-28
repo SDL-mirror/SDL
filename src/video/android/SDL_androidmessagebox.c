@@ -18,24 +18,20 @@
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
-#include "../../SDL_internal.h"
+#include "SDL_config.h"
 
-#ifndef _SDL_androidaudio_h
-#define _SDL_androidaudio_h
+#if SDL_VIDEO_DRIVER_ANDROID
 
-#include "../SDL_sysaudio.h"
+#include "SDL_messagebox.h"
 
-/* Hidden "this" pointer for the audio functions */
-#define _THIS   SDL_AudioDevice *this
-
-struct SDL_PrivateAudioData
+int
+Android_ShowMessageBox(const SDL_MessageBoxData *messageboxdata, int *buttonid)
 {
-    /* Resume device if it was paused automatically */
-    int resume;
-};
+    int Android_JNI_ShowMessageBox(const SDL_MessageBoxData *messageboxdata, int *buttonid);
 
-static void AndroidAUD_CloseDevice(_THIS);
+    return Android_JNI_ShowMessageBox(messageboxdata, buttonid);
+}
 
-#endif /* _SDL_androidaudio_h */
+#endif /* SDL_VIDEO_DRIVER_ANDROID */
 
 /* vi: set ts=4 sw=4 expandtab: */

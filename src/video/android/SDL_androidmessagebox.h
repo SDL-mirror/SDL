@@ -20,22 +20,10 @@
 */
 #include "../../SDL_internal.h"
 
-#ifndef _SDL_androidaudio_h
-#define _SDL_androidaudio_h
+#if SDL_VIDEO_DRIVER_ANDROID
 
-#include "../SDL_sysaudio.h"
+extern int Android_ShowMessageBox(const SDL_MessageBoxData *messageboxdata, int *buttonid);
 
-/* Hidden "this" pointer for the audio functions */
-#define _THIS   SDL_AudioDevice *this
-
-struct SDL_PrivateAudioData
-{
-    /* Resume device if it was paused automatically */
-    int resume;
-};
-
-static void AndroidAUD_CloseDevice(_THIS);
-
-#endif /* _SDL_androidaudio_h */
+#endif /* SDL_VIDEO_DRIVER_ANDROID */
 
 /* vi: set ts=4 sw=4 expandtab: */
