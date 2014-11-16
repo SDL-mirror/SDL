@@ -318,9 +318,9 @@ WINRT_CreateWindow(_THIS, SDL_Window * window)
         SDL_VideoData * video_data = (SDL_VideoData *)_this->driverdata;
 
         /* Call SDL_EGL_ChooseConfig and eglCreateWindowSurface directly,
-         * rather than via SDL_EGL_CreateSurface, as ANGLE/WinRT requires
-         * a C++ object, ComPtr<IUnknown>, to be passed into
-         * eglCreateWindowSurface.
+         * rather than via SDL_EGL_CreateSurface, as older versions of
+         * ANGLE/WinRT may require that a C++ object, ComPtr<IUnknown>,
+         * be passed into eglCreateWindowSurface.
          */
         if (SDL_EGL_ChooseConfig(_this) != 0) {
             char buf[512];
@@ -328,13 +328,33 @@ WINRT_CreateWindow(_THIS, SDL_Window * window)
             return SDL_SetError(buf);
         }
 
-        Microsoft::WRL::ComPtr<IUnknown> cpp_winrtEglWindow = video_data->winrtEglWindow;
-        data->egl_surface = ((eglCreateWindowSurface_Function)_this->egl_data->eglCreateWindowSurface)(
-            _this->egl_data->egl_display,
-            _this->egl_data->egl_config,
-            cpp_winrtEglWindow, NULL);
-        if (data->egl_surface == NULL) {
-            return SDL_SetError("eglCreateWindowSurface failed");
+        if (video_data->winrtEglWindow) {   /* ... is the 'old' version of ANGLE/WinRT being used? */
+            /* Attempt to create a window surface using older versions of
+             * ANGLE/WinRT:
+             */
+            Microsoft::WRL::ComPtr<IUnknown> cpp_winrtEglWindow = video_data->winrtEglWindow;
+            data->egl_surface = ((eglCreateWindowSurface_Old_Function)_this->egl_data->eglCreateWindowSurface)(
+                _this->egl_data->egl_display,
+                _this->egl_data->egl_config,
+                cpp_winrtEglWindow, NULL);
+            if (data->egl_surface == NULL) {
+                return SDL_SetError("eglCreateWindowSurface failed");
+            }
+        } else if (data->coreWindow.Get() != nullptr) {
+            /* Attempt to create a window surface using newer versions of
+             * ANGLE/WinRT:
+             */
+            IInspectable * coreWindowAsIInspectable = reinterpret_cast<IInspectable *>(data->coreWindow.Get());
+            data->egl_surface = _this->egl_data->eglCreateWindowSurface(
+                _this->egl_data->egl_display,
+                _this->egl_data->egl_config,
+                coreWindowAsIInspectable,
+                NULL);
+            if (data->egl_surface == NULL) {
+                return SDL_SetError("eglCreateWindowSurface failed");
+            }
+        } else {
+            return SDL_SetError("No supported means to create an EGL window surface are available");
         }
     }
 #endif
@@ -394,6 +414,7 @@ WINRT_DestroyWindow(_THIS, SDL_Window * window)
         // Delete the internal window data:
         delete data;
         data = NULL;
+        window->driverdata = NULL;
     }
 }
 
