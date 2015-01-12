@@ -60,8 +60,6 @@ static Uint32 timerStart;
 
 void SDL_StartTicks(void)
 {
-	long dummy;
-
 	/* Set first ticks value, one _hz_200 tic is 5ms */
 	start = readHz200Timer() * 5;
 }
