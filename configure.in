@@ -1,6 +1,7 @@
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT(README)
 AC_CONFIG_HEADER(include/SDL_config.h)
+AC_GNU_SOURCE
 AC_CONFIG_AUX_DIRS($srcdir/build-scripts)
 
 dnl Set various version strings - taken gratefully from the GTk sources
@@ -77,7 +78,7 @@ case "$host" in
         BASE_LDFLAGS="-mno-cygwin"
         ;;
     *)
-        BASE_CFLAGS=""
+        BASE_CFLAGS="-D_GNU_SOURCE=1"
         BASE_LDFLAGS=""
         ;;
 esac
