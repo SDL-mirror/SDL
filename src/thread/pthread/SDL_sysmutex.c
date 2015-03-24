@@ -21,6 +21,9 @@
 */
 #include "SDL_config.h"
 
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE
+#endif
 #include <pthread.h>
 
 #include "SDL_thread.h"
