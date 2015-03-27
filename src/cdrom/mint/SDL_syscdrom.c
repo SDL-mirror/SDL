@@ -20,6 +20,7 @@
     slouken@libsdl.org
 */
 #include "SDL_config.h"
+#include "SDL_stdinc.h"
 
 #ifdef SDL_CDROM_MINT
 
@@ -75,23 +76,24 @@ int SDL_SYS_CDInit(void)
 	int i, handle;
 	struct cdrom_subchnl info;
 
+	SDL_numcds = 0;
+	SDL_memset(metados_drives, 0, sizeof(metados_drives));
+
 	Metainit(&metainit);
 	if (metainit.version == NULL) {
 #ifdef DEBUG_CDROM
 		fprintf(stderr, "MetaDOS not installed\n");
 #endif
-		return -1;
+		return 0;
 	}
 
 	if (metainit.drives_map == 0) {
 #ifdef DEBUG_CDROM
 		fprintf(stderr, "No MetaDOS devices present\n");
 #endif
-		return -1;
+		return 0;
 	}
 
-	SDL_numcds = 0;
-	
 	for (i='A'; i<='Z'; i++) {
 		metados_drives[SDL_numcds].device[0] = 0;
 		metados_drives[SDL_numcds].device[1] = ':';
