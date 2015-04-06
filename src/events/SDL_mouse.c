@@ -293,9 +293,14 @@ SDL_PrivateSendMouseMotion(SDL_Window * window, SDL_MouseID mouseID, int relativ
         event.motion.yrel = yrel;
         posted = (SDL_PushEvent(&event) > 0);
     }
-    /* Use unclamped values if we're getting events outside the window */
-    mouse->last_x = x;
-    mouse->last_y = y;
+    if (relative) {
+        mouse->last_x = mouse->x;
+        mouse->last_y = mouse->y;
+    } else {
+        /* Use unclamped values if we're getting events outside the window */
+        mouse->last_x = x;
+        mouse->last_y = y;
+    }
     return posted;
 }
 
@@ -303,10 +308,11 @@ static SDL_MouseClickState *GetMouseClickState(SDL_Mouse *mouse, Uint8 button)
 {
     if (button >= mouse->num_clickstates) {
         int i, count = button + 1;
-        mouse->clickstate = (SDL_MouseClickState *)SDL_realloc(mouse->clickstate, count * sizeof(*mouse->clickstate));
-        if (!mouse->clickstate) {
+        SDL_MouseClickState *clickstate = (SDL_MouseClickState *)SDL_realloc(mouse->clickstate, count * sizeof(*mouse->clickstate));
+        if (!clickstate) {
             return NULL;
         }
+        mouse->clickstate = clickstate;
 
         for (i = mouse->num_clickstates; i < count; ++i) {
             SDL_zero(mouse->clickstate[i]);

@@ -32,6 +32,7 @@
 
 #include "../../events/SDL_events_c.h"
 #include "../../video/android/SDL_androidkeyboard.h"
+#include "../../video/android/SDL_androidmouse.h"
 #include "../../video/android/SDL_androidtouch.h"
 #include "../../video/android/SDL_androidvideo.h"
 #include "../../video/android/SDL_androidwindow.h"
@@ -293,6 +294,14 @@ JNIEXPORT void JNICALL Java_org_libsdl_app_SDLActivity_onNativeTouch(
     Android_OnTouch(touch_device_id_in, pointer_finger_id_in, action, x, y, p);
 }
 
+/* Mouse */
+JNIEXPORT void JNICALL Java_org_libsdl_app_SDLActivity_onNativeMouse(
+                                    JNIEnv* env, jclass jcls,
+                                    jint button, jint action, jfloat x, jfloat y)
+{
+    Android_OnMouse(button, action, x, y);
+}
+
 /* Accelerometer */
 JNIEXPORT void JNICALL Java_org_libsdl_app_SDLActivity_onNativeAccel(
                                     JNIEnv* env, jclass jcls,
@@ -548,12 +557,12 @@ int Android_JNI_SetupThread(void)
  * Audio support
  */
 static jboolean audioBuffer16Bit = JNI_FALSE;
-static jboolean audioBufferStereo = JNI_FALSE;
 static jobject audioBuffer = NULL;
 static void* audioBufferPinned = NULL;
 
 int Android_JNI_OpenAudioDevice(int sampleRate, int is16Bit, int channelCount, int desiredBufferFrames)
 {
+    jboolean audioBufferStereo;
     int audioBufferFrames;
 
     JNIEnv *env = Android_JNI_GetEnv();
@@ -1599,6 +1608,11 @@ const char * SDL_AndroidGetExternalStoragePath()
         LocalReferenceHolder_Cleanup(&refs);
     }
     return s_AndroidExternalFilesPath;
+}
+
+jclass Android_JNI_GetActivityClass(void)
+{
+    return mActivityClass;
 }
 
 #endif /* __ANDROID__ */

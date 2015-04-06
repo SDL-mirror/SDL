@@ -18,25 +18,14 @@
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
-#include "../../SDL_internal.h"
-#include "SDL_error.h"
-#include "SDL_filesystem.h"
 
-#ifdef SDL_FILESYSTEM_NACL
+#ifndef _SDL_androidmouse_h
+#define _SDL_androidmouse_h
 
-char *
-SDL_GetBasePath(void)
-{
-    SDL_Unsupported();
-    return NULL;
-}
+#include "SDL_androidvideo.h"
 
-char *
-SDL_GetPrefPath(const char *org, const char *app)
-{
-    SDL_Unsupported();
-    return NULL;
-}
+extern void Android_OnMouse( int button, int action, float x, float y);
 
-#endif /* SDL_FILESYSTEM_NACL */
+#endif /* _SDL_androidmouse_h */
 
+/* vi: set ts=4 sw=4 expandtab: */

@@ -77,7 +77,7 @@ SDL_JoystickID SDL_SYS_GetInstanceIdOfDeviceIndex(int device_index)
 }
 
 /* Function to open a joystick for use.
-   The joystick to open is specified by the index field of the joystick.
+   The joystick to open is specified by the device index.
    This should fill the nbuttons and naxes fields of the joystick structure.
    It returns 0, or -1 if there is an error.
  */
@@ -167,7 +167,6 @@ SDL_SYS_JoystickClose(SDL_Joystick * joystick)
     @autoreleasepool {
         [motionManager stopAccelerometerUpdates];
     }
-    joystick->closed = 1;
 }
 
 /* Function to perform any system-specific joystick related cleanup */

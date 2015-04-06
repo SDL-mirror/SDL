@@ -86,6 +86,7 @@ Android_SuspendScreenSaver(_THIS)
 static void
 Android_DeleteDevice(SDL_VideoDevice * device)
 {
+    SDL_free(device->driverdata);
     SDL_free(device);
 }
 
@@ -187,6 +188,7 @@ Android_VideoInit(_THIS)
 void
 Android_VideoQuit(_THIS)
 {
+    Android_QuitTouch();
 }
 
 /* This function gets called before VideoInit() */

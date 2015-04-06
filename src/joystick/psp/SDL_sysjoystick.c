@@ -18,6 +18,9 @@
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
+#include "../../SDL_internal.h"
+
+#if SDL_JOYSTICK_PSP
 
 /* This is the PSP implementation of the SDL joystick API */
 #include <pspctrl.h>
@@ -161,7 +164,7 @@ const char *SDL_SYS_JoystickName(int index)
 }
 
 /* Function to open a joystick for use.
-   The joystick to open is specified by the index field of the joystick.
+   The joystick to open is specified by the device index.
    This should fill the nbuttons and naxes fields of the joystick structure.
    It returns 0, or -1 if there is an error.
  */
@@ -179,12 +182,12 @@ SDL_bool SDL_SYS_JoystickAttached(SDL_Joystick *joystick)
 {
     return SDL_TRUE;
 }
+
 /* Function to update the state of a joystick - called as a device poll.
  * This function shouldn't update the joystick structure directly,
  * but instead should call SDL_PrivateJoystick*() to deliver events
  * and update joystick device state.
  */
-
 void SDL_SYS_JoystickUpdate(SDL_Joystick *joystick)
 {
     int i;
@@ -230,7 +233,6 @@ void SDL_SYS_JoystickUpdate(SDL_Joystick *joystick)
 /* Function to close a joystick after use */
 void SDL_SYS_JoystickClose(SDL_Joystick *joystick)
 {
-    /* Do nothing. */
 }
 
 /* Function to perform any system-specific joystick related cleanup */
@@ -261,6 +263,8 @@ SDL_JoystickGUID SDL_SYS_JoystickGetGUID(SDL_Joystick * joystick)
     SDL_memcpy( &guid, name, SDL_min( sizeof(guid), SDL_strlen( name ) ) );
     return guid;
 }
+
+#endif /* SDL_JOYSTICK_PSP */
 
 /* vim: ts=4 sw=4
  */

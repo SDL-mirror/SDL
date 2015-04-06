@@ -46,6 +46,10 @@
 #include "SDL_opengles2.h"
 #endif /* SDL_VIDEO_OPENGL_ES2 && !SDL_VIDEO_OPENGL */
 
+#ifndef GL_CONTEXT_RELEASE_BEHAVIOR_KHR
+#define GL_CONTEXT_RELEASE_BEHAVIOR_KHR 0x82FB
+#endif
+
 /* On Windows, windows.h defines CreateWindow */
 #ifdef CreateWindow
 #undef CreateWindow
@@ -1612,13 +1616,14 @@ SDL_SetWindowPosition(SDL_Window * window, int x, int y)
     CHECK_WINDOW_MAGIC(window,);
 
     if (SDL_WINDOWPOS_ISCENTERED(x) || SDL_WINDOWPOS_ISCENTERED(y)) {
-        SDL_VideoDisplay *display = SDL_GetDisplayForWindow(window);
-        int displayIndex;
+        int displayIndex = (x & 0xFFFF);
         SDL_Rect bounds;
+        if (displayIndex > _this->num_displays) {
+            displayIndex = 0;
+        }
 
         SDL_zero(bounds);
 
-        displayIndex = SDL_GetIndexOfDisplay(display);
         SDL_GetDisplayBounds(displayIndex, &bounds);
         if (SDL_WINDOWPOS_ISCENTERED(x)) {
             x = bounds.x + (bounds.w - window->w) / 2;
@@ -2114,6 +2119,7 @@ void
 SDL_UpdateWindowGrab(SDL_Window * window)
 {
     if (_this->SetWindowGrab) {
+        SDL_Window *grabbed_window;
         SDL_bool grabbed;
         if ((SDL_GetMouse()->relative_mode || (window->flags & SDL_WINDOW_INPUT_GRABBED)) &&
              (window->flags & SDL_WINDOW_INPUT_FOCUS)) {
@@ -2121,6 +2127,19 @@ SDL_UpdateWindowGrab(SDL_Window * window)
         } else {
             grabbed = SDL_FALSE;
         }
+
+        grabbed_window = _this->grabbed_window;
+        if (grabbed) {
+            if (grabbed_window && (grabbed_window != window)) {
+                /* stealing a grab from another window! */
+                grabbed_window->flags &= ~SDL_WINDOW_INPUT_GRABBED;
+                _this->SetWindowGrab(_this, grabbed_window, SDL_FALSE);
+            }
+            _this->grabbed_window = window;
+        } else if (grabbed_window == window) {
+            _this->grabbed_window = NULL;  /* ungrabbing. */
+        }
+
         _this->SetWindowGrab(_this, window, grabbed);
     }
 }
@@ -2145,8 +2164,15 @@ SDL_bool
 SDL_GetWindowGrab(SDL_Window * window)
 {
     CHECK_WINDOW_MAGIC(window, SDL_FALSE);
+    SDL_assert(!_this->grabbed_window || ((_this->grabbed_window->flags & SDL_WINDOW_INPUT_GRABBED) != 0));
+    return window == _this->grabbed_window;
+}
 
-    return ((window->flags & SDL_WINDOW_INPUT_GRABBED) != 0);
+SDL_Window *
+SDL_GetGrabbedWindow(void)
+{
+    SDL_assert(!_this->grabbed_window || ((_this->grabbed_window->flags & SDL_WINDOW_INPUT_GRABBED) != 0));
+    return _this->grabbed_window;
 }
 
 void
@@ -2639,6 +2665,7 @@ SDL_GL_ResetAttributes()
 #endif
     _this->gl_config.flags = 0;
     _this->gl_config.framebuffer_srgb_capable = 0;
+    _this->gl_config.release_behavior = SDL_GL_CONTEXT_RELEASE_BEHAVIOR_FLUSH;
 
     _this->gl_config.share_with_current_context = 0;
 }
@@ -2745,6 +2772,9 @@ SDL_GL_SetAttribute(SDL_GLattr attr, int value)
     case SDL_GL_FRAMEBUFFER_SRGB_CAPABLE:
         _this->gl_config.framebuffer_srgb_capable = value;
         break;
+    case SDL_GL_CONTEXT_RELEASE_BEHAVIOR:
+        _this->gl_config.release_behavior = value;
+        break;
     default:
         retval = SDL_SetError("Unknown OpenGL attribute");
         break;
@@ -2845,6 +2875,13 @@ SDL_GL_GetAttribute(SDL_GLattr attr, int *value)
         attrib = GL_SAMPLES_ARB;
 #else
         attrib = GL_SAMPLES;
+#endif
+        break;
+    case SDL_GL_CONTEXT_RELEASE_BEHAVIOR:
+#if SDL_VIDEO_OPENGL
+        attrib = GL_CONTEXT_RELEASE_BEHAVIOR;
+#else
+        attrib = GL_CONTEXT_RELEASE_BEHAVIOR_KHR;
 #endif
         break;
     case SDL_GL_BUFFER_SIZE:

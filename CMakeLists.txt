@@ -118,9 +118,9 @@ else()
 endif()
 
 if (UNIX_OR_MAC_SYS AND NOT EMSCRIPTEN) # JavaScript does not yet have threading support, so disable pthreads when building for Emscripten.
-  set(PTHREADS_ENABLED_BY_DEFAULT ON)
+  set(SDL_PTHREADS_ENABLED_BY_DEFAULT ON)
 else()
-  set(PTHREADS_ENABLED_BY_DEFAULT OFF)
+  set(SDL_PTHREADS_ENABLED_BY_DEFAULT OFF)
 endif()
 
 # Default option knobs
@@ -202,6 +202,7 @@ include_directories(${SDL2_BINARY_DIR}/include ${SDL2_SOURCE_DIR}/include)
 
 # All these ENABLED_BY_DEFAULT vars will default to ON if not specified, so
 #  you only need to have a platform override them if they are disabling.
+set(OPT_DEF_ASM TRUE)
 if(EMSCRIPTEN)
   # Set up default values for the currently supported set of subsystems:
   # Emscripten/Javascript does not have assembly support, a dynamic library 
@@ -212,12 +213,12 @@ if(EMSCRIPTEN)
   set(SDL_THREADS_ENABLED_BY_DEFAULT OFF)
   set(SDL_LOADSO_ENABLED_BY_DEFAULT OFF)
   set(SDL_CPUINFO_ENABLED_BY_DEFAULT OFF)
-  set(DLOPEN_ENABLED_BY_DEFAULT OFF)
+  set(SDL_DLOPEN_ENABLED_BY_DEFAULT OFF)
 endif()
 
 set(SDL_SUBSYSTEMS
     Atomic Audio Video Render Events Joystick Haptic Power Threads Timers
-    File Loadso CPUinfo Filesystem)
+    File Loadso CPUinfo Filesystem Dlopen)
 foreach(_SUB ${SDL_SUBSYSTEMS})
   string(TOUPPER ${_SUB} _OPT)
   if (NOT DEFINED SDL_${_OPT}_ENABLED_BY_DEFAULT)
@@ -246,9 +247,9 @@ dep_option(FUSIONSOUND_SHARED  "Dynamically load fusionsound audio support" ON "
 set_option(VIDEO_DUMMY         "Use dummy video driver" ON)
 set_option(VIDEO_OPENGL        "Include OpenGL support" ON)
 set_option(VIDEO_OPENGLES      "Include OpenGL ES support" ON)
-set_option(PTHREADS            "Use POSIX threads for multi-threading" ${PTHREADS_ENABLED_BY_DEFAULT})
+set_option(PTHREADS            "Use POSIX threads for multi-threading" ${SDL_PTHREADS_ENABLED_BY_DEFAULT})
 dep_option(PTHREADS_SEM        "Use pthread semaphores" ON "PTHREADS" OFF)
-set_option(SDL_DLOPEN          "Use dlopen for shared object loading" ${DLOPEN_ENABLED_BY_DEFAULT})
+set_option(SDL_DLOPEN          "Use dlopen for shared object loading" ${SDL_DLOPEN_ENABLED_BY_DEFAULT})
 set_option(OSS                 "Support the OSS audio API" ${UNIX_SYS})
 set_option(ALSA                "Support the ALSA audio API" ${UNIX_SYS})
 dep_option(ALSA_SHARED         "Dynamically load ALSA audio support" ON "ALSA" OFF)
@@ -266,7 +267,10 @@ set_option(CLOCK_GETTIME       "Use clock_gettime() instead of gettimeofday()" O
 set_option(INPUT_TSLIB         "Use the Touchscreen library for input" ${UNIX_SYS})
 set_option(VIDEO_X11           "Use X11 video driver" ${UNIX_SYS})
 set_option(VIDEO_WAYLAND       "Use Wayland video driver" ${UNIX_SYS})
+dep_option(WAYLAND_SHARED      "Dynamically load Wayland support" ON "VIDEO_WAYLAND" OFF)
+dep_option(VIDEO_WAYLAND_QT_TOUCH  "QtWayland server support for Wayland video driver" ON "VIDEO_WAYLAND" OFF)
 set_option(VIDEO_MIR           "Use Mir video driver" ${UNIX_SYS})
+dep_option(MIR_SHARED          "Dynamically load Mir support" ON "VIDEO_MIR" OFF)
 set_option(VIDEO_RPI           "Use Raspberry Pi video driver" ${UNIX_SYS})
 dep_option(X11_SHARED          "Dynamically load X11 support" ON "VIDEO_X11" OFF)
 set(SDL_X11_OPTIONS Xcursor Xinerama XInput Xrandr Xscrnsaver XShape Xvm)
@@ -585,7 +589,7 @@ if(LIBC)
       set(CMAKE_REQUIRED_LIBRARIES m)
       foreach(_FN
               atan atan2 ceil copysign cos cosf fabs floor log pow scalbn sin
-              sinf sqrt sqrtf tan tanf)
+              sinf sqrt sqrtf tan tanf acos asin)
         string(TOUPPER ${_FN} _UPPER)
         set(_HAVEVAR "HAVE_${_UPPER}")
         check_function_exists("${_FN}" ${_HAVEVAR})
@@ -597,6 +601,15 @@ if(LIBC)
     check_library_exists(iconv iconv_open "" HAVE_LIBICONV)
     if(HAVE_LIBICONV)
       list(APPEND EXTRA_LIBS iconv)
+      set(HAVE_ICONV 1)
+    endif()
+
+    if(NOT APPLE)
+      check_include_file(alloca.h HAVE_ALLOCA_H)
+      check_function_exists(alloca HAVE_ALLOCA)
+    else()
+      set(HAVE_ALLOCA_H 1)
+      set(HAVE_ALLOCA 1)
     endif()
 
     check_struct_has_member("struct sigaction" "sa_sigaction" "signal.h" HAVE_SA_SIGACTION)
@@ -1140,10 +1153,6 @@ elseif(APPLE)
       set(SDL_VIDEO_OPENGL 1)
       set(SDL_VIDEO_OPENGL_CGL 1)
       set(SDL_VIDEO_RENDER_OGL 1)
-      if(DARWIN)
-        find_library(OpenGL_LIBRARY OpenGL)
-        list(APPEND EXTRA_LIBRARIES ${OpenGL_LIBRARY})
-      endif()
       set(HAVE_VIDEO_OPENGL TRUE)
     endif()
   endif()
