@@ -52,6 +52,7 @@ struct SDL_PrivateAudioData {
 	int	numfreq;	/* Number of selected frequency */
 
 	Uint8	*audiobuf[2];	/* DMA buffers */
+	Uint8	*fastrambuf;	/* Intermediate buffer to be filled by application */
 	int	audiosize;	/* and their size, variable depending on latency */
 
 	void (*swapbuf)(Uint8 *nextbuf, int nextsize);	/* Routine to swap DMA buffers */
@@ -64,6 +65,7 @@ struct SDL_PrivateAudioData {
 #define MINTAUDIO_numfreq	(this->hidden->numfreq)
 #define MINTAUDIO_swapbuf	(this->hidden->swapbuf)
 #define MINTAUDIO_audiobuf	(this->hidden->audiobuf)
+#define MINTAUDIO_fastrambuf	(this->hidden->fastrambuf)
 #define MINTAUDIO_audiosize	(this->hidden->audiosize)
 
 /* _MCH cookie (values>>16) */

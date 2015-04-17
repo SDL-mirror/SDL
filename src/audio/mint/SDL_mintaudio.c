@@ -80,7 +80,13 @@ int SDL_MintAudio_InitBuffers(SDL_AudioSpec *spec)
 	SDL_CalculateAudioSpec(spec);
 	MINTAUDIO_audiosize = spec->size * MAX_DMA_BUF;
 
-	/* Allocate memory for audio buffers in DMA-able RAM */
+	/* Allocate audio buffer memory for application in FastRAM */
+	MINTAUDIO_fastrambuf = Atari_SysMalloc(MINTAUDIO_audiosize, MX_TTRAM);
+	if (MINTAUDIO_fastrambuf) {
+		SDL_memset(MINTAUDIO_fastrambuf, spec->silence, MINTAUDIO_audiosize);
+	}
+
+	/* Allocate audio buffers memory for hardware in DMA-able RAM */
 	MINTAUDIO_audiobuf[0] = Atari_SysMalloc(2 * MINTAUDIO_audiosize, MX_STRAM);
 	if (MINTAUDIO_audiobuf[0]==NULL) {
 		SDL_SetError("SDL_MintAudio_OpenAudio: Not enough memory for audio buffer");
@@ -104,6 +110,10 @@ void SDL_MintAudio_FreeBuffers(void)
 {
 	SDL_AudioDevice *this = SDL_MintAudio_device;
 
+	if (MINTAUDIO_fastrambuf) {
+		Mfree(MINTAUDIO_fastrambuf);
+		MINTAUDIO_fastrambuf = NULL;
+	}
 	if (MINTAUDIO_audiobuf[0]) {
 		Mfree(MINTAUDIO_audiobuf[0]);
 		MINTAUDIO_audiobuf[0] = MINTAUDIO_audiobuf[1] = NULL;
@@ -156,33 +166,40 @@ static void SDL_MintAudio_Callback(void)
 	Uint8 *buffer;
 	int i;
 
- 	buffer = MINTAUDIO_audiobuf[SDL_MintAudio_numbuf];
+ 	buffer = (MINTAUDIO_fastrambuf ?
+		MINTAUDIO_fastrambuf :
+		MINTAUDIO_audiobuf[SDL_MintAudio_numbuf]);
 	SDL_memset(buffer, this->spec.silence, this->spec.size * SDL_MintAudio_max_buf);
 
-	if (this->paused)
-		return;
+	if (!this->paused) {
+		for (i=0; i<SDL_MintAudio_max_buf; i++) {
+			if (this->convert.needed) {
+				int silence;
 
-	for (i=0; i<SDL_MintAudio_max_buf; i++) {
-		if (this->convert.needed) {
-			int silence;
+				if ( this->convert.src_format == AUDIO_U8 ) {
+					silence = 0x80;
+				} else {
+					silence = 0;
+				}
+				SDL_memset(this->convert.buf, silence, this->convert.len);
+				this->spec.callback(this->spec.userdata,
+					(Uint8 *)this->convert.buf,this->convert.len);
+				SDL_ConvertAudio(&this->convert);
+				SDL_memcpy(buffer, this->convert.buf, this->convert.len_cvt);
 
-			if ( this->convert.src_format == AUDIO_U8 ) {
-				silence = 0x80;
+				buffer += this->convert.len_cvt;
 			} else {
-				silence = 0;
+				this->spec.callback(this->spec.userdata, buffer,
+					this->spec.size);
+
+				buffer += this->spec.size;
 			}
-			SDL_memset(this->convert.buf, silence, this->convert.len);
-			this->spec.callback(this->spec.userdata,
-				(Uint8 *)this->convert.buf,this->convert.len);
-			SDL_ConvertAudio(&this->convert);
-			SDL_memcpy(buffer, this->convert.buf, this->convert.len_cvt);
-
-			buffer += this->convert.len_cvt;
-		} else {
-			this->spec.callback(this->spec.userdata, buffer, this->spec.size);
-
-			buffer += this->spec.size;
 		}
+	}
+
+	if (MINTAUDIO_fastrambuf) {
+		SDL_memcpy(MINTAUDIO_audiobuf[SDL_MintAudio_numbuf], MINTAUDIO_fastrambuf,
+			this->spec.size * SDL_MintAudio_max_buf);
 	}
 }
 
