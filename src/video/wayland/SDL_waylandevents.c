@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2014 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2015 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -293,7 +293,14 @@ keyboard_handle_enter(void *data, struct wl_keyboard *keyboard,
                       struct wl_array *keys)
 {
     struct SDL_WaylandInput *input = data;
-    SDL_WindowData *window = wl_surface_get_user_data(surface);
+    SDL_WindowData *window;
+
+    if (!surface) {
+        /* enter event for a window we've just destroyed */
+        return;
+    }
+ 
+    window = wl_surface_get_user_data(surface);
 
     input->keyboard_focus = window;
     window->keyboard_device = input;

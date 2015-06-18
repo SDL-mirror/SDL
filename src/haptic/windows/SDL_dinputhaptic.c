@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2014 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2015 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -21,16 +21,16 @@
 #include "../../SDL_internal.h"
 
 #include "SDL_error.h"
-#include "SDL_stdinc.h"
 #include "SDL_haptic.h"
+#include "../SDL_syshaptic.h"
+
+#if SDL_HAPTIC_DINPUT
+
+#include "SDL_stdinc.h"
 #include "SDL_timer.h"
 #include "SDL_windowshaptic_c.h"
 #include "SDL_dinputhaptic_c.h"
-#include "../SDL_syshaptic.h"
 #include "../../joystick/windows/SDL_windowsjoystick_c.h"
-
-
-#if SDL_HAPTIC_DINPUT
 
 /*
  * External stuff.
@@ -1181,6 +1181,8 @@ SDL_DINPUT_HapticStopAll(SDL_Haptic * haptic)
 
 #else /* !SDL_HAPTIC_DINPUT */
 
+typedef struct DIDEVICEINSTANCE DIDEVICEINSTANCE;
+typedef struct SDL_hapticlist_item SDL_hapticlist_item;
 
 int
 SDL_DINPUT_HapticInit(void)

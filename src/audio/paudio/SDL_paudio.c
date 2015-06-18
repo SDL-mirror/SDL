@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2014 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2015 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -111,7 +111,7 @@ OpenAudioPath(char *path, int maxlen, int flags, int classic)
 
         if (stat(audiopath, &sb) == 0) {
             fd = open(audiopath, flags, 0);
-            if (fd > 0) {
+            if (fd >= 0) {
                 if (path != NULL) {
                     SDL_strlcpy(path, audiopath, maxlen);
                 }

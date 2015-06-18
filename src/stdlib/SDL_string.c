@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2014 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2015 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -21,6 +21,10 @@
 
 #if defined(__clang_analyzer__) && !defined(SDL_DISABLE_ANALYZE_MACROS)
 #define SDL_DISABLE_ANALYZE_MACROS 1
+#endif
+
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE 1
 #endif
 
 #include "../SDL_internal.h"

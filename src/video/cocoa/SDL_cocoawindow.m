@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2014 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2015 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -255,6 +255,7 @@ SetWindowStyle(SDL_Window * window, unsigned int style)
         [center addObserver:self selector:@selector(windowDidDeminiaturize:) name:NSWindowDidDeminiaturizeNotification object:window];
         [center addObserver:self selector:@selector(windowDidBecomeKey:) name:NSWindowDidBecomeKeyNotification object:window];
         [center addObserver:self selector:@selector(windowDidResignKey:) name:NSWindowDidResignKeyNotification object:window];
+        [center addObserver:self selector:@selector(windowDidChangeBackingProperties:) name:NSWindowDidChangeBackingPropertiesNotification object:window];
         [center addObserver:self selector:@selector(windowWillEnterFullScreen:) name:NSWindowWillEnterFullScreenNotification object:window];
         [center addObserver:self selector:@selector(windowDidEnterFullScreen:) name:NSWindowDidEnterFullScreenNotification object:window];
         [center addObserver:self selector:@selector(windowWillExitFullScreen:) name:NSWindowWillExitFullScreenNotification object:window];
@@ -385,6 +386,7 @@ SetWindowStyle(SDL_Window * window, unsigned int style)
         [center removeObserver:self name:NSWindowDidDeminiaturizeNotification object:window];
         [center removeObserver:self name:NSWindowDidBecomeKeyNotification object:window];
         [center removeObserver:self name:NSWindowDidResignKeyNotification object:window];
+        [center removeObserver:self name:NSWindowDidChangeBackingPropertiesNotification object:window];
         [center removeObserver:self name:NSWindowWillEnterFullScreenNotification object:window];
         [center removeObserver:self name:NSWindowDidEnterFullScreenNotification object:window];
         [center removeObserver:self name:NSWindowWillExitFullScreenNotification object:window];
@@ -531,12 +533,14 @@ SetWindowStyle(SDL_Window * window, unsigned int style)
 {
     SDL_Window *window = _data->window;
     SDL_Mouse *mouse = SDL_GetMouse();
+
+    /* We're going to get keyboard events, since we're key. */
+    /* This needs to be done before restoring the relative mouse mode. */
+    SDL_SetKeyboardFocus(window);
+
     if (mouse->relative_mode && !mouse->relative_mode_warp && ![self isMoving]) {
         mouse->SetRelativeMouseMode(SDL_TRUE);
     }
-
-    /* We're going to get keyboard events, since we're key. */
-    SDL_SetKeyboardFocus(window);
 
     /* If we just gained focus we need the updated mouse position */
     if (!mouse->relative_mode) {
@@ -579,6 +583,22 @@ SetWindowStyle(SDL_Window * window, unsigned int style)
 
     if (isFullscreenSpace) {
         [NSMenu setMenuBarVisible:YES];
+    }
+}
+
+- (void)windowDidChangeBackingProperties:(NSNotification *)aNotification
+{
+    NSNumber *oldscale = [[aNotification userInfo] objectForKey:NSBackingPropertyOldScaleFactorKey];
+
+    if (inFullscreenTransition) {
+        return;
+    }
+
+    if ([oldscale doubleValue] != [_data->nswindow backingScaleFactor]) {
+        /* Force a resize event when the backing scale factor changes. */
+        _data->window->w = 0;
+        _data->window->h = 0;
+        [self windowDidResize:aNotification];
     }
 }
 
@@ -730,6 +750,14 @@ SetWindowStyle(SDL_Window * window, unsigned int style)
 - (void)mouseDown:(NSEvent *)theEvent
 {
     int button;
+
+    /* Ignore events that aren't inside the client area (i.e. title bar.) */
+    if ([theEvent window]) {
+        const NSRect windowRect = [[[theEvent window] contentView] frame];
+        if (!NSPointInRect([theEvent locationInWindow], windowRect)) {
+            return;
+        }
+    }
 
     if ([self processHitTest:theEvent]) {
         return;  /* dragging, drop event. */
@@ -931,10 +959,8 @@ SetWindowStyle(SDL_Window * window, unsigned int style)
 
     for (NSTouch *touch in touches) {
         const SDL_TouchID touchId = (SDL_TouchID)(intptr_t)[touch device];
-        if (!SDL_GetTouch(touchId)) {
-            if (SDL_AddTouch(touchId, "") < 0) {
-                return;
-            }
+        if (SDL_AddTouch(touchId, "") < 0) {
+            return;
         }
 
         const SDL_FingerID fingerId = (SDL_FingerID)(intptr_t)[touch identity];
@@ -962,14 +988,29 @@ SetWindowStyle(SDL_Window * window, unsigned int style)
 
 @end
 
-@interface SDLView : NSView
+@interface SDLView : NSView {
+    SDL_Window *_sdlWindow;
+}
+
+- (void)setSDLWindow:(SDL_Window*)window;
 
 /* The default implementation doesn't pass rightMouseDown to responder chain */
 - (void)rightMouseDown:(NSEvent *)theEvent;
 - (BOOL)mouseDownCanMoveWindow;
+- (void)drawRect:(NSRect)dirtyRect;
 @end
 
 @implementation SDLView
+- (void)setSDLWindow:(SDL_Window*)window
+{
+    _sdlWindow = window;
+}
+
+- (void)drawRect:(NSRect)dirtyRect
+{
+    SDL_SendWindowEvent(_sdlWindow, SDL_WINDOWEVENT_EXPOSED, 0, 0);
+}
+
 - (void)rightMouseDown:(NSEvent *)theEvent
 {
     [[self nextResponder] rightMouseDown:theEvent];
@@ -1000,8 +1041,8 @@ SetWindowStyle(SDL_Window * window, unsigned int style)
 
 static int
 SetupWindowData(_THIS, SDL_Window * window, NSWindow *nswindow, SDL_bool created)
+{ @autoreleasepool
 {
-    NSAutoreleasePool *pool;
     SDL_VideoData *videodata = (SDL_VideoData *) _this->driverdata;
     SDL_WindowData *data;
 
@@ -1015,8 +1056,6 @@ SetupWindowData(_THIS, SDL_Window * window, NSWindow *nswindow, SDL_bool created
     data->created = created;
     data->videodata = videodata;
     data->nscontexts = [[NSMutableArray alloc] init];
-
-    pool = [[NSAutoreleasePool alloc] init];
 
     /* Create an event listener for the window */
     data->listener = [[Cocoa_WindowListener alloc] init];
@@ -1079,16 +1118,15 @@ SetupWindowData(_THIS, SDL_Window * window, NSWindow *nswindow, SDL_bool created
     [nswindow setOneShot:NO];
 
     /* All done! */
-    [pool release];
     window->driverdata = data;
     return 0;
-}
+}}
 
 int
 Cocoa_CreateWindow(_THIS, SDL_Window * window)
+{ @autoreleasepool
 {
     SDL_VideoData *videodata = (SDL_VideoData *) _this->driverdata;
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     NSWindow *nswindow;
     SDL_VideoDisplay *display = SDL_GetDisplayForWindow(window);
     NSRect rect;
@@ -1123,9 +1161,7 @@ Cocoa_CreateWindow(_THIS, SDL_Window * window)
         nswindow = [[SDLWindow alloc] initWithContentRect:rect styleMask:style backing:NSBackingStoreBuffered defer:NO screen:screen];
     }
     @catch (NSException *e) {
-        SDL_SetError("%s", [[e reason] UTF8String]);
-        [pool release];
-        return -1;
+        return SDL_SetError("%s", [[e reason] UTF8String]);
     }
     [nswindow setBackgroundColor:[NSColor blackColor]];
 
@@ -1141,7 +1177,8 @@ Cocoa_CreateWindow(_THIS, SDL_Window * window)
 
     /* Create a default view for this window */
     rect = [nswindow contentRectForFrameRect:[nswindow frame]];
-    NSView *contentView = [[SDLView alloc] initWithFrame:rect];
+    SDLView *contentView = [[SDLView alloc] initWithFrame:rect];
+    [contentView setSDLWindow:window];
 
     if (window->flags & SDL_WINDOW_ALLOW_HIGHDPI) {
         if ([contentView respondsToSelector:@selector(setWantsBestResolutionOpenGLSurface:)]) {
@@ -1155,23 +1192,19 @@ Cocoa_CreateWindow(_THIS, SDL_Window * window)
     /* Allow files and folders to be dragged onto the window by users */
     [nswindow registerForDraggedTypes:[NSArray arrayWithObject:(NSString *)kUTTypeFileURL]];
 
-    [pool release];
-
     if (SetupWindowData(_this, window, nswindow, SDL_TRUE) < 0) {
         [nswindow release];
         return -1;
     }
     return 0;
-}
+}}
 
 int
 Cocoa_CreateWindowFrom(_THIS, SDL_Window * window, const void *data)
+{ @autoreleasepool
 {
-    NSAutoreleasePool *pool;
     NSWindow *nswindow = (NSWindow *) data;
     NSString *title;
-
-    pool = [[NSAutoreleasePool alloc] init];
 
     /* Query the title from the existing window */
     title = [nswindow title];
@@ -1179,39 +1212,34 @@ Cocoa_CreateWindowFrom(_THIS, SDL_Window * window, const void *data)
         window->title = SDL_strdup([title UTF8String]);
     }
 
-    [pool release];
-
     return SetupWindowData(_this, window, nswindow, SDL_FALSE);
-}
+}}
 
 void
 Cocoa_SetWindowTitle(_THIS, SDL_Window * window)
+{ @autoreleasepool
 {
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     NSWindow *nswindow = ((SDL_WindowData *) window->driverdata)->nswindow;
     NSString *string = [[NSString alloc] initWithUTF8String:window->title];
     [nswindow setTitle:string];
     [string release];
-    [pool release];
-}
+}}
 
 void
 Cocoa_SetWindowIcon(_THIS, SDL_Window * window, SDL_Surface * icon)
+{ @autoreleasepool
 {
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     NSImage *nsimage = Cocoa_CreateImage(icon);
 
     if (nsimage) {
         [NSApp setApplicationIconImage:nsimage];
     }
-
-    [pool release];
-}
+}}
 
 void
 Cocoa_SetWindowPosition(_THIS, SDL_Window * window)
+{ @autoreleasepool
 {
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     SDL_WindowData *windata = (SDL_WindowData *) window->driverdata;
     NSWindow *nswindow = windata->nswindow;
     NSRect rect;
@@ -1229,14 +1257,12 @@ Cocoa_SetWindowPosition(_THIS, SDL_Window * window)
     s_moveHack = moveHack;
 
     ScheduleContextUpdates(windata);
-
-    [pool release];
-}
+}}
 
 void
 Cocoa_SetWindowSize(_THIS, SDL_Window * window)
+{ @autoreleasepool
 {
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     SDL_WindowData *windata = (SDL_WindowData *) window->driverdata;
     NSWindow *nswindow = windata->nswindow;
     NSSize size;
@@ -1246,14 +1272,12 @@ Cocoa_SetWindowSize(_THIS, SDL_Window * window)
     [nswindow setContentSize:size];
 
     ScheduleContextUpdates(windata);
-
-    [pool release];
-}
+}}
 
 void
 Cocoa_SetWindowMinimumSize(_THIS, SDL_Window * window)
+{ @autoreleasepool
 {
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     SDL_WindowData *windata = (SDL_WindowData *) window->driverdata;
 
     NSSize minSize;
@@ -1261,14 +1285,12 @@ Cocoa_SetWindowMinimumSize(_THIS, SDL_Window * window)
     minSize.height = window->min_h;
 
     [windata->nswindow setContentMinSize:minSize];
-
-    [pool release];
-}
+}}
 
 void
 Cocoa_SetWindowMaximumSize(_THIS, SDL_Window * window)
+{ @autoreleasepool
 {
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     SDL_WindowData *windata = (SDL_WindowData *) window->driverdata;
 
     NSSize maxSize;
@@ -1276,14 +1298,12 @@ Cocoa_SetWindowMaximumSize(_THIS, SDL_Window * window)
     maxSize.height = window->max_h;
 
     [windata->nswindow setContentMaxSize:maxSize];
-
-    [pool release];
-}
+}}
 
 void
 Cocoa_ShowWindow(_THIS, SDL_Window * window)
+{ @autoreleasepool
 {
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     SDL_WindowData *windowData = ((SDL_WindowData *) window->driverdata);
     NSWindow *nswindow = windowData->nswindow;
 
@@ -1292,23 +1312,21 @@ Cocoa_ShowWindow(_THIS, SDL_Window * window)
         [nswindow makeKeyAndOrderFront:nil];
         [windowData->listener resumeVisibleObservation];
     }
-    [pool release];
-}
+}}
 
 void
 Cocoa_HideWindow(_THIS, SDL_Window * window)
+{ @autoreleasepool
 {
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     NSWindow *nswindow = ((SDL_WindowData *) window->driverdata)->nswindow;
 
     [nswindow orderOut:nil];
-    [pool release];
-}
+}}
 
 void
 Cocoa_RaiseWindow(_THIS, SDL_Window * window)
+{ @autoreleasepool
 {
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     SDL_WindowData *windowData = ((SDL_WindowData *) window->driverdata);
     NSWindow *nswindow = windowData->nswindow;
 
@@ -1321,28 +1339,24 @@ Cocoa_RaiseWindow(_THIS, SDL_Window * window)
         [nswindow makeKeyAndOrderFront:nil];
     }
     [windowData->listener resumeVisibleObservation];
-
-    [pool release];
-}
+}}
 
 void
 Cocoa_MaximizeWindow(_THIS, SDL_Window * window)
+{ @autoreleasepool
 {
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     SDL_WindowData *windata = (SDL_WindowData *) window->driverdata;
     NSWindow *nswindow = windata->nswindow;
 
     [nswindow zoom:nil];
 
     ScheduleContextUpdates(windata);
-
-    [pool release];
-}
+}}
 
 void
 Cocoa_MinimizeWindow(_THIS, SDL_Window * window)
+{ @autoreleasepool
 {
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
     NSWindow *nswindow = data->nswindow;
 
@@ -1351,13 +1365,12 @@ Cocoa_MinimizeWindow(_THIS, SDL_Window * window)
     } else {
         [nswindow miniaturize:nil];
     }
-    [pool release];
-}
+}}
 
 void
 Cocoa_RestoreWindow(_THIS, SDL_Window * window)
+{ @autoreleasepool
 {
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     NSWindow *nswindow = ((SDL_WindowData *) window->driverdata)->nswindow;
 
     if ([nswindow isMiniaturized]) {
@@ -1365,8 +1378,7 @@ Cocoa_RestoreWindow(_THIS, SDL_Window * window)
     } else if ((window->flags & SDL_WINDOW_RESIZABLE) && [nswindow isZoomed]) {
         [nswindow zoom:nil];
     }
-    [pool release];
-}
+}}
 
 static NSWindow *
 Cocoa_RebuildWindow(SDL_WindowData * data, NSWindow * nswindow, unsigned style)
@@ -1391,21 +1403,20 @@ Cocoa_RebuildWindow(SDL_WindowData * data, NSWindow * nswindow, unsigned style)
 
 void
 Cocoa_SetWindowBordered(_THIS, SDL_Window * window, SDL_bool bordered)
+{ @autoreleasepool
 {
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     if (SetWindowStyle(window, GetWindowStyle(window))) {
         if (bordered) {
             Cocoa_SetWindowTitle(_this, window);  /* this got blanked out. */
         }
     }
-    [pool release];
-}
+}}
 
 
 void
 Cocoa_SetWindowFullscreen(_THIS, SDL_Window * window, SDL_VideoDisplay * display, SDL_bool fullscreen)
+{ @autoreleasepool
 {
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
     NSWindow *nswindow = data->nswindow;
     NSRect rect;
@@ -1479,9 +1490,7 @@ Cocoa_SetWindowFullscreen(_THIS, SDL_Window * window, SDL_VideoDisplay * display
     }
 
     ScheduleContextUpdates(data);
-
-    [pool release];
-}
+}}
 
 int
 Cocoa_SetWindowGammaRamp(_THIS, SDL_Window * window, const Uint16 * ramp)
@@ -1564,8 +1573,8 @@ Cocoa_SetWindowGrab(_THIS, SDL_Window * window, SDL_bool grabbed)
 
 void
 Cocoa_DestroyWindow(_THIS, SDL_Window * window)
+{ @autoreleasepool
 {
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
 
     if (data) {
@@ -1585,9 +1594,7 @@ Cocoa_DestroyWindow(_THIS, SDL_Window * window)
         SDL_free(data);
     }
     window->driverdata = NULL;
-
-    [pool release];
-}
+}}
 
 SDL_bool
 Cocoa_GetWindowWMInfo(_THIS, SDL_Window * window, SDL_SysWMinfo * info)
@@ -1619,9 +1626,9 @@ Cocoa_IsWindowInFullscreenSpace(SDL_Window * window)
 
 SDL_bool
 Cocoa_SetWindowFullscreenSpace(SDL_Window * window, SDL_bool state)
+{ @autoreleasepool
 {
     SDL_bool succeeded = SDL_FALSE;
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
     SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
 
     if ([data->listener setFullscreenSpace:(state ? YES : NO)]) {
@@ -1642,10 +1649,8 @@ Cocoa_SetWindowFullscreenSpace(SDL_Window * window, SDL_bool state)
         }
     }
 
-    [pool release];
-
     return succeeded;
-}
+}}
 
 int
 Cocoa_SetWindowHitTest(SDL_Window * window, SDL_bool enabled)

@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2014 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2015 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -33,7 +33,7 @@
 
 #include "SDL.h"
 
-static char* SDL_UDEV_LIBS[] = { "libudev.so.1", "libudev.so.0" };
+static const char* SDL_UDEV_LIBS[] = { "libudev.so.1", "libudev.so.0" };
 
 #define _THIS SDL_UDEV_PrivateData *_this
 static _THIS = NULL;
@@ -469,6 +469,9 @@ SDL_UDEV_Poll(void)
         action = _this->udev_device_get_action(dev);
 
         if (SDL_strcmp(action, "add") == 0) {
+            /* Wait for the device to finish initialization */
+            SDL_Delay(100);
+
             device_event(SDL_UDEV_DEVICEADDED, dev);
         } else if (SDL_strcmp(action, "remove") == 0) {
             device_event(SDL_UDEV_DEVICEREMOVED, dev);

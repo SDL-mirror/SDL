@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2014 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2015 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -21,12 +21,12 @@
 #include "../../SDL_internal.h"
 
 #include "../SDL_sysjoystick.h"
+
+#if SDL_JOYSTICK_DINPUT
+
 #include "SDL_windowsjoystick_c.h"
 #include "SDL_dinputjoystick_c.h"
 #include "SDL_xinputjoystick_c.h"
-
-
-#if SDL_JOYSTICK_DINPUT
 
 #ifndef DIDFT_OPTIONAL
 #define DIDFT_OPTIONAL      0x80000000
@@ -342,7 +342,7 @@ EnumJoysticksCallback(const DIDEVICEINSTANCE * pdidInstance, VOID * pContext)
     JoyStick_DeviceData *pPrevJoystick = NULL;
     const DWORD devtype = (pdidInstance->dwDevType & 0xFF);
 
-    if ((devtype != DI8DEVTYPE_JOYSTICK) && (devtype != DI8DEVTYPE_GAMEPAD)) {
+    if (devtype == DI8DEVTYPE_SUPPLEMENTAL) {
         return DIENUM_CONTINUE;  /* Ignore touchpads, etc. */
     }
 
@@ -867,6 +867,7 @@ SDL_DINPUT_JoystickQuit(void)
 
 #else /* !SDL_JOYSTICK_DINPUT */
 
+typedef struct JoyStick_DeviceData JoyStick_DeviceData;
 
 int
 SDL_DINPUT_JoystickInit(void)

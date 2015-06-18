@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2014 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2015 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -111,7 +111,7 @@ SDL_SetError(SDL_PRINTF_FORMAT_STRING const char *fmt, ...)
     va_end(ap);
 
     /* If we are in debug mode, print out an error message */
-    SDL_LogError(SDL_LOG_CATEGORY_ERROR, "%s", SDL_GetError());
+    SDL_LogDebug(SDL_LOG_CATEGORY_ERROR, "%s", SDL_GetError());
 
     return -1;
 }

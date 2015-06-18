@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2014 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2015 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -341,7 +341,7 @@ static Uint8 EVDEV_MouseButtons[] = {
     SDL_BUTTON_X2 + 3           /*  BTN_TASK        0x117 */
 };
 
-static char* EVDEV_consoles[] = {
+static const char* EVDEV_consoles[] = {
     "/proc/self/fd/0",
     "/dev/tty",
     "/dev/tty0",

@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2014 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2015 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -123,7 +123,7 @@ IBus_utf8_strlen(const char *str)
 }
 
 static DBusHandlerResult
-IBus_MessageFilter(DBusConnection *conn, DBusMessage *msg, void *user_data)
+IBus_MessageHandler(DBusConnection *conn, DBusMessage *msg, void *user_data)
 {
     SDL_DBusContext *dbus = (SDL_DBusContext *)user_data;
         
@@ -156,12 +156,12 @@ IBus_MessageFilter(DBusConnection *conn, DBusMessage *msg, void *user_data)
         dbus->message_iter_init(msg, &iter);
         text = IBus_GetVariantText(conn, &iter, dbus);
         
-        if (text && *text) {
+        if (text) {
             char buf[SDL_TEXTEDITINGEVENT_TEXT_SIZE];
             size_t text_bytes = SDL_strlen(text), i = 0;
             size_t cursor = 0;
             
-            while (i < text_bytes) {
+            do {
                 size_t sz = SDL_utf8strlcpy(buf, text+i, sizeof(buf));
                 size_t chars = IBus_utf8_strlen(buf);
                 
@@ -169,7 +169,7 @@ IBus_MessageFilter(DBusConnection *conn, DBusMessage *msg, void *user_data)
 
                 i += sz;
                 cursor += chars;
-            }
+            } while (i < text_bytes);
         }
         
         SDL_IBus_UpdateTextRect(NULL);
@@ -341,6 +341,8 @@ IBus_SetupConnection(SDL_DBusContext *dbus, const char* addr)
     const char *path = NULL;
     SDL_bool result = SDL_FALSE;
     DBusMessage *msg;
+    DBusObjectPathVTable ibus_vtable = {0};
+    ibus_vtable.message_function = &IBus_MessageHandler;
 
     ibus_conn = dbus->connection_open_private(addr, NULL);
 
@@ -388,7 +390,7 @@ IBus_SetupConnection(SDL_DBusContext *dbus, const char* addr)
         SDL_AddHintCallback(SDL_HINT_IME_INTERNAL_EDITING, &IBus_SetCapabilities, NULL);
         
         dbus->bus_add_match(ibus_conn, "type='signal',interface='org.freedesktop.IBus.InputContext'", NULL);
-        dbus->connection_add_filter(ibus_conn, &IBus_MessageFilter, dbus, NULL);
+        dbus->connection_try_register_object_path(ibus_conn, input_ctx_path, &ibus_vtable, dbus, NULL);
         dbus->connection_flush(ibus_conn);
     }
 
@@ -459,10 +461,12 @@ SDL_IBus_Init(void)
             return SDL_FALSE;
         }
         
+        /* !!! FIXME: if ibus_addr_file != NULL, this will overwrite it and leak (twice!) */
         ibus_addr_file = SDL_strdup(addr_file);
         
         addr = IBus_ReadAddressFromFile(addr_file);
         if (!addr) {
+            SDL_free(addr_file);
             return SDL_FALSE;
         }
         
@@ -668,7 +672,7 @@ SDL_IBus_PumpEvents(void)
         dbus->connection_read_write(ibus_conn, 0);
     
         while (dbus->connection_dispatch(ibus_conn) == DBUS_DISPATCH_DATA_REMAINS) {
-            /* Do nothing, actual work happens in IBus_MessageFilter */
+            /* Do nothing, actual work happens in IBus_MessageHandler */
         }
     }
 }

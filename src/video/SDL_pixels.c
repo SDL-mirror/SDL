@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2014 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2015 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -1101,9 +1101,7 @@ SDL_CalculateGammaRamp(float gamma, Uint16 * ramp)
 
     /* 0.0 gamma is all black */
     if (gamma == 0.0f) {
-        for (i = 0; i < 256; ++i) {
-            ramp[i] = 0;
-        }
+        SDL_memset(ramp, 0, 256 * sizeof(Uint16));
         return;
     } else if (gamma == 1.0f) {
         /* 1.0 gamma is identity */

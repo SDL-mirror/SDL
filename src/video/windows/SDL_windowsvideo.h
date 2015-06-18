@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2014 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2015 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -27,7 +27,7 @@
 
 #include "../SDL_sysvideo.h"
 
-#if defined(_MSC_VER)
+#if defined(_MSC_VER) && (_MSC_VER >= 1500)
 #include <msctf.h>
 #else
 #include "SDL_msctf.h"

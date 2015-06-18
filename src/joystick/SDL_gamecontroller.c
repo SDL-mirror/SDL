@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2014 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2015 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -259,22 +259,29 @@ ControllerMapping_t *SDL_PrivateGetControllerMappingForGUID(SDL_JoystickGUID *gu
  */
 ControllerMapping_t *SDL_PrivateGetControllerMapping(int device_index)
 {
+    SDL_JoystickGUID jGUID = SDL_JoystickGetDeviceGUID(device_index);
+    ControllerMapping_t *mapping;
+
+    mapping = SDL_PrivateGetControllerMappingForGUID(&jGUID);
 #if SDL_JOYSTICK_XINPUT
-    if (SDL_SYS_IsXInputGamepad_DeviceIndex(device_index) && s_pXInputMapping) {
-        return s_pXInputMapping;
+    if (!mapping && SDL_SYS_IsXInputGamepad_DeviceIndex(device_index)) {
+        mapping = s_pXInputMapping;
     }
-    else
 #endif
 #if defined(SDL_JOYSTICK_EMSCRIPTEN)
-    if (s_pEmscriptenMapping) {
-        return s_pEmscriptenMapping;
+    if (!mapping && s_pEmscriptenMapping) {
+        mapping = s_pEmscriptenMapping;
     }
-    else
 #endif
-    {
-        SDL_JoystickGUID jGUID = SDL_JoystickGetDeviceGUID(device_index);
-        return SDL_PrivateGetControllerMappingForGUID(&jGUID);
+    if (!mapping) {
+        const char *name = SDL_JoystickNameForIndex(device_index);
+        if (name) {
+            if (SDL_strstr(name, "Xbox") || SDL_strstr(name, "X-Box")) {
+                mapping = s_pXInputMapping;
+            }
+        }
     }
+    return mapping;
 }
 
 static const char* map_StringForControllerAxis[] = {

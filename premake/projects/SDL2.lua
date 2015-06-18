@@ -1,4 +1,4 @@
--- Copyright (C) 1997-2014 Sam Lantinga <slouken@libsdl.org>
+-- Copyright (C) 1997-2015 Sam Lantinga <slouken@libsdl.org>
 --
 -- This software is provided 'as-is', without any express or implied
 -- warranty.  In no event will the authors be held liable for any damages
@@ -293,6 +293,7 @@ SDL_project "SDL2"
 			["SDL_VIDEO_DRIVER_X11_DYNAMIC_XSS"] = '"libXss.so"',
 			["SDL_VIDEO_DRIVER_X11_DYNAMIC_XVIDMODE"] = '"libXxf86vm.so"',
 			["SDL_VIDEO_DRIVER_X11_XCURSOR"] = 1,
+			["SDL_VIDEO_DRIVER_X11_XDBE"] = 1,
 			["SDL_VIDEO_DRIVER_X11_XINERAMA"] = 1,
 			["SDL_VIDEO_DRIVER_X11_XINPUT2"] = 1,
 			["SDL_VIDEO_DRIVER_X11_XINPUT2_SUPPORTS_MULTITOUCH"] = 1,

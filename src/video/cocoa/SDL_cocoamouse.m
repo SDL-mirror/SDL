@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2014 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2015 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -195,6 +195,21 @@ Cocoa_ShowCursor(SDL_Cursor * cursor)
     return 0;
 }}
 
+static SDL_Window *
+SDL_FindWindowAtPoint(const int x, const int y)
+{
+    const SDL_Point pt = { x, y };
+    SDL_Window *i;
+    for (i = SDL_GetVideoDevice()->windows; i; i = i->next) {
+        const SDL_Rect r = { i->x, i->y, i->w, i->h };
+        if (SDL_PointInRect(&pt, &r)) {
+            return i;
+        }
+    }
+
+    return NULL;
+}
+
 static void
 Cocoa_WarpMouseGlobal(int x, int y)
 {
@@ -207,7 +222,7 @@ Cocoa_WarpMouseGlobal(int x, int y)
             return;
         }
     }
-    CGPoint point = CGPointMake((float)x, (float)y);
+    const CGPoint point = CGPointMake((float)x, (float)y);
 
     Cocoa_HandleMouseWarp(point.x, point.y);
 
@@ -219,11 +234,16 @@ Cocoa_WarpMouseGlobal(int x, int y)
     CGWarpMouseCursorPosition(point);
     CGSetLocalEventsSuppressionInterval(0.25);
 
-    if (!mouse->relative_mode && mouse->focus) {
-        /* CGWarpMouseCursorPosition doesn't generate a window event, unlike our
-         * other implementations' APIs.
-         */
-        SDL_SendMouseMotion(mouse->focus, mouse->mouseID, 0, x - mouse->focus->x, y - mouse->focus->y);
+    /* CGWarpMouseCursorPosition doesn't generate a window event, unlike our
+     * other implementations' APIs. Send what's appropriate.
+     */
+    if (!mouse->relative_mode) {
+        SDL_Window *win = SDL_FindWindowAtPoint(x, y);
+        SDL_SetMouseFocus(win);
+        if (win) {
+            SDL_assert(win == mouse->focus);
+            SDL_SendMouseMotion(win, mouse->mouseID, 0, x - win->x, y - win->y);
+        }
     }
 }
 

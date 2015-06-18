@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2014 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2015 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -683,7 +683,10 @@ SDL_SYS_HapticQuit(void)
         IOObjectRelease(item->dev);
         SDL_free(item);
     }
+
     numhaptics = -1;
+    SDL_hapticlist = NULL;
+    SDL_hapticlist_tail = NULL;
 }
 
 
@@ -771,18 +774,18 @@ static int
 SDL_SYS_ToFFEFFECT(SDL_Haptic * haptic, FFEFFECT * dest, SDL_HapticEffect * src)
 {
     int i;
-    FFCONSTANTFORCE *constant;
-    FFPERIODIC *periodic;
-    FFCONDITION *condition;     /* Actually an array of conditions - one per axis. */
-    FFRAMPFORCE *ramp;
-    FFCUSTOMFORCE *custom;
-    FFENVELOPE *envelope;
-    SDL_HapticConstant *hap_constant;
-    SDL_HapticPeriodic *hap_periodic;
-    SDL_HapticCondition *hap_condition;
-    SDL_HapticRamp *hap_ramp;
-    SDL_HapticCustom *hap_custom;
-    DWORD *axes;
+    FFCONSTANTFORCE *constant = NULL;
+    FFPERIODIC *periodic = NULL;
+    FFCONDITION *condition = NULL;     /* Actually an array of conditions - one per axis. */
+    FFRAMPFORCE *ramp = NULL;
+    FFCUSTOMFORCE *custom = NULL;
+    FFENVELOPE *envelope = NULL;
+    SDL_HapticConstant *hap_constant = NULL;
+    SDL_HapticPeriodic *hap_periodic = NULL;
+    SDL_HapticCondition *hap_condition = NULL;
+    SDL_HapticRamp *hap_ramp = NULL;
+    SDL_HapticCustom *hap_custom = NULL;
+    DWORD *axes = NULL;
 
     /* Set global stuff. */
     SDL_memset(dest, 0, sizeof(FFEFFECT));
@@ -912,25 +915,28 @@ SDL_SYS_ToFFEFFECT(SDL_Haptic * haptic, FFEFFECT * dest, SDL_HapticEffect * src)
     case SDL_HAPTIC_INERTIA:
     case SDL_HAPTIC_FRICTION:
         hap_condition = &src->condition;
-        condition = SDL_malloc(sizeof(FFCONDITION) * dest->cAxes);
-        if (condition == NULL) {
-            return SDL_OutOfMemory();
-        }
-        SDL_memset(condition, 0, sizeof(FFCONDITION));
+        if (dest->cAxes > 0) {
+            condition = SDL_malloc(sizeof(FFCONDITION) * dest->cAxes);
+            if (condition == NULL) {
+                return SDL_OutOfMemory();
+            }
+            SDL_memset(condition, 0, sizeof(FFCONDITION));
 
-        /* Specifics */
-        for (i = 0; i < dest->cAxes; i++) {
-            condition[i].lOffset = CONVERT(hap_condition->center[i]);
-            condition[i].lPositiveCoefficient =
-                CONVERT(hap_condition->right_coeff[i]);
-            condition[i].lNegativeCoefficient =
-                CONVERT(hap_condition->left_coeff[i]);
-            condition[i].dwPositiveSaturation =
-                CCONVERT(hap_condition->right_sat[i] / 2);
-            condition[i].dwNegativeSaturation =
-                CCONVERT(hap_condition->left_sat[i] / 2);
-            condition[i].lDeadBand = CCONVERT(hap_condition->deadband[i] / 2);
+            /* Specifics */
+            for (i = 0; i < dest->cAxes; i++) {
+                condition[i].lOffset = CONVERT(hap_condition->center[i]);
+                condition[i].lPositiveCoefficient =
+                    CONVERT(hap_condition->right_coeff[i]);
+                condition[i].lNegativeCoefficient =
+                    CONVERT(hap_condition->left_coeff[i]);
+                condition[i].dwPositiveSaturation =
+                    CCONVERT(hap_condition->right_sat[i] / 2);
+                condition[i].dwNegativeSaturation =
+                    CCONVERT(hap_condition->left_sat[i] / 2);
+                condition[i].lDeadBand = CCONVERT(hap_condition->deadband[i] / 2);
+            }
         }
+
         dest->cbTypeSpecificParams = sizeof(FFCONDITION) * dest->cAxes;
         dest->lpvTypeSpecificParams = condition;
 
@@ -1406,5 +1412,6 @@ SDL_SYS_HapticStopAll(SDL_Haptic * haptic)
     return 0;
 }
 
-
 #endif /* SDL_HAPTIC_IOKIT */
+
+/* vi: set ts=4 sw=4 expandtab: */

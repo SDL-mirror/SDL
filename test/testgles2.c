@@ -1,5 +1,5 @@
 /*
-  Copyright (r) 1997-2014 Sam Lantinga <slouken@libsdl.org>
+  Copyright (r) 1997-2015 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -20,7 +20,7 @@
 
 #include "SDL_test_common.h"
 
-#if defined(__IPHONEOS__) || defined(__ANDROID__) || defined(__NACL__)
+#if defined(__IPHONEOS__) || defined(__ANDROID__) || defined(__EMSCRIPTEN__) || defined(__NACL__)
 #define HAVE_OPENGLES2
 #endif
 
@@ -466,6 +466,11 @@ void loop()
           SDL_GL_SwapWindow(state->windows[i]);
       }
     }
+#ifdef __EMSCRIPTEN__
+    else {
+        emscripten_cancel_main_loop();
+    }
+#endif
 }
 
 int

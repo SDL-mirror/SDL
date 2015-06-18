@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2014 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2015 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -165,7 +165,8 @@ SDL_RendererEventWatch(void *userdata, SDL_Event *event)
             }
         }
     } else if (event->type == SDL_MOUSEMOTION) {
-        if (renderer->logical_w) {
+        SDL_Window *window = SDL_GetWindowFromID(event->motion.windowID);
+        if (renderer->logical_w && window == renderer->window) {
             event->motion.x -= renderer->viewport.x;
             event->motion.y -= renderer->viewport.y;
             event->motion.x = (int)(event->motion.x / renderer->scale.x);
@@ -183,7 +184,8 @@ SDL_RendererEventWatch(void *userdata, SDL_Event *event)
         }
     } else if (event->type == SDL_MOUSEBUTTONDOWN ||
                event->type == SDL_MOUSEBUTTONUP) {
-        if (renderer->logical_w) {
+        SDL_Window *window = SDL_GetWindowFromID(event->button.windowID);
+        if (renderer->logical_w && window == renderer->window) {
             event->button.x -= renderer->viewport.x;
             event->button.y -= renderer->viewport.y;
             event->button.x = (int)(event->button.x / renderer->scale.x);
@@ -820,7 +822,9 @@ SDL_UpdateTexture(SDL_Texture * texture, const SDL_Rect * rect,
         rect = &full_rect;
     }
 
-    if (texture->yuv) {
+    if ((rect->w == 0) || (rect->h == 0)) {
+        return 0;  /* nothing to do. */
+    } else if (texture->yuv) {
         return SDL_UpdateTextureYUV(texture, rect, pixels, pitch);
     } else if (texture->native) {
         return SDL_UpdateTextureNative(texture, rect, pixels, pitch);

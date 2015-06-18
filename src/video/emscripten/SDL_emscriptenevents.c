@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2014 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2015 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -38,8 +38,9 @@
 #define FULLSCREEN_MASK ( SDL_WINDOW_FULLSCREEN_DESKTOP | SDL_WINDOW_FULLSCREEN )
 
 /*
-.which to scancode
-https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent#Constants
+.keyCode to scancode
+https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent
+https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/keyCode
 */
 static const SDL_Scancode emscripten_scancode_table[] = {
     /*  0 */    SDL_SCANCODE_UNKNOWN,
@@ -371,25 +372,24 @@ Emscripten_HandleFocus(int eventType, const EmscriptenFocusEvent *wheelEvent, vo
 EM_BOOL
 Emscripten_HandleTouch(int eventType, const EmscriptenTouchEvent *touchEvent, void *userData)
 {
-    /*SDL_WindowData *window_data = userData;*/
+    SDL_WindowData *window_data = userData;
     int i;
 
-    SDL_TouchID deviceId = 0;
-    if (!SDL_GetTouch(deviceId)) {
-        if (SDL_AddTouch(deviceId, "") < 0) {
-             return 0;
-        }
+    SDL_TouchID deviceId = 1;
+    if (SDL_AddTouch(deviceId, "") < 0) {
+         return 0;
     }
 
     for (i = 0; i < touchEvent->numTouches; i++) {
-        long x, y, id;
+        SDL_FingerID id;
+        float x, y;
 
         if (!touchEvent->touches[i].isChanged)
             continue;
 
         id = touchEvent->touches[i].identifier;
-        x = touchEvent->touches[i].canvasX;
-        y = touchEvent->touches[i].canvasY;
+        x = touchEvent->touches[i].canvasX / (float)window_data->windowed_width;
+        y = touchEvent->touches[i].canvasY / (float)window_data->windowed_height;
 
         if (eventType == EMSCRIPTEN_EVENT_TOUCHMOVE) {
             SDL_SendTouchMotion(deviceId, id, x, y, 1.0f);

@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2014 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2015 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -187,6 +187,7 @@ void
 WIN_SetTextInputRect(_THIS, SDL_Rect *rect)
 {
     SDL_VideoData *videodata = (SDL_VideoData *)_this->driverdata;
+    HIMC himc = 0;
 
     if (!rect) {
         SDL_InvalidParamError("rect");
@@ -194,6 +195,17 @@ WIN_SetTextInputRect(_THIS, SDL_Rect *rect)
     }
 
     videodata->ime_rect = *rect;
+
+    himc = ImmGetContext(videodata->ime_hwnd_current);
+    if (himc)
+    {
+        COMPOSITIONFORM cf;
+        cf.ptCurrentPos.x = videodata->ime_rect.x;
+        cf.ptCurrentPos.y = videodata->ime_rect.y;
+        cf.dwStyle = CFS_FORCE_POSITION;
+        ImmSetCompositionWindow(himc, &cf);
+        ImmReleaseContext(videodata->ime_hwnd_current, himc);
+    }
 }
 
 #ifdef SDL_DISABLE_WINDOWS_IME
@@ -211,7 +223,12 @@ void IME_Present(SDL_VideoData *videodata)
 
 #else
 
-#ifdef __GNUC__
+#ifdef _SDL_msctf_h
+#define USE_INIT_GUID
+#elif defined(__GNUC__)
+#define USE_INIT_GUID
+#endif
+#ifdef USE_INIT_GUID
 #undef DEFINE_GUID
 #define DEFINE_GUID(n,l,w1,w2,b1,b2,b3,b4,b5,b6,b7,b8) static const GUID n = {l,w1,w2,{b1,b2,b3,b4,b5,b6,b7,b8}}
 DEFINE_GUID(IID_ITfInputProcessorProfileActivationSink,        0x71C6E74E,0x0F28,0x11D8,0xA8,0x2A,0x00,0x06,0x5B,0x84,0x43,0x5C);

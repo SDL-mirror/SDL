@@ -1,5 +1,5 @@
 /*
-   Copyright (C) 1997-2014 Sam Lantinga <slouken@libsdl.org>
+   Copyright (C) 1997-2015 Sam Lantinga <slouken@libsdl.org>
 
    This software is provided 'as-is', without any express or implied
    warranty.  In no event will the authors be held liable for any damages
@@ -39,7 +39,7 @@ DrawChessBoard(SDL_Renderer * renderer)
 	for( ; row < 8; row++)
 	{
 		column = row%2;
-		x = x + column;
+		x = column;
 		for( ; column < 4+(row%2); column++)
 		{
 			SDL_SetRenderDrawColor(renderer, 0, 0, 0, 0xFF);
@@ -51,7 +51,6 @@ DrawChessBoard(SDL_Renderer * renderer)
 			x = x + 2;
 			SDL_RenderFillRect(renderer, &rect);
 		}
-		x=0;
 	}
 }
 
@@ -59,14 +58,20 @@ void
 loop()
 {
     SDL_Event e;
-	if (SDL_PollEvent(&e)) {
+    while (SDL_PollEvent(&e)) {
 		if (e.type == SDL_QUIT) {
 			done = 1;
+#ifdef __EMSCRIPTEN__
+			emscripten_cancel_main_loop();
+#endif
 			return;
 		}
 
-		if(e.key.keysym.sym == SDLK_ESCAPE) {
+		if ((e.type == SDL_KEYDOWN) && (e.key.keysym.sym == SDLK_ESCAPE)) {
 			done = 1;
+#ifdef __EMSCRIPTEN__
+			emscripten_cancel_main_loop();
+#endif
 			return;
 		}
 	}

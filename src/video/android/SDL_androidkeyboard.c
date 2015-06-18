@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2014 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2015 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -253,8 +253,8 @@ static SDL_Scancode Android_Keycodes[] = {
     SDL_SCANCODE_CALCULATOR, /* AKEYCODE_CALCULATOR */
     SDL_SCANCODE_LANG5, /* AKEYCODE_ZENKAKU_HANKAKU */
     SDL_SCANCODE_UNKNOWN, /* AKEYCODE_EISU */
-    SDL_SCANCODE_UNKNOWN, /* AKEYCODE_MUHENKAN */
-    SDL_SCANCODE_UNKNOWN, /* AKEYCODE_HENKAN */
+    SDL_SCANCODE_INTERNATIONAL5, /* AKEYCODE_MUHENKAN */
+    SDL_SCANCODE_INTERNATIONAL4, /* AKEYCODE_HENKAN */
     SDL_SCANCODE_LANG3, /* AKEYCODE_KATAKANA_HIRAGANA */
     SDL_SCANCODE_INTERNATIONAL3, /* AKEYCODE_YEN */
     SDL_SCANCODE_UNKNOWN, /* AKEYCODE_RO */

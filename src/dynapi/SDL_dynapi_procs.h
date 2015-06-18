@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2014 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2015 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -624,3 +624,6 @@ SDL_DYNAPI_PROC(int,SDL_QueueAudio,(SDL_AudioDeviceID a, const void *b, Uint32 c
 SDL_DYNAPI_PROC(Uint32,SDL_GetQueuedAudioSize,(SDL_AudioDeviceID a),(a),return)
 SDL_DYNAPI_PROC(void,SDL_ClearQueuedAudio,(SDL_AudioDeviceID a),(a),)
 SDL_DYNAPI_PROC(SDL_Window*,SDL_GetGrabbedWindow,(void),(),return)
+#ifdef __WIN32__
+SDL_DYNAPI_PROC(void,SDL_SetWindowsMessageHook,(SDL_WindowsMessageHook a, void *b),(a,b),)
+#endif

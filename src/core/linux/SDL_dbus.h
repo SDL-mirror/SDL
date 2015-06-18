@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2014 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2015 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -41,6 +41,8 @@ typedef struct SDL_DBusContext {
     dbus_bool_t (*connection_get_is_connected)(DBusConnection *); 	
     dbus_bool_t (*connection_add_filter)(DBusConnection *, DBusHandleMessageFunction,
 	    void *, DBusFreeFunction);
+    dbus_bool_t (*connection_try_register_object_path)(DBusConnection *, const char *,
+        const DBusObjectPathVTable *, void *, DBusError *);
     dbus_bool_t (*connection_send)(DBusConnection *, DBusMessage *, dbus_uint32_t *);
     DBusMessage *(*connection_send_with_reply_and_block)(DBusConnection *, DBusMessage *, int, DBusError *);
     void (*connection_close)(DBusConnection *);

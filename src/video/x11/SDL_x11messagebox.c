@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2014 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2015 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -28,6 +28,7 @@
 #include "SDL_x11dyn.h"
 #include "SDL_assert.h"
 
+#include <X11/keysym.h>
 #include <locale.h>
 
 
@@ -83,6 +84,10 @@ typedef struct SDL_MessageBoxDataX11
     Display *display;
     int screen;
     Window window;
+#if SDL_VIDEO_DRIVER_X11_XDBE
+    XdbeBackBuffer buf;
+    SDL_bool xdbe;                      /* Whether Xdbe is present or not */
+#endif
     long event_mask;
     Atom wm_protocols;
     Atom wm_delete_message;
@@ -347,6 +352,12 @@ X11_MessageBoxShutdown( SDL_MessageBoxDataX11 *data )
         data->font_struct = NULL;
     }
 
+#if SDL_VIDEO_DRIVER_X11_XDBE
+    if ( SDL_X11_HAVE_XDBE && data->xdbe ) {
+        X11_XdbeDeallocateBackBufferName(data->display, data->buf);
+    }
+#endif
+
     if ( data->display ) {
         if ( data->window != None ) {
             X11_XWithdrawWindow( data->display, data->window, data->screen );
@@ -366,7 +377,7 @@ X11_MessageBoxCreateWindow( SDL_MessageBoxDataX11 *data )
     int x, y;
     XSizeHints *sizehints;
     XSetWindowAttributes wnd_attr;
-    Atom _NET_WM_WINDOW_TYPE, _NET_WM_WINDOW_TYPE_DIALOG;
+    Atom _NET_WM_WINDOW_TYPE, _NET_WM_WINDOW_TYPE_DIALOG, _NET_WM_NAME, UTF8_STRING;
     Display *display = data->display;
     SDL_WindowData *windowdata = NULL;
     const SDL_MessageBoxData *messageboxdata = data->messageboxdata;
@@ -401,6 +412,11 @@ X11_MessageBoxCreateWindow( SDL_MessageBoxDataX11 *data )
     }
 
     X11_XStoreName( display, data->window, messageboxdata->title );
+    _NET_WM_NAME = X11_XInternAtom(display, "_NET_WM_NAME", False);
+    UTF8_STRING = X11_XInternAtom(display, "UTF8_STRING", False);
+    X11_XChangeProperty(display, data->window, _NET_WM_NAME, UTF8_STRING, 8,
+                    PropModeReplace, (unsigned char *) messageboxdata->title,
+                    strlen(messageboxdata->title) + 1 );
 
     /* Let the window manager know this is a dialog box */
     _NET_WM_WINDOW_TYPE = X11_XInternAtom(display, "_NET_WM_WINDOW_TYPE", False);
@@ -445,6 +461,20 @@ X11_MessageBoxCreateWindow( SDL_MessageBoxDataX11 *data )
     }
 
     X11_XMapRaised( display, data->window );
+
+#if SDL_VIDEO_DRIVER_X11_XDBE
+    /* Initialise a back buffer for double buffering */
+    if (SDL_X11_HAVE_XDBE) {
+        int xdbe_major, xdbe_minor;
+        if (X11_XdbeQueryExtension(display, &xdbe_major, &xdbe_minor) != 0) {
+            data->xdbe = SDL_TRUE;
+            data->buf = X11_XdbeAllocateBackBufferName(display, data->window, XdbeUndefined);
+        } else {
+            data->xdbe = SDL_FALSE;
+        }
+    }
+#endif
+
     return 0;
 }
 
@@ -453,8 +483,15 @@ static void
 X11_MessageBoxDraw( SDL_MessageBoxDataX11 *data, GC ctx )
 {
     int i;
-    Window window = data->window;
+    Drawable window = data->window;
     Display *display = data->display;
+
+#if SDL_VIDEO_DRIVER_X11_XDBE
+    if (SDL_X11_HAVE_XDBE && data->xdbe) {
+        window = data->buf;
+        X11_XdbeBeginIdiom(data->display);
+    }
+#endif
 
     X11_XSetForeground( display, ctx, data->color[ SDL_MESSAGEBOX_COLOR_BACKGROUND ] );
     X11_XFillRectangle( display, window, ctx, 0, 0, data->dialog_width, data->dialog_height );
@@ -505,6 +542,23 @@ X11_MessageBoxDraw( SDL_MessageBoxDataX11 *data, GC ctx )
                          buttondata->text, buttondatax11->length );
         }
     }
+
+#if SDL_VIDEO_DRIVER_X11_XDBE
+    if (SDL_X11_HAVE_XDBE && data->xdbe) {
+        XdbeSwapInfo swap_info;
+        swap_info.swap_window = data->window;
+        swap_info.swap_action = XdbeUndefined;
+        X11_XdbeSwapBuffers(data->display, &swap_info, 1);
+        X11_XdbeEndIdiom(data->display);
+    }
+#endif
+}
+
+static Bool
+X11_MessageBoxEventTest(Display *display, XEvent *event, XPointer arg)
+{
+    const SDL_MessageBoxDataX11 *data = (const SDL_MessageBoxDataX11 *) arg;
+    return ((event->xany.display == data->display) && (event->xany.window == data->window)) ? True : False;
 }
 
 /* Loop and handle message box event messages until something kills it. */
@@ -539,7 +593,9 @@ X11_MessageBoxLoop( SDL_MessageBoxDataX11 *data )
         XEvent e;
         SDL_bool draw = SDL_TRUE;
 
-        X11_XWindowEvent( data->display, data->window, data->event_mask, &e );
+        /* can't use XWindowEvent() because it can't handle ClientMessage events. */
+        /* can't use XNextEvent() because we only want events for this window. */
+        X11_XIfEvent( data->display, &e, X11_MessageBoxEventTest, (XPointer) data );
 
         /* If X11_XFilterEvent returns True, then some input method has filtered the
            event, and the client should discard the event. */
@@ -568,7 +624,7 @@ X11_MessageBoxLoop( SDL_MessageBoxDataX11 *data )
         case MotionNotify:
             if ( has_focus ) {
                 /* Mouse moved... */
-                int previndex = data->mouse_over_index;
+                const int previndex = data->mouse_over_index;
                 data->mouse_over_index = GetHitButtonIndex( data, e.xbutton.x, e.xbutton.y );
                 if (data->mouse_over_index == previndex) {
                     draw = SDL_FALSE;

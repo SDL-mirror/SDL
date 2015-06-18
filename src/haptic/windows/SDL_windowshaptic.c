@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2014 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2015 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -272,6 +272,10 @@ SDL_SYS_HapticQuit(void)
 
     SDL_XINPUT_HapticQuit();
     SDL_DINPUT_HapticQuit();
+
+    numhaptics = 0;
+    SDL_hapticlist = NULL;
+    SDL_hapticlist_tail = NULL;
 }
 
 /*

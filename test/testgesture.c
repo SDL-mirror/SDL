@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 1997-2014 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2015 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -16,6 +16,7 @@
  */
 
 #include "SDL.h"
+#include <stdlib.h> /* for exit() */
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten/emscripten.h>
@@ -265,6 +266,12 @@ void loop()
       }
     }
     DrawScreen(screen, window);
+
+#ifdef __EMSCRIPTEN__
+    if (quitting) {
+        emscripten_cancel_main_loop();
+    }
+#endif
 }
 
 int main(int argc, char* argv[])

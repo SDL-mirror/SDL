@@ -216,6 +216,10 @@ if(EMSCRIPTEN)
   set(SDL_DLOPEN_ENABLED_BY_DEFAULT OFF)
 endif()
 
+if (NOT DEFINED SDL_SHARED_ENABLED_BY_DEFAULT)
+    set(SDL_SHARED_ENABLED_BY_DEFAULT ON)
+endif()
+
 set(SDL_SUBSYSTEMS
     Atomic Audio Video Render Events Joystick Haptic Power Threads Timers
     File Loadso CPUinfo Filesystem Dlopen)
@@ -1027,14 +1031,19 @@ elseif(WINDOWS)
     set(HAVE_SDL_JOYSTICK TRUE)
 
     if(SDL_HAPTIC)
-      file(GLOB HAPTIC_SOURCES ${SDL2_SOURCE_DIR}/src/haptic/windows/*.c)
+      if(HAVE_DINPUT_H OR HAVE_XINPUT_H)
+        file(GLOB HAPTIC_SOURCES ${SDL2_SOURCE_DIR}/src/haptic/windows/*.c)
+        if(HAVE_DINPUT_H)
+          set(SDL_HAPTIC_DINPUT 1)
+        endif()
+        if(HAVE_XINPUT_H)
+          set(SDL_HAPTIC_XINPUT 1)
+        endif()
+      else()
+        file(GLOB HAPTIC_SOURCES ${SDL2_SOURCE_DIR}/src/haptic/dummy/*.c)
+        set(SDL_HAPTIC_DUMMY 1)
+      endif()
       set(SOURCE_FILES ${SOURCE_FILES} ${HAPTIC_SOURCES})
-      if(HAVE_DINPUT_H)
-        set(SDL_HAPTIC_DINPUT 1)
-      endif()
-      if(HAVE_XINPUT_H)
-        set(SDL_HAPTIC_XINPUT 1)
-      endif()
       set(HAVE_SDL_HAPTIC TRUE)
     endif()
   endif()
@@ -1390,7 +1399,8 @@ endif()
 ##### Installation targets #####
 install(TARGETS ${_INSTALL_LIBS}
   LIBRARY DESTINATION "lib${LIB_SUFFIX}"
-  ARCHIVE DESTINATION "lib${LIB_SUFFIX}")
+  ARCHIVE DESTINATION "lib${LIB_SUFFIX}"
+  RUNTIME DESTINATION bin)
 
 file(GLOB INCLUDE_FILES ${SDL2_SOURCE_DIR}/include/*.h)
 file(GLOB BIN_INCLUDE_FILES ${SDL2_BINARY_DIR}/include/*.h)
@@ -1418,10 +1428,6 @@ if(NOT WINDOWS OR CYGWIN)
   install(PROGRAMS ${SDL2_BINARY_DIR}/sdl2-config DESTINATION bin)
   # TODO: what about the .spec file? Is it only needed for RPM creation?
   install(FILES "${SDL2_SOURCE_DIR}/sdl2.m4" DESTINATION "share/aclocal")
-else()
-  if(SDL_SHARED)
-    install(TARGETS SDL2 RUNTIME DESTINATION bin)
-  endif()
 endif()
 
 ##### Uninstall target #####

@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2014 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2015 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -88,12 +88,10 @@ touch_handle_touch(void *data,
     uint32_t capabilities = flags >> 16;
     */
 
-    SDL_TouchID deviceId = 0;
-    if (!SDL_GetTouch(deviceId)) {
-        if (SDL_AddTouch(deviceId, "qt_touch_extension") < 0) {
-             SDL_Log("error: can't add touch %s, %d", __FILE__, __LINE__);
-        }
-    }
+    SDL_TouchID deviceId = 1;
+	if (SDL_AddTouch(deviceId, "qt_touch_extension") < 0) {
+		 SDL_Log("error: can't add touch %s, %d", __FILE__, __LINE__);
+	}
 
     switch (touchState) {
         case QtWaylandTouchPointPressed:

@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2014 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2015 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -30,7 +30,7 @@ static unsigned int screensaver_cookie = 0;
 static SDL_DBusContext dbus = {0};
 
 static int
-load_dbus_syms(void)
+LoadDBUSSyms(void)
 {
     #define SDL_DBUS_SYM2(x, y) \
         if (!(dbus.x = SDL_LoadFunction(dbus_handle, #y))) return -1
@@ -45,6 +45,7 @@ load_dbus_syms(void)
     SDL_DBUS_SYM(connection_set_exit_on_disconnect);
     SDL_DBUS_SYM(connection_get_is_connected);
     SDL_DBUS_SYM(connection_add_filter);
+    SDL_DBUS_SYM(connection_try_register_object_path);
     SDL_DBUS_SYM(connection_send);
     SDL_DBUS_SYM(connection_send_with_reply_and_block);
     SDL_DBUS_SYM(connection_close);
@@ -94,7 +95,7 @@ LoadDBUSLibrary(void)
             retval = -1;
             /* Don't call SDL_SetError(): SDL_LoadObject already did. */
         } else {
-            retval = load_dbus_syms();
+            retval = LoadDBUSSyms();
             if (retval < 0) {
                 UnloadDBUSLibrary();
             }

@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2014 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2015 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -59,6 +59,7 @@ typedef struct SDL_hapticlist_item
 {
     char *fname;                /* Dev path name (like /dev/input/event1) */
     SDL_Haptic *haptic;         /* Associated haptic. */
+    dev_t dev_num;
     struct SDL_hapticlist_item *next;
 } SDL_hapticlist_item;
 
@@ -236,14 +237,10 @@ void haptic_udev_callback(SDL_UDEV_deviceevent udev_type, int udev_class, const 
 static int
 MaybeAddDevice(const char *path)
 {
-    dev_t dev_nums[MAX_HAPTICS];
     struct stat sb;
     int fd;
-    int k;
-    int duplicate;
     int success;
     SDL_hapticlist_item *item;
-
 
     if (path == NULL) {
         return -1;
@@ -255,14 +252,10 @@ MaybeAddDevice(const char *path)
     }
 
     /* check for duplicates */
-    duplicate = 0;
-    for (k = 0; (k < numhaptics) && !duplicate; ++k) {
-        if (sb.st_rdev == dev_nums[k]) {
-            duplicate = 1;
+    for (item = SDL_hapticlist; item != NULL; item = item->next) {
+        if (item->dev_num == sb.st_rdev) {
+            return -1;  /* duplicate. */
         }
-    }
-    if (duplicate) {
-        return -1;
     }
 
     /* try to open */
@@ -293,6 +286,8 @@ MaybeAddDevice(const char *path)
         return -1;
     }
 
+    item->dev_num = sb.st_rdev;
+
     /* TODO: should we add instance IDs? */
     if (SDL_hapticlist_tail == NULL) {
         SDL_hapticlist = SDL_hapticlist_tail = item;
@@ -300,8 +295,6 @@ MaybeAddDevice(const char *path)
         SDL_hapticlist_tail->next = item;
         SDL_hapticlist_tail = item;
     }
-
-    dev_nums[numhaptics] = sb.st_rdev;
 
     ++numhaptics;
 
@@ -390,8 +383,8 @@ SDL_SYS_HapticName(int index)
             /* No name found, return device character device */
             name = item->fname;
         }
+        close(fd);
     }
-    close(fd);
 
     return name;
 }
@@ -545,7 +538,6 @@ SDL_SYS_HapticOpenFromJoystick(SDL_Haptic * haptic, SDL_Joystick * joystick)
     int fd;
     int ret;
     SDL_hapticlist_item *item;
-
 
     /* Find the joystick in the haptic list. */
     for (item = SDL_hapticlist; item; item = item->next) {
@@ -1162,5 +1154,6 @@ SDL_SYS_HapticStopAll(SDL_Haptic * haptic)
     return 0;
 }
 
-
 #endif /* SDL_HAPTIC_LINUX */
+
+/* vi: set ts=4 sw=4 expandtab: */

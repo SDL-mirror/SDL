@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2014 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2015 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -20,14 +20,14 @@
 */
 #include "../../SDL_internal.h"
 
-#include "SDL_assert.h"
-#include "SDL_hints.h"
 #include "../SDL_sysjoystick.h"
-#include "SDL_windowsjoystick_c.h"
-#include "SDL_xinputjoystick_c.h"
-
 
 #if SDL_JOYSTICK_XINPUT
+
+#include "SDL_assert.h"
+#include "SDL_hints.h"
+#include "SDL_windowsjoystick_c.h"
+#include "SDL_xinputjoystick_c.h"
 
 /*
  * Internal stuff.
@@ -339,6 +339,7 @@ SDL_SYS_IsXInputGamepad_DeviceIndex(int device_index)
 
 #else /* !SDL_JOYSTICK_XINPUT */
 
+typedef struct JoyStick_DeviceData JoyStick_DeviceData;
 
 SDL_bool SDL_XINPUT_Enabled(void)
 {

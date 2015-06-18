@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 1997-2014 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2015 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -136,6 +136,11 @@ void loop()
         }
     }
     MoveSprites(renderer, sprite);
+#ifdef __EMSCRIPTEN__
+    if (done) {
+        emscripten_cancel_main_loop();
+    }
+#endif
 }
 
 int

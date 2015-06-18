@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2014 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2015 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -45,6 +45,7 @@
 
 #include "SDL_platform.h"
 #include "SDL_thread.h"
+#include "SDL_hints.h"
 #include "../SDL_thread_c.h"
 #include "../SDL_systhread.h"
 #ifdef __ANDROID__
@@ -86,6 +87,8 @@ int
 SDL_SYS_CreateThread(SDL_Thread * thread, void *args)
 {
     pthread_attr_t type;
+    size_t ss;
+    const char *hint = SDL_GetHint(SDL_HINT_THREAD_STACK_SIZE);
 
     /* do this here before any threads exist, so there's no race condition. */
     #if defined(__MACOSX__) || defined(__IPHONEOS__) || defined(__LINUX__)
@@ -105,6 +108,16 @@ SDL_SYS_CreateThread(SDL_Thread * thread, void *args)
         return SDL_SetError("Couldn't initialize pthread attributes");
     }
     pthread_attr_setdetachstate(&type, PTHREAD_CREATE_JOINABLE);
+    
+    /* If the SDL_HINT_THREAD_STACK_SIZE exists and it seems to be a positive number, use it */
+    if (hint && hint[0] >= '0' && hint[0] <= '9') {
+        const size_t stacksize = (size_t) SDL_atoi(hint);
+        if (stacksize > 0) {
+            pthread_attr_setstacksize(&type, stacksize);
+        }
+    }
+    
+    pthread_attr_getstacksize(&type, &ss);
 
     /* Create the thread and go! */
     if (pthread_create(&thread->handle, &type, RunThread, args) != 0) {
@@ -117,10 +130,10 @@ SDL_SYS_CreateThread(SDL_Thread * thread, void *args)
 void
 SDL_SYS_SetupThread(const char *name)
 {
-#ifndef __NACL__
+#if !defined(__ANDROID__) && !defined(__NACL__)
     int i;
     sigset_t mask;
-#endif
+#endif /* !__ANDROID__ && !__NACL__ */
 
     if (name != NULL) {
         #if defined(__MACOSX__) || defined(__IPHONEOS__) || defined(__LINUX__)
@@ -146,14 +159,15 @@ SDL_SYS_SetupThread(const char *name)
     }
 
    /* NativeClient does not yet support signals.*/
-#ifndef __NACL__
+#if !defined(__ANDROID__) && !defined(__NACL__)
     /* Mask asynchronous signals for this thread */
     sigemptyset(&mask);
     for (i = 0; sig_list[i]; ++i) {
         sigaddset(&mask, sig_list[i]);
     }
     pthread_sigmask(SIG_BLOCK, &mask, 0);
-#endif
+#endif /* !__ANDROID__ && !__NACL__ */
+
 
 #ifdef PTHREAD_CANCEL_ASYNCHRONOUS
     /* Allow ourselves to be asynchronously cancelled */

@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2014 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2015 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -46,13 +46,23 @@ static IOHIDManagerRef hidman = NULL;
 /* Linked list of all available devices */
 static recDevice *gpDeviceList = NULL;
 
-/* if SDL_TRUE then a device was added since the last update call */
-static SDL_bool s_bDeviceAdded = SDL_FALSE;
-static SDL_bool s_bDeviceRemoved = SDL_FALSE;
-
 /* static incrementing counter for new joystick devices seen on the system. Devices should start with index 0 */
 static int s_joystick_instance_id = -1;
 
+static recDevice *GetDeviceForIndex(int device_index)
+{
+    recDevice *device = gpDeviceList;
+    while (device) {
+        if (!device->removed) {
+            if (device_index == 0)
+                break;
+
+            --device_index;
+        }
+        device = device->pNext;
+    }
+    return device;
+}
 
 static void
 FreeElementList(recElement *pElement)
@@ -143,7 +153,22 @@ JoystickDeviceWasRemovedCallback(void *ctx, IOReturn result, void *sender)
 #if SDL_HAPTIC_IOKIT
     MacHaptic_MaybeRemoveDevice(device->ffservice);
 #endif
-    s_bDeviceRemoved = SDL_TRUE;
+
+/* !!! FIXME: why isn't there an SDL_PrivateJoyDeviceRemoved()? */
+#if !SDL_EVENTS_DISABLED
+    {
+        SDL_Event event;
+        event.type = SDL_JOYDEVICEREMOVED;
+
+        if (SDL_GetEventState(event.type) == SDL_ENABLE) {
+            event.jdevice.which = device->instance_id;
+            if ((SDL_EventOK == NULL)
+                || (*SDL_EventOK) (SDL_EventOKParam, &event)) {
+                SDL_PushEvent(&event);
+            }
+        }
+    }
+#endif /* !SDL_EVENTS_DISABLED */
 }
 
 
@@ -381,6 +406,7 @@ static void
 JoystickDeviceWasAddedCallback(void *ctx, IOReturn res, void *sender, IOHIDDeviceRef ioHIDDeviceObject)
 {
     recDevice *device;
+    int device_index = 0;
 
     if (res != kIOReturnSuccess) {
         return;
@@ -410,7 +436,11 @@ JoystickDeviceWasAddedCallback(void *ctx, IOReturn res, void *sender, IOHIDDevic
     device->instance_id = ++s_joystick_instance_id;
 
     /* We have to do some storage of the io_service_t for SDL_HapticOpenFromJoystick */
+
+#if MAC_OS_X_VERSION_MIN_REQUIRED < 1060
     if (IOHIDDeviceGetService != NULL) {  /* weak reference: available in 10.6 and later. */
+#endif
+
         const io_service_t ioservice = IOHIDDeviceGetService(ioHIDDeviceObject);
 #if SDL_HAPTIC_IOKIT
         if ((ioservice) && (FFIsForceFeedback(ioservice) == FF_OK)) {
@@ -418,10 +448,10 @@ JoystickDeviceWasAddedCallback(void *ctx, IOReturn res, void *sender, IOHIDDevic
             MacHaptic_MaybeAddDevice(ioservice);
         }
 #endif
-    }
 
-    device->send_open_event = 1;
-    s_bDeviceAdded = SDL_TRUE;
+#if MAC_OS_X_VERSION_MIN_REQUIRED < 1060
+    }
+#endif
 
     /* Add device to the end of the list */
     if ( !gpDeviceList ) {
@@ -431,10 +461,27 @@ JoystickDeviceWasAddedCallback(void *ctx, IOReturn res, void *sender, IOHIDDevic
 
         curdevice = gpDeviceList;
         while ( curdevice->pNext ) {
+            ++device_index;
             curdevice = curdevice->pNext;
         }
         curdevice->pNext = device;
     }
+
+/* !!! FIXME: why isn't there an SDL_PrivateJoyDeviceAdded()? */
+#if !SDL_EVENTS_DISABLED
+    {
+        SDL_Event event;
+        event.type = SDL_JOYDEVICEADDED;
+
+        if (SDL_GetEventState(event.type) == SDL_ENABLE) {
+            event.jdevice.which = device_index;
+            if ((SDL_EventOK == NULL)
+                || (*SDL_EventOK) (SDL_EventOKParam, &event)) {
+                SDL_PushEvent(&event);
+            }
+        }
+    }
+#endif /* !SDL_EVENTS_DISABLED */
 }
 
 static SDL_bool
@@ -560,53 +607,12 @@ SDL_SYS_NumJoysticks()
 void
 SDL_SYS_JoystickDetect()
 {
-    if (s_bDeviceAdded || s_bDeviceRemoved) {
-        recDevice *device = gpDeviceList;
-        s_bDeviceAdded = SDL_FALSE;
-        s_bDeviceRemoved = SDL_FALSE;
-        int device_index = 0;
-        /* send notifications */
-        while (device) {
-            if (device->send_open_event) {
-                device->send_open_event = 0;
-/* !!! FIXME: why isn't there an SDL_PrivateJoyDeviceAdded()? */
-#if !SDL_EVENTS_DISABLED
-                SDL_Event event;
-                event.type = SDL_JOYDEVICEADDED;
-
-                if (SDL_GetEventState(event.type) == SDL_ENABLE) {
-                    event.jdevice.which = device_index;
-                    if ((SDL_EventOK == NULL)
-                        || (*SDL_EventOK) (SDL_EventOKParam, &event)) {
-                        SDL_PushEvent(&event);
-                    }
-                }
-#endif /* !SDL_EVENTS_DISABLED */
-
-            }
-
-            if (device->removed) {
-                const int instance_id = device->instance_id;
-                device = FreeDevice(device);
-
-/* !!! FIXME: why isn't there an SDL_PrivateJoyDeviceRemoved()? */
-#if !SDL_EVENTS_DISABLED
-                SDL_Event event;
-                event.type = SDL_JOYDEVICEREMOVED;
-
-                if (SDL_GetEventState(event.type) == SDL_ENABLE) {
-                    event.jdevice.which = instance_id;
-                    if ((SDL_EventOK == NULL)
-                        || (*SDL_EventOK) (SDL_EventOKParam, &event)) {
-                        SDL_PushEvent(&event);
-                    }
-                }
-#endif /* !SDL_EVENTS_DISABLED */
-
-            } else {
-                device = device->pNext;
-                device_index++;
-            }
+    recDevice *device = gpDeviceList;
+    while (device) {
+        if (device->removed) {
+            device = FreeDevice(device);
+        } else {
+            device = device->pNext;
         }
     }
 
@@ -621,13 +627,8 @@ SDL_SYS_JoystickDetect()
 const char *
 SDL_SYS_JoystickNameForDeviceIndex(int device_index)
 {
-    recDevice *device = gpDeviceList;
-
-    while (device_index-- > 0) {
-        device = device->pNext;
-    }
-
-    return device->product;
+    recDevice *device = GetDeviceForIndex(device_index);
+    return device ? device->product : "UNKNOWN";
 }
 
 /* Function to return the instance id of the joystick at device_index
@@ -635,14 +636,8 @@ SDL_SYS_JoystickNameForDeviceIndex(int device_index)
 SDL_JoystickID
 SDL_SYS_GetInstanceIdOfDeviceIndex(int device_index)
 {
-    recDevice *device = gpDeviceList;
-    int index;
-
-    for (index = device_index; index > 0; index--) {
-        device = device->pNext;
-    }
-
-    return device->instance_id;
+    recDevice *device = GetDeviceForIndex(device_index);
+    return device ? device->instance_id : 0;
 }
 
 /* Function to open a joystick for use.
@@ -653,12 +648,7 @@ SDL_SYS_GetInstanceIdOfDeviceIndex(int device_index)
 int
 SDL_SYS_JoystickOpen(SDL_Joystick * joystick, int device_index)
 {
-    recDevice *device = gpDeviceList;
-    int index;
-
-    for (index = device_index; index > 0; index--) {
-        device = device->pNext;
-    }
+    recDevice *device = GetDeviceForIndex(device_index);
 
     joystick->instance_id = device->instance_id;
     joystick->hwdata = device;
@@ -805,21 +795,19 @@ SDL_SYS_JoystickQuit(void)
         CFRelease(hidman);
         hidman = NULL;
     }
-
-    s_bDeviceAdded = s_bDeviceRemoved = SDL_FALSE;
 }
 
 
 SDL_JoystickGUID SDL_SYS_JoystickGetDeviceGUID( int device_index )
 {
-    recDevice *device = gpDeviceList;
-    int index;
-
-    for (index = device_index; index > 0; index--) {
-        device = device->pNext;
+    recDevice *device = GetDeviceForIndex(device_index);
+    SDL_JoystickGUID guid;
+    if (device) {
+        guid = device->guid;
+    } else {
+        SDL_zero(guid);
     }
-
-    return device->guid;
+    return guid;
 }
 
 SDL_JoystickGUID SDL_SYS_JoystickGetGUID(SDL_Joystick *joystick)

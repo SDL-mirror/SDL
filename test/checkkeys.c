@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 1997-2014 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2015 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -89,6 +89,20 @@ print_modifiers(char **text, size_t *maxlen)
 }
 
 static void
+PrintModifierState()
+{
+    char message[512];
+    char *spot;
+    size_t left;
+
+    spot = message;
+    left = sizeof(message);
+
+    print_modifiers(&spot, &left);
+    SDL_Log("Initial state:%s\n", message);
+}
+
+static void
 PrintKey(SDL_Keysym * sym, SDL_bool pressed, SDL_bool repeat)
 {
     char message[512];
@@ -121,7 +135,7 @@ PrintKey(SDL_Keysym * sym, SDL_bool pressed, SDL_bool repeat)
 }
 
 static void
-PrintText(char *text)
+PrintText(char *eventtype, char *text)
 {
     char *spot, expanded[1024];
 
@@ -131,7 +145,7 @@ PrintText(char *text)
         size_t length = SDL_strlen(expanded);
         SDL_snprintf(expanded + length, sizeof(expanded) - length, "\\x%.2x", (unsigned char)*spot);
     }
-    SDL_Log("Text (%s): \"%s%s\"\n", expanded, *text == '"' ? "\\" : "", text);
+    SDL_Log("%s Text (%s): \"%s%s\"\n", eventtype, expanded, *text == '"' ? "\\" : "", text);
 }
 
 void
@@ -144,11 +158,14 @@ loop()
     while (SDL_PollEvent(&event)) {
         switch (event.type) {
         case SDL_KEYDOWN:
-        //case SDL_KEYUP:
+        case SDL_KEYUP:
 		    PrintKey(&event.key.keysym, (event.key.state == SDL_PRESSED) ? SDL_TRUE : SDL_FALSE, (event.key.repeat) ? SDL_TRUE : SDL_FALSE);
             break;
+        case SDL_TEXTEDITING:
+            PrintText("EDIT", event.text.text);
+            break;
         case SDL_TEXTINPUT:
-            PrintText(event.text.text);
+            PrintText("INPUT", event.text.text);
             break;
         case SDL_MOUSEBUTTONDOWN:
             /* Any button press quits the app... */
@@ -159,6 +176,11 @@ loop()
             break;
         }
     }
+#ifdef __EMSCRIPTEN__
+    if (done) {
+        emscripten_cancel_main_loop();
+    }
+#endif
 }
 
 int
@@ -191,6 +213,10 @@ main(int argc, char *argv[])
 #endif
 
     SDL_StartTextInput();
+
+    /* Print initial modifier state */
+    SDL_PumpEvents();
+    PrintModifierState();
 
     /* Watch keystrokes */
     done = 0;

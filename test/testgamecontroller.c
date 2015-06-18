@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 1997-2014 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2015 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -153,6 +153,12 @@ loop(void *arg)
         done = SDL_TRUE;
         retval = SDL_TRUE;  /* keep going, wait for reattach. */
     }
+
+#ifdef __EMSCRIPTEN__
+    if (done) {
+        emscripten_cancel_main_loop();
+    }
+#endif
 }
 
 SDL_bool
@@ -288,10 +294,8 @@ main(int argc, char *argv[])
             while (keepGoing) {
                 if (gamecontroller == NULL) {
                     if (!reportederror) {
-                        if (gamecontroller == NULL) {
-                            SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Couldn't open gamecontroller %d: %s\n", device, SDL_GetError());
-                            retcode = 1;
-                        }
+                        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Couldn't open gamecontroller %d: %s\n", device, SDL_GetError());
+                        retcode = 1;
                         keepGoing = SDL_FALSE;
                         reportederror = SDL_TRUE;
                     }

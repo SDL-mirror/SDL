@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2014 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2015 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -88,8 +88,9 @@ extern DECLSPEC const char *SDLCALL SDL_JoystickNameForIndex(int device_index);
 /**
  *  Open a joystick for use.
  *  The index passed as an argument refers to the N'th joystick on the system.
- *  This index is the value which will identify this joystick in future joystick
- *  events.
+ *  This index is not the value which will identify this joystick in future
+ *  joystick events.  The joystick's instance id (::SDL_JoystickID) will be used
+ *  there instead.
  *
  *  \return A joystick identifier, or NULL if an error occurred.
  */

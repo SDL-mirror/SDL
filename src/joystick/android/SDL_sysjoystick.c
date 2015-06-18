@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2014 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2015 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -191,8 +191,8 @@ Android_OnPadDown(int device_id, int keycode)
         item = JoystickByDeviceId(device_id);
         if (item && item->joystick) {
             SDL_PrivateJoystickButton(item->joystick, button , SDL_PRESSED);
+            return 0;
         }
-        return 0;
     }
     
     return -1;
@@ -207,8 +207,8 @@ Android_OnPadUp(int device_id, int keycode)
         item = JoystickByDeviceId(device_id);
         if (item && item->joystick) {
             SDL_PrivateJoystickButton(item->joystick, button, SDL_RELEASED);
+            return 0;
         }
-        return 0;
     }
     
     return -1;
@@ -311,7 +311,9 @@ Android_AddJoystick(int device_id, const char *name, SDL_bool is_accelerometer, 
     }
 #endif /* !SDL_EVENTS_DISABLED */
 
+#ifdef DEBUG_JOYSTICK
     SDL_Log("Added joystick %s with device_id %d", name, device_id);
+#endif
 
     return numjoysticks;
 }
@@ -368,7 +370,9 @@ Android_RemoveJoystick(int device_id)
     }
 #endif /* !SDL_EVENTS_DISABLED */
 
+#ifdef DEBUG_JOYSTICK
     SDL_Log("Removed joystick with device_id %d", device_id);
+#endif
     
     SDL_free(item->name);
     SDL_free(item);
@@ -514,6 +518,12 @@ SDL_SYS_JoystickUpdate(SDL_Joystick * joystick)
             if (item->joystick) {
                 if (Android_JNI_GetAccelerometerValues(values)) {
                     for ( i = 0; i < 3; i++ ) {
+                        if (values[i] > 1.0f) {
+                            values[i] = 1.0f;
+                        } else if (values[i] < -1.0f) {
+                            values[i] = -1.0f;
+                        }
+
                         value = (Sint16)(values[i] * 32767.0f);
                         SDL_PrivateJoystickAxis(item->joystick, i, value);
                     }
