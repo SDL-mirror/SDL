@@ -3,381 +3,378 @@
 -include $(OBJECTS:.lo=.d)
 
 # Special dependency for SDL.c, since it depends on SDL_revision.h
-/cygdrive/j/Amiga/Amiga2015/SDL2/src/SDL.c: update-revision
+/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/SDL.c: update-revision
 
-$(objects)/SDL_dummy_main.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/main/amigaos4/SDL_dummy_main.c
+$(objects)/SDL_dummy_main.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/main/amigaos4/SDL_dummy_main.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/SDL.c
+$(objects)/SDL.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/SDL.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_assert.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/SDL_assert.c
+$(objects)/SDL_assert.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/SDL_assert.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_error.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/SDL_error.c
+$(objects)/SDL_error.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/SDL_error.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_hints.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/SDL_hints.c
+$(objects)/SDL_hints.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/SDL_hints.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_log.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/SDL_log.c
+$(objects)/SDL_log.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/SDL_log.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_atomic.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/atomic/SDL_atomic.c
+$(objects)/SDL_atomic.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/atomic/SDL_atomic.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_spinlock.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/atomic/SDL_spinlock.c
+$(objects)/SDL_spinlock.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/atomic/SDL_spinlock.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_audio.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/audio/SDL_audio.c
+$(objects)/SDL_audio.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/audio/SDL_audio.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_audiocvt.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/audio/SDL_audiocvt.c
+$(objects)/SDL_audiocvt.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/audio/SDL_audiocvt.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_audiodev.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/audio/SDL_audiodev.c
+$(objects)/SDL_audiodev.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/audio/SDL_audiodev.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_audiotypecvt.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/audio/SDL_audiotypecvt.c
+$(objects)/SDL_audiotypecvt.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/audio/SDL_audiotypecvt.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_mixer.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/audio/SDL_mixer.c
+$(objects)/SDL_mixer.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/audio/SDL_mixer.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_wave.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/audio/SDL_wave.c
+$(objects)/SDL_wave.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/audio/SDL_wave.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_cpuinfo.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/cpuinfo/SDL_cpuinfo.c
+$(objects)/SDL_cpuinfo.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/cpuinfo/SDL_cpuinfo.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_dynapi.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/dynapi/SDL_dynapi.c
+$(objects)/SDL_dynapi.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/dynapi/SDL_dynapi.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_clipboardevents.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/events/SDL_clipboardevents.c
+$(objects)/SDL_clipboardevents.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/events/SDL_clipboardevents.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_dropevents.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/events/SDL_dropevents.c
+$(objects)/SDL_dropevents.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/events/SDL_dropevents.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_events.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/events/SDL_events.c
+$(objects)/SDL_events.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/events/SDL_events.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_gesture.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/events/SDL_gesture.c
+$(objects)/SDL_gesture.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/events/SDL_gesture.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_keyboard.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/events/SDL_keyboard.c
+$(objects)/SDL_keyboard.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/events/SDL_keyboard.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_mouse.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/events/SDL_mouse.c
+$(objects)/SDL_mouse.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/events/SDL_mouse.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_quit.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/events/SDL_quit.c
+$(objects)/SDL_quit.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/events/SDL_quit.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_touch.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/events/SDL_touch.c
+$(objects)/SDL_touch.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/events/SDL_touch.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_windowevents.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/events/SDL_windowevents.c
+$(objects)/SDL_windowevents.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/events/SDL_windowevents.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_rwops.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/file/SDL_rwops.c
+$(objects)/SDL_rwops.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/file/SDL_rwops.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_haptic.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/haptic/SDL_haptic.c
+$(objects)/SDL_haptic.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/haptic/SDL_haptic.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_gamecontroller.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/joystick/SDL_gamecontroller.c
+$(objects)/SDL_gamecontroller.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/joystick/SDL_gamecontroller.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_joystick.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/joystick/SDL_joystick.c
+$(objects)/SDL_joystick.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/joystick/SDL_joystick.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/e_atan2.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/libm/e_atan2.c
+$(objects)/e_atan2.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/libm/e_atan2.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/e_log.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/libm/e_log.c
+$(objects)/e_log.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/libm/e_log.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/e_pow.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/libm/e_pow.c
+$(objects)/e_pow.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/libm/e_pow.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/e_rem_pio2.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/libm/e_rem_pio2.c
+$(objects)/e_rem_pio2.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/libm/e_rem_pio2.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/e_sqrt.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/libm/e_sqrt.c
+$(objects)/e_sqrt.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/libm/e_sqrt.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/k_cos.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/libm/k_cos.c
+$(objects)/k_cos.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/libm/k_cos.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/k_rem_pio2.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/libm/k_rem_pio2.c
+$(objects)/k_rem_pio2.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/libm/k_rem_pio2.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/k_sin.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/libm/k_sin.c
+$(objects)/k_sin.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/libm/k_sin.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/s_atan.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/libm/s_atan.c
+$(objects)/s_atan.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/libm/s_atan.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/s_copysign.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/libm/s_copysign.c
+$(objects)/s_copysign.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/libm/s_copysign.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/s_cos.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/libm/s_cos.c
+$(objects)/s_cos.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/libm/s_cos.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/s_fabs.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/libm/s_fabs.c
+$(objects)/s_fabs.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/libm/s_fabs.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/s_floor.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/libm/s_floor.c
+$(objects)/s_floor.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/libm/s_floor.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/s_scalbn.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/libm/s_scalbn.c
+$(objects)/s_scalbn.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/libm/s_scalbn.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/s_sin.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/libm/s_sin.c
+$(objects)/s_sin.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/libm/s_sin.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_power.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/power/SDL_power.c
+$(objects)/SDL_power.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/power/SDL_power.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_d3dmath.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/render/SDL_d3dmath.c
+$(objects)/SDL_d3dmath.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/render/SDL_d3dmath.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_render.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/render/SDL_render.c
+$(objects)/SDL_render.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/render/SDL_render.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_yuv_mmx.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/render/SDL_yuv_mmx.c
+$(objects)/SDL_yuv_mmx.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/render/SDL_yuv_mmx.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_yuv_sw.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/render/SDL_yuv_sw.c
+$(objects)/SDL_yuv_sw.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/render/SDL_yuv_sw.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_render_d3d.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/render/direct3d/SDL_render_d3d.c
+$(objects)/SDL_render_d3d.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/render/direct3d/SDL_render_d3d.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_render_d3d11.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/render/direct3d11/SDL_render_d3d11.c
+$(objects)/SDL_render_d3d11.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/render/direct3d11/SDL_render_d3d11.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_render_gl.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/render/opengl/SDL_render_gl.c
+$(objects)/SDL_render_gl.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/render/opengl/SDL_render_gl.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_shaders_gl.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/render/opengl/SDL_shaders_gl.c
+$(objects)/SDL_shaders_gl.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/render/opengl/SDL_shaders_gl.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_render_gles.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/render/opengles/SDL_render_gles.c
+$(objects)/SDL_render_gles.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/render/opengles/SDL_render_gles.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_render_gles2.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/render/opengles2/SDL_render_gles2.c
+$(objects)/SDL_render_gles2.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/render/opengles2/SDL_render_gles2.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_shaders_gles2.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/render/opengles2/SDL_shaders_gles2.c
+$(objects)/SDL_shaders_gles2.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/render/opengles2/SDL_shaders_gles2.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_render_psp.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/render/psp/SDL_render_psp.c
+$(objects)/SDL_render_psp.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/render/psp/SDL_render_psp.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_blendfillrect.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/render/software/SDL_blendfillrect.c
+$(objects)/SDL_blendfillrect.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/render/software/SDL_blendfillrect.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_blendline.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/render/software/SDL_blendline.c
+$(objects)/SDL_blendline.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/render/software/SDL_blendline.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_blendpoint.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/render/software/SDL_blendpoint.c
+$(objects)/SDL_blendpoint.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/render/software/SDL_blendpoint.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_drawline.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/render/software/SDL_drawline.c
+$(objects)/SDL_drawline.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/render/software/SDL_drawline.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_drawpoint.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/render/software/SDL_drawpoint.c
+$(objects)/SDL_drawpoint.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/render/software/SDL_drawpoint.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_render_sw.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/render/software/SDL_render_sw.c
+$(objects)/SDL_render_sw.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/render/software/SDL_render_sw.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_rotate.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/render/software/SDL_rotate.c
+$(objects)/SDL_rotate.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/render/software/SDL_rotate.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_getenv.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/stdlib/SDL_getenv.c
+$(objects)/SDL_getenv.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/stdlib/SDL_getenv.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_iconv.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/stdlib/SDL_iconv.c
+$(objects)/SDL_iconv.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/stdlib/SDL_iconv.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_malloc.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/stdlib/SDL_malloc.c
+$(objects)/SDL_malloc.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/stdlib/SDL_malloc.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_qsort.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/stdlib/SDL_qsort.c
+$(objects)/SDL_qsort.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/stdlib/SDL_qsort.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_stdlib.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/stdlib/SDL_stdlib.c
+$(objects)/SDL_stdlib.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/stdlib/SDL_stdlib.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_string.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/stdlib/SDL_string.c
+$(objects)/SDL_string.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/stdlib/SDL_string.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_thread.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/thread/SDL_thread.c
+$(objects)/SDL_thread.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/thread/SDL_thread.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_timer.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/timer/SDL_timer.c
+$(objects)/SDL_timer.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/timer/SDL_timer.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_RLEaccel.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/video/SDL_RLEaccel.c
+$(objects)/SDL_RLEaccel.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/video/SDL_RLEaccel.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_blit.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/video/SDL_blit.c
+$(objects)/SDL_blit.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/video/SDL_blit.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_blit_0.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/video/SDL_blit_0.c
+$(objects)/SDL_blit_0.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/video/SDL_blit_0.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_blit_1.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/video/SDL_blit_1.c
+$(objects)/SDL_blit_1.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/video/SDL_blit_1.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_blit_A.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/video/SDL_blit_A.c
+$(objects)/SDL_blit_A.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/video/SDL_blit_A.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_blit_N.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/video/SDL_blit_N.c
+$(objects)/SDL_blit_N.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/video/SDL_blit_N.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_blit_auto.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/video/SDL_blit_auto.c
+$(objects)/SDL_blit_auto.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/video/SDL_blit_auto.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_blit_copy.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/video/SDL_blit_copy.c
+$(objects)/SDL_blit_copy.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/video/SDL_blit_copy.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_blit_slow.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/video/SDL_blit_slow.c
+$(objects)/SDL_blit_slow.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/video/SDL_blit_slow.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_bmp.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/video/SDL_bmp.c
+$(objects)/SDL_bmp.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/video/SDL_bmp.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_clipboard.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/video/SDL_clipboard.c
+$(objects)/SDL_clipboard.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/video/SDL_clipboard.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_egl.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/video/SDL_egl.c
+$(objects)/SDL_egl.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/video/SDL_egl.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_fillrect.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/video/SDL_fillrect.c
+$(objects)/SDL_fillrect.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/video/SDL_fillrect.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_pixels.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/video/SDL_pixels.c
+$(objects)/SDL_pixels.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/video/SDL_pixels.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_rect.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/video/SDL_rect.c
+$(objects)/SDL_rect.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/video/SDL_rect.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_shape.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/video/SDL_shape.c
+$(objects)/SDL_shape.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/video/SDL_shape.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_stretch.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/video/SDL_stretch.c
+$(objects)/SDL_stretch.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/video/SDL_stretch.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_surface.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/video/SDL_surface.c
+$(objects)/SDL_surface.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/video/SDL_surface.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_video.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/video/SDL_video.c
+$(objects)/SDL_video.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/video/SDL_video.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_nullevents.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/video/dummy/SDL_nullevents.c
+$(objects)/SDL_nullevents.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/video/dummy/SDL_nullevents.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_nullframebuffer.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/video/dummy/SDL_nullframebuffer.c
+$(objects)/SDL_nullframebuffer.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/video/dummy/SDL_nullframebuffer.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_nullvideo.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/video/dummy/SDL_nullvideo.c
+$(objects)/SDL_nullvideo.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/video/dummy/SDL_nullvideo.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_diskaudio.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/audio/disk/SDL_diskaudio.c
+$(objects)/SDL_dummyaudio.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/audio/dummy/SDL_dummyaudio.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_dummyaudio.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/audio/dummy/SDL_dummyaudio.c
+$(objects)/SDL_os4_wrapper.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/video/amigaos4/SDL_os4_wrapper.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_os4_wrapper.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/video/amigaos4/SDL_os4_wrapper.c
+$(objects)/SDL_os4blit.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/video/amigaos4/SDL_os4blit.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_os4blit.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/video/amigaos4/SDL_os4blit.c
+$(objects)/SDL_os4events.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/video/amigaos4/SDL_os4events.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_os4events.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/video/amigaos4/SDL_os4events.c
+$(objects)/SDL_os4gl.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/video/amigaos4/SDL_os4gl.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_os4gl.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/video/amigaos4/SDL_os4gl.c
+$(objects)/SDL_os4surface.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/video/amigaos4/SDL_os4surface.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_os4surface.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/video/amigaos4/SDL_os4surface.c
+$(objects)/SDL_os4utils.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/video/amigaos4/SDL_os4utils.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_os4utils.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/video/amigaos4/SDL_os4utils.c
+$(objects)/SDL_os4video.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/video/amigaos4/SDL_os4video.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_os4video.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/video/amigaos4/SDL_os4video.c
+$(objects)/SDL_os4wm.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/video/amigaos4/SDL_os4wm.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_os4wm.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/video/amigaos4/SDL_os4wm.c
+$(objects)/SDL_sysloadso.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/loadso/dlopen/SDL_sysloadso.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_sysloadso.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/loadso/dlopen/SDL_sysloadso.c
+$(objects)/SDL_sysmutex.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/thread/amigaos4/SDL_sysmutex.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_sysmutex.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/thread/amigaos4/SDL_sysmutex.c
+$(objects)/SDL_syssem.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/thread/amigaos4/SDL_syssem.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_syssem.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/thread/amigaos4/SDL_syssem.c
+$(objects)/SDL_systhread.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/thread/amigaos4/SDL_systhread.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_systhread.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/thread/amigaos4/SDL_systhread.c
+$(objects)/SDL_os4audio.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/audio/amigaos4/SDL_os4audio.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_os4audio.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/audio/amigaos4/SDL_os4audio.c
+$(objects)/SDL_sysjoystick.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/joystick/amigaos4/SDL_sysjoystick.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_sysjoystick.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/joystick/amigaos4/SDL_sysjoystick.c
+$(objects)/SDL_os4timer.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/timer/amigaos4/SDL_os4timer.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_os4timer.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/timer/amigaos4/SDL_os4timer.c
+$(objects)/SDL_systimer.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/timer/amigaos4/SDL_systimer.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_systimer.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/timer/amigaos4/SDL_systimer.c
+$(objects)/SDL_sysfilesystem.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/filesystem/amigaos4/SDL_sysfilesystem.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_sysfilesystem.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/filesystem/amigaos4/SDL_sysfilesystem.c
+$(objects)/SDL_syshaptic.lo: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/haptic/dummy/SDL_syshaptic.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_syshaptic.lo: /cygdrive/j/Amiga/Amiga2015/SDL2/src/haptic/dummy/SDL_syshaptic.c
-	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
-
 
-$(objects)/SDL_dummy_main.o: /cygdrive/j/Amiga/Amiga2015/SDL2/src/main/dummy/SDL_dummy_main.c
+$(objects)/SDL_dummy_main.o: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/main/dummy/SDL_dummy_main.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@
 
-$(objects)/SDL_test_assert.o: /cygdrive/j/Amiga/Amiga2015/SDL2/src/test/SDL_test_assert.c
+$(objects)/SDL_test_assert.o: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/test/SDL_test_assert.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@ 
-$(objects)/SDL_test_common.o: /cygdrive/j/Amiga/Amiga2015/SDL2/src/test/SDL_test_common.c
+$(objects)/SDL_test_common.o: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/test/SDL_test_common.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@ 
-$(objects)/SDL_test_compare.o: /cygdrive/j/Amiga/Amiga2015/SDL2/src/test/SDL_test_compare.c
+$(objects)/SDL_test_compare.o: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/test/SDL_test_compare.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@ 
-$(objects)/SDL_test_crc32.o: /cygdrive/j/Amiga/Amiga2015/SDL2/src/test/SDL_test_crc32.c
+$(objects)/SDL_test_crc32.o: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/test/SDL_test_crc32.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@ 
-$(objects)/SDL_test_font.o: /cygdrive/j/Amiga/Amiga2015/SDL2/src/test/SDL_test_font.c
+$(objects)/SDL_test_font.o: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/test/SDL_test_font.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@ 
-$(objects)/SDL_test_fuzzer.o: /cygdrive/j/Amiga/Amiga2015/SDL2/src/test/SDL_test_fuzzer.c
+$(objects)/SDL_test_fuzzer.o: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/test/SDL_test_fuzzer.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@ 
-$(objects)/SDL_test_harness.o: /cygdrive/j/Amiga/Amiga2015/SDL2/src/test/SDL_test_harness.c
+$(objects)/SDL_test_harness.o: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/test/SDL_test_harness.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@ 
-$(objects)/SDL_test_imageBlit.o: /cygdrive/j/Amiga/Amiga2015/SDL2/src/test/SDL_test_imageBlit.c
+$(objects)/SDL_test_imageBlit.o: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/test/SDL_test_imageBlit.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@ 
-$(objects)/SDL_test_imageBlitBlend.o: /cygdrive/j/Amiga/Amiga2015/SDL2/src/test/SDL_test_imageBlitBlend.c
+$(objects)/SDL_test_imageBlitBlend.o: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/test/SDL_test_imageBlitBlend.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@ 
-$(objects)/SDL_test_imageFace.o: /cygdrive/j/Amiga/Amiga2015/SDL2/src/test/SDL_test_imageFace.c
+$(objects)/SDL_test_imageFace.o: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/test/SDL_test_imageFace.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@ 
-$(objects)/SDL_test_imagePrimitives.o: /cygdrive/j/Amiga/Amiga2015/SDL2/src/test/SDL_test_imagePrimitives.c
+$(objects)/SDL_test_imagePrimitives.o: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/test/SDL_test_imagePrimitives.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@ 
-$(objects)/SDL_test_imagePrimitivesBlend.o: /cygdrive/j/Amiga/Amiga2015/SDL2/src/test/SDL_test_imagePrimitivesBlend.c
+$(objects)/SDL_test_imagePrimitivesBlend.o: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/test/SDL_test_imagePrimitivesBlend.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@ 
-$(objects)/SDL_test_log.o: /cygdrive/j/Amiga/Amiga2015/SDL2/src/test/SDL_test_log.c
+$(objects)/SDL_test_log.o: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/test/SDL_test_log.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@ 
-$(objects)/SDL_test_md5.o: /cygdrive/j/Amiga/Amiga2015/SDL2/src/test/SDL_test_md5.c
+$(objects)/SDL_test_md5.o: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/test/SDL_test_md5.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@ 
-$(objects)/SDL_test_random.o: /cygdrive/j/Amiga/Amiga2015/SDL2/src/test/SDL_test_random.c
+$(objects)/SDL_test_random.o: /cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/src/test/SDL_test_random.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(EXTRA_CFLAGS) -MMD -MT $@ -c $< -o $@

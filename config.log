@@ -526,23 +526,23 @@ configure:15574: checking for windres
 configure:15590: found /usr/bin/windres
 configure:15601: result: windres
 configure:15730: checking for an ANSI C-conforming const
-configure:15796: ppc-amigaos-gcc -c -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include  conftest.c >&5
+configure:15796: ppc-amigaos-gcc -c -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include  conftest.c >&5
 configure:15796: $? = 0
 configure:15803: result: yes
 configure:15811: checking for inline
-configure:15827: ppc-amigaos-gcc -c -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include  conftest.c >&5
+configure:15827: ppc-amigaos-gcc -c -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include  conftest.c >&5
 configure:15827: $? = 0
 configure:15835: result: inline
 configure:15853: checking for working volatile
-configure:15872: ppc-amigaos-gcc -c -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include  conftest.c >&5
+configure:15872: ppc-amigaos-gcc -c -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include  conftest.c >&5
 configure:15872: $? = 0
 configure:15879: result: yes
 configure:15932: checking for GCC -MMD -MT option
-configure:15950: ppc-amigaos-gcc -c -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include  conftest.c >&5
+configure:15950: ppc-amigaos-gcc -c -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include  conftest.c >&5
 configure:15950: $? = 0
 configure:15956: result: yes
 configure:15964: checking for linker option --no-undefined
-configure:15987: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include    -Wl,--no-undefined conftest.c  >&5
+configure:15987: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include    -Wl,--no-undefined conftest.c  >&5
 configure:15987: $? = 0
 configure:15998: result: yes
 configure:16013: checking for ANSI C header files
@@ -550,11 +550,11 @@ configure:16117: result: yes
 configure:16128: checking for sys/types.h
 configure:16128: result: yes
 configure:16128: checking stdio.h usability
-configure:16128: ppc-amigaos-gcc -c -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include  conftest.c >&5
+configure:16128: ppc-amigaos-gcc -c -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include  conftest.c >&5
 configure:16128: $? = 0
 configure:16128: result: yes
 configure:16128: checking stdio.h presence
-configure:16128: ppc-amigaos-gcc -E  -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include  conftest.c
+configure:16128: ppc-amigaos-gcc -E  -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include  conftest.c
 configure:16128: $? = 0
 configure:16128: result: yes
 configure:16128: checking for stdio.h
@@ -562,31 +562,31 @@ configure:16128: result: yes
 configure:16128: checking for stdlib.h
 configure:16128: result: yes
 configure:16128: checking stddef.h usability
-configure:16128: ppc-amigaos-gcc -c -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include  conftest.c >&5
+configure:16128: ppc-amigaos-gcc -c -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include  conftest.c >&5
 configure:16128: $? = 0
 configure:16128: result: yes
 configure:16128: checking stddef.h presence
-configure:16128: ppc-amigaos-gcc -E  -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include  conftest.c
+configure:16128: ppc-amigaos-gcc -E  -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include  conftest.c
 configure:16128: $? = 0
 configure:16128: result: yes
 configure:16128: checking for stddef.h
 configure:16128: result: yes
 configure:16128: checking stdarg.h usability
-configure:16128: ppc-amigaos-gcc -c -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include  conftest.c >&5
+configure:16128: ppc-amigaos-gcc -c -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include  conftest.c >&5
 configure:16128: $? = 0
 configure:16128: result: yes
 configure:16128: checking stdarg.h presence
-configure:16128: ppc-amigaos-gcc -E  -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include  conftest.c
+configure:16128: ppc-amigaos-gcc -E  -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include  conftest.c
 configure:16128: $? = 0
 configure:16128: result: yes
 configure:16128: checking for stdarg.h
 configure:16128: result: yes
 configure:16128: checking malloc.h usability
-configure:16128: ppc-amigaos-gcc -c -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include  conftest.c >&5
+configure:16128: ppc-amigaos-gcc -c -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include  conftest.c >&5
 configure:16128: $? = 0
 configure:16128: result: yes
 configure:16128: checking malloc.h presence
-configure:16128: ppc-amigaos-gcc -E  -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include  conftest.c
+configure:16128: ppc-amigaos-gcc -E  -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include  conftest.c
 configure:16128: $? = 0
 configure:16128: result: yes
 configure:16128: checking for malloc.h
@@ -602,49 +602,49 @@ configure:16128: result: yes
 configure:16128: checking for stdint.h
 configure:16128: result: yes
 configure:16128: checking ctype.h usability
-configure:16128: ppc-amigaos-gcc -c -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include  conftest.c >&5
+configure:16128: ppc-amigaos-gcc -c -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include  conftest.c >&5
 configure:16128: $? = 0
 configure:16128: result: yes
 configure:16128: checking ctype.h presence
-configure:16128: ppc-amigaos-gcc -E  -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include  conftest.c
+configure:16128: ppc-amigaos-gcc -E  -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include  conftest.c
 configure:16128: $? = 0
 configure:16128: result: yes
 configure:16128: checking for ctype.h
 configure:16128: result: yes
 configure:16128: checking math.h usability
-configure:16128: ppc-amigaos-gcc -c -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include  conftest.c >&5
+configure:16128: ppc-amigaos-gcc -c -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include  conftest.c >&5
 configure:16128: $? = 0
 configure:16128: result: yes
 configure:16128: checking math.h presence
-configure:16128: ppc-amigaos-gcc -E  -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include  conftest.c
+configure:16128: ppc-amigaos-gcc -E  -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include  conftest.c
 configure:16128: $? = 0
 configure:16128: result: yes
 configure:16128: checking for math.h
 configure:16128: result: yes
 configure:16128: checking iconv.h usability
-configure:16128: ppc-amigaos-gcc -c -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include  conftest.c >&5
+configure:16128: ppc-amigaos-gcc -c -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include  conftest.c >&5
 configure:16128: $? = 0
 configure:16128: result: yes
 configure:16128: checking iconv.h presence
-configure:16128: ppc-amigaos-gcc -E  -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include  conftest.c
+configure:16128: ppc-amigaos-gcc -E  -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include  conftest.c
 configure:16128: $? = 0
 configure:16128: result: yes
 configure:16128: checking for iconv.h
 configure:16128: result: yes
 configure:16128: checking signal.h usability
-configure:16128: ppc-amigaos-gcc -c -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include  conftest.c >&5
+configure:16128: ppc-amigaos-gcc -c -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include  conftest.c >&5
 configure:16128: $? = 0
 configure:16128: result: yes
 configure:16128: checking signal.h presence
-configure:16128: ppc-amigaos-gcc -E  -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include  conftest.c
+configure:16128: ppc-amigaos-gcc -E  -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include  conftest.c
 configure:16128: $? = 0
 configure:16128: result: yes
 configure:16128: checking for signal.h
 configure:16128: result: yes
 configure:16139: checking for size_t
-configure:16139: ppc-amigaos-gcc -c -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include  conftest.c >&5
+configure:16139: ppc-amigaos-gcc -c -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include  conftest.c >&5
 configure:16139: $? = 0
-configure:16139: ppc-amigaos-gcc -c -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include  conftest.c >&5
+configure:16139: ppc-amigaos-gcc -c -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include  conftest.c >&5
 conftest.c: In function 'main':
 conftest.c:74:21: error: expected expression before ')' token
  if (sizeof ((size_t)))
@@ -733,11 +733,11 @@ configure:16139: result: yes
 configure:16151: checking for M_PI in math.h
 configure:16175: result: yes
 configure:16190: checking for working alloca.h
-configure:16207: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include    conftest.c  >&5
+configure:16207: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include    conftest.c  >&5
 configure:16207: $? = 0
 configure:16215: result: yes
 configure:16223: checking for alloca
-configure:16260: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include    conftest.c  >&5
+configure:16260: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include    conftest.c  >&5
 configure:16260: $? = 0
 configure:16268: result: yes
 configure:16377: checking for working memcmp
@@ -745,16 +745,16 @@ configure:16430: result: no
 configure:16444: checking for working strtod
 configure:16495: result: no
 configure:16504: checking for pow
-configure:16504: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include    conftest.c  >&5
+configure:16504: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include    conftest.c  >&5
 conftest.c:64:6: warning: conflicting types for built-in function 'pow'
  char pow ();
       ^
 configure:16504: $? = 0
 configure:16504: result: yes
 configure:16562: checking for mprotect
-configure:16562: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include    conftest.c  >&5
-/tmp/ccvvo6z3.o: In function `main':
-/cygdrive/j/Amiga/Amiga2015/SDL2/conftest.c:75: undefined reference to `mprotect'
+configure:16562: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include    conftest.c  >&5
+/tmp/ccqe7a6l.o: In function `main':
+/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/conftest.c:75: undefined reference to `mprotect'
 collect2: error: ld returned 1 exit status
 configure:16562: $? = 1
 configure: failed program was:
@@ -838,49 +838,49 @@ configure: failed program was:
 | }
 configure:16562: result: no
 configure:16592: checking for malloc
-configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include    conftest.c  >&5
+configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include    conftest.c  >&5
 conftest.c:64:6: warning: conflicting types for built-in function 'malloc'
  char malloc ();
       ^
 configure:16592: $? = 0
 configure:16592: result: yes
 configure:16592: checking for calloc
-configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include    conftest.c  >&5
+configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include    conftest.c  >&5
 conftest.c:65:6: warning: conflicting types for built-in function 'calloc'
  char calloc ();
       ^
 configure:16592: $? = 0
 configure:16592: result: yes
 configure:16592: checking for realloc
-configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include    conftest.c  >&5
+configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include    conftest.c  >&5
 conftest.c:66:6: warning: conflicting types for built-in function 'realloc'
  char realloc ();
       ^
 configure:16592: $? = 0
 configure:16592: result: yes
 configure:16592: checking for free
-configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include    conftest.c  >&5
+configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include    conftest.c  >&5
 conftest.c:67:6: warning: conflicting types for built-in function 'free'
  char free ();
       ^
 configure:16592: $? = 0
 configure:16592: result: yes
 configure:16592: checking for getenv
-configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include    conftest.c  >&5
+configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include    conftest.c  >&5
 configure:16592: $? = 0
 configure:16592: result: yes
 configure:16592: checking for setenv
-configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include    conftest.c  >&5
+configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include    conftest.c  >&5
 configure:16592: $? = 0
 configure:16592: result: yes
 configure:16592: checking for putenv
-configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include    conftest.c  >&5
+configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include    conftest.c  >&5
 configure:16592: $? = 0
 configure:16592: result: yes
 configure:16592: checking for unsetenv
-configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include    conftest.c  >&5
-/tmp/ccIeSaHp.o: In function `main':
-/cygdrive/j/Amiga/Amiga2015/SDL2/conftest.c:82: undefined reference to `unsetenv'
+configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include    conftest.c  >&5
+/tmp/ccEWyKFf.o: In function `main':
+/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/conftest.c:82: undefined reference to `unsetenv'
 collect2: error: ld returned 1 exit status
 configure:16592: $? = 1
 configure: failed program was:
@@ -971,70 +971,70 @@ configure: failed program was:
 | }
 configure:16592: result: no
 configure:16592: checking for qsort
-configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include    conftest.c  >&5
+configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include    conftest.c  >&5
 configure:16592: $? = 0
 configure:16592: result: yes
 configure:16592: checking for abs
-configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include    conftest.c  >&5
+configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include    conftest.c  >&5
 conftest.c:72:6: warning: conflicting types for built-in function 'abs'
  char abs ();
       ^
 configure:16592: $? = 0
 configure:16592: result: yes
 configure:16592: checking for bcopy
-configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include    conftest.c  >&5
+configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include    conftest.c  >&5
 conftest.c:73:6: warning: conflicting types for built-in function 'bcopy'
  char bcopy ();
       ^
 configure:16592: $? = 0
 configure:16592: result: yes
 configure:16592: checking for memset
-configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include    conftest.c  >&5
+configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include    conftest.c  >&5
 conftest.c:74:6: warning: conflicting types for built-in function 'memset'
  char memset ();
       ^
 configure:16592: $? = 0
 configure:16592: result: yes
 configure:16592: checking for memcpy
-configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include    conftest.c  >&5
+configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include    conftest.c  >&5
 conftest.c:75:6: warning: conflicting types for built-in function 'memcpy'
  char memcpy ();
       ^
 configure:16592: $? = 0
 configure:16592: result: yes
 configure:16592: checking for memmove
-configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include    conftest.c  >&5
+configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include    conftest.c  >&5
 conftest.c:76:6: warning: conflicting types for built-in function 'memmove'
  char memmove ();
       ^
 configure:16592: $? = 0
 configure:16592: result: yes
 configure:16592: checking for strlen
-configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include    conftest.c  >&5
+configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include    conftest.c  >&5
 conftest.c:77:6: warning: conflicting types for built-in function 'strlen'
  char strlen ();
       ^
 configure:16592: $? = 0
 configure:16592: result: yes
 configure:16592: checking for strlcpy
-configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include    conftest.c  >&5
+configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include    conftest.c  >&5
 configure:16592: $? = 0
 configure:16592: result: yes
 configure:16592: checking for strlcat
-configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include    conftest.c  >&5
+configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include    conftest.c  >&5
 configure:16592: $? = 0
 configure:16592: result: yes
 configure:16592: checking for strdup
-configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include    conftest.c  >&5
+configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include    conftest.c  >&5
 conftest.c:80:6: warning: conflicting types for built-in function 'strdup'
  char strdup ();
       ^
 configure:16592: $? = 0
 configure:16592: result: yes
 configure:16592: checking for _strrev
-configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include    conftest.c  >&5
-/tmp/ccVzoNRe.o: In function `main':
-/cygdrive/j/Amiga/Amiga2015/SDL2/conftest.c:92: undefined reference to `_strrev'
+configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include    conftest.c  >&5
+/tmp/ccdM3O3K.o: In function `main':
+/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/conftest.c:92: undefined reference to `_strrev'
 collect2: error: ld returned 1 exit status
 configure:16592: $? = 1
 configure: failed program was:
@@ -1135,9 +1135,9 @@ configure: failed program was:
 | }
 configure:16592: result: no
 configure:16592: checking for _strupr
-configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include    conftest.c  >&5
-/tmp/ccafCmK3.o: In function `main':
-/cygdrive/j/Amiga/Amiga2015/SDL2/conftest.c:92: undefined reference to `_strupr'
+configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include    conftest.c  >&5
+/tmp/ccFlKMj1.o: In function `main':
+/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/conftest.c:92: undefined reference to `_strupr'
 collect2: error: ld returned 1 exit status
 configure:16592: $? = 1
 configure: failed program was:
@@ -1238,9 +1238,9 @@ configure: failed program was:
 | }
 configure:16592: result: no
 configure:16592: checking for _strlwr
-configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include    conftest.c  >&5
-/tmp/cciDGGMO.o: In function `main':
-/cygdrive/j/Amiga/Amiga2015/SDL2/conftest.c:92: undefined reference to `_strlwr'
+configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include    conftest.c  >&5
+/tmp/ccSB0Djk.o: In function `main':
+/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/conftest.c:92: undefined reference to `_strlwr'
 collect2: error: ld returned 1 exit status
 configure:16592: $? = 1
 configure: failed program was:
@@ -1341,30 +1341,30 @@ configure: failed program was:
 | }
 configure:16592: result: no
 configure:16592: checking for strchr
-configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include    conftest.c  >&5
+configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include    conftest.c  >&5
 conftest.c:81:6: warning: conflicting types for built-in function 'strchr'
  char strchr ();
       ^
 configure:16592: $? = 0
 configure:16592: result: yes
 configure:16592: checking for strrchr
-configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include    conftest.c  >&5
+configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include    conftest.c  >&5
 conftest.c:82:6: warning: conflicting types for built-in function 'strrchr'
  char strrchr ();
       ^
 configure:16592: $? = 0
 configure:16592: result: yes
 configure:16592: checking for strstr
-configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include    conftest.c  >&5
+configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include    conftest.c  >&5
 conftest.c:83:6: warning: conflicting types for built-in function 'strstr'
  char strstr ();
       ^
 configure:16592: $? = 0
 configure:16592: result: yes
 configure:16592: checking for itoa
-configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include    conftest.c  >&5
-/tmp/cc5gHxCz.o: In function `main':
-/cygdrive/j/Amiga/Amiga2015/SDL2/conftest.c:95: undefined reference to `itoa'
+configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include    conftest.c  >&5
+/tmp/cc4jQsyD.o: In function `main':
+/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/conftest.c:95: undefined reference to `itoa'
 collect2: error: ld returned 1 exit status
 configure:16592: $? = 1
 configure: failed program was:
@@ -1468,9 +1468,9 @@ configure: failed program was:
 | }
 configure:16592: result: no
 configure:16592: checking for _ltoa
-configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include    conftest.c  >&5
-/tmp/cchpPY8W.o: In function `main':
-/cygdrive/j/Amiga/Amiga2015/SDL2/conftest.c:95: undefined reference to `_ltoa'
+configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include    conftest.c  >&5
+/tmp/cc1V9J5L.o: In function `main':
+/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/conftest.c:95: undefined reference to `_ltoa'
 collect2: error: ld returned 1 exit status
 configure:16592: $? = 1
 configure: failed program was:
@@ -1574,9 +1574,9 @@ configure: failed program was:
 | }
 configure:16592: result: no
 configure:16592: checking for _uitoa
-configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include    conftest.c  >&5
-/tmp/cchxkRxl.o: In function `main':
-/cygdrive/j/Amiga/Amiga2015/SDL2/conftest.c:95: undefined reference to `_uitoa'
+configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include    conftest.c  >&5
+/tmp/cc9wA0px.o: In function `main':
+/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/conftest.c:95: undefined reference to `_uitoa'
 collect2: error: ld returned 1 exit status
 configure:16592: $? = 1
 configure: failed program was:
@@ -1680,9 +1680,9 @@ configure: failed program was:
 | }
 configure:16592: result: no
 configure:16592: checking for _ultoa
-configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include    conftest.c  >&5
-/tmp/ccE4GO78.o: In function `main':
-/cygdrive/j/Amiga/Amiga2015/SDL2/conftest.c:95: undefined reference to `_ultoa'
+configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include    conftest.c  >&5
+/tmp/ccOiHNVJ.o: In function `main':
+/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/conftest.c:95: undefined reference to `_ultoa'
 collect2: error: ld returned 1 exit status
 configure:16592: $? = 1
 configure: failed program was:
@@ -1786,17 +1786,17 @@ configure: failed program was:
 | }
 configure:16592: result: no
 configure:16592: checking for strtol
-configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include    conftest.c  >&5
+configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include    conftest.c  >&5
 configure:16592: $? = 0
 configure:16592: result: yes
 configure:16592: checking for strtoul
-configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include    conftest.c  >&5
+configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include    conftest.c  >&5
 configure:16592: $? = 0
 configure:16592: result: yes
 configure:16592: checking for _i64toa
-configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include    conftest.c  >&5
-/tmp/ccwc9dOG.o: In function `main':
-/cygdrive/j/Amiga/Amiga2015/SDL2/conftest.c:97: undefined reference to `_i64toa'
+configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include    conftest.c  >&5
+/tmp/ccttTken.o: In function `main':
+/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/conftest.c:97: undefined reference to `_i64toa'
 collect2: error: ld returned 1 exit status
 configure:16592: $? = 1
 configure: failed program was:
@@ -1902,9 +1902,9 @@ configure: failed program was:
 | }
 configure:16592: result: no
 configure:16592: checking for _ui64toa
-configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include    conftest.c  >&5
-/tmp/ccfWetoJ.o: In function `main':
-/cygdrive/j/Amiga/Amiga2015/SDL2/conftest.c:97: undefined reference to `_ui64toa'
+configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include    conftest.c  >&5
+/tmp/cc2AO6Uz.o: In function `main':
+/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/conftest.c:97: undefined reference to `_ui64toa'
 collect2: error: ld returned 1 exit status
 configure:16592: $? = 1
 configure: failed program was:
@@ -2010,39 +2010,39 @@ configure: failed program was:
 | }
 configure:16592: result: no
 configure:16592: checking for strtoll
-configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include    conftest.c  >&5
+configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include    conftest.c  >&5
 configure:16592: $? = 0
 configure:16592: result: yes
 configure:16592: checking for strtoull
-configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include    conftest.c  >&5
+configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include    conftest.c  >&5
 configure:16592: $? = 0
 configure:16592: result: yes
 configure:16592: checking for atoi
-configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include    conftest.c  >&5
+configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include    conftest.c  >&5
 configure:16592: $? = 0
 configure:16592: result: yes
 configure:16592: checking for atof
-configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include    conftest.c  >&5
+configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include    conftest.c  >&5
 configure:16592: $? = 0
 configure:16592: result: yes
 configure:16592: checking for strcmp
-configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include    conftest.c  >&5
+configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include    conftest.c  >&5
 conftest.c:90:6: warning: conflicting types for built-in function 'strcmp'
  char strcmp ();
       ^
 configure:16592: $? = 0
 configure:16592: result: yes
 configure:16592: checking for strncmp
-configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include    conftest.c  >&5
+configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include    conftest.c  >&5
 conftest.c:91:6: warning: conflicting types for built-in function 'strncmp'
  char strncmp ();
       ^
 configure:16592: $? = 0
 configure:16592: result: yes
 configure:16592: checking for _stricmp
-configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include    conftest.c  >&5
-/tmp/cczPBBIU.o: In function `main':
-/cygdrive/j/Amiga/Amiga2015/SDL2/conftest.c:103: undefined reference to `_stricmp'
+configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include    conftest.c  >&5
+/tmp/cc54hTe3.o: In function `main':
+/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/conftest.c:103: undefined reference to `_stricmp'
 collect2: error: ld returned 1 exit status
 configure:16592: $? = 1
 configure: failed program was:
@@ -2154,16 +2154,16 @@ configure: failed program was:
 | }
 configure:16592: result: no
 configure:16592: checking for strcasecmp
-configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include    conftest.c  >&5
+configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include    conftest.c  >&5
 conftest.c:92:6: warning: conflicting types for built-in function 'strcasecmp'
  char strcasecmp ();
       ^
 configure:16592: $? = 0
 configure:16592: result: yes
 configure:16592: checking for _strnicmp
-configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include    conftest.c  >&5
-/tmp/ccOrJwx3.o: In function `main':
-/cygdrive/j/Amiga/Amiga2015/SDL2/conftest.c:104: undefined reference to `_strnicmp'
+configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include    conftest.c  >&5
+/tmp/ccp6f95p.o: In function `main':
+/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/conftest.c:104: undefined reference to `_strnicmp'
 collect2: error: ld returned 1 exit status
 configure:16592: $? = 1
 configure: failed program was:
@@ -2276,38 +2276,38 @@ configure: failed program was:
 | }
 configure:16592: result: no
 configure:16592: checking for strncasecmp
-configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include    conftest.c  >&5
+configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include    conftest.c  >&5
 conftest.c:93:6: warning: conflicting types for built-in function 'strncasecmp'
  char strncasecmp ();
       ^
 configure:16592: $? = 0
 configure:16592: result: yes
 configure:16592: checking for vsscanf
-configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include    conftest.c  >&5
+configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include    conftest.c  >&5
 conftest.c:94:6: warning: conflicting types for built-in function 'vsscanf'
  char vsscanf ();
       ^
 configure:16592: $? = 0
 configure:16592: result: yes
 configure:16592: checking for vsnprintf
-configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include    conftest.c  >&5
+configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include    conftest.c  >&5
 conftest.c:95:6: warning: conflicting types for built-in function 'vsnprintf'
  char vsnprintf ();
       ^
 configure:16592: $? = 0
 configure:16592: result: yes
 configure:16592: checking for fseeko
-configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include    conftest.c  >&5
+configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include    conftest.c  >&5
 configure:16592: $? = 0
 configure:16592: result: yes
 configure:16592: checking for fseeko64
-configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include    conftest.c  >&5
+configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include    conftest.c  >&5
 configure:16592: $? = 0
 configure:16592: result: yes
 configure:16592: checking for sigaction
-configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include    conftest.c  >&5
-/tmp/ccvnZLPw.o: In function `main':
-/cygdrive/j/Amiga/Amiga2015/SDL2/conftest.c:109: undefined reference to `sigaction'
+configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include    conftest.c  >&5
+/tmp/cctG4R73.o: In function `main':
+/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/conftest.c:109: undefined reference to `sigaction'
 collect2: error: ld returned 1 exit status
 configure:16592: $? = 1
 configure: failed program was:
@@ -2425,13 +2425,13 @@ configure: failed program was:
 | }
 configure:16592: result: no
 configure:16592: checking for setjmp
-configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include    conftest.c  >&5
+configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include    conftest.c  >&5
 configure:16592: $? = 0
 configure:16592: result: yes
 configure:16592: checking for nanosleep
-configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include    conftest.c  >&5
-/tmp/ccwn4kPt.o: In function `main':
-/cygdrive/j/Amiga/Amiga2015/SDL2/conftest.c:110: undefined reference to `nanosleep'
+configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include    conftest.c  >&5
+/tmp/cc7WTg63.o: In function `main':
+/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/conftest.c:110: undefined reference to `nanosleep'
 collect2: error: ld returned 1 exit status
 configure:16592: $? = 1
 configure: failed program was:
@@ -2550,9 +2550,9 @@ configure: failed program was:
 | }
 configure:16592: result: no
 configure:16592: checking for sysconf
-configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include    conftest.c  >&5
-/tmp/ccScjWnG.o: In function `main':
-/cygdrive/j/Amiga/Amiga2015/SDL2/conftest.c:110: undefined reference to `sysconf'
+configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include    conftest.c  >&5
+/tmp/cc0EiEHA.o: In function `main':
+/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/conftest.c:110: undefined reference to `sysconf'
 collect2: error: ld returned 1 exit status
 configure:16592: $? = 1
 configure: failed program was:
@@ -2671,9 +2671,9 @@ configure: failed program was:
 | }
 configure:16592: result: no
 configure:16592: checking for sysctlbyname
-configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include    conftest.c  >&5
-/tmp/ccqHEYeR.o: In function `main':
-/cygdrive/j/Amiga/Amiga2015/SDL2/conftest.c:110: undefined reference to `sysctlbyname'
+configure:16592: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include    conftest.c  >&5
+/tmp/ccD5ee9P.o: In function `main':
+/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/conftest.c:110: undefined reference to `sysctlbyname'
 collect2: error: ld returned 1 exit status
 configure:16592: $? = 1
 configure: failed program was:
@@ -2792,84 +2792,84 @@ configure: failed program was:
 | }
 configure:16592: result: no
 configure:16602: checking for pow in -lm
-configure:16627: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include    conftest.c -lm   >&5
+configure:16627: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include    conftest.c -lm   >&5
 conftest.c:83:6: warning: conflicting types for built-in function 'pow'
  char pow ();
       ^
 configure:16627: $? = 0
 configure:16636: result: yes
 configure:16645: checking for atan
-configure:16645: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include    conftest.c  -lm >&5
+configure:16645: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include    conftest.c  -lm >&5
 conftest.c:99:6: warning: conflicting types for built-in function 'atan'
  char atan ();
       ^
 configure:16645: $? = 0
 configure:16645: result: yes
 configure:16645: checking for atan2
-configure:16645: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include    conftest.c  -lm >&5
+configure:16645: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include    conftest.c  -lm >&5
 conftest.c:100:6: warning: conflicting types for built-in function 'atan2'
  char atan2 ();
       ^
 configure:16645: $? = 0
 configure:16645: result: yes
 configure:16645: checking for acos
-configure:16645: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include    conftest.c  -lm >&5
+configure:16645: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include    conftest.c  -lm >&5
 conftest.c:101:6: warning: conflicting types for built-in function 'acos'
  char acos ();
       ^
 configure:16645: $? = 0
 configure:16645: result: yes
 configure:16645: checking for asin
-configure:16645: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include    conftest.c  -lm >&5
+configure:16645: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include    conftest.c  -lm >&5
 conftest.c:102:6: warning: conflicting types for built-in function 'asin'
  char asin ();
       ^
 configure:16645: $? = 0
 configure:16645: result: yes
 configure:16645: checking for ceil
-configure:16645: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include    conftest.c  -lm >&5
+configure:16645: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include    conftest.c  -lm >&5
 conftest.c:103:6: warning: conflicting types for built-in function 'ceil'
  char ceil ();
       ^
 configure:16645: $? = 0
 configure:16645: result: yes
 configure:16645: checking for copysign
-configure:16645: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include    conftest.c  -lm >&5
+configure:16645: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include    conftest.c  -lm >&5
 conftest.c:104:6: warning: conflicting types for built-in function 'copysign'
  char copysign ();
       ^
 configure:16645: $? = 0
 configure:16645: result: yes
 configure:16645: checking for cos
-configure:16645: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include    conftest.c  -lm >&5
+configure:16645: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include    conftest.c  -lm >&5
 conftest.c:105:6: warning: conflicting types for built-in function 'cos'
  char cos ();
       ^
 configure:16645: $? = 0
 configure:16645: result: yes
 configure:16645: checking for cosf
-configure:16645: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include    conftest.c  -lm >&5
+configure:16645: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include    conftest.c  -lm >&5
 conftest.c:106:6: warning: conflicting types for built-in function 'cosf'
  char cosf ();
       ^
 configure:16645: $? = 0
 configure:16645: result: yes
 configure:16645: checking for fabs
-configure:16645: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include    conftest.c  -lm >&5
+configure:16645: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include    conftest.c  -lm >&5
 conftest.c:107:6: warning: conflicting types for built-in function 'fabs'
  char fabs ();
       ^
 configure:16645: $? = 0
 configure:16645: result: yes
 configure:16645: checking for floor
-configure:16645: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include    conftest.c  -lm >&5
+configure:16645: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include    conftest.c  -lm >&5
 conftest.c:108:6: warning: conflicting types for built-in function 'floor'
  char floor ();
       ^
 configure:16645: $? = 0
 configure:16645: result: yes
 configure:16645: checking for log
-configure:16645: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include    conftest.c  -lm >&5
+configure:16645: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include    conftest.c  -lm >&5
 conftest.c:109:6: warning: conflicting types for built-in function 'log'
  char log ();
       ^
@@ -2878,43 +2878,43 @@ configure:16645: result: yes
 configure:16645: checking for pow
 configure:16645: result: yes
 configure:16645: checking for scalbn
-configure:16645: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include    conftest.c  -lm >&5
+configure:16645: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include    conftest.c  -lm >&5
 conftest.c:111:6: warning: conflicting types for built-in function 'scalbn'
  char scalbn ();
       ^
 configure:16645: $? = 0
 configure:16645: result: yes
 configure:16645: checking for sin
-configure:16645: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include    conftest.c  -lm >&5
+configure:16645: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include    conftest.c  -lm >&5
 conftest.c:112:6: warning: conflicting types for built-in function 'sin'
  char sin ();
       ^
 configure:16645: $? = 0
 configure:16645: result: yes
 configure:16645: checking for sinf
-configure:16645: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include    conftest.c  -lm >&5
+configure:16645: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include    conftest.c  -lm >&5
 conftest.c:113:6: warning: conflicting types for built-in function 'sinf'
  char sinf ();
       ^
 configure:16645: $? = 0
 configure:16645: result: yes
 configure:16645: checking for sqrt
-configure:16645: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include    conftest.c  -lm >&5
+configure:16645: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include    conftest.c  -lm >&5
 conftest.c:114:6: warning: conflicting types for built-in function 'sqrt'
  char sqrt ();
       ^
 configure:16645: $? = 0
 configure:16645: result: yes
 configure:16655: checking for iconv_open in -liconv
-configure:16680: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include    conftest.c -liconv   -lm >&5
+configure:16680: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include    conftest.c -liconv   -lm >&5
 configure:16680: $? = 0
 configure:16689: result: yes
 configure:16697: checking for iconv
-configure:16697: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include    conftest.c  -lm -liconv >&5
+configure:16697: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include    conftest.c  -lm -liconv >&5
 configure:16697: $? = 0
 configure:16697: result: yes
 configure:16707: checking for struct sigaction.sa_sigaction
-configure:16707: ppc-amigaos-gcc -c -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include  conftest.c >&5
+configure:16707: ppc-amigaos-gcc -c -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include  conftest.c >&5
 conftest.c: In function 'main':
 conftest.c:99:12: error: 'struct sigaction' has no member named 'sa_sigaction'
  if (ac_aggr.sa_sigaction)
@@ -3024,7 +3024,7 @@ configure: failed program was:
 |   ;
 |   return 0;
 | }
-configure:16707: ppc-amigaos-gcc -c -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include  conftest.c >&5
+configure:16707: ppc-amigaos-gcc -c -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include  conftest.c >&5
 conftest.c: In function 'main':
 conftest.c:99:19: error: 'struct sigaction' has no member named 'sa_sigaction'
  if (sizeof ac_aggr.sa_sigaction)
@@ -3136,11 +3136,11 @@ configure: failed program was:
 | }
 configure:16707: result: no
 configure:16726: checking for GCC builtin atomic operations
-configure:16748: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include    conftest.c  -lm -liconv >&5
+configure:16748: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include    conftest.c  -lm -liconv >&5
 configure:16748: $? = 0
 configure:16755: result: yes
 configure:17064: checking for GCC -mmmx option
-configure:17095: ppc-amigaos-gcc -c -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include  -mmmx  -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include  conftest.c >&5
+configure:17095: ppc-amigaos-gcc -c -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include  -mmmx  -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include  conftest.c >&5
 ppc-amigaos-gcc: error: unrecognized command line option '-mmmx'
 configure:17095: $? = 1
 configure: failed program was:
@@ -3263,7 +3263,7 @@ configure: failed program was:
 | }
 configure:17101: result: no
 configure:17121: checking for GCC -m3dnow option
-configure:17145: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include  -m3dnow  -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include    conftest.c  -lm -liconv >&5
+configure:17145: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include  -m3dnow  -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include    conftest.c  -lm -liconv >&5
 ppc-amigaos-gcc: error: unrecognized command line option '-m3dnow'
 configure:17145: $? = 1
 configure: failed program was:
@@ -3379,7 +3379,7 @@ configure: failed program was:
 | }
 configure:17152: result: no
 configure:17172: checking for GCC -msse option
-configure:17203: ppc-amigaos-gcc -c -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include  -msse  -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include  conftest.c >&5
+configure:17203: ppc-amigaos-gcc -c -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include  -msse  -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include  conftest.c >&5
 ppc-amigaos-gcc: error: unrecognized command line option '-msse'
 configure:17203: $? = 1
 configure: failed program was:
@@ -3502,13 +3502,13 @@ configure: failed program was:
 | }
 configure:17209: result: no
 configure:21966: checking for dlopen
-configure:21985: ppc-amigaos-gcc -c -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include  conftest.c >&5
+configure:21985: ppc-amigaos-gcc -c -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include  conftest.c >&5
 configure:21985: $? = 0
 configure:21991: result: yes
 configure:21995: checking for dlopen in -lc
-configure:22020: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include    conftest.c -lc   -lm -liconv >&5
-/tmp/ccMhOIJj.o: In function `main':
-/cygdrive/j/Amiga/Amiga2015/SDL2/conftest.c:113: undefined reference to `dlopen'
+configure:22020: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include    conftest.c -lc   -lm -liconv >&5
+/tmp/ccmYxKae.o: In function `main':
+/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/conftest.c:112: undefined reference to `dlopen'
 collect2: error: ld returned 1 exit status
 configure:22020: $? = 1
 configure: failed program was:
@@ -3606,7 +3606,6 @@ configure: failed program was:
 | #define HAVE_GCC_ATOMICS 1
 | #define SDL_ASSEMBLY_ROUTINES 1
 | #define SDL_VIDEO_DRIVER_DUMMY 1
-| #define SDL_AUDIO_DRIVER_DISK 1
 | #define SDL_AUDIO_DRIVER_DUMMY 1
 | #define SDL_VIDEO_DRIVER_AMIGAOS4 1
 | #define SDL_VIDEO_OPENGL 1
@@ -3630,7 +3629,7 @@ configure: failed program was:
 | }
 configure:22029: result: no
 configure:22034: checking for dlopen in -ldl
-configure:22059: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include    conftest.c -ldl   -lm -liconv >&5
+configure:22059: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include    conftest.c -ldl   -lm -liconv >&5
 /usr/local/amiga/ppc-amigaos/SDK/local/newlib/lib/libdl.a(libdl.o): In function `initdl':
 libdl.c:(.text+0xb6): undefined reference to `IElf'
 libdl.c:(.text+0xba): undefined reference to `IElf'
@@ -3736,7 +3735,6 @@ configure: failed program was:
 | #define HAVE_GCC_ATOMICS 1
 | #define SDL_ASSEMBLY_ROUTINES 1
 | #define SDL_VIDEO_DRIVER_DUMMY 1
-| #define SDL_AUDIO_DRIVER_DISK 1
 | #define SDL_AUDIO_DRIVER_DUMMY 1
 | #define SDL_VIDEO_DRIVER_AMIGAOS4 1
 | #define SDL_VIDEO_OPENGL 1
@@ -3760,7 +3758,7 @@ configure: failed program was:
 | }
 configure:22068: result: no
 configure:22073: checking for dlopen in -lltdl
-configure:22098: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include    conftest.c -lltdl   -lm -liconv >&5
+configure:22098: ppc-amigaos-gcc -o conftest -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include   -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include    conftest.c -lltdl   -lm -liconv >&5
 /usr/local/amiga/lib/gcc/ppc-amigaos/4.9.1/../../../../ppc-amigaos/bin/ld: cannot find -lltdl
 collect2: error: ld returned 1 exit status
 configure:22098: $? = 1
@@ -3859,7 +3857,6 @@ configure: failed program was:
 | #define HAVE_GCC_ATOMICS 1
 | #define SDL_ASSEMBLY_ROUTINES 1
 | #define SDL_VIDEO_DRIVER_DUMMY 1
-| #define SDL_AUDIO_DRIVER_DISK 1
 | #define SDL_AUDIO_DRIVER_DUMMY 1
 | #define SDL_VIDEO_DRIVER_AMIGAOS4 1
 | #define SDL_VIDEO_OPENGL 1
@@ -3883,12 +3880,12 @@ configure: failed program was:
 | }
 configure:22107: result: no
 configure:18636: checking for GCC -Wall option
-configure:18656: ppc-amigaos-gcc -c -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include  -Wall  -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include  conftest.c >&5
+configure:18656: ppc-amigaos-gcc -c -g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include  -Wall  -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include  conftest.c >&5
 configure:18656: $? = 0
 configure:18662: result: yes
 configure:18669: checking for necessary GCC -Wno-multichar option
 configure:18677: result: no
-configure:23474: creating ./config.status
+configure:23473: creating ./config.status
 
 ## ---------------------- ##
 ## Running config.status. ##
@@ -3905,15 +3902,15 @@ generated by GNU Autoconf 2.69.  Invocation command line was
 
 on PC-SVILUPPO
 
-config.status:1261: creating Makefile
-config.status:1261: creating sdl2-config
-config.status:1261: creating SDL2.spec
-config.status:1261: creating sdl2.pc
-config.status:1261: creating include/SDL_config.h
-config.status:1421: include/SDL_config.h is unchanged
-config.status:1435: executing libtool commands
-config.status:1435: executing sdl2_config commands
-config.status:1435: executing summary commands
+config.status:1260: creating Makefile
+config.status:1260: creating sdl2-config
+config.status:1260: creating SDL2.spec
+config.status:1260: creating sdl2.pc
+config.status:1260: creating include/SDL_config.h
+config.status:1420: include/SDL_config.h is unchanged
+config.status:1434: executing libtool commands
+config.status:1434: executing sdl2_config commands
+config.status:1434: executing summary commands
 
 ## ---------------- ##
 ## Cache variables. ##
@@ -4121,9 +4118,9 @@ AWK='gawk'
 BUILD_CFLAGS='-g -O3 -DUSING_GENERATED_CONFIG_H'
 BUILD_LDFLAGS=''
 CC='ppc-amigaos-gcc'
-CFLAGS='-g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include '
+CFLAGS='-g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include '
 CPP='ppc-amigaos-gcc -E'
-CPPFLAGS=' -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include '
+CPPFLAGS=' -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include '
 CXX='ppc-amigaos-g++'
 CXXCPP='ppc-amigaos-g++ -E'
 CXXFLAGS='-g -O2'
@@ -4144,11 +4141,11 @@ ESD_CFLAGS=''
 ESD_CONFIG=''
 ESD_LIBS=''
 EXEEXT=''
-EXTRA_CFLAGS='-Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include  -mstrict-align -Wall'
+EXTRA_CFLAGS='-Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include  -mstrict-align -Wall'
 EXTRA_LDFLAGS='-use-dynld -Wl,-export-dynamic -Wl,-no-undefined  -Wl,--no-undefined -lm -liconv -lGL -lGLU -ldl'
 FGREP='/usr/bin/grep -F'
 GREP='/usr/bin/grep'
-INCLUDE='-Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include'
+INCLUDE='-Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include'
 INSTALL_DATA='${INSTALL} -m 644'
 INSTALL_PROGRAM='${INSTALL}'
 INSTALL_SCRIPT='${INSTALL}'
@@ -4168,7 +4165,7 @@ MANIFEST_TOOL=':'
 NM='/usr/local/amiga/bin/ppc-amigaos-nm -B'
 NMEDIT=''
 OBJDUMP='ppc-amigaos-objdump'
-OBJECTS='$(objects)/SDL_dummy_main.lo $(objects)/SDL.lo $(objects)/SDL_assert.lo $(objects)/SDL_error.lo $(objects)/SDL_hints.lo $(objects)/SDL_log.lo $(objects)/SDL_atomic.lo $(objects)/SDL_spinlock.lo $(objects)/SDL_audio.lo $(objects)/SDL_audiocvt.lo $(objects)/SDL_audiodev.lo $(objects)/SDL_audiotypecvt.lo $(objects)/SDL_mixer.lo $(objects)/SDL_wave.lo $(objects)/SDL_cpuinfo.lo $(objects)/SDL_dynapi.lo $(objects)/SDL_clipboardevents.lo $(objects)/SDL_dropevents.lo $(objects)/SDL_events.lo $(objects)/SDL_gesture.lo $(objects)/SDL_keyboard.lo $(objects)/SDL_mouse.lo $(objects)/SDL_quit.lo $(objects)/SDL_touch.lo $(objects)/SDL_windowevents.lo $(objects)/SDL_rwops.lo $(objects)/SDL_haptic.lo $(objects)/SDL_gamecontroller.lo $(objects)/SDL_joystick.lo $(objects)/e_atan2.lo $(objects)/e_log.lo $(objects)/e_pow.lo $(objects)/e_rem_pio2.lo $(objects)/e_sqrt.lo $(objects)/k_cos.lo $(objects)/k_rem_pio2.lo $(objects)/k_sin.lo $(objects)/s_atan.lo $(objects)/s_copysign.lo $(objects)/s_cos.lo $(objects)/s_fabs.lo $(objects)/s_floor.lo $(objects)/s_scalbn.lo $(objects)/s_sin.lo $(objects)/SDL_power.lo $(objects)/SDL_d3dmath.lo $(objects)/SDL_render.lo $(objects)/SDL_yuv_mmx.lo $(objects)/SDL_yuv_sw.lo $(objects)/SDL_render_d3d.lo $(objects)/SDL_render_d3d11.lo $(objects)/SDL_render_gl.lo $(objects)/SDL_shaders_gl.lo $(objects)/SDL_render_gles.lo $(objects)/SDL_render_gles2.lo $(objects)/SDL_shaders_gles2.lo $(objects)/SDL_render_psp.lo $(objects)/SDL_blendfillrect.lo $(objects)/SDL_blendline.lo $(objects)/SDL_blendpoint.lo $(objects)/SDL_drawline.lo $(objects)/SDL_drawpoint.lo $(objects)/SDL_render_sw.lo $(objects)/SDL_rotate.lo $(objects)/SDL_getenv.lo $(objects)/SDL_iconv.lo $(objects)/SDL_malloc.lo $(objects)/SDL_qsort.lo $(objects)/SDL_stdlib.lo $(objects)/SDL_string.lo $(objects)/SDL_thread.lo $(objects)/SDL_timer.lo $(objects)/SDL_RLEaccel.lo $(objects)/SDL_blit.lo $(objects)/SDL_blit_0.lo $(objects)/SDL_blit_1.lo $(objects)/SDL_blit_A.lo $(objects)/SDL_blit_N.lo $(objects)/SDL_blit_auto.lo $(objects)/SDL_blit_copy.lo $(objects)/SDL_blit_slow.lo $(objects)/SDL_bmp.lo $(objects)/SDL_clipboard.lo $(objects)/SDL_egl.lo $(objects)/SDL_fillrect.lo $(objects)/SDL_pixels.lo $(objects)/SDL_rect.lo $(objects)/SDL_shape.lo $(objects)/SDL_stretch.lo $(objects)/SDL_surface.lo $(objects)/SDL_video.lo $(objects)/SDL_nullevents.lo $(objects)/SDL_nullframebuffer.lo $(objects)/SDL_nullvideo.lo $(objects)/SDL_diskaudio.lo $(objects)/SDL_dummyaudio.lo $(objects)/SDL_os4_wrapper.lo $(objects)/SDL_os4blit.lo $(objects)/SDL_os4events.lo $(objects)/SDL_os4gl.lo $(objects)/SDL_os4surface.lo $(objects)/SDL_os4utils.lo $(objects)/SDL_os4video.lo $(objects)/SDL_os4wm.lo $(objects)/SDL_sysloadso.lo $(objects)/SDL_sysmutex.lo $(objects)/SDL_syssem.lo $(objects)/SDL_systhread.lo $(objects)/SDL_os4audio.lo $(objects)/SDL_sysjoystick.lo $(objects)/SDL_os4timer.lo $(objects)/SDL_systimer.lo $(objects)/SDL_sysfilesystem.lo $(objects)/SDL_syshaptic.lo'
+OBJECTS='$(objects)/SDL_dummy_main.lo $(objects)/SDL.lo $(objects)/SDL_assert.lo $(objects)/SDL_error.lo $(objects)/SDL_hints.lo $(objects)/SDL_log.lo $(objects)/SDL_atomic.lo $(objects)/SDL_spinlock.lo $(objects)/SDL_audio.lo $(objects)/SDL_audiocvt.lo $(objects)/SDL_audiodev.lo $(objects)/SDL_audiotypecvt.lo $(objects)/SDL_mixer.lo $(objects)/SDL_wave.lo $(objects)/SDL_cpuinfo.lo $(objects)/SDL_dynapi.lo $(objects)/SDL_clipboardevents.lo $(objects)/SDL_dropevents.lo $(objects)/SDL_events.lo $(objects)/SDL_gesture.lo $(objects)/SDL_keyboard.lo $(objects)/SDL_mouse.lo $(objects)/SDL_quit.lo $(objects)/SDL_touch.lo $(objects)/SDL_windowevents.lo $(objects)/SDL_rwops.lo $(objects)/SDL_haptic.lo $(objects)/SDL_gamecontroller.lo $(objects)/SDL_joystick.lo $(objects)/e_atan2.lo $(objects)/e_log.lo $(objects)/e_pow.lo $(objects)/e_rem_pio2.lo $(objects)/e_sqrt.lo $(objects)/k_cos.lo $(objects)/k_rem_pio2.lo $(objects)/k_sin.lo $(objects)/s_atan.lo $(objects)/s_copysign.lo $(objects)/s_cos.lo $(objects)/s_fabs.lo $(objects)/s_floor.lo $(objects)/s_scalbn.lo $(objects)/s_sin.lo $(objects)/SDL_power.lo $(objects)/SDL_d3dmath.lo $(objects)/SDL_render.lo $(objects)/SDL_yuv_mmx.lo $(objects)/SDL_yuv_sw.lo $(objects)/SDL_render_d3d.lo $(objects)/SDL_render_d3d11.lo $(objects)/SDL_render_gl.lo $(objects)/SDL_shaders_gl.lo $(objects)/SDL_render_gles.lo $(objects)/SDL_render_gles2.lo $(objects)/SDL_shaders_gles2.lo $(objects)/SDL_render_psp.lo $(objects)/SDL_blendfillrect.lo $(objects)/SDL_blendline.lo $(objects)/SDL_blendpoint.lo $(objects)/SDL_drawline.lo $(objects)/SDL_drawpoint.lo $(objects)/SDL_render_sw.lo $(objects)/SDL_rotate.lo $(objects)/SDL_getenv.lo $(objects)/SDL_iconv.lo $(objects)/SDL_malloc.lo $(objects)/SDL_qsort.lo $(objects)/SDL_stdlib.lo $(objects)/SDL_string.lo $(objects)/SDL_thread.lo $(objects)/SDL_timer.lo $(objects)/SDL_RLEaccel.lo $(objects)/SDL_blit.lo $(objects)/SDL_blit_0.lo $(objects)/SDL_blit_1.lo $(objects)/SDL_blit_A.lo $(objects)/SDL_blit_N.lo $(objects)/SDL_blit_auto.lo $(objects)/SDL_blit_copy.lo $(objects)/SDL_blit_slow.lo $(objects)/SDL_bmp.lo $(objects)/SDL_clipboard.lo $(objects)/SDL_egl.lo $(objects)/SDL_fillrect.lo $(objects)/SDL_pixels.lo $(objects)/SDL_rect.lo $(objects)/SDL_shape.lo $(objects)/SDL_stretch.lo $(objects)/SDL_surface.lo $(objects)/SDL_video.lo $(objects)/SDL_nullevents.lo $(objects)/SDL_nullframebuffer.lo $(objects)/SDL_nullvideo.lo $(objects)/SDL_dummyaudio.lo $(objects)/SDL_os4_wrapper.lo $(objects)/SDL_os4blit.lo $(objects)/SDL_os4events.lo $(objects)/SDL_os4gl.lo $(objects)/SDL_os4surface.lo $(objects)/SDL_os4utils.lo $(objects)/SDL_os4video.lo $(objects)/SDL_os4wm.lo $(objects)/SDL_sysloadso.lo $(objects)/SDL_sysmutex.lo $(objects)/SDL_syssem.lo $(objects)/SDL_systhread.lo $(objects)/SDL_os4audio.lo $(objects)/SDL_sysjoystick.lo $(objects)/SDL_os4timer.lo $(objects)/SDL_systimer.lo $(objects)/SDL_sysfilesystem.lo $(objects)/SDL_syshaptic.lo'
 OBJEXT='o'
 OTOOL64=''
 OTOOL=''
@@ -4342,7 +4339,6 @@ target_alias=''
 #define HAVE_GCC_ATOMICS 1
 #define SDL_ASSEMBLY_ROUTINES 1
 #define SDL_VIDEO_DRIVER_DUMMY 1
-#define SDL_AUDIO_DRIVER_DISK 1
 #define SDL_AUDIO_DRIVER_DUMMY 1
 #define SDL_VIDEO_DRIVER_AMIGAOS4 1
 #define SDL_VIDEO_OPENGL 1

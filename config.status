@@ -437,8 +437,8 @@ Copyright (C) 2012 Free Software Foundation, Inc.
 This config.status script is free software; the Free Software Foundation
 gives unlimited permission to copy, distribute and modify it."
 
-ac_pwd='/cygdrive/j/Amiga/Amiga2015/SDL2'
-srcdir='/cygdrive/j/Amiga/Amiga2015/SDL2'
+ac_pwd='/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk'
+srcdir='/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk'
 INSTALL='/usr/bin/install -c'
 AWK='gawk'
 test -n "$AWK" || AWK=awk
@@ -598,7 +598,7 @@ old_postuninstall_cmds=''
 old_archive_cmds='$AR $AR_FLAGS $oldlib$oldobjs~$RANLIB $tool_oldlib'
 lock_old_archive_extraction='no'
 CC='ppc-amigaos-gcc'
-CFLAGS='-g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include '
+CFLAGS='-g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include '
 compiler='ppc-amigaos-g++'
 GCC='yes'
 lt_cv_sys_global_symbol_pipe='sed -n -e '\''s/^.*[	 ]\([ABCDGIRSTW][ABCDGIRSTW]*\)[	 ][	 ]*\([_A-Za-z][_A-Za-z0-9]*\)$/\1 \2 \2/p'\'' | sed '\''/ __gnu_lto/d'\'''
@@ -790,7 +790,7 @@ fi
 
 
 
-SUMMARY="SDL2 Configure Summary:\nBuilding Shared Libraries\nBuilding Static Libraries\nEnabled modules : atomic audio video render events joystick haptic power filesystem threads timers file loadso cpuinfo assembly\nAssembly Math   :\nAudio drivers   : disk dummy\nVideo drivers   : dummy amigaos4 opengl\nInput drivers   :\nUsing libudev   : NO\nUsing dbus      : NO\n"
+SUMMARY="SDL2 Configure Summary:\nBuilding Shared Libraries\nBuilding Static Libraries\nEnabled modules : atomic audio video render events joystick haptic power filesystem threads timers file loadso cpuinfo assembly\nAssembly Math   :\nAudio drivers   : dummy amigaos4\nVideo drivers   : dummy amigaos4 opengl\nInput drivers   : amigainput\nUsing libudev   : NO\nUsing dbus      : NO\n"
 
 
 # Handling of arguments.
@@ -873,7 +873,7 @@ cat >>"$ac_tmp/subs1.awk" <<\_ACAWK &&
 S["LTLIBOBJS"]=" ${LIBOBJDIR}memcmp$U.lo ${LIBOBJDIR}strtod$U.lo"
 S["EXTRA_LDFLAGS"]="-use-dynld -Wl,-export-dynamic -Wl,-no-undefined  -Wl,--no-undefined -lm -liconv -lGL -lGLU -ldl"
 S["BUILD_LDFLAGS"]=""
-S["EXTRA_CFLAGS"]="-Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include  -mstrict-align -Wall"
+S["EXTRA_CFLAGS"]="-Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include  -mstrict-align -Wall"
 S["BUILD_CFLAGS"]="-g -O3 -DUSING_GENERATED_CONFIG_H"
 S["SDLTEST_OBJECTS"]="$(objects)/SDL_test_assert.o $(objects)/SDL_test_common.o $(objects)/SDL_test_compare.o $(objects)/SDL_test_crc32.o $(objects)/SDL_test_font.o $(obj"\
 "ects)/SDL_test_fuzzer.o $(objects)/SDL_test_harness.o $(objects)/SDL_test_imageBlit.o $(objects)/SDL_test_imageBlitBlend.o $(objects)/SDL_test_image"\
@@ -897,11 +897,11 @@ S["OBJECTS"]="$(objects)/SDL_dummy_main.lo $(objects)/SDL.lo $(objects)/SDL_asse
 "DL_blit_1.lo $(objects)/SDL_blit_A.lo $(objects)/SDL_blit_N.lo $(objects)/SDL_blit_auto.lo $(objects)/SDL_blit_copy.lo $(objects)/SDL_blit_slow.lo $"\
 "(objects)/SDL_bmp.lo $(objects)/SDL_clipboard.lo $(objects)/SDL_egl.lo $(objects)/SDL_fillrect.lo $(objects)/SDL_pixels.lo $(objects)/SDL_rect.lo $("\
 "objects)/SDL_shape.lo $(objects)/SDL_stretch.lo $(objects)/SDL_surface.lo $(objects)/SDL_video.lo $(objects)/SDL_nullevents.lo $(objects)/SDL_nullfr"\
-"amebuffer.lo $(objects)/SDL_nullvideo.lo $(objects)/SDL_diskaudio.lo $(objects)/SDL_dummyaudio.lo $(objects)/SDL_os4_wrapper.lo $(objects)/SDL_os4bl"\
-"it.lo $(objects)/SDL_os4events.lo $(objects)/SDL_os4gl.lo $(objects)/SDL_os4surface.lo $(objects)/SDL_os4utils.lo $(objects)/SDL_os4video.lo $(objec"\
-"ts)/SDL_os4wm.lo $(objects)/SDL_sysloadso.lo $(objects)/SDL_sysmutex.lo $(objects)/SDL_syssem.lo $(objects)/SDL_systhread.lo $(objects)/SDL_os4audio"\
-".lo $(objects)/SDL_sysjoystick.lo $(objects)/SDL_os4timer.lo $(objects)/SDL_systimer.lo $(objects)/SDL_sysfilesystem.lo $(objects)/SDL_syshaptic.lo"
-S["INCLUDE"]="-Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include"
+"amebuffer.lo $(objects)/SDL_nullvideo.lo $(objects)/SDL_dummyaudio.lo $(objects)/SDL_os4_wrapper.lo $(objects)/SDL_os4blit.lo $(objects)/SDL_os4even"\
+"ts.lo $(objects)/SDL_os4gl.lo $(objects)/SDL_os4surface.lo $(objects)/SDL_os4utils.lo $(objects)/SDL_os4video.lo $(objects)/SDL_os4wm.lo $(objects)/"\
+"SDL_sysloadso.lo $(objects)/SDL_sysmutex.lo $(objects)/SDL_syssem.lo $(objects)/SDL_systhread.lo $(objects)/SDL_os4audio.lo $(objects)/SDL_sysjoysti"\
+"ck.lo $(objects)/SDL_os4timer.lo $(objects)/SDL_systimer.lo $(objects)/SDL_sysfilesystem.lo $(objects)/SDL_syshaptic.lo"
+S["INCLUDE"]="-Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include"
 S["ac_aux_dir"]="build-scripts"
 S["ENABLE_STATIC_FALSE"]="#"
 S["ENABLE_STATIC_TRUE"]=""
@@ -964,9 +964,9 @@ S["SED"]="/usr/bin/sed"
 S["OBJEXT"]="o"
 S["EXEEXT"]=""
 S["ac_ct_CC"]=""
-S["CPPFLAGS"]=" -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include "
+S["CPPFLAGS"]=" -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include "
 S["LDFLAGS"]=" "
-S["CFLAGS"]="-g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/SDL2/include "
+S["CFLAGS"]="-g -O2 -Iinclude -I/cygdrive/j/Amiga/Amiga2015/sdl2-amigaos4-code/trunk/include "
 S["CC"]="ppc-amigaos-gcc"
 S["host_os"]="amigaos"
 S["host_vendor"]="unknown"
@@ -1158,7 +1158,6 @@ D["HAVE_ICONV"]=" 1"
 D["HAVE_GCC_ATOMICS"]=" 1"
 D["SDL_ASSEMBLY_ROUTINES"]=" 1"
 D["SDL_VIDEO_DRIVER_DUMMY"]=" 1"
-D["SDL_AUDIO_DRIVER_DISK"]=" 1"
 D["SDL_AUDIO_DRIVER_DUMMY"]=" 1"
 D["SDL_VIDEO_DRIVER_AMIGAOS4"]=" 1"
 D["SDL_VIDEO_OPENGL"]=" 1"

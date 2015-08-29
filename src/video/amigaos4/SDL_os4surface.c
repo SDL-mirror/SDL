@@ -20,8 +20,6 @@
     slouken@libsdl.org
 */
 
-#include "SDL_config.h"
-
 #include "../SDL_sysvideo.h"
 #include "../SDL_blit.h"
 #include "SDL_os4video.h"
@@ -73,7 +71,7 @@ int os4video_AllocHWSurface(_THIS, SDL_Surface *surface)
 
 	/* Create surface hardware record if not already present */
 	if (!surface->hwdata)
-		surface->hwdata = SaveAllocPooled(_this->hidden, sizeof(struct private_hwdata));
+		surface->hwdata = SaveAllocPooled(_this->driverdata, sizeof(struct private_hwdata));
 
 	if (surface->hwdata) {
 		struct BitMap *friend_bitmap;
@@ -82,15 +80,15 @@ int os4video_AllocHWSurface(_THIS, SDL_Surface *surface)
 		surface->hwdata->lock = 0;
 
 		/* Determine friend bitmap */
-		if (_this->hidden->scr == NULL)
+		if (_this->driverdata->scr == NULL)
 		{
 			/* Windowed mode - use the off-screen buffer's bitmap */
-			friend_bitmap = _this->hidden->offScreenBuffer.bitmap;
+			friend_bitmap = _this->driverdata->offScreenBuffer.bitmap;
 		}
 		else
 		{
 			/* Full-screen mode. Use the display's bitmap */
-			friend_bitmap = _this->hidden->win->RPort->BitMap;
+			friend_bitmap = _this->driverdata->win->RPort->BitMap;
 		}
 
 		dprintf("Trying to create %dx%dx%d bitmap\n",
@@ -115,7 +113,7 @@ int os4video_AllocHWSurface(_THIS, SDL_Surface *surface)
 		{
 			/* Failed */
 			dprintf ("Failed to create bitmap\n");
-			SaveFreePooled(_this->hidden, surface->hwdata, sizeof(struct private_hwdata));
+			SaveFreePooled(_this->driverdata, surface->hwdata, sizeof(struct private_hwdata));
 			surface->hwdata = NULL;
 		}
 	}
@@ -136,7 +134,7 @@ void os4video_FreeHWSurface(_THIS, SDL_Surface *surface)
 			SDL_IP96->p96FreeBitMap (surface->hwdata->bm);
 
 			/*  Free surface hardware record */
-			SaveFreePooled(_this->hidden, surface->hwdata, sizeof(struct private_hwdata));
+			SaveFreePooled(_this->driverdata, surface->hwdata, sizeof(struct private_hwdata));
 			surface->hwdata = NULL;
 		}
 	}
@@ -218,7 +216,7 @@ int os4video_FillHWRect(_THIS, SDL_Surface *dst, SDL_Rect *rect, Uint32 color)
 		{
 			if (!(dst->flags & SDL_DOUBLEBUF))
 			{
-				rp = _this->hidden->win->RPort;
+				rp = _this->driverdata->win->RPort;
 			}
 		}
 
@@ -327,7 +325,7 @@ int os4video_CheckHWBlit(_THIS, SDL_Surface *src, SDL_Surface *dst)
 
 int os4video_FlipHWSurface(_THIS, SDL_Surface *surface)
 {
-	struct SDL_PrivateVideoData *hidden = _this->hidden;
+	struct SDL_PrivateVideoData *hidden = _this->driverdata;
 	struct private_hwdata       *hwdata = &hidden->screenHWData;
 
 	if (hwdata->type == hwdata_display_hw)
@@ -393,7 +391,7 @@ void os4video_UpdateRectsNone(_THIS, int numrects, SDL_Rect *rects)
 static void os4video_OffscreenHook_8bit (struct Hook *hook, struct RastPort *rp, int *message)
 {
 	SDL_VideoDevice *_this = (SDL_VideoDevice *)hook->h_Data;
-	struct SDL_PrivateVideoData *hidden = _this->hidden;
+	struct SDL_PrivateVideoData *hidden = _this->driverdata;
 
 	struct Rectangle *rect = (struct Rectangle *)(message + 1);
 	uint32 offsetX         = message[3];
@@ -499,7 +497,7 @@ void os4video_UpdateRectsOffscreen_8bit(_THIS, int numrects, SDL_Rect *rects)
 	uint32 end;
 #endif
 
-	struct SDL_PrivateVideoData *hidden = _this->hidden;
+	struct SDL_PrivateVideoData *hidden = _this->driverdata;
 	struct Window 				*w      = hidden->win;
 
 	/* We don't want Intuition dead-locking us while we try to do this... */
@@ -550,7 +548,7 @@ void os4video_UpdateRectsOffscreen_8bit(_THIS, int numrects, SDL_Rect *rects)
  */
 void os4video_UpdateRectsOffscreen(_THIS, int numrects, SDL_Rect *rects)
 {
-	struct SDL_PrivateVideoData *hidden = _this->hidden;
+	struct SDL_PrivateVideoData *hidden = _this->driverdata;
 	struct Window               *w      = hidden->win;
 	
 	/* We don't want our window changing size while we're doing this */

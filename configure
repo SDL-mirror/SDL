@@ -22970,7 +22970,6 @@ $as_echo "#define SDL_FILESYSTEM_HAIKU 1" >>confdefs.h
         ARCH=amigaos4
         ac_default_prefix=/progdir
         CheckDummyVideo
-        CheckDiskAudio
         CheckDummyAudio
         CheckAmigaOS4Video
         CheckAmigaOS4GL
@@ -22986,7 +22985,7 @@ $as_echo "#define SDL_THREAD_AMIGAOS4 1" >>confdefs.h
         fi
         # Set up files for the audio library
         if test x$enable_audio = xyes; then
-
+			SUMMARY_audio="${SUMMARY_audio} amigaos4"
 $as_echo "#define SDL_AUDIO_DRIVER_AMIGAOS4 1" >>confdefs.h
 
             SOURCES="$SOURCES $srcdir/src/audio/amigaos4/*.c"
@@ -22994,7 +22993,7 @@ $as_echo "#define SDL_AUDIO_DRIVER_AMIGAOS4 1" >>confdefs.h
         fi
         # Set up files for the joystick library
         if test x$enable_joystick = xyes; then
-
+			SUMMARY_input="${SUMMARY_input} amigainput"
 $as_echo "#define SDL_JOYSTICK_AMIGAINPUT 1" >>confdefs.h
 
             SOURCES="$SOURCES $srcdir/src/joystick/amigaos4/*.c"
@@ -23019,7 +23018,7 @@ $as_echo "#define SDL_FILESYSTEM_AMIGAOS4 1" >>confdefs.h
         # The AmigaOS4 platform requires special setup.
         SOURCES="$srcdir/src/main/amigaos4/*.c $SOURCES"
         EXTRA_LDFLAGS="-use-dynld -Wl,-export-dynamic -Wl,-no-undefined $EXTRA_LDFLAGS -ldl"
-		EXTRA_CFLAGS="$EXTRA_CFLAGS -mstrict-align"
+		EXTRA_CFLAGS="$EXTRA_CFLAGS -mstrict-align -Wno-switch"
         ;;
     arm*-apple-darwin*)
         # iOS - We are not writing anything to confdefs.h because you have to replace

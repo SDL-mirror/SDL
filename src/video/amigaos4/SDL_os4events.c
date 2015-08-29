@@ -19,6 +19,7 @@
     Sam Lantinga
     slouken@libsdl.org
 */
+#if SDL_VIDEO_DRIVER_AMIGAOS4
 
 #include "../../events/SDL_events_c.h"
 #include "../../events/SDL_sysevents.h"
@@ -44,9 +45,9 @@ extern struct KeymapIFace    *SDL_IKeymap;
 
 #define POINTER_GRAB_TIMEOUT		20	/* Number of ticks before pointer grab needs to be reactivated */
 
-uint32 rawkey_table[128];
+SDL_Scancode rawkey_table[128];
 
-#define map(x,y) rawkey_table[x] = y
+#define map(x,y) rawkey_table[x] = SDL_GetScancodeFromKey(y)
 
 extern void SetMouseColors(SDL_VideoDevice *_this);
 extern void ResetMouseColors(SDL_VideoDevice *_this);
@@ -575,3 +576,10 @@ void os4video_CheckMouseMode(SDL_VideoDevice *_this)
 
 	SDL_Unlock_EventThread();
 }
+
+VideoBootStrap AMIGAOS4_bootstrap = {
+	"amigaos4", "AmigaOS4 graphics",
+	OS4_Available, OS4_CreateDevice
+};
+
+#endif

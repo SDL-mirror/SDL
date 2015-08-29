@@ -26,6 +26,7 @@
  *
  * (c) 2005      Thomas Frieden
  * (c) 2005-2006 Richard Drummond
+ * (c) 2007-2015 Various developers
  */
 
 #if SDL_VIDEO_OPENGL
@@ -33,6 +34,7 @@
 #include "SDL_os4video.h"
 #include "SDL_os4utils.h"
 #include "SDL_os4blit.h"
+#include "SDL_opengl.h"
 
 #include <proto/exec.h>
 #include <proto/graphics.h>
@@ -50,7 +52,6 @@ extern struct P96IFace *SDL_IP96;
 
 static struct MiniGLIFace *IMiniGL = 0;
 static struct Library *MiniGLBase = 0;
-//static struct GLContextIFace *IGL;
 
 extern struct IntuitionIFace *SDL_IIntuition;
 extern struct GraphicsIFace  *SDL_IGraphics;
@@ -69,7 +70,7 @@ struct GLContextIFace *mini_CurrentContext = 0;
  */
 int os4video_GL_Init(_THIS)
 {
-	struct SDL_PrivateVideoData *hidden = _this->hidden;
+	struct SDL_PrivateVideoData *hidden = (struct SDL_PrivateVideoData *)_this->driverdata;
     int w,h;
 
 	if( hidden->dontdeletecontext ) return 0;
@@ -122,8 +123,6 @@ int os4video_GL_Init(_THIS)
 
 	if (hidden->IGL)
 	{
-		struct GLContextIFace **target;
-
 		_this->gl_config.driver_loaded = 1;
 
         hidden->IGL->GLViewport(0,0,w,h);
@@ -145,7 +144,7 @@ int os4video_GL_Init(_THIS)
 
 void os4video_GL_Term(_THIS)
 {
-	struct SDL_PrivateVideoData *hidden = _this->hidden;
+	struct SDL_PrivateVideoData *hidden = (struct SDL_PrivateVideoData *)_this->driverdata;
 
 	if( hidden->dontdeletecontext ) return;
 
@@ -174,7 +173,7 @@ void os4video_GL_Term(_THIS)
 
 int	os4video_GL_GetAttribute(_THIS, SDL_GLattr attrib, int* value)
 {
-	struct SDL_PrivateVideoData *hidden = _this->hidden;
+	struct SDL_PrivateVideoData *hidden = (struct SDL_PrivateVideoData *)_this->driverdata;
 	struct BitMap *bm = hidden->screenHWData.bm;
 	SDL_PixelFormat pf;
 	uint32 rgbFormat;
@@ -246,14 +245,13 @@ int	os4video_GL_MakeCurrent(_THIS)
 
 void os4video_GL_SwapBuffers(_THIS)
 {
-	struct SDL_PrivateVideoData *hidden = _this->hidden;
+	struct SDL_PrivateVideoData *hidden = (struct SDL_PrivateVideoData *)_this->driverdata;
 	int w,h;
     GLint buf;
 	struct BitMap *temp;
 
-	SDL_Surface *video = SDL_VideoSurface;
+	struct SDL_GLDriverData *video = _this->gl_data;
 
-//	if (video && video->flags & SDL_FULLSCREEN)
 	if (video)
 	{
 		mglUnlockDisplay();

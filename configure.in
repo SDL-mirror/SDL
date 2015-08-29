@@ -2965,51 +2965,55 @@ AC_HELP_STRING([--enable-render-d3d], [enable the Direct3D render driver [[defau
         ARCH=amigaos4
         ac_default_prefix=/progdir
         CheckDummyVideo
-        CheckDiskAudio
         CheckDummyAudio
         CheckAmigaOS4Video
         CheckAmigaOS4GL
-        CheckPTHREAD
+		CheckDLOPEN
+		
+        # Set up files for the thread library
+        if test x$enable_threads = xyes; then
 
+$as_echo "#define SDL_THREAD_AMIGAOS4 1" >>confdefs.h
+
+            SOURCES="$SOURCES $srcdir/src/thread/amigaos4/*.c"
+            have_threads=yes
+        fi
         # Set up files for the audio library
         if test x$enable_audio = xyes; then
-            AC_DEFINE(SDL_AUDIO_DRIVER_HAIKU, 1, [ ])
+			SUMMARY_audio="${SUMMARY_audio} amigaos4"
+$as_echo "#define SDL_AUDIO_DRIVER_AMIGAOS4 1" >>confdefs.h
+
             SOURCES="$SOURCES $srcdir/src/audio/amigaos4/*.c"
             have_audio=yes
         fi
         # Set up files for the joystick library
         if test x$enable_joystick = xyes; then
-            AC_DEFINE(SDL_JOYSTICK_HAIKU, 1, [ ])
+
+$as_echo "#define SDL_JOYSTICK_AMIGAINPUT 1" >>confdefs.h
+			SUMMARY_input="${SUMMARY_input} amigainput"
             SOURCES="$SOURCES $srcdir/src/joystick/amigaos4/*.c"
             have_joystick=yes
         fi
         # Set up files for the timer library
         if test x$enable_timers = xyes; then
-            AC_DEFINE(SDL_TIMER_HAIKU, 1, [ ])
+
+$as_echo "#define SDL_TIMER_AMIGAOS4 1" >>confdefs.h
+
             SOURCES="$SOURCES $srcdir/src/timer/amigaos4/*.c"
             have_timers=yes
         fi
-        # Set up files for the shared object loading library
-        if test x$enable_loadso = xyes; then
-            AC_DEFINE(SDL_LOADSO_HAIKU, 1, [ ])
-            SOURCES="$SOURCES $srcdir/src/loadso/amigaos4/*.c"
-            have_loadso=yes
-        fi
-        # Set up files for the system power library
-        if test x$enable_power = xyes; then
-            AC_DEFINE(SDL_POWER_HAIKU, 1, [ ])
-            SOURCES="$SOURCES $srcdir/src/power/amigaos4/*.c"
-            have_power=yes
-        fi
         # Set up files for the system filesystem library
         if test x$enable_filesystem = xyes; then
-            AC_DEFINE(SDL_FILESYSTEM_HAIKU, 1, [ ])
+
+$as_echo "#define SDL_FILESYSTEM_AMIGAOS4 1" >>confdefs.h
+
             SOURCES="$SOURCES $srcdir/src/filesystem/amigaos4/*.c"
             have_filesystem=yes
         fi
         # The AmigaOS4 platform requires special setup.
         SOURCES="$srcdir/src/main/amigaos4/*.c $SOURCES"
-        EXTRA_LDFLAGS="-use-dynld $EXTRA_LDFLAGS -lpthread -lunix -lauto"
+        EXTRA_LDFLAGS="-use-dynld -Wl,-export-dynamic -Wl,-no-undefined $EXTRA_LDFLAGS -ldl"
+		EXTRA_CFLAGS="$EXTRA_CFLAGS -mstrict-align"
         ;;
     arm*-apple-darwin*)
         # iOS - We are not writing anything to confdefs.h because you have to replace
