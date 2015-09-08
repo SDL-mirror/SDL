@@ -55,6 +55,10 @@
 #include <be/kernel/OS.h>
 #endif
 
+#ifdef __amigaos4__
+#include <proto/exec.h>
+#endif
+
 #include "SDL_assert.h"
 
 /* List of signals to mask in the subthreads */
@@ -141,12 +145,14 @@ SDL_SYS_SetupThread(const char *name)
         #endif
     }
 
+#ifndef __amigaos4__
     /* Mask asynchronous signals for this thread */
     sigemptyset(&mask);
     for (i = 0; sig_list[i]; ++i) {
         sigaddset(&mask, sig_list[i]);
     }
     pthread_sigmask(SIG_BLOCK, &mask, 0);
+#endif
 
 #ifdef PTHREAD_CANCEL_ASYNCHRONOUS
     /* Allow ourselves to be asynchronously cancelled */
@@ -182,6 +188,18 @@ SDL_SYS_SetThreadPriority(SDL_ThreadPriority priority)
          */
         return SDL_SetError("setpriority() failed");
     }
+    return 0;
+#elif defined(__amigaos4__)
+    int value;
+
+    if (priority == SDL_THREAD_PRIORITY_LOW) {
+        value = 5;
+    } else if (priority == SDL_THREAD_PRIORITY_HIGH) {
+        value = -5;
+    } else {
+        value = 0;
+    }
+    IExec->SetTaskPri(IExec->FindTask(NULL), value);
     return 0;
 #else
     struct sched_param sched;

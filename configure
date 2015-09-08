@@ -22966,23 +22966,24 @@ $as_echo "#define SDL_FILESYSTEM_HAIKU 1" >>confdefs.h
         SOURCES="$srcdir/src/main/haiku/*.cc $SOURCES"
         EXTRA_LDFLAGS="$EXTRA_LDFLAGS -lroot -lbe -lmedia -lgame -ldevice -ltextencoding"
         ;;
-	*-*-amigaos*)
+    *-*-amigaos*)
         ARCH=amigaos4
         ac_default_prefix=/progdir
         CheckDummyVideo
         CheckDummyAudio
         CheckAmigaOS4Video
         CheckAmigaOS4GL
-		CheckDLOPEN
-		
+        CheckDLOPEN
+        CheckPTHREAD
+
         # Set up files for the thread library
-        if test x$enable_threads = xyes; then
-
-$as_echo "#define SDL_THREAD_AMIGAOS4 1" >>confdefs.h
-
-            SOURCES="$SOURCES $srcdir/src/thread/amigaos4/*.c"
-            have_threads=yes
-        fi
+#        if test x$enable_threads = xyes; then
+#
+#$as_echo "#define SDL_THREAD_AMIGAOS4 1" >>confdefs.h
+#
+#            SOURCES="$SOURCES $srcdir/src/thread/amigaos4/*.c"
+#            have_threads=yes
+#        fi
         # Set up files for the audio library
         if test x$enable_audio = xyes; then
 			SUMMARY_audio="${SUMMARY_audio} amigaos4"
@@ -22993,9 +22994,9 @@ $as_echo "#define SDL_AUDIO_DRIVER_AMIGAOS4 1" >>confdefs.h
         fi
         # Set up files for the joystick library
         if test x$enable_joystick = xyes; then
-			SUMMARY_input="${SUMMARY_input} amigainput"
-$as_echo "#define SDL_JOYSTICK_AMIGAINPUT 1" >>confdefs.h
 
+$as_echo "#define SDL_JOYSTICK_AMIGAINPUT 1" >>confdefs.h
+			SUMMARY_input="${SUMMARY_input} amigainput"
             SOURCES="$SOURCES $srcdir/src/joystick/amigaos4/*.c"
             have_joystick=yes
         fi
@@ -23018,7 +23019,7 @@ $as_echo "#define SDL_FILESYSTEM_AMIGAOS4 1" >>confdefs.h
         # The AmigaOS4 platform requires special setup.
         SOURCES="$srcdir/src/main/amigaos4/*.c $SOURCES"
         EXTRA_LDFLAGS="-use-dynld -Wl,-export-dynamic -Wl,-no-undefined $EXTRA_LDFLAGS -ldl"
-		EXTRA_CFLAGS="$EXTRA_CFLAGS -mstrict-align -Wno-switch"
+		EXTRA_CFLAGS="$EXTRA_CFLAGS -mstrict-align"
         ;;
     arm*-apple-darwin*)
         # iOS - We are not writing anything to confdefs.h because you have to replace
