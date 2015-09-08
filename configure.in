@@ -2996,11 +2996,16 @@ $as_echo "#define SDL_JOYSTICK_AMIGAINPUT 1" >>confdefs.h
             have_joystick=yes
         fi
         # Set up files for the timer library
+#        if test x$enable_timers = xyes; then
+#
+#$as_echo "#define SDL_TIMER_AMIGAOS4 1" >>confdefs.h
+#
+#            SOURCES="$SOURCES $srcdir/src/timer/amigaos4/*.c"
+#            have_timers=yes
+#        fi
         if test x$enable_timers = xyes; then
-
-$as_echo "#define SDL_TIMER_AMIGAOS4 1" >>confdefs.h
-
-            SOURCES="$SOURCES $srcdir/src/timer/amigaos4/*.c"
+            AC_DEFINE(SDL_TIMER_UNIX, 1, [ ])
+            SOURCES="$SOURCES $srcdir/src/timer/unix/*.c"
             have_timers=yes
         fi
         # Set up files for the system filesystem library
