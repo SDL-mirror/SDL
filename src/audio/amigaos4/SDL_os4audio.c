@@ -194,7 +194,7 @@ static int OS4_OpenAudio(_THIS, const char *devname, int iscapture)
 			break;
 	}
 	/* This will cause a lot of problems.. and should be removed */
-	IExec->SetTaskPri(IExec->FindTask(0), 15);
+	IExec->SetTaskPri(IExec->FindTask(0), 5);
 	
     os4data->audio_IsOpen = 1;
 
