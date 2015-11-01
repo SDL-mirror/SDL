@@ -78,6 +78,45 @@ static const xbiosmode_t vga_modes[]={
 	{BPS8|VERTFLAG,320,240,8,XBIOSMODE_C2P}
 };
 
+static const xbiosmode_t sv_modes[]={
+	{0x487D,2560,1440,32,0},  /* 32-bits */
+	{0x467D,1920,1200,32,0},
+	{0x447D,1920,1080,32,0},
+	{0x463D,1280,1024,32,0},
+	{0x443D,1024,768,32,0},
+	{0x423D,800,600,32,0},
+
+	{0x403D,640,480,32,0},
+	{0x413D,640,240,32,0},
+	{0x4035,320,480,32,0},
+	{0x4135,320,240,32,0},
+
+	{0x487C,2560,1440,16,0},    /* 16-bits */
+	{0x467C,1920,1200,16,0},
+	{0x447C,1920,1080,16,0},
+	{0x427C,1680,1050,16,0},
+	{0x463C,1280,1024,16,0},
+	{0x443C,1024,768,16,0},
+	{0x423C,800,600,16,0},
+
+	{0x403C,640,480,16,0},
+	{0x413C,640,240,16,0},
+	{0x4034,320,480,16,0},
+	{0x4134,320,240,16,0},
+
+	{0x487F,2560,1440,8,0},     /* 8-bits c2p */
+	{0x467F,1920,1200,8,0},
+	{0x447F,1920,1080,8,0},
+	{0x463f,1280,1024,8,0},
+	{0x443F,1024,768,8,0},
+	{0x423F,800,600,8,0},
+
+	{0x403F,640,480,8,0},
+	{0x411F,640,240,8,0},
+	{0x4017,320,480,8,0},
+	{0x4137,320,240,8,0}
+};
+
 static int has_supervidel;
 
 static void listModes(_THIS, int actually_add);
@@ -137,6 +176,20 @@ static void listModes(_THIS, int actually_add)
 	const xbiosmode_t *f30_modes = NULL;
 	xbiosmode_t modeinfo;
 
+	if (has_supervidel) {
+		/* SuperVidel specific modes */
+		max_modes = sizeof(sv_modes)/sizeof(xbiosmode_t);
+		f30_modes = sv_modes;
+
+		for (i=0; i<max_modes; i++) {
+			SDL_memcpy(&modeinfo, &sv_modes[i], sizeof(xbiosmode_t));
+			SDL_XBIOS_AddMode(this, actually_add, &modeinfo);
+		}
+
+		return;
+	}
+
+	/* Standard Videl */
 	switch (VgetMonitor()) {
 		case MONITOR_RGB:
 		case MONITOR_TV:
