@@ -196,6 +196,6 @@ OS4_QuitModes(_THIS)
 	IIntuition->UnlockPubScreen(NULL, data->publicScreen);
 }
 
-#endif /* SDL_VIDEO_DRIVER_AMIGAOS4DOWS */
+#endif /* SDL_VIDEO_DRIVER_AMIGAOS4 */
 
 /* vi: set ts=4 sw=4 expandtab: */

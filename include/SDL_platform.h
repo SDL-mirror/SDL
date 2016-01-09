@@ -142,6 +142,11 @@
 #define __PSP__ 1
 #endif
 
+#if defined(__amigaos4__)
+#undef __AMIGAOS4__
+#define __AMIGAOS4__ 1
+#endif
+
 #include "begin_code.h"
 /* Set up for C function definitions, even when using C++ */
 #ifdef __cplusplus

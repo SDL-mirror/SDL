@@ -27,7 +27,7 @@
 #include "SDL_events_c.h"
 #include "SDL_gesture_c.h"
 
-#if !defined(__PSP__)
+#if !defined(__PSP__) && !defined(__amigaos4__)
 #include <memory.h>
 #endif
 

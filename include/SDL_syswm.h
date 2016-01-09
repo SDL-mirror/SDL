@@ -117,6 +117,7 @@ typedef enum
     SDL_SYSWM_WAYLAND,
     SDL_SYSWM_MIR,
     SDL_SYSWM_WINRT,
+    SDL_SYSWM_OS4,
 } SDL_SYSWM_TYPE;
 
 /**
@@ -229,7 +230,12 @@ struct SDL_SysWMinfo
             MirSurface *surface;  /**< Mir surface */
         } mir;
 #endif
-
+#if defined(SDL_VIDEO_DRIVER_AMIGAOS4)
+        struct
+        {
+            struct Window *window;      /**< The AmigaOS 4 window */
+        } os4;
+#endif
         /* Can't have an empty union */
         int dummy;
     } info;

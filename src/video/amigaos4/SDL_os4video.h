@@ -30,13 +30,14 @@
 #include <proto/graphics.h>
 #include <proto/keymap.h>
 #include <proto/layers.h>
-#include <proto/Picasso96API.h>
+//#include <proto/Picasso96API.h> // P96 is deprecated
 #include <proto/icon.h>
 
 #include "../SDL_sysvideo.h"
 
 #include "SDL_os4keyboard.h"
 #include "SDL_os4modes.h"
+#include "SDL_os4window.h"
 
 /* Private display data */
 
@@ -46,7 +47,7 @@ typedef struct
 
 	struct Library			*gfxbase;
 	struct Library			*layersbase;
-	struct Library			*p96base;
+	//struct Library			*p96base;
 	struct Library			*intuitionbase;
 	struct Library			*iconbase;
 	struct Library			*workbenchbase;
@@ -54,7 +55,7 @@ typedef struct
 
 	struct GraphicsIFace	*iGraphics;
 	struct LayersIFace		*iLayers;
-	struct P96IFace			*iP96;
+	//struct P96IFace			*iP96;
 	struct IntuitionIFace	*iIntuition;
 	struct IconIFace		*iIcon;
 	struct WorkbenchIFace	*iWorkbench;
@@ -63,7 +64,7 @@ typedef struct
 
 #define GfxBase ((SDL_VideoData *) _this->driverdata)->gfxbase
 #define LayersBase ((SDL_VideoData *) _this->driverdata)->layersbase
-#define P96Base ((SDL_VideoData *) _this->driverdata)->p96base
+//#define P96Base ((SDL_VideoData *) _this->driverdata)->p96base
 #define IntuitionBase ((SDL_VideoData *) _this->driverdata)->intuitionbase
 #define IconBase ((SDL_VideoData *) _this->driverdata)->iconbase
 #define WorkbenchBase ((SDL_VideoData *) _this->driverdata)->workbenchbase
@@ -71,7 +72,7 @@ typedef struct
 
 #define IGraphics ((SDL_VideoData *) _this->driverdata)->iGraphics
 #define ILayers ((SDL_VideoData *) _this->driverdata)->iLayers
-#define IP96 ((SDL_VideoData *) _this->driverdata)->iP96
+//#define IP96 ((SDL_VideoData *) _this->driverdata)->iP96
 #define IIntuition ((SDL_VideoData *) _this->driverdata)->iIntuition
 #define IIcon ((SDL_VideoData *) _this->driverdata)->iIcon
 #define IWorkbench ((SDL_VideoData *) _this->driverdata)->iWorkbench

@@ -56,24 +56,24 @@ static SDL_bool OS4_Open_Libraries(_THIS)
 {
 	GfxBase       = IExec->OpenLibrary("graphics.library", MIN_LIB_VERSION);
 	LayersBase    = IExec->OpenLibrary("layers.library", MIN_LIB_VERSION);
-	P96Base       = IExec->OpenLibrary("Picasso96API.library", 0);
+	//P96Base       = IExec->OpenLibrary("Picasso96API.library", 0);
 	IntuitionBase = IExec->OpenLibrary("intuition.library", MIN_LIB_VERSION);
 	IconBase      = IExec->OpenLibrary("icon.library", MIN_LIB_VERSION);
 	WorkbenchBase = IExec->OpenLibrary("workbench.library", MIN_LIB_VERSION);
 	KeymapBase    = IExec->OpenLibrary("keymap.library", MIN_LIB_VERSION);
 
-	if (!GfxBase || !LayersBase || !P96Base || !IntuitionBase || !IconBase || !WorkbenchBase || !KeymapBase)
+	if (!GfxBase || !LayersBase || /*!P96Base ||*/ !IntuitionBase || !IconBase || !WorkbenchBase || !KeymapBase)
 		return SDL_FALSE;
 
 	IGraphics  = (struct GraphicsIFace *)  IExec->GetInterface(GfxBase, "main", 1, NULL);
 	ILayers    = (struct LayersIFace *)    IExec->GetInterface(LayersBase, "main", 1, NULL);
-	IP96       = (struct P96IFace *)       IExec->GetInterface(P96Base, "main", 1, NULL);
+	//IP96       = (struct P96IFace *)       IExec->GetInterface(P96Base, "main", 1, NULL);
 	IIntuition = (struct IntuitionIFace *) IExec->GetInterface(IntuitionBase, "main", 1, NULL);
 	IIcon      = (struct IconIFace *)      IExec->GetInterface(IconBase, "main", 1, NULL);
 	IWorkbench = (struct WorkbenchIFace *) IExec->GetInterface(WorkbenchBase, "main", 1, NULL);
 	IKeymap    = (struct KeymapIFace *)    IExec->GetInterface(KeymapBase, "main", 1, NULL);
 
-	if (!IGraphics || !ILayers || !IP96 || !IIntuition || !IIcon || !IWorkbench || !IKeymap)
+	if (!IGraphics || !ILayers || /*!IP96 ||*/ !IIntuition || !IIcon || !IWorkbench || !IKeymap)
 		return SDL_FALSE;
 
 	return SDL_TRUE;
@@ -97,10 +97,12 @@ static void OS4_Close_Libraries(_THIS)
 		IExec->DropInterface((struct Interface *) IIntuition);
 		IIntuition = NULL;
 	}
+/*
 	if (IP96) {
 		IExec->DropInterface((struct Interface *) IP96);
 		IP96 = NULL;
 	}
+*/
 	if (ILayers) {
 		IExec->DropInterface((struct Interface *) ILayers);
 		ILayers = NULL;
@@ -126,10 +128,12 @@ static void OS4_Close_Libraries(_THIS)
 		IExec->CloseLibrary(IntuitionBase);
 		IntuitionBase = NULL;
 	}
+/*
 	if (P96Base) {
 		IExec->CloseLibrary(P96Base);
 		P96Base = NULL;
 	}
+*/
 	if (LayersBase) {
 		IExec->CloseLibrary(LayersBase);
 		LayersBase = NULL;
@@ -184,50 +188,50 @@ OS4_CreateDevice(int devindex)
 	device->GetDisplayBounds = OS4_GetDisplayBounds;
 	device->GetDisplayModes = OS4_GetDisplayModes;
 	device->SetDisplayMode = OS4_SetDisplayMode;
-#if 0
+
 	device->CreateWindow = OS4_CreateWindow;
 	device->CreateWindowFrom = OS4_CreateWindowFrom;
 	device->SetWindowTitle = OS4_SetWindowTitle;
-	device->SetWindowIcon = OS4_SetWindowIcon;
+	//device->SetWindowIcon = OS4_SetWindowIcon;
 	device->SetWindowPosition = OS4_SetWindowPosition;
 	device->SetWindowSize = OS4_SetWindowSize;
 	device->ShowWindow = OS4_ShowWindow;
 	device->HideWindow = OS4_HideWindow;
 	device->RaiseWindow = OS4_RaiseWindow;
-	device->MaximizeWindow = OS4_MaximizeWindow;
-	device->MinimizeWindow = OS4_MinimizeWindow;
-	device->RestoreWindow = OS4_RestoreWindow;
-	device->SetWindowBordered = OS4_SetWindowBordered;
-	device->SetWindowFullscreen = OS4_SetWindowFullscreen;
+	//device->MaximizeWindow = OS4_MaximizeWindow;
+	//device->MinimizeWindow = OS4_MinimizeWindow;
+	//device->RestoreWindow = OS4_RestoreWindow;
+	//device->SetWindowBordered = OS4_SetWindowBordered;
+	//device->SetWindowFullscreen = OS4_SetWindowFullscreen;
 	//device->SetWindowGammaRamp = OS4_SetWindowGammaRamp;
 	//device->GetWindowGammaRamp = OS4_GetWindowGammaRamp;
-	device->SetWindowGrab = OS4_SetWindowGrab;
+	//device->SetWindowGrab = OS4_SetWindowGrab;
 	device->DestroyWindow = OS4_DestroyWindow;
-	device->CreateWindowFramebuffer = OS4_CreateWindowFramebuffer;
-	device->UpdateWindowFramebuffer = OS4_UpdateWindowFramebuffer;
-	device->DestroyWindowFramebuffer = OS4_DestroyWindowFramebuffer;
-	device->OnWindowEnter = OS4_OnWindowEnter; 
+	//device->CreateWindowFramebuffer = OS4_CreateWindowFramebuffer;
+	//device->UpdateWindowFramebuffer = OS4_UpdateWindowFramebuffer;
+	//device->DestroyWindowFramebuffer = OS4_DestroyWindowFramebuffer;
+	//device->OnWindowEnter = OS4_OnWindowEnter;
 
 	device->GetWindowWMInfo = OS4_GetWindowWMInfo;
 
-	device->GL_LoadLibrary = OS4_GL_LoadLibrary;
-	device->GL_GetProcAddress = OS4_GL_GetProcAddress;
-	device->GL_UnloadLibrary = OS4_GL_UnloadLibrary;
-	device->GL_CreateContext = OS4_GL_CreateContext;
-	device->GL_MakeCurrent = OS4_GL_MakeCurrent;
+	//device->GL_LoadLibrary = OS4_GL_LoadLibrary;
+	//device->GL_GetProcAddress = OS4_GL_GetProcAddress;
+	//device->GL_UnloadLibrary = OS4_GL_UnloadLibrary;
+	//device->GL_CreateContext = OS4_GL_CreateContext;
+	//device->GL_MakeCurrent = OS4_GL_MakeCurrent;
 	//device->GL_GetDrawableSize = OS4_GL_GetDrawableSize;
-	device->GL_SetSwapInterval = OS4_GL_SetSwapInterval;
-	device->GL_GetSwapInterval = OS4_GL_GetSwapInterval;
-	device->GL_SwapWindow = OS4_GL_SwapWindow;
-	device->GL_DeleteContext = OS4_GL_DeleteContext; 
+	//device->GL_SetSwapInterval = OS4_GL_SetSwapInterval;
+	//device->GL_GetSwapInterval = OS4_GL_GetSwapInterval;
+	//device->GL_SwapWindow = OS4_GL_SwapWindow;
+	//device->GL_DeleteContext = OS4_GL_DeleteContext;
 
-	device->PumpEvents = OS4_PumpEvents;
-	device->SuspendScreenSaver = OS4_SuspendScreenSaver;
-	device->SetClipboardText = OS4_SetClipboardText;
-	device->GetClipboardText = OS4_GetClipboardText;
-	device->HasClipboardText = OS4_HasClipboardText;
-	device->ShowMessageBox = OS4_ShowMessageBox; 
-#endif
+	//device->PumpEvents = OS4_PumpEvents;
+	//device->SuspendScreenSaver = OS4_SuspendScreenSaver;
+	//device->SetClipboardText = OS4_SetClipboardText;
+	//device->GetClipboardText = OS4_GetClipboardText;
+	//device->HasClipboardText = OS4_HasClipboardText;
+	//device->ShowMessageBox = OS4_ShowMessageBox;
+
 	device->free = OS4_DeleteDevice;
 
 	return device;
