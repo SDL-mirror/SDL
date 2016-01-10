@@ -40,12 +40,14 @@ int SetupWindowData(_THIS, SDL_Window * sdlwin, struct Window * syswin, SDL_bool
 	data->created = created;
 
 	sdlwin->driverdata = data;
+
+	return 0;
 }
 
 int
 OS4_CreateWindow(_THIS, SDL_Window * window)
 {
-	SDL_VideoData *videodata = (SDL_VideoData *) _this->driverdata;
+	//SDL_VideoData *videodata = (SDL_VideoData *) _this->driverdata;
 
 	if (window->flags & SDL_WINDOW_FULLSCREEN) {
 	    // TODO: fullscreen

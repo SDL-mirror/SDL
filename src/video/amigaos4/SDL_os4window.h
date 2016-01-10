@@ -28,6 +28,7 @@ typedef struct
 	SDL_Window    * sdlwin;
 	struct Window * syswin;
 	SDL_bool        created;
+	struct BitMap * bitmap;
 } SDL_WindowData;
 
 

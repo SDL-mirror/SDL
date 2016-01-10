@@ -30,7 +30,7 @@
 
 #include "SDL_os4video.h"
 //#include "SDL_os4events.h"
-//#include "SDL_os4framebuffer.h"
+#include "SDL_os4framebuffer.h"
 
 #define OS4VID_DRIVER_NAME "os4"
 
@@ -207,9 +207,11 @@ OS4_CreateDevice(int devindex)
 	//device->GetWindowGammaRamp = OS4_GetWindowGammaRamp;
 	//device->SetWindowGrab = OS4_SetWindowGrab;
 	device->DestroyWindow = OS4_DestroyWindow;
-	//device->CreateWindowFramebuffer = OS4_CreateWindowFramebuffer;
-	//device->UpdateWindowFramebuffer = OS4_UpdateWindowFramebuffer;
-	//device->DestroyWindowFramebuffer = OS4_DestroyWindowFramebuffer;
+	
+	device->CreateWindowFramebuffer = OS4_CreateWindowFramebuffer;
+	device->UpdateWindowFramebuffer = OS4_UpdateWindowFramebuffer;
+	device->DestroyWindowFramebuffer = OS4_DestroyWindowFramebuffer;
+	
 	//device->OnWindowEnter = OS4_OnWindowEnter;
 
 	device->GetWindowWMInfo = OS4_GetWindowWMInfo;
