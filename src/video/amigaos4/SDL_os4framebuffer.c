@@ -106,8 +106,7 @@ OS4_UpdateWindowFramebuffer(_THIS, SDL_Window * window, const SDL_Rect * rects, 
 
 			ILayers->LockLayer(0, data->syswin->WLayer);
 
-			for (i = 0; i < numrects; ++i)
-			{
+			for (i = 0; i < numrects; ++i) {
 				const SDL_Rect * r = &rects[i];
 
 				int32 ret = IGraphics->BltBitMapTags(
@@ -150,6 +149,6 @@ OS4_DestroyWindowFramebuffer(_THIS, SDL_Window * window)
 	}
 }
 
-#endif
+#endif /* SDL_VIDEO_DRIVER_AMIGAOS4 */
 
 /* vi: set ts=4 sw=4 expandtab: */

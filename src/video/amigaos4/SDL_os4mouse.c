@@ -11,22 +11,31 @@
   freely, subject to the following restrictions:
 
   1. The origin of this software must not be misrepresented; you must not
-     claim that you wrote the original software. If you use this software
-     in a product, an acknowledgment in the product documentation would be
-     appreciated but is not required.
+	 claim that you wrote the original software. If you use this software
+	 in a product, an acknowledgment in the product documentation would be
+	 appreciated but is not required.
   2. Altered source versions must be plainly marked as such, and must not be
-     misrepresented as being the original software.
+	 misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
 #include "../../SDL_internal.h"
 
-#ifndef _SDL_os4framebuffer_h
-#define _SDL_os4framebuffer_h
+#if SDL_VIDEO_DRIVER_AMIGAOS4
 
-extern int OS4_CreateWindowFramebuffer(_THIS, SDL_Window * window, Uint32 * format, void ** pixels, int *pitch);
-extern int OS4_UpdateWindowFramebuffer(_THIS, SDL_Window * window, const SDL_Rect * rects, int numrects);
-extern void OS4_DestroyWindowFramebuffer(_THIS, SDL_Window * window);
+#include "SDL_os4video.h"
 
-#endif /* _SDL_os4framebuffer_h */
+
+void
+OS4_InitMouse(_THIS)
+{
+	//SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
+}
+
+void
+OS4_QuitMouse(_THIS)
+{
+}
+
+#endif /* SDL_VIDEO_DRIVER_AMIGAOS4 */
 
 /* vi: set ts=4 sw=4 expandtab: */

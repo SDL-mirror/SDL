@@ -31,6 +31,10 @@
 #include "SDL_os4video.h"
 //#include "SDL_os4events.h"
 #include "SDL_os4framebuffer.h"
+#include "SDL_os4mouse.h"
+
+#define DEBUG
+#include "../../main/amigaos4/SDL_os4debug.h"
 
 #define OS4VID_DRIVER_NAME "os4"
 
@@ -52,7 +56,8 @@ OS4_Available(void)
 
 #define MIN_LIB_VERSION 51
 
-static SDL_bool OS4_Open_Libraries(_THIS)
+static SDL_bool
+OS4_Open_Libraries(_THIS)
 {
 	GfxBase       = IExec->OpenLibrary("graphics.library", MIN_LIB_VERSION);
 	LayersBase    = IExec->OpenLibrary("layers.library", MIN_LIB_VERSION);
@@ -79,7 +84,8 @@ static SDL_bool OS4_Open_Libraries(_THIS)
 	return SDL_TRUE;
 }
 
-static void OS4_Close_Libraries(_THIS)
+static void
+OS4_Close_Libraries(_THIS)
 {
 	if (IKeymap) {
 		IExec->DropInterface((struct Interface *) IKeymap);
@@ -148,6 +154,9 @@ static void
 OS4_DeleteDevice(SDL_VideoDevice * device)
 {
 	//SDL_VideoData *data = (SDL_VideoData *) device->driverdata;
+
+	dprintf("Called\n");
+
 	OS4_Close_Libraries(device);
 	SDL_free(device->driverdata);
 	SDL_free(device);
@@ -159,20 +168,24 @@ OS4_CreateDevice(int devindex)
 	SDL_VideoDevice *device;
 	SDL_VideoData *data;
 
+	dprintf("Called\n");
+
 	/* Initialize all variables that we clean on shutdown */
 	device = (SDL_VideoDevice *) SDL_calloc(1, sizeof(SDL_VideoDevice));
+
 	if (device) {
 		data = (SDL_VideoData *) SDL_calloc(1, sizeof(SDL_VideoData));
 	} else {
 		data = NULL;
 	}
+
 	if (!data) {
 		SDL_free(device);
 		SDL_OutOfMemory();
 		return NULL;
 	}
-	device->driverdata = data;
 
+	device->driverdata = data;
 	if (!OS4_Open_Libraries(device))
 	{
 		SDL_free(device);
@@ -248,6 +261,8 @@ VideoBootStrap OS4_bootstrap = {
 int
 OS4_VideoInit(_THIS)
 {
+	dprintf("Called\n");
+
 	if (OS4_InitModes(_this) < 0) {
 		return -1;
 	}
@@ -261,6 +276,8 @@ OS4_VideoInit(_THIS)
 void
 OS4_VideoQuit(_THIS)
 {
+	dprintf("Called\n");
+
 	OS4_QuitModes(_this);
 	OS4_QuitKeyboard(_this);
 	OS4_QuitMouse(_this);

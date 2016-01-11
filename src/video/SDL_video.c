@@ -92,11 +92,11 @@ static VideoBootStrap *bootstrap[] = {
 #if SDL_VIDEO_DRIVER_WAYLAND
     &Wayland_bootstrap,
 #endif
-#if SDL_VIDEO_DRIVER_DUMMY
-    &DUMMY_bootstrap,
-#endif
 #if SDL_VIDEO_DRIVER_AMIGAOS4
     &OS4_bootstrap,
+#endif
+#if SDL_VIDEO_DRIVER_DUMMY
+    &DUMMY_bootstrap,
 #endif
     NULL
 };

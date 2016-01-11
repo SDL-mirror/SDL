@@ -24,6 +24,9 @@
 
 #include "SDL_os4video.h"
 
+#define DEBUG
+#include "../../main/amigaos4/SDL_os4debug.h"
+
 static SDL_bool
 OS4_GetDisplayMode(_THIS, ULONG id, SDL_DisplayMode * mode)
 {
@@ -45,7 +48,7 @@ OS4_GetDisplayMode(_THIS, ULONG id, SDL_DisplayMode * mode)
 		return SDL_FALSE;
 	}
 
-	SDL_zero(mode);
+	SDL_zero(*mode);
 	data->modeid = id;
 	data->x = diminfo.Nominal.MinX;
 	data->y = diminfo.Nominal.MinY;

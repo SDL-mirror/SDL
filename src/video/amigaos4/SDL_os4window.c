@@ -25,8 +25,11 @@
 #include "SDL_os4video.h"
 #include "SDL_syswm.h"
 
-static
-int SetupWindowData(_THIS, SDL_Window * sdlwin, struct Window * syswin, SDL_bool created)
+#define DEBUG
+#include "../../main/amigaos4/SDL_os4debug.h"
+
+static int
+SetupWindowData(_THIS, SDL_Window * sdlwin, struct Window * syswin, SDL_bool created)
 {
 	SDL_WindowData *data;
 	
@@ -48,6 +51,8 @@ int
 OS4_CreateWindow(_THIS, SDL_Window * window)
 {
 	//SDL_VideoData *videodata = (SDL_VideoData *) _this->driverdata;
+
+	dprintf("Called\n");
 
 	if (window->flags & SDL_WINDOW_FULLSCREEN) {
 	    // TODO: fullscreen
@@ -89,6 +94,8 @@ int
 OS4_CreateWindowFrom(_THIS, SDL_Window * window, const void *data)
 {
 	struct Window *syswin = (struct Window *) data;
+
+	dprintf("Called\n");
 
 	if (syswin->Title && SDL_strlen(syswin->Title)) {
 		window->title = SDL_strdup(syswin->Title);
@@ -184,6 +191,8 @@ OS4_DestroyWindow(_THIS, SDL_Window * window)
 {
 	SDL_WindowData *data = window->driverdata;
 
+	dprintf("Called\n");
+
 	if (data) {
 		if (data->created && data->syswin) {
 			IIntuition->CloseWindow(data->syswin);
@@ -206,6 +215,8 @@ OS4_GetWindowWMInfo(_THIS, SDL_Window * window,
 									struct SDL_SysWMinfo *info)
 {
 	struct Window * syswin = ((SDL_WindowData *) window->driverdata)->syswin;
+
+	dprintf("Called\n");
 
 	if (info->version.major <= SDL_MAJOR_VERSION) {
 		info->subsystem = SDL_SYSWM_OS4;
