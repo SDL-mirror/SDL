@@ -24,7 +24,7 @@
 
 #define OLDSDK 1
 
-/* This is the Ami9gaOS4 implementation of the SDL joystick API */
+/* This is the AmigaOS4 implementation of the SDL joystick API */
 
 #include "SDL_joystick.h"
 #include "../SDL_sysjoystick.h"
@@ -50,7 +50,7 @@
 
 #define BUFFER_OFFSET(buffer, offset)	(((int32 *)buffer)[offset])
 
-extern SDL_Joystick **SDL_joysticks;
+//extern SDL_Joystick **SDL_joysticks; TODO: do we still need explicit cleanup?
 
 struct joystick
 {
@@ -554,6 +554,11 @@ SDL_SYS_JoystickQuit(void)
 {
 	uint32 i;
 
+#if 0
+
+	// TODO: check whether this kind of work around makes sense anymore. Anyway,
+	// SDL_Joysticks declaration has changed so code needs work in case of still necessary.
+
 	// PG
 	// Close any open joysticks before quitting.
 	// This stops a hang on exit for bad SDL software that doesn't
@@ -581,6 +586,8 @@ SDL_SYS_JoystickQuit(void)
 			SDL_joysticks[i] = NULL;
 		}
 	}
+
+#endif
 
 	for (i = 0; i < joystickCount; i++)
 		freeString((char *)joystickList[i].name);
