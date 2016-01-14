@@ -28,10 +28,26 @@
 #include "SDL_error.h"
 #include "SDL_filesystem.h"
 
+#define OS4_BASE_PATH "PROGDIR:"
+
 char *
 SDL_GetBasePath(void)
 {
-    return "PROGDIR:";
+	size_t len = 0;
+	char *retval = NULL;
+
+	len = SDL_strlen(OS4_BASE_PATH) + 1;
+
+	retval = (char *) SDL_malloc(len);
+	if (!retval) {
+		SDL_OutOfMemory();
+		return NULL;
+	}
+
+	SDL_memset(retval, 0, len);
+	SDL_snprintf(retval, len, "%s", OS4_BASE_PATH);
+
+	return retval;
 }
 
 char *
