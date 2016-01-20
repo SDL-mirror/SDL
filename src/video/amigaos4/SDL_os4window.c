@@ -29,7 +29,7 @@
 #include "../../main/amigaos4/SDL_os4debug.h"
 
 static int
-SetupWindowData(_THIS, SDL_Window * sdlwin, struct Window * syswin, SDL_bool created)
+SetupWindowData(_THIS, SDL_Window * sdlwin, struct Window * syswin, SDL_bool created, struct MsgPort * userport)
 {
 	SDL_WindowData *data;
 	
@@ -41,6 +41,7 @@ SetupWindowData(_THIS, SDL_Window * sdlwin, struct Window * syswin, SDL_bool cre
 	data->sdlwin = sdlwin;
 	data->syswin = syswin;
 	data->created = created;
+	data->userport = userport;
 
 	sdlwin->driverdata = data;
 
@@ -50,41 +51,113 @@ SetupWindowData(_THIS, SDL_Window * sdlwin, struct Window * syswin, SDL_bool cre
 int
 OS4_CreateWindow(_THIS, SDL_Window * window)
 {
-	//SDL_VideoData *videodata = (SDL_VideoData *) _this->driverdata;
+	SDL_VideoData *videodata = (SDL_VideoData *) _this->driverdata;
+	
+	struct Window   * syswin;
+	struct MsgPort  * userport;
+
+	uint32 windowFlags = WFLG_REPORTMOUSE | WFLG_RMBTRAP;
+
+	uint32 IDCMPFlags  = IDCMP_NEWSIZE | IDCMP_MOUSEBUTTONS | IDCMP_MOUSEMOVE
+					   | IDCMP_DELTAMOVE | IDCMP_RAWKEY | IDCMP_ACTIVEWINDOW
+					   | IDCMP_INACTIVEWINDOW | IDCMP_INTUITICKS
+					   | IDCMP_EXTENDEDMOUSE;
+	
+	uint32 windowX;
+	uint32 windowY;
 
 	dprintf("Called\n");
 
+	if (! (userport = IExec->AllocSysObject(ASOT_PORT, 0))) {
+		return SDL_SetError("Couldn't allocate message port");
+	}
+
 	if (window->flags & SDL_WINDOW_FULLSCREEN) {
 	    // TODO: fullscreen
+		windowFlags |= WFLG_BORDERLESS | WFLG_SIMPLE_REFRESH | WFLG_BACKDROP;
+		
+		windowX = 0;
+		windowY = 0;
+
 	} else {
-		struct Window *syswin = IIntuition->OpenWindowTags(
-			NULL,
-			WA_Title, "SDL_Appname",
-			WA_ScreenTitle, "SDL_Appname",
-			WA_Left, window->x,
-			WA_Top, window->y,
-			WA_InnerWidth, window->w,
-			WA_InnerHeight, window->h,
-			WA_Borderless, (window->flags & SDL_WINDOW_BORDERLESS) ? TRUE : FALSE,
-			WA_SizeGadget, (window->flags & SDL_WINDOW_RESIZABLE) ? TRUE : FALSE,
-			WA_Hidden, (window->flags & SDL_WINDOW_SHOWN) ? FALSE : TRUE,
-			//WA_GrabFocus, (window->flags & SDL_WINDOW_INPUT_GRABBED) ? 100 : 0,
-			TAG_DONE);
 
-		if (!syswin) {
-			return SDL_SetError("Couldn't create window");
+		windowFlags |= WFLG_SMART_REFRESH | WFLG_NOCAREREFRESH | WFLG_NEWLOOKMENUS;
+
+		windowX = window->x;
+		windowY = window->y;
+
+		if (window->flags & SDL_WINDOW_BORDERLESS) {
+			windowFlags |= WFLG_BORDERLESS;
+		} else {
+			windowFlags |= WFLG_DRAGBAR | WFLG_DEPTHGADGET | WFLG_CLOSEGADGET;
+
+			IDCMPFlags  |= IDCMP_CLOSEWINDOW;
 		}
 
-		if (SetupWindowData(_this, window, syswin, SDL_TRUE) < 0) {
-			IIntuition->CloseWindow(syswin);
-			return -1;
+		if (window->flags & SDL_WINDOW_RESIZABLE) {
+			windowFlags |= WFLG_SIZEGADGET | WFLG_SIZEBBOTTOM;
+			
+			IDCMPFlags  |= IDCMP_SIZEVERIFY;
 		}
+	}
+
+	dprintf("Trying to open window '%s' at (%d,%d) of size (%dx%d)\n",
+		window->title, windowX, windowY, window->w, window->h);
+
+	syswin = IIntuition->OpenWindowTags(
+		NULL,
+		WA_PubScreen, videodata->publicScreen,
+		WA_Title, window->title,
+		WA_ScreenTitle, window->title,
+		WA_Left, windowX,
+		WA_Top, windowY,
+		WA_InnerWidth, window->w,
+		WA_InnerHeight, window->h,
+		WA_Flags, windowFlags,
+		WA_IDCMP, IDCMPFlags,
+		WA_Hidden, (window->flags & SDL_WINDOW_SHOWN) ? FALSE : TRUE,
+		//WA_GrabFocus, (window->flags & SDL_WINDOW_INPUT_GRABBED) ? 100 : 0,
+		WA_UserPort, userport,
+		TAG_DONE);
+
+	if (!syswin) {
+		IExec->FreeSysObject(ASOT_PORT, userport);
+		
+		return SDL_SetError("Couldn't create window");
+	}
+
+	if (window->flags & SDL_WINDOW_RESIZABLE) {
+		
+		/* If this window is resizable, reset window size limits
+	 	 * so that the user can actually resize it.
+		 *
+		 * What's a useful minimum size, anyway?
+		 */
+		
+		IIntuition->WindowLimits(syswin,
+			syswin->BorderLeft + syswin->BorderRight + 100,
+			syswin->BorderTop + syswin->BorderBottom + 100,
+			-1,
+			-1);
+	}
+
+	if (SetupWindowData(_this, window, syswin, SDL_TRUE, userport) < 0) {
+		IIntuition->CloseWindow(syswin);
+		IExec->FreeSysObject(ASOT_PORT, userport);
+
+		return SDL_SetError("Failed to setup window data");
 	}
 
 	// TODO: OpenGL context
 	if (window->flags & SDL_WINDOW_OPENGL) {
 		// ...
 	}
+
+	if (window->flags & SDL_WINDOW_FULLSCREEN) {
+		//IIntuition->ScreenToFront(screen);
+	}
+
+	IIntuition->ActivateWindow(syswin);
 
 	return 0;
 }
@@ -101,7 +174,7 @@ OS4_CreateWindowFrom(_THIS, SDL_Window * window, const void *data)
 		window->title = SDL_strdup(syswin->Title);
 	}
 
-	if (SetupWindowData(_this, window, syswin, SDL_FALSE) < 0) {
+	if (SetupWindowData(_this, window, syswin, SDL_FALSE, NULL) < 0) {
 		return -1;
 	}
 
@@ -197,6 +270,11 @@ OS4_DestroyWindow(_THIS, SDL_Window * window)
 		if (data->created && data->syswin) {
 			IIntuition->CloseWindow(data->syswin);
 		}
+
+		if (data->userport) {
+			IExec->FreeSysObject(ASOT_PORT, data->userport);
+		}
+
 
 		SDL_free(data);
 	}

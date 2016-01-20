@@ -25,10 +25,11 @@
 
 typedef struct
 {
-	SDL_Window    * sdlwin;
-	struct Window * syswin;
-	SDL_bool        created;
-	struct BitMap * bitmap;
+	SDL_Window      * sdlwin;
+	struct Window   * syswin;
+	SDL_bool          created;
+	struct BitMap   * bitmap;
+	struct MsgPort  * userport;
 } SDL_WindowData;
 
 
