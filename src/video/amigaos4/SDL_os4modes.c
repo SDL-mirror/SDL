@@ -130,7 +130,7 @@ OS4_GetDisplayModes(_THIS, SDL_VideoDisplay * display)
 {
 	//SDL_DisplayData *displaydata = (SDL_DisplayData *) display->driverdata;
 	SDL_DisplayMode mode;
-	ULONG id;
+	ULONG id = INVALID_ID;
 
 	while ((id = IGraphics->NextDisplayInfo(id)) != INVALID_ID) {
 		OS4_GetDisplayMode(_this, id, &mode);
