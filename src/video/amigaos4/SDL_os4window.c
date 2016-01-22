@@ -29,7 +29,7 @@
 #include "../../main/amigaos4/SDL_os4debug.h"
 
 static int
-SetupWindowData(_THIS, SDL_Window * sdlwin, struct Window * syswin, SDL_bool created, struct MsgPort * userport)
+SetupWindowData(_THIS, SDL_Window * sdlwin, struct Window * syswin, SDL_bool created)
 {
 	SDL_WindowData *data;
 	
@@ -41,7 +41,6 @@ SetupWindowData(_THIS, SDL_Window * sdlwin, struct Window * syswin, SDL_bool cre
 	data->sdlwin = sdlwin;
 	data->syswin = syswin;
 	data->created = created;
-	data->userport = userport;
 
 	sdlwin->driverdata = data;
 
@@ -54,7 +53,6 @@ OS4_CreateWindow(_THIS, SDL_Window * window)
 	SDL_VideoData *videodata = (SDL_VideoData *) _this->driverdata;
 	
 	struct Window   * syswin;
-	struct MsgPort  * userport;
 
 	uint32 windowFlags = WFLG_REPORTMOUSE | WFLG_RMBTRAP;
 
@@ -67,10 +65,6 @@ OS4_CreateWindow(_THIS, SDL_Window * window)
 	uint32 windowY;
 
 	dprintf("Called\n");
-
-	if (! (userport = IExec->AllocSysObject(ASOT_PORT, 0))) {
-		return SDL_SetError("Couldn't allocate message port");
-	}
 
 	if (window->flags & SDL_WINDOW_FULLSCREEN) {
 	    // TODO: fullscreen
@@ -117,12 +111,10 @@ OS4_CreateWindow(_THIS, SDL_Window * window)
 		WA_IDCMP, IDCMPFlags,
 		WA_Hidden, (window->flags & SDL_WINDOW_SHOWN) ? FALSE : TRUE,
 		//WA_GrabFocus, (window->flags & SDL_WINDOW_INPUT_GRABBED) ? 100 : 0,
-		WA_UserPort, userport,
+		WA_UserPort, videodata->userport,
 		TAG_DONE);
 
-	if (!syswin) {
-		IExec->FreeSysObject(ASOT_PORT, userport);
-		
+	if (!syswin) {		  
 		return SDL_SetError("Couldn't create window");
 	}
 
@@ -141,9 +133,8 @@ OS4_CreateWindow(_THIS, SDL_Window * window)
 			-1);
 	}
 
-	if (SetupWindowData(_this, window, syswin, SDL_TRUE, userport) < 0) {
+	if (SetupWindowData(_this, window, syswin, SDL_TRUE) < 0) {
 		IIntuition->CloseWindow(syswin);
-		IExec->FreeSysObject(ASOT_PORT, userport);
 
 		return SDL_SetError("Failed to setup window data");
 	}
@@ -174,7 +165,7 @@ OS4_CreateWindowFrom(_THIS, SDL_Window * window, const void *data)
 		window->title = SDL_strdup(syswin->Title);
 	}
 
-	if (SetupWindowData(_this, window, syswin, SDL_FALSE, NULL) < 0) {
+	if (SetupWindowData(_this, window, syswin, SDL_FALSE) < 0) {
 		return -1;
 	}
 
@@ -270,11 +261,6 @@ OS4_DestroyWindow(_THIS, SDL_Window * window)
 		if (data->created && data->syswin) {
 			IIntuition->CloseWindow(data->syswin);
 		}
-
-		if (data->userport) {
-			IExec->FreeSysObject(ASOT_PORT, data->userport);
-		}
-
 
 		SDL_free(data);
 	}

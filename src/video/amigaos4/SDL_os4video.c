@@ -29,7 +29,7 @@
 #include "../../events/SDL_events_c.h"
 
 #include "SDL_os4video.h"
-//#include "SDL_os4events.h"
+#include "SDL_os4events.h"
 #include "SDL_os4framebuffer.h"
 #include "SDL_os4mouse.h"
 
@@ -153,9 +153,13 @@ OS4_Close_Libraries(_THIS)
 static void
 OS4_DeleteDevice(SDL_VideoDevice * device)
 {
-	//SDL_VideoData *data = (SDL_VideoData *) device->driverdata;
+	SDL_VideoData *data = (SDL_VideoData *) device->driverdata;
 
 	dprintf("Called\n");
+
+	if (data->userport) {
+	   	IExec->FreeSysObject(ASOT_PORT, data->userport);
+	}
 
 	OS4_Close_Libraries(device);
 	SDL_free(device->driverdata);
@@ -186,11 +190,18 @@ OS4_CreateDevice(int devindex)
 	}
 
 	device->driverdata = data;
-	if (!OS4_Open_Libraries(device))
-	{
+	if (!OS4_Open_Libraries(device)) {
 		SDL_free(device);
 		SDL_free(data);
 		SDL_Unsupported();
+		return NULL;
+	}
+
+	if (! (data->userport = IExec->AllocSysObject(ASOT_PORT, 0))) {
+		SDL_free(device);
+		SDL_free(data);
+		
+		SDL_SetError("Couldn't allocate message port");
 		return NULL;
 	}
 
@@ -240,7 +251,7 @@ OS4_CreateDevice(int devindex)
 	//device->GL_SwapWindow = OS4_GL_SwapWindow;
 	//device->GL_DeleteContext = OS4_GL_DeleteContext;
 
-	//device->PumpEvents = OS4_PumpEvents;
+	device->PumpEvents = OS4_PumpEvents;
 	//device->SuspendScreenSaver = OS4_SuspendScreenSaver;
 	//device->SetClipboardText = OS4_SetClipboardText;
 	//device->GetClipboardText = OS4_GetClipboardText;

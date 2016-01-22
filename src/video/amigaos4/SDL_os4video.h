@@ -45,6 +45,8 @@ typedef struct
 {
 	struct Screen *			publicScreen;
 
+	struct MsgPort *        userport;
+	
 	struct Library			*gfxbase;
 	struct Library			*layersbase;
 	//struct Library			*p96base;
