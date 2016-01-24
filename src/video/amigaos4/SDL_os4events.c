@@ -25,6 +25,8 @@
 #include "SDL_os4video.h"
 
 #include "../../events/SDL_keyboard_c.h"
+#include "../../events/SDL_mouse_c.h"
+#include "../../events/SDL_windowevents_c.h"
 
 #define DEBUG
 #include "../../main/amigaos4/SDL_os4debug.h"
@@ -34,7 +36,10 @@ struct MyIntuiMessage
 	uint32 Class;
 	uint16 Code;
 	uint16 Qualifier;
+	
 	struct Gadget *Gadget;
+
+	struct Window *IDCMPWindow;
 
 	int16  MouseDX;		/* Relative mouse movement */
 	int16  MouseDY;
@@ -48,9 +53,32 @@ struct MyIntuiMessage
 	int8   wantDelta;	/* Do we want to report delta movements or absolute position */
 };
 
-/*
-static uint32
-OS4_TranslateUnicode(uint16 Code, uint32 Qualifier)
+/* We could possibly use also Window.userdata field to contain SDL_Window,
+and thus avoid searching */
+static SDL_Window *
+OS4_FindWindow(_THIS, struct Window * syswin)
+{
+	SDL_Window * sdlwin;
+
+	for (sdlwin = _this->windows; sdlwin; sdlwin = sdlwin->next) {
+
+		SDL_WindowData *data = sdlwin->driverdata;
+
+		if (data->syswin == syswin) {
+
+	        dprintf("Found window %p\n", syswin);
+
+			return sdlwin;
+		}
+	}
+
+	dprintf("No window found\n");
+
+	return NULL;
+}
+
+static char
+OS4_TranslateUnicode(_THIS, uint16 Code, uint32 Qualifier)
 {
 	struct InputEvent ie;
 	uint16 res;
@@ -66,7 +94,8 @@ OS4_TranslateUnicode(uint16 Code, uint32 Qualifier)
 	if (res != 1) return 0;
 	else return buffer[0];
 }
-*/
+
+/*
 static SDL_Keymod
 OS4_KMod(uint16 Qualifier)
 {
@@ -82,18 +111,146 @@ OS4_KMod(uint16 Qualifier)
 
 	return x;
 }
+*/
 
 static void
-OS4_HandleKeyboard(struct MyIntuiMessage *imsg)
+OS4_HandleKeyboard(_THIS, struct MyIntuiMessage *imsg)
 {
 	if ((imsg->Qualifier & IEQUALIFIER_REPEAT) == 0) {
 
-		SDL_Scancode s = imsg->Code;
+		SDL_Scancode s = (uint8)imsg->Code;
 
-		if (s <= 127)
+		if (s <= 127) {
+
+			char text[2];
+			
+			text[0]	= OS4_TranslateUnicode(_this, imsg->Code, imsg->Qualifier);
+			text[1] = '\0';
+
 			SDL_SendKeyboardKey(SDL_PRESSED, s);
-		else
+			SDL_SendKeyboardText(text);
+		} else
 			SDL_SendKeyboardKey(SDL_RELEASED, s);
+	}
+}
+
+static void
+OS4_HandleMouseMotion(_THIS, struct MyIntuiMessage *imsg)
+{
+	SDL_Window * sdlwin = OS4_FindWindow(_this, imsg->IDCMPWindow);
+
+	if (sdlwin) {
+		if (imsg->wantDelta)
+		{
+			// TODO: implement relative mouse
+			if (imsg->MouseDX != 0 || imsg->MouseDY != 0)
+			{
+				dprintf("dX:%d dY:%d\n", imsg->MouseDX, imsg->MouseDY);
+
+				SDL_SendMouseMotion(sdlwin, 0 /*mouse->mouseID*/, 1, imsg->MouseDX, imsg->MouseDY);
+			}
+		}
+		else
+		{
+			dprintf("X:%d Y:%d\n", imsg->PointerX, imsg->PointerY);
+
+			SDL_SendMouseMotion(sdlwin, 0 /*mouse->mouseID*/, 0, imsg->PointerX, imsg->PointerY);
+		}	 
+	}
+}
+
+static void
+OS4_HandleMouseButtons(_THIS, struct MyIntuiMessage *imsg)
+{
+	SDL_Window * sdlwin = OS4_FindWindow(_this, imsg->IDCMPWindow);
+
+	if (sdlwin) {
+		uint8 button = 0;
+		uint8 state = SDL_PRESSED;
+
+		if ((imsg->Code & ~IECODE_UP_PREFIX) == IECODE_LBUTTON)
+			button = SDL_BUTTON_LEFT;
+		else if ((imsg->Code & ~IECODE_UP_PREFIX) == IECODE_RBUTTON)
+			button = SDL_BUTTON_RIGHT;
+		else if ((imsg->Code & ~IECODE_UP_PREFIX) == IECODE_MBUTTON)
+			button = SDL_BUTTON_MIDDLE;
+
+		// TODO: can we support more buttons?
+
+		if (imsg->Code & IECODE_UP_PREFIX)
+			state = SDL_RELEASED;
+
+		dprintf("X:%d Y:%d button:%d state:%d\n",
+			imsg->PointerX, imsg->PointerY, button, state);
+
+		SDL_SendMouseButton(sdlwin, 0, state, button);
+	}
+}
+
+static void
+OS4_HandleMouseWheel(_THIS, struct MyIntuiMessage *imsg)
+{
+	SDL_Window * sdlwin = OS4_FindWindow(_this, imsg->IDCMPWindow);
+
+	if (sdlwin) {
+		struct IntuiWheelData *data = (struct IntuiWheelData *)imsg->Gadget;
+
+		if (data->WheelY < 0) {
+			SDL_SendMouseWheel(sdlwin, 0, 0, 1);
+		} else if (data->WheelY > 0) {
+			SDL_SendMouseWheel(sdlwin, 0, 0, -1);
+		}
+
+		if (data->WheelX < 0) {
+			SDL_SendMouseWheel(sdlwin, 0, 1, 0);
+		} else if (data->WheelX > 0) {
+			SDL_SendMouseWheel(sdlwin, 0, -1, 0);
+		}
+	}
+}
+
+
+static void
+OS4_HandleResize(_THIS, struct MyIntuiMessage *imsg)
+{
+	SDL_Window * sdlwin = OS4_FindWindow(_this, imsg->IDCMPWindow);
+
+	if (sdlwin) {
+		SDL_SendWindowEvent(sdlwin, SDL_WINDOWEVENT_RESIZED,
+			imsg->Width, imsg->Height);
+	}
+}
+
+static void
+OS4_HandleActivation(_THIS, struct MyIntuiMessage *imsg, SDL_bool activated)
+{
+	SDL_Window * sdlwin = OS4_FindWindow(_this, imsg->IDCMPWindow);
+
+	if (sdlwin) {
+		if (activated) {
+			SDL_SendWindowEvent(sdlwin, SDL_WINDOWEVENT_SHOWN, 0, 0);
+			if (SDL_GetKeyboardFocus() != sdlwin) {
+				SDL_SetKeyboardFocus(sdlwin);
+				// TODO: do we want to set mouse colors as in SDL1?
+			}
+		} else {
+			if (SDL_GetKeyboardFocus() == sdlwin) {
+				SDL_SetKeyboardFocus(NULL);
+				// TODO: do we want to reset mouse colors as in SDL1?
+			}
+		}
+
+		dprintf("Window %p activation %d\n", sdlwin, activated);
+	}
+}
+
+static void
+OS4_HandleClose(_THIS, struct MyIntuiMessage *imsg)
+{
+	SDL_Window * sdlwin = OS4_FindWindow(_this, imsg->IDCMPWindow);
+
+	if (sdlwin) {
+	   SDL_SendWindowEvent(sdlwin, SDL_WINDOWEVENT_CLOSE, 0, 0);
 	}
 }
 
@@ -108,6 +265,8 @@ OS4_CopyRelevantFields(struct IntuiMessage * src, struct MyIntuiMessage * dst)
 	dst->Qualifier 		 = src->Qualifier;
 
 	dst->Gadget			 = (struct Gadget *) src->IAddress;
+
+	dst->IDCMPWindow     = src->IDCMPWindow;
 
 	/* We've got IDCMP_DELTAMOVE set on our window, so the intuimsg will report
 	* relative mouse movements in MouseX/Y not absolute pointer position. */
@@ -127,7 +286,6 @@ OS4_CopyRelevantFields(struct IntuiMessage * src, struct MyIntuiMessage * dst)
 	// TODO: dst->wantDelta		  = hidden->isMouseRelative;
 }
 
-
 static void
 OS4_EventHandler(_THIS)
 {
@@ -142,39 +300,44 @@ OS4_EventHandler(_THIS)
 
 		IExec->ReplyMsg((struct Message *) imsg);
 
-		dprintf("Message class %d, code %d\n", msg.Class, msg.Code);
-
 		switch (msg.Class) {
 			case IDCMP_MOUSEMOVE:
+				OS4_HandleMouseMotion(_this, &msg);
 				break;
 
 			case IDCMP_RAWKEY:
-				OS4_HandleKeyboard(&msg);
+				OS4_HandleKeyboard(_this, &msg);
 				break;
 
 			case IDCMP_MOUSEBUTTONS:
+				OS4_HandleMouseButtons(_this, &msg);
 				break;
 
 			case IDCMP_EXTENDEDMOUSE:
+				OS4_HandleMouseWheel(_this, &msg);
 				break;
 
 			case IDCMP_NEWSIZE:
+				OS4_HandleResize(_this, &msg);
 				break;
 
 			case IDCMP_ACTIVEWINDOW:
+				OS4_HandleActivation(_this, &msg, SDL_TRUE);
 				break;
 
 			case IDCMP_INACTIVEWINDOW:
+				OS4_HandleActivation(_this, &msg, SDL_FALSE);
 				break;
 
 			case IDCMP_CLOSEWINDOW:
+				OS4_HandleClose(_this, &msg);
 				break;
 
 			case IDCMP_INTUITICKS:
 				break;
 
 			default:
-				dprintf("Unknown event received\n");
+				dprintf("Unknown event received class %d, code %d\n", msg.Class, msg.Code);
 				break;
 		}
 
