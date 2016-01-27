@@ -66,7 +66,7 @@ OS4_FindWindow(_THIS, struct Window * syswin)
 
 		if (data->syswin == syswin) {
 
-	        dprintf("Found window %p\n", syswin);
+			//dprintf("Found window %p\n", syswin);
 
 			return sdlwin;
 		}
@@ -91,8 +91,11 @@ OS4_TranslateUnicode(_THIS, uint16 Code, uint32 Qualifier)
     ie.ie_EventAddress = NULL;
 
 	res = IKeymap->MapRawKey(&ie, buffer, sizeof(buffer), 0);
-	if (res != 1) return 0;
-	else return buffer[0];
+	
+	if (res != 1)
+	    return 0;
+	else
+	    return buffer[0];
 }
 
 /*
@@ -120,7 +123,7 @@ OS4_HandleKeyboard(_THIS, struct MyIntuiMessage *imsg)
 
 		SDL_Scancode s = (uint8)imsg->Code;
 
-		if (s <= 127) {
+		if (imsg->Code <= 127) {
 
 			char text[2];
 			
@@ -129,8 +132,10 @@ OS4_HandleKeyboard(_THIS, struct MyIntuiMessage *imsg)
 
 			SDL_SendKeyboardKey(SDL_PRESSED, s);
 			SDL_SendKeyboardText(text);
-		} else
+		} else {
+			// TODO: SDL doesn't seem to send KEYUPs, even though this gets called
 			SDL_SendKeyboardKey(SDL_RELEASED, s);
+		}
 	}
 }
 
@@ -254,6 +259,26 @@ OS4_HandleClose(_THIS, struct MyIntuiMessage *imsg)
 	}
 }
 
+static void
+OS4_HandleTicks(_THIS, struct MyIntuiMessage *imsg)
+{
+	SDL_Window * sdlwin = OS4_FindWindow(_this, imsg->IDCMPWindow);
+
+	if (sdlwin) {
+		if ((sdlwin->flags & SDL_WINDOW_INPUT_GRABBED) && !(sdlwin->flags & SDL_WINDOW_FULLSCREEN) &&
+			(SDL_GetKeyboardFocus() == sdlwin)) {
+			
+			SDL_WindowData *data = sdlwin->driverdata;
+
+			// Re-grab the window after our ticks have passed
+			if (--data->pointerGrabTicks < 0) {
+				data->pointerGrabTicks = POINTER_GRAB_TIMEOUT;
+
+				OS4_SetWindowGrabInternal(_this, imsg->IDCMPWindow, TRUE);
+			}
+		}
+	}
+}
 
 static void
 OS4_CopyRelevantFields(struct IntuiMessage * src, struct MyIntuiMessage * dst)
@@ -334,6 +359,7 @@ OS4_EventHandler(_THIS)
 				break;
 
 			case IDCMP_INTUITICKS:
+				OS4_HandleTicks(_this, &msg);
 				break;
 
 			default:

@@ -23,6 +23,8 @@
 #ifndef _SDL_os4window_h
 #define _SDL_os4window_h
 
+#define POINTER_GRAB_TIMEOUT		20	/* Number of ticks before pointer grab needs to be reactivated */
+
 typedef struct
 {
 	SDL_Window      * sdlwin;
@@ -30,6 +32,7 @@ typedef struct
 	SDL_bool          created;
 	struct BitMap   * bitmap;
 	struct MsgPort  * userport;
+	Sint32            pointerGrabTicks;
 } SDL_WindowData;
 
 
@@ -49,7 +52,9 @@ extern void OS4_RaiseWindow(_THIS, SDL_Window * window);
 //extern void OS4_SetWindowFullscreen(_THIS, SDL_Window * window, SDL_VideoDisplay * display, SDL_bool fullscreen);
 //extern int OS4_SetWindowGammaRamp(_THIS, SDL_Window * window, const Uint16 * ramp);
 //extern int OS4_GetWindowGammaRamp(_THIS, SDL_Window * window, Uint16 * ramp);
-//extern void OS4_SetWindowGrab(_THIS, SDL_Window * window, SDL_bool grabbed);
+
+extern void OS4_SetWindowGrabInternal(_THIS, struct Window * w, BOOL activate);
+extern void OS4_SetWindowGrab(_THIS, SDL_Window * window, SDL_bool grabbed);
 extern void OS4_DestroyWindow(_THIS, SDL_Window * window);
 extern SDL_bool OS4_GetWindowWMInfo(_THIS, SDL_Window * window,
                                     struct SDL_SysWMinfo *info);

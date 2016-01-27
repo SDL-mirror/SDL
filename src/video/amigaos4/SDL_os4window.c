@@ -42,6 +42,10 @@ SetupWindowData(_THIS, SDL_Window * sdlwin, struct Window * syswin, SDL_bool cre
 	data->syswin = syswin;
 	data->created = created;
 
+	if (sdlwin->flags & SDL_WINDOW_INPUT_GRABBED) {
+		data->pointerGrabTicks = POINTER_GRAB_TIMEOUT;
+	}
+
 	sdlwin->driverdata = data;
 
 	return 0;
@@ -110,7 +114,7 @@ OS4_CreateWindow(_THIS, SDL_Window * window)
 		WA_Flags, windowFlags,
 		WA_IDCMP, IDCMPFlags,
 		WA_Hidden, (window->flags & SDL_WINDOW_SHOWN) ? FALSE : TRUE,
-		//WA_GrabFocus, (window->flags & SDL_WINDOW_INPUT_GRABBED) ? 100 : 0,
+		WA_GrabFocus, (window->flags & SDL_WINDOW_INPUT_GRABBED) ? POINTER_GRAB_TIMEOUT : 0,
 		WA_UserPort, videodata->userport,
 		TAG_DONE);
 
@@ -247,6 +251,34 @@ OS4_RaiseWindow(_THIS, SDL_Window * window)
 
 	if (data && data->syswin) {
 		IIntuition->WindowToFront(data->syswin);
+	}
+}
+
+/* This may be called from os4events.c, too */
+void
+OS4_SetWindowGrabInternal(_THIS, struct Window * w, BOOL activate)
+{
+	struct IBox grabBox = {
+		w->BorderLeft,
+		w->BorderTop,
+		w->Width  - w->BorderLeft - w->BorderRight,
+		w->Height - w->BorderTop  - w->BorderBottom
+	};
+
+	IIntuition->SetWindowAttrs(w, WA_MouseLimits, &grabBox, sizeof(grabBox));
+	IIntuition->SetWindowAttrs(w, WA_GrabFocus, activate ? POINTER_GRAB_TIMEOUT : 0, sizeof(ULONG));
+
+	dprintf("Window 0x%p input was %s\n", w, (activate == TRUE) ? "grabbed" : "released");
+}
+
+void
+OS4_SetWindowGrab(_THIS, SDL_Window * window, SDL_bool grabbed)
+{
+	SDL_WindowData *data = window->driverdata;
+
+	if (data) {
+		OS4_SetWindowGrabInternal(_this, data->syswin, grabbed ? TRUE : FALSE);
+		data->pointerGrabTicks = POINTER_GRAB_TIMEOUT;
 	}
 }
 

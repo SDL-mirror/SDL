@@ -229,7 +229,7 @@ OS4_CreateDevice(int devindex)
 	//device->SetWindowFullscreen = OS4_SetWindowFullscreen;
 	//device->SetWindowGammaRamp = OS4_SetWindowGammaRamp;
 	//device->GetWindowGammaRamp = OS4_GetWindowGammaRamp;
-	//device->SetWindowGrab = OS4_SetWindowGrab;
+	device->SetWindowGrab = OS4_SetWindowGrab;
 	device->DestroyWindow = OS4_DestroyWindow;
 	
 	device->CreateWindowFramebuffer = OS4_CreateWindowFramebuffer;
