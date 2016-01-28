@@ -41,10 +41,7 @@ SetupWindowData(_THIS, SDL_Window * sdlwin, struct Window * syswin, SDL_bool cre
 	data->sdlwin = sdlwin;
 	data->syswin = syswin;
 	data->created = created;
-
-	if (sdlwin->flags & SDL_WINDOW_INPUT_GRABBED) {
-		data->pointerGrabTicks = POINTER_GRAB_TIMEOUT;
-	}
+	data->pointerGrabTicks = 0;
 
 	sdlwin->driverdata = data;
 
@@ -278,7 +275,7 @@ OS4_SetWindowGrab(_THIS, SDL_Window * window, SDL_bool grabbed)
 
 	if (data) {
 		OS4_SetWindowGrabInternal(_this, data->syswin, grabbed ? TRUE : FALSE);
-		data->pointerGrabTicks = POINTER_GRAB_TIMEOUT;
+		data->pointerGrabTicks = 0;
 	}
 }
 

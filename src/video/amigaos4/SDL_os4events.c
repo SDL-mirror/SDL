@@ -270,9 +270,11 @@ OS4_HandleTicks(_THIS, struct MyIntuiMessage *imsg)
 			
 			SDL_WindowData *data = sdlwin->driverdata;
 
+			dprintf("Window 0x%p ticks %d\n", imsg->IDCMPWindow, data->pointerGrabTicks);
+
 			// Re-grab the window after our ticks have passed
-			if (--data->pointerGrabTicks < 0) {
-				data->pointerGrabTicks = POINTER_GRAB_TIMEOUT;
+			if (++data->pointerGrabTicks >= POINTER_GRAB_TIMEOUT) {
+				data->pointerGrabTicks = 0;
 
 				OS4_SetWindowGrabInternal(_this, imsg->IDCMPWindow, TRUE);
 			}

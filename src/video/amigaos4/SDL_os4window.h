@@ -32,7 +32,7 @@ typedef struct
 	SDL_bool          created;
 	struct BitMap   * bitmap;
 	struct MsgPort  * userport;
-	Sint32            pointerGrabTicks;
+	Uint32            pointerGrabTicks;
 } SDL_WindowData;
 
 
