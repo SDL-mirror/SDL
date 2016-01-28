@@ -57,8 +57,10 @@ OS4_Available(void)
 #define MIN_LIB_VERSION 51
 
 static SDL_bool
-OS4_Open_Libraries(_THIS)
+OS4_OpenLibraries(_THIS)
 {
+	dprintf("Called\n");
+
 	GfxBase       = IExec->OpenLibrary("graphics.library", MIN_LIB_VERSION);
 	LayersBase    = IExec->OpenLibrary("layers.library", MIN_LIB_VERSION);
 	//P96Base       = IExec->OpenLibrary("Picasso96API.library", 0);
@@ -85,8 +87,10 @@ OS4_Open_Libraries(_THIS)
 }
 
 static void
-OS4_Close_Libraries(_THIS)
+OS4_CloseLibraries(_THIS)
 {
+	dprintf("Called\n");
+
 	if (IKeymap) {
 		IExec->DropInterface((struct Interface *) IKeymap);
 		IKeymap = NULL;
@@ -150,18 +154,74 @@ OS4_Close_Libraries(_THIS)
 	}
 }
 
-static void
-OS4_DeleteDevice(SDL_VideoDevice * device)
+static SDL_bool
+OS4_AllocSystemResources(_THIS)
 {
-	SDL_VideoData *data = (SDL_VideoData *) device->driverdata;
+	SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
 
 	dprintf("Called\n");
+
+	if (!OS4_OpenLibraries(_this)) {
+		return SDL_FALSE;
+	}
+
+	if (!(data->userport = IExec->AllocSysObject(ASOT_PORT, 0))) {
+		SDL_SetError("Couldn't allocate message port");
+		return SDL_FALSE;
+	}
+
+	/* Create the semaphore used for the pool */
+	if (!(data->poolSemaphore = IExec->AllocSysObjectTags(ASOT_SEMAPHORE, TAG_DONE))) {
+		SDL_SetError("Couldn't allocate pool semaphore");
+		return SDL_FALSE;
+	}
+
+	/* Create the pool we'll be using (Shared, might be used from threads) */
+	if (!(data->pool = IExec->AllocSysObjectTags(ASOT_MEMPOOL,
+		ASOPOOL_MFlags,    MEMF_SHARED,
+		ASOPOOL_Threshold, 16384,
+	    ASOPOOL_Puddle,    16384,
+		TAG_DONE))) {
+	
+		SDL_SetError("Couldn't allocate pool");
+		return SDL_FALSE;
+	}
+
+	return SDL_TRUE;
+}
+
+static void
+OS4_FreeSystemResources(_THIS)
+{
+	SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
+	
+	dprintf("Called\n");
+
+	if (data->pool) {
+		//IExec->ObtainSemaphore(data->poolSemaphore);
+		IExec->FreeSysObject(ASOT_MEMPOOL, data->pool);
+		//IExec->ReleaseSemaphore(data->poolSemaphore);
+	}
+
+	if (data->poolSemaphore) {
+		IExec->FreeSysObject(ASOT_SEMAPHORE, data->poolSemaphore);
+	}
 
 	if (data->userport) {
 	   	IExec->FreeSysObject(ASOT_PORT, data->userport);
 	}
 
-	OS4_Close_Libraries(device);
+
+	OS4_CloseLibraries(_this);
+}
+
+static void
+OS4_DeleteDevice(SDL_VideoDevice * device)
+{
+	dprintf("Called\n");
+
+	OS4_FreeSystemResources(device);
+
 	SDL_free(device->driverdata);
 	SDL_free(device);
 }
@@ -190,18 +250,16 @@ OS4_CreateDevice(int devindex)
 	}
 
 	device->driverdata = data;
-	if (!OS4_Open_Libraries(device)) {
-		SDL_free(device);
-		SDL_free(data);
-		SDL_Unsupported();
-		return NULL;
-	}
 
-	if (! (data->userport = IExec->AllocSysObject(ASOT_PORT, 0))) {
+	if (!OS4_AllocSystemResources(device)) {
 		SDL_free(device);
 		SDL_free(data);
 		
-		SDL_SetError("Couldn't allocate message port");
+		/* If we return with NULL, SDL_VideoQuit() can't clean up OS4 stuff. So let's do it now. */
+		OS4_FreeSystemResources(device);
+		
+		SDL_Unsupported();
+
 		return NULL;
 	}
 

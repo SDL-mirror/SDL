@@ -46,6 +46,9 @@ typedef struct
 	struct Screen *			publicScreen;
 
 	struct MsgPort *        userport;
+
+	APTR 					pool;
+	struct SignalSemaphore *poolSemaphore;
 	
 	struct Library			*gfxbase;
 	struct Library			*layersbase;
