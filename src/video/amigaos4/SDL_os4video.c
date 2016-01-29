@@ -187,6 +187,29 @@ OS4_AllocSystemResources(_THIS)
 		return SDL_FALSE;
 	}
 
+	/* inputPort, inputReq and and input.device are created for WarpMouse functionality. (In SDL1
+	they were created in library constructor for an unknown reason) */
+	if (!(data->inputPort = IExec->AllocSysObjectTags(ASOT_PORT, TAG_DONE))) {
+
+		SDL_SetError("Couldn't allocate input port");
+		return SDL_FALSE;
+	}
+
+	if (!(data->inputReq = IExec->AllocSysObjectTags(ASOT_IOREQUEST,
+											 ASOIOR_Size, 		sizeof(struct IOStdReq),
+											 ASOIOR_ReplyPort,	data->inputPort,
+											 TAG_DONE))) {
+
+		SDL_SetError("Couldn't allocate input request");
+		return SDL_FALSE;
+	}
+	
+	if (IExec->OpenDevice("input.device", 0, (struct IORequest *)data->inputReq, 0))
+	{
+		SDL_SetError("Couldn't open input.device");
+		return SDL_FALSE;
+	}
+
 	return SDL_TRUE;
 }
 
@@ -196,6 +219,21 @@ OS4_FreeSystemResources(_THIS)
 	SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
 	
 	dprintf("Called\n");
+
+	if (data->inputReq) {
+		dprintf("Deleting input.device\n");
+		//IExec->AbortIO((struct IORequest *)data->inputReq);
+		//IExec->WaitIO((struct IORequest *)data->inputReq);
+		IExec->CloseDevice((struct IORequest *)data->inputReq);
+		
+		dprintf("Deleting IORequest\n");
+		IExec->FreeSysObject(ASOT_IOREQUEST, (void *)data->inputReq);
+	}
+
+	if (data->inputPort) {
+		dprintf("Deleting MsgPort\n");
+		IExec->FreeSysObject(ASOT_PORT, (void *)data->inputPort);
+	}
 
 	if (data->pool) {
 		//IExec->ObtainSemaphore(data->poolSemaphore);
@@ -210,7 +248,6 @@ OS4_FreeSystemResources(_THIS)
 	if (data->userport) {
 	   	IExec->FreeSysObject(ASOT_PORT, data->userport);
 	}
-
 
 	OS4_CloseLibraries(_this);
 }
@@ -350,6 +387,52 @@ OS4_VideoQuit(_THIS)
 	OS4_QuitModes(_this);
 	OS4_QuitKeyboard(_this);
 	OS4_QuitMouse(_this);
+}
+
+void *
+OS4_SaveAllocPooled(_THIS, uint32 size)
+{
+	SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;	  
+	void *res;
+
+	IExec->ObtainSemaphore(data->poolSemaphore);
+	res = IExec->AllocPooled(data->pool, size);
+	IExec->ReleaseSemaphore(data->poolSemaphore);
+
+	return res;
+}
+
+void *
+OS4_SaveAllocVecPooled(_THIS, uint32 size)
+{
+	SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
+	void *res;
+
+	IExec->ObtainSemaphore(data->poolSemaphore);
+	res = IExec->AllocVecPooled(data->pool, size);
+	IExec->ReleaseSemaphore(data->poolSemaphore);
+
+	return res;
+}
+
+void
+OS4_SaveFreePooled(_THIS, void *mem, uint32 size)
+{
+	SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
+
+	IExec->ObtainSemaphore(data->poolSemaphore);
+	IExec->FreePooled(data->pool, mem, size);
+	IExec->ReleaseSemaphore(data->poolSemaphore);
+}
+
+void
+OS4_SaveFreeVecPooled(_THIS, void *mem)
+{
+	SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
+
+	IExec->ObtainSemaphore(data->poolSemaphore);
+	IExec->FreeVecPooled(data->pool, mem);
+	IExec->ReleaseSemaphore(data->poolSemaphore);
 }
 
 #endif /* SDL_VIDEO_DRIVER_AMIGAOS4 */

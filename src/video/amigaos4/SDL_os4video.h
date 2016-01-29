@@ -43,10 +43,13 @@
 
 typedef struct
 {
-	struct Screen *			publicScreen;
+	struct Screen          *publicScreen;
 
-	struct MsgPort *        userport;
+	struct MsgPort         *userport;
 
+	struct MsgPort         *inputPort;
+	struct IOStdReq        *inputReq;
+	
 	APTR 					pool;
 	struct SignalSemaphore *poolSemaphore;
 	
@@ -82,6 +85,11 @@ typedef struct
 #define IIcon ((SDL_VideoData *) _this->driverdata)->iIcon
 #define IWorkbench ((SDL_VideoData *) _this->driverdata)->iWorkbench
 #define IKeymap ((SDL_VideoData *) _this->driverdata)->iKeymap
+
+extern void * OS4_SaveAllocPooled(_THIS, uint32 size);
+extern void * OS4_SaveAllocVecPooled(_THIS, uint32 size);
+extern void OS4_SaveFreePooled(_THIS, void *mem, uint32 size);
+extern void OS4_SaveFreeVecPooled(_THIS, void *mem);
 
 #endif /* _SDL_os4video_h */
 

@@ -56,8 +56,8 @@ extern void OS4_RaiseWindow(_THIS, SDL_Window * window);
 extern void OS4_SetWindowGrabInternal(_THIS, struct Window * w, BOOL activate);
 extern void OS4_SetWindowGrab(_THIS, SDL_Window * window, SDL_bool grabbed);
 extern void OS4_DestroyWindow(_THIS, SDL_Window * window);
-extern SDL_bool OS4_GetWindowWMInfo(_THIS, SDL_Window * window,
-                                    struct SDL_SysWMinfo *info);
+extern SDL_bool OS4_GetWindowWMInfo(_THIS, SDL_Window * window, struct SDL_SysWMinfo *info);
+
 //extern void OS4_OnWindowEnter(_THIS, SDL_Window * window);
 //extern void OS4_UpdateClipCursor(SDL_Window *window);
 

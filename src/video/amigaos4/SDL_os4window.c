@@ -29,7 +29,7 @@
 #include "../../main/amigaos4/SDL_os4debug.h"
 
 static int
-SetupWindowData(_THIS, SDL_Window * sdlwin, struct Window * syswin, SDL_bool created)
+OS4_SetupWindowData(_THIS, SDL_Window * sdlwin, struct Window * syswin, SDL_bool created)
 {
 	SDL_WindowData *data;
 	
@@ -134,7 +134,7 @@ OS4_CreateWindow(_THIS, SDL_Window * window)
 			-1);
 	}
 
-	if (SetupWindowData(_this, window, syswin, SDL_TRUE) < 0) {
+	if (OS4_SetupWindowData(_this, window, syswin, SDL_TRUE) < 0) {
 		IIntuition->CloseWindow(syswin);
 
 		return SDL_SetError("Failed to setup window data");
@@ -166,7 +166,7 @@ OS4_CreateWindowFrom(_THIS, SDL_Window * window, const void *data)
 		window->title = SDL_strdup(syswin->Title);
 	}
 
-	if (SetupWindowData(_this, window, syswin, SDL_FALSE) < 0) {
+	if (OS4_SetupWindowData(_this, window, syswin, SDL_FALSE) < 0) {
 		return -1;
 	}
 
@@ -248,6 +248,7 @@ OS4_RaiseWindow(_THIS, SDL_Window * window)
 
 	if (data && data->syswin) {
 		IIntuition->WindowToFront(data->syswin);
+		IIntuition->ActivateWindow(data->syswin);
 	}
 }
 
@@ -304,8 +305,7 @@ OS4_DestroyWindow(_THIS, SDL_Window * window)
 }
 
 SDL_bool
-OS4_GetWindowWMInfo(_THIS, SDL_Window * window,
-									struct SDL_SysWMinfo *info)
+OS4_GetWindowWMInfo(_THIS, SDL_Window * window, struct SDL_SysWMinfo *info)
 {
 	struct Window * syswin = ((SDL_WindowData *) window->driverdata)->syswin;
 
