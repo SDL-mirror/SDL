@@ -33,6 +33,9 @@ OS4_GetDisplayMode(_THIS, ULONG id, SDL_DisplayMode * mode)
 	SDL_DisplayModeData *data;
 	APTR handle;
 	struct DimensionInfo diminfo;
+	struct DisplayInfo dispinfo;
+
+	//dprintf("Called\n");
 
 	handle = IGraphics->FindDisplayInfo(id);
 	if (!handle) {
@@ -40,6 +43,12 @@ OS4_GetDisplayMode(_THIS, ULONG id, SDL_DisplayMode * mode)
 	}
 
 	if (!IGraphics->GetDisplayInfoData(handle, (UBYTE *)&diminfo, sizeof(diminfo), DTAG_DIMS, 0)) {
+		dprintf("Failed to get dim info\n");
+		return SDL_FALSE;
+	}
+
+	if (!IGraphics->GetDisplayInfoData(handle, (UBYTE*)&dispinfo, sizeof(dispinfo), DTAG_DISP, 0)) {
+		dprintf("Failed to get disp info\n");
 		return SDL_FALSE;
 	}
 
@@ -55,23 +64,32 @@ OS4_GetDisplayMode(_THIS, ULONG id, SDL_DisplayMode * mode)
 	mode->w = diminfo.Nominal.MaxX - diminfo.Nominal.MinX + 1;
 	mode->h = diminfo.Nominal.MaxY - diminfo.Nominal.MinY + 1;
 	mode->refresh_rate = 60; // grab DTAG_MNTR?
-	switch (diminfo.MaxDepth) {
-	case 32:
-		mode->format = SDL_PIXELFORMAT_RGBA8888; //SDL_PIXELFORMAT_RGB888;
-		break;
-	case 24:
-		mode->format = SDL_PIXELFORMAT_RGB888; // SDL_PIXELFORMAT_RGB24;
-		break;
-	case 16:
-		mode->format = SDL_PIXELFORMAT_RGB565;
-		break;
-	case 15:
-		mode->format = SDL_PIXELFORMAT_RGB555;
-		break;
-	case 8:
-		mode->format = SDL_PIXELFORMAT_INDEX8;
-		break;
+	mode->format = SDL_PIXELFORMAT_UNKNOWN;
+
+	// We are only interested in RTG modes
+	if (dispinfo.PropertyFlags & DIPF_IS_RTG) {
+
+		dprintf("RTG mode %d: w=%d, h=%d, bits=%d\n", id, mode->w, mode->h, diminfo.MaxDepth);
+
+		switch (diminfo.MaxDepth) {
+		case 32:
+			mode->format = SDL_PIXELFORMAT_RGBA8888; //SDL_PIXELFORMAT_RGB888;
+			break;
+		case 24:
+			mode->format = SDL_PIXELFORMAT_RGB888; // SDL_PIXELFORMAT_RGB24;
+			break;
+		case 16:
+			mode->format = SDL_PIXELFORMAT_RGB565;
+			break;
+		case 15:
+			mode->format = SDL_PIXELFORMAT_RGB555;
+			break;
+		case 8:
+			mode->format = SDL_PIXELFORMAT_INDEX8;
+			break;
+		}
 	}
+
 	mode->driverdata = data;
 
 	return SDL_TRUE;
@@ -86,6 +104,8 @@ OS4_InitModes(_THIS)
 	SDL_DisplayData *displaydata;
 	ULONG modeid;
 
+	dprintf("Called\n");
+
 	displaydata = (SDL_DisplayData *) SDL_malloc(sizeof(*displaydata));
 	if (!displaydata) {
 		return SDL_OutOfMemory();
@@ -98,7 +118,11 @@ OS4_InitModes(_THIS)
 	}
 
 	IIntuition->GetScreenAttrs(data->publicScreen, SA_DisplayID, &modeid, TAG_DONE);
-	OS4_GetDisplayMode(_this, modeid, &current_mode);
+	if (!OS4_GetDisplayMode(_this, modeid, &current_mode)) {
+		dprintf("Failed to get display mode for %d\n", modeid);
+		SDL_free(displaydata);
+		return SDL_SetError("Couldn't get display mode\n");
+	}
 
 	/* OS4 has no multi-monitor support */
 	SDL_zero(display);
@@ -117,6 +141,8 @@ OS4_GetDisplayBounds(_THIS, SDL_VideoDisplay * display, SDL_Rect * rect)
 {
 	SDL_DisplayModeData *data = (SDL_DisplayModeData *) display->current_mode.driverdata;
 
+	dprintf("Called\n");
+
 	rect->x = data->x;
 	rect->y = data->y;
 	rect->w = display->current_mode.w;
@@ -132,15 +158,36 @@ OS4_GetDisplayModes(_THIS, SDL_VideoDisplay * display)
 	SDL_DisplayMode mode;
 	ULONG id = INVALID_ID;
 
+	dprintf("Called\n");
+
 	while ((id = IGraphics->NextDisplayInfo(id)) != INVALID_ID) {
-		OS4_GetDisplayMode(_this, id, &mode);
-		if (mode.format != SDL_PIXELFORMAT_UNKNOWN) {
-			if (!SDL_AddDisplayMode(display, &mode)) {
+		
+		if (OS4_GetDisplayMode(_this, id, &mode)) {
+			if (mode.format != SDL_PIXELFORMAT_UNKNOWN) {
+				if (!SDL_AddDisplayMode(display, &mode)) {
+					SDL_free(mode.driverdata);
+				}
+			} else {
 				SDL_free(mode.driverdata);
 			}
 		} else {
-			SDL_free(mode.driverdata);
+			dprintf("Failed to get display mode for %d\n", id);
 		}
+	}
+}
+
+void
+OS4_CloseScreenInternal(_THIS, struct Screen *screen)
+{
+	if (screen) {
+		dprintf("Close screen %p\n", screen);
+
+		if (IIntuition->CloseScreen(screen) == FALSE) {
+    		dprintf("Screen has open window(s)\n");
+		}
+
+	} else {
+		dprintf("NULL pointer\n");
 	}
 }
 
@@ -150,11 +197,28 @@ OS4_SetDisplayMode(_THIS, SDL_VideoDisplay * display, SDL_DisplayMode * mode)
 	SDL_DisplayData *displaydata = (SDL_DisplayData *) display->driverdata;
 	SDL_DisplayModeData *data = (SDL_DisplayModeData *) mode->driverdata;
 	ULONG openError = 0;
+	int bpp = SDL_BITSPERPIXEL(mode->format);
+
+	if (displaydata->screen) {
+		OS4_CloseScreenInternal(_this, displaydata->screen);
+		displaydata->screen = NULL;
+	}
+
+	if (SDL_memcmp(mode, &display->desktop_mode, sizeof(SDL_DisplayMode)) == 0)
+	{
+		// Don't create another "Workbench"
+		dprintf("Desktop mode passed\n");
+		
+		//TODO: should we check the current display ID and reopen the screen when needed?
+		return 0;
+	}
+
+	dprintf("Opening screen id %d: %d*%d*%d\n", data->modeid, mode->w, mode->h, bpp);
 
 	displaydata->screen = IIntuition->OpenScreenTags(NULL,
 		SA_Width, 		mode->w,
 		SA_Height,		mode->h,
-		SA_Depth,		8,
+		SA_Depth,		bpp,
 		SA_DisplayID,	data->modeid,
 		SA_Quiet,		TRUE,
 		SA_ShowTitle,	FALSE,
@@ -196,6 +260,9 @@ void
 OS4_QuitModes(_THIS)
 {
 	SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
+
+	dprintf("Called\n");
+	
 	IIntuition->UnlockPubScreen(NULL, data->publicScreen);
 }
 

@@ -49,7 +49,7 @@ extern void OS4_RaiseWindow(_THIS, SDL_Window * window);
 //extern void OS4_MinimizeWindow(_THIS, SDL_Window * window);
 //extern void OS4_RestoreWindow(_THIS, SDL_Window * window);
 //extern void OS4_SetWindowBordered(_THIS, SDL_Window * window, SDL_bool bordered);
-//extern void OS4_SetWindowFullscreen(_THIS, SDL_Window * window, SDL_VideoDisplay * display, SDL_bool fullscreen);
+extern void OS4_SetWindowFullscreen(_THIS, SDL_Window * window, SDL_VideoDisplay * display, SDL_bool fullscreen);
 //extern int OS4_SetWindowGammaRamp(_THIS, SDL_Window * window, const Uint16 * ramp);
 //extern int OS4_GetWindowGammaRamp(_THIS, SDL_Window * window, Uint16 * ramp);
 

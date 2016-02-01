@@ -28,7 +28,7 @@
 #include "../../events/SDL_mouse_c.h"
 #include "../../events/SDL_windowevents_c.h"
 
-#define DEBUG
+//#define DEBUG
 #include "../../main/amigaos4/SDL_os4debug.h"
 
 struct MyIntuiMessage
@@ -270,7 +270,7 @@ OS4_HandleTicks(_THIS, struct MyIntuiMessage *imsg)
 			
 			SDL_WindowData *data = sdlwin->driverdata;
 
-			dprintf("Window 0x%p ticks %d\n", imsg->IDCMPWindow, data->pointerGrabTicks);
+			dprintf("Window %p ticks %d\n", imsg->IDCMPWindow, data->pointerGrabTicks);
 
 			// Re-grab the window after our ticks have passed
 			if (++data->pointerGrabTicks >= POINTER_GRAB_TIMEOUT) {

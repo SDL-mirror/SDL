@@ -28,6 +28,8 @@
 #define DEBUG
 #include "../../main/amigaos4/SDL_os4debug.h"
 
+static void OS4_CloseWindowInternal(_THIS, struct Window *window);
+
 static int
 OS4_SetupWindowData(_THIS, SDL_Window * sdlwin, struct Window * syswin, SDL_bool created)
 {
@@ -48,12 +50,12 @@ OS4_SetupWindowData(_THIS, SDL_Window * sdlwin, struct Window * syswin, SDL_bool
 	return 0;
 }
 
-int
-OS4_CreateWindow(_THIS, SDL_Window * window)
+static struct Window *
+OS4_CreateWindowInternal(_THIS, SDL_Window *window, SDL_VideoDisplay *display)
 {
 	SDL_VideoData *videodata = (SDL_VideoData *) _this->driverdata;
-	
-	struct Window   * syswin;
+	struct Window * syswin;
+	struct Screen * screen;
 
 	uint32 windowFlags = WFLG_REPORTMOUSE | WFLG_RMBTRAP;
 
@@ -61,16 +63,15 @@ OS4_CreateWindow(_THIS, SDL_Window * window)
 					   | IDCMP_DELTAMOVE | IDCMP_RAWKEY | IDCMP_ACTIVEWINDOW
 					   | IDCMP_INACTIVEWINDOW | IDCMP_INTUITICKS
 					   | IDCMP_EXTENDEDMOUSE;
-	
+
 	uint32 windowX;
 	uint32 windowY;
 
 	dprintf("Called\n");
 
-	if (window->flags & SDL_WINDOW_FULLSCREEN) {
-	    // TODO: fullscreen
+	if (/*window->flags & SDL_WINDOW_FULLSCREEN*/display) {
 		windowFlags |= WFLG_BORDERLESS | WFLG_SIMPLE_REFRESH | WFLG_BACKDROP;
-		
+
 		windowX = 0;
 		windowY = 0;
 
@@ -91,7 +92,7 @@ OS4_CreateWindow(_THIS, SDL_Window * window)
 
 		if (window->flags & SDL_WINDOW_RESIZABLE) {
 			windowFlags |= WFLG_SIZEGADGET | WFLG_SIZEBBOTTOM;
-			
+
 			IDCMPFlags  |= IDCMP_SIZEVERIFY;
 		}
 	}
@@ -99,9 +100,19 @@ OS4_CreateWindow(_THIS, SDL_Window * window)
 	dprintf("Trying to open window '%s' at (%d,%d) of size (%dx%d)\n",
 		window->title, windowX, windowY, window->w, window->h);
 
+	if (display) {
+        SDL_DisplayData *displaydata = (SDL_DisplayData *) display->driverdata;
+		
+		dprintf("Fullscreen\n");
+		screen = displaydata->screen;
+	} else {
+		dprintf("Window mode\n");
+		screen = videodata->publicScreen;
+	}
+
 	syswin = IIntuition->OpenWindowTags(
 		NULL,
-		WA_PubScreen, videodata->publicScreen,
+		WA_PubScreen, screen,
 		WA_Title, window->title,
 		WA_ScreenTitle, window->title,
 		WA_Left, windowX,
@@ -115,29 +126,24 @@ OS4_CreateWindow(_THIS, SDL_Window * window)
 		WA_UserPort, videodata->userport,
 		TAG_DONE);
 
-	if (!syswin) {		  
-		return SDL_SetError("Couldn't create window");
+	if (!syswin) {
+		dprintf("Couldn't create window\n");
+		return NULL;
 	}
 
 	if (window->flags & SDL_WINDOW_RESIZABLE) {
-		
+
 		/* If this window is resizable, reset window size limits
 	 	 * so that the user can actually resize it.
 		 *
 		 * What's a useful minimum size, anyway?
 		 */
-		
+
 		IIntuition->WindowLimits(syswin,
 			syswin->BorderLeft + syswin->BorderRight + 100,
 			syswin->BorderTop + syswin->BorderBottom + 100,
 			-1,
 			-1);
-	}
-
-	if (OS4_SetupWindowData(_this, window, syswin, SDL_TRUE) < 0) {
-		IIntuition->CloseWindow(syswin);
-
-		return SDL_SetError("Failed to setup window data");
 	}
 
 	// TODO: OpenGL context
@@ -146,14 +152,39 @@ OS4_CreateWindow(_THIS, SDL_Window * window)
 	}
 
 	if (window->flags & SDL_WINDOW_FULLSCREEN) {
-		//IIntuition->ScreenToFront(screen);
+		IIntuition->ScreenToFront(screen);
 	}
 
 	IIntuition->ActivateWindow(syswin);
 
-	return 0;
+	return syswin;
 }
 
+int
+OS4_CreateWindow(_THIS, SDL_Window * window)
+{	 
+	struct Window *syswin = NULL;
+
+	if (window->flags & SDL_WINDOW_FULLSCREEN) {
+		// We may not have the screen opened yet, so let's wait that SDL calls us back with
+		// SDL_SetWindowFullscreen() and open the window then.
+		dprintf("Open fullscreen window with delay\n");
+	} else {
+		if (!(syswin = OS4_CreateWindowInternal(_this, window, NULL))) {
+			return SDL_SetError("Failed to create system window");
+	    }
+	}
+
+	if (OS4_SetupWindowData(_this, window, syswin, SDL_TRUE) < 0) {
+		if (syswin) {
+			OS4_CloseWindowInternal(_this, syswin);
+		}
+
+		return SDL_SetError("Failed to setup window data");
+	}
+
+	return 0;
+}
 
 int
 OS4_CreateWindowFrom(_THIS, SDL_Window * window, const void *data)
@@ -252,21 +283,65 @@ OS4_RaiseWindow(_THIS, SDL_Window * window)
 	}
 }
 
+static void
+OS4_CloseWindowInternal(_THIS, struct Window *window)
+{
+	if (window) {
+		dprintf("Closing window '%s'\n", window->Title);
+		IIntuition->CloseWindow(window);
+	} else {
+		dprintf("NULL pointer\n");
+	}
+}
+
+void OS4_SetWindowFullscreen(_THIS, SDL_Window * window, SDL_VideoDisplay * display, SDL_bool fullscreen)
+{
+    if (window->is_destroying) {
+		// This function gets also called during window closing
+		dprintf("Window '%s' is being destroyed, mode change ignored\n", window->title);
+	} else {
+	    SDL_WindowData *data = window->driverdata;
+		
+		if (data->syswin) {
+		    dprintf("Reopening window '%s' due to mode change\n", window->title);
+
+		    OS4_CloseWindowInternal(_this, data->syswin);
+		} else {
+			dprintf("No system window yet, let's open one\n");
+		}
+
+		if (!fullscreen) {
+			SDL_DisplayData * displayData = display->driverdata;
+
+			if (displayData->screen) {
+				OS4_CloseScreenInternal(_this, displayData->screen);
+				displayData->screen = NULL;
+		    }
+
+			display = NULL;
+		}
+
+	    data->syswin = OS4_CreateWindowInternal(_this, window, display);
+	}
+}
+
 /* This may be called from os4events.c, too */
 void
 OS4_SetWindowGrabInternal(_THIS, struct Window * w, BOOL activate)
 {
-	struct IBox grabBox = {
-		w->BorderLeft,
-		w->BorderTop,
-		w->Width  - w->BorderLeft - w->BorderRight,
-		w->Height - w->BorderTop  - w->BorderBottom
-	};
+	if (w) {
+		struct IBox grabBox = {
+			w->BorderLeft,
+			w->BorderTop,
+			w->Width  - w->BorderLeft - w->BorderRight,
+			w->Height - w->BorderTop  - w->BorderBottom
+		};
 
-	IIntuition->SetWindowAttrs(w, WA_MouseLimits, &grabBox, sizeof(grabBox));
-	IIntuition->SetWindowAttrs(w, WA_GrabFocus, activate ? POINTER_GRAB_TIMEOUT : 0, sizeof(ULONG));
+		IIntuition->SetWindowAttrs(w, WA_MouseLimits, &grabBox, sizeof(grabBox));
+		IIntuition->SetWindowAttrs(w, WA_GrabFocus, activate ? POINTER_GRAB_TIMEOUT : 0, sizeof(ULONG));
 
-	dprintf("Window 0x%p input was %s\n", w, (activate == TRUE) ? "grabbed" : "released");
+		dprintf("Window %p input was %s\n", w, (activate == TRUE) ? "grabbed" : "released");
+	}
 }
 
 void
@@ -285,18 +360,22 @@ OS4_DestroyWindow(_THIS, SDL_Window * window)
 {
 	SDL_WindowData *data = window->driverdata;
 
-	dprintf("Called\n");
+	dprintf("Called for '%s'\n", window->title);
 
 	if (data) {
 		if (data->created && data->syswin) {
-			IIntuition->CloseWindow(data->syswin);
+			SDL_VideoData *videodata = (SDL_VideoData *) _this->driverdata;
+			
+			struct Screen *screen = data->syswin->WScreen;
+
+			OS4_CloseWindowInternal(_this, data->syswin);
+
+			if (screen != videodata->publicScreen) {
+				OS4_CloseScreenInternal(_this, screen);
+		    }
 		}
 
 		SDL_free(data);
-	}
-
-	if (window->flags & SDL_WINDOW_FULLSCREEN) {
-		// TODO:fullscreen
 	}
 
 	if (window->flags & SDL_WINDOW_OPENGL) {

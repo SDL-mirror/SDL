@@ -41,6 +41,8 @@ extern void OS4_GetDisplayModes(_THIS, SDL_VideoDisplay * display);
 extern int OS4_SetDisplayMode(_THIS, SDL_VideoDisplay * display, SDL_DisplayMode * mode);
 extern void OS4_QuitModes(_THIS);
 
+extern void OS4_CloseScreenInternal(_THIS, struct Screen *screen);
+
 #endif /* _SDL_os4modes_h */
 
 /* vi: set ts=4 sw=4 expandtab: */

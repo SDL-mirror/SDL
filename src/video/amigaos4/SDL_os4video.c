@@ -24,6 +24,8 @@
 
 #include "SDL_video.h"
 #include "SDL_mouse.h"
+#include "SDL_hints.h"
+
 #include "../SDL_sysvideo.h"
 #include "../SDL_pixels_c.h"
 #include "../../events/SDL_events_c.h"
@@ -321,7 +323,7 @@ OS4_CreateDevice(int devindex)
 	//device->MinimizeWindow = OS4_MinimizeWindow;
 	//device->RestoreWindow = OS4_RestoreWindow;
 	//device->SetWindowBordered = OS4_SetWindowBordered;
-	//device->SetWindowFullscreen = OS4_SetWindowFullscreen;
+	device->SetWindowFullscreen = OS4_SetWindowFullscreen;
 	//device->SetWindowGammaRamp = OS4_SetWindowGammaRamp;
 	//device->GetWindowGammaRamp = OS4_GetWindowGammaRamp;
 	device->SetWindowGrab = OS4_SetWindowGrab;
@@ -375,6 +377,9 @@ OS4_VideoInit(_THIS)
 
 	OS4_InitKeyboard(_this);
 	OS4_InitMouse(_this);
+
+	// We don't want SDL to change  window setup in SDL_OnWindowFocusLost()
+	SDL_SetHint(SDL_HINT_VIDEO_MINIMIZE_ON_FOCUS_LOSS, "0");
 
 	return 0;
 }

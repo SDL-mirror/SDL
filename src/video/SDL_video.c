@@ -1182,8 +1182,15 @@ SDL_UpdateFullscreenMode(SDL_Window * window, SDL_bool fullscreen)
     window->last_fullscreen_flags = window->flags;
 }
 
-#define CREATE_FLAGS \
-    (SDL_WINDOW_OPENGL | SDL_WINDOW_BORDERLESS | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI)
+#ifdef __AMIGAOS4__
+	/* Without this hack, SDL would trigger us to open a window before screen which causes unnecessary
+	work, because then we would have to close the window first and re-open it on the custom screen */
+	#define CREATE_FLAGS \
+		(SDL_WINDOW_OPENGL | SDL_WINDOW_BORDERLESS | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_FULLSCREEN)
+#else
+	#define CREATE_FLAGS \
+		(SDL_WINDOW_OPENGL | SDL_WINDOW_BORDERLESS | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI)
+#endif
 
 static void
 SDL_FinishWindowCreation(SDL_Window *window, Uint32 flags)
