@@ -34,6 +34,7 @@
 #include "SDL_os4events.h"
 #include "SDL_os4framebuffer.h"
 #include "SDL_os4mouse.h"
+#include "SDL_os4opengl.h"
 
 #define DEBUG
 #include "../../main/amigaos4/SDL_os4debug.h"
@@ -58,6 +59,7 @@ OS4_Available(void)
 
 #define MIN_LIB_VERSION 51
 
+//TODO: add proper error messages, wrap OpenLibrary?
 static SDL_bool
 OS4_OpenLibraries(_THIS)
 {
@@ -70,9 +72,15 @@ OS4_OpenLibraries(_THIS)
 	IconBase      = IExec->OpenLibrary("icon.library", MIN_LIB_VERSION);
 	WorkbenchBase = IExec->OpenLibrary("workbench.library", MIN_LIB_VERSION);
 	KeymapBase    = IExec->OpenLibrary("keymap.library", MIN_LIB_VERSION);
+	MiniGLBase    = IExec->OpenLibrary("minigl.library", 0);
 
 	if (!GfxBase || !LayersBase || /*!P96Base ||*/ !IntuitionBase || !IconBase || !WorkbenchBase || !KeymapBase)
 		return SDL_FALSE;
+
+	if (!MiniGLBase) {
+		dprintf("Failed to open minigl.library\n");
+		_this->gl_config.driver_loaded = 0;
+	}
 
 	IGraphics  = (struct GraphicsIFace *)  IExec->GetInterface(GfxBase, "main", 1, NULL);
 	ILayers    = (struct LayersIFace *)    IExec->GetInterface(LayersBase, "main", 1, NULL);
@@ -81,9 +89,18 @@ OS4_OpenLibraries(_THIS)
 	IIcon      = (struct IconIFace *)      IExec->GetInterface(IconBase, "main", 1, NULL);
 	IWorkbench = (struct WorkbenchIFace *) IExec->GetInterface(WorkbenchBase, "main", 1, NULL);
 	IKeymap    = (struct KeymapIFace *)    IExec->GetInterface(KeymapBase, "main", 1, NULL);
+	IMiniGL	   = (struct MiniGLIFace *)    IExec->GetInterface(MiniGLBase, "main", 1, NULL);
 
 	if (!IGraphics || !ILayers || /*!IP96 ||*/ !IIntuition || !IIcon || !IWorkbench || !IKeymap)
 		return SDL_FALSE;
+
+	if (!IMiniGL) {
+		dprintf("Failed to open MiniGL interace\n");
+        _this->gl_config.driver_loaded = 0;
+	} else {
+		dprintf("MiniGL opened\n");
+		_this->gl_config.driver_loaded = 1;
+	}
 
 	return SDL_TRUE;
 }
@@ -92,6 +109,11 @@ static void
 OS4_CloseLibraries(_THIS)
 {
 	dprintf("Called\n");
+
+	if (IMiniGL) {
+		IExec->DropInterface((struct Interface *) IMiniGL);
+		IMiniGL = NULL;
+	}
 
 	if (IKeymap) {
 		IExec->DropInterface((struct Interface *) IKeymap);
@@ -122,6 +144,11 @@ OS4_CloseLibraries(_THIS)
 	if (IGraphics) {
 		IExec->DropInterface((struct Interface *) IGraphics);
 		IGraphics = NULL;
+	}
+
+	if (MiniGLBase) {
+		IExec->CloseLibrary(MiniGLBase);
+		MiniGLBase = NULL;
 	}
 
 	if (KeymapBase) {
@@ -337,16 +364,16 @@ OS4_CreateDevice(int devindex)
 
 	device->GetWindowWMInfo = OS4_GetWindowWMInfo;
 
-	//device->GL_LoadLibrary = OS4_GL_LoadLibrary;
-	//device->GL_GetProcAddress = OS4_GL_GetProcAddress;
-	//device->GL_UnloadLibrary = OS4_GL_UnloadLibrary;
-	//device->GL_CreateContext = OS4_GL_CreateContext;
-	//device->GL_MakeCurrent = OS4_GL_MakeCurrent;
-	//device->GL_GetDrawableSize = OS4_GL_GetDrawableSize;
-	//device->GL_SetSwapInterval = OS4_GL_SetSwapInterval;
-	//device->GL_GetSwapInterval = OS4_GL_GetSwapInterval;
-	//device->GL_SwapWindow = OS4_GL_SwapWindow;
-	//device->GL_DeleteContext = OS4_GL_DeleteContext;
+	device->GL_LoadLibrary = OS4_GL_LoadLibrary;
+	device->GL_GetProcAddress = OS4_GL_GetProcAddress;
+	device->GL_UnloadLibrary = OS4_GL_UnloadLibrary;
+	device->GL_CreateContext = OS4_GL_CreateContext;
+	device->GL_MakeCurrent = OS4_GL_MakeCurrent;
+	device->GL_GetDrawableSize = OS4_GL_GetDrawableSize;
+	device->GL_SetSwapInterval = OS4_GL_SetSwapInterval;
+	device->GL_GetSwapInterval = OS4_GL_GetSwapInterval;
+	device->GL_SwapWindow = OS4_GL_SwapWindow;
+	device->GL_DeleteContext = OS4_GL_DeleteContext;
 
 	device->PumpEvents = OS4_PumpEvents;
 	//device->SuspendScreenSaver = OS4_SuspendScreenSaver;
@@ -421,7 +448,7 @@ OS4_SaveAllocVecPooled(_THIS, uint32 size)
 }
 
 void
-OS4_SaveFreePooled(_THIS, void *mem, uint32 size)
+OS4_SaveFreePooled(_THIS, void * mem, uint32 size)
 {
 	SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
 
@@ -431,7 +458,7 @@ OS4_SaveFreePooled(_THIS, void *mem, uint32 size)
 }
 
 void
-OS4_SaveFreeVecPooled(_THIS, void *mem)
+OS4_SaveFreeVecPooled(_THIS, void * mem)
 {
 	SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
 

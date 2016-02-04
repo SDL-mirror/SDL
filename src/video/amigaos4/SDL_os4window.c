@@ -28,7 +28,7 @@
 #define DEBUG
 #include "../../main/amigaos4/SDL_os4debug.h"
 
-static void OS4_CloseWindowInternal(_THIS, struct Window *window);
+static void OS4_CloseWindowInternal(_THIS, struct Window * window);
 
 static int
 OS4_SetupWindowData(_THIS, SDL_Window * sdlwin, struct Window * syswin, SDL_bool created)
@@ -51,11 +51,11 @@ OS4_SetupWindowData(_THIS, SDL_Window * sdlwin, struct Window * syswin, SDL_bool
 }
 
 static struct Window *
-OS4_CreateWindowInternal(_THIS, SDL_Window *window, SDL_VideoDisplay *display)
+OS4_CreateWindowInternal(_THIS, SDL_Window * window, SDL_VideoDisplay * display)
 {
 	SDL_VideoData *videodata = (SDL_VideoData *) _this->driverdata;
-	struct Window * syswin;
-	struct Screen * screen;
+	struct Window *syswin;
+	struct Screen *screen;
 
 	uint32 windowFlags = WFLG_REPORTMOUSE | WFLG_RMBTRAP;
 
@@ -69,7 +69,7 @@ OS4_CreateWindowInternal(_THIS, SDL_Window *window, SDL_VideoDisplay *display)
 
 	dprintf("Called\n");
 
-	if (/*window->flags & SDL_WINDOW_FULLSCREEN*/display) {
+	if (/*window->flags & SDL_WINDOW_FULLSCREEN*/ display) {
 		windowFlags |= WFLG_BORDERLESS | WFLG_SIMPLE_REFRESH | WFLG_BACKDROP;
 
 		windowX = 0;
@@ -187,7 +187,7 @@ OS4_CreateWindow(_THIS, SDL_Window * window)
 }
 
 int
-OS4_CreateWindowFrom(_THIS, SDL_Window * window, const void *data)
+OS4_CreateWindowFrom(_THIS, SDL_Window * window, const void * data)
 {
 	struct Window *syswin = (struct Window *) data;
 
@@ -284,7 +284,7 @@ OS4_RaiseWindow(_THIS, SDL_Window * window)
 }
 
 static void
-OS4_CloseWindowInternal(_THIS, struct Window *window)
+OS4_CloseWindowInternal(_THIS, struct Window * window)
 {
 	if (window) {
 		dprintf("Closing window '%s'\n", window->Title);
@@ -307,7 +307,7 @@ void OS4_SetWindowFullscreen(_THIS, SDL_Window * window, SDL_VideoDisplay * disp
 
 		    OS4_CloseWindowInternal(_this, data->syswin);
 		} else {
-			dprintf("No system window yet, let's open one\n");
+			dprintf("System window doesn't exist yet, let's open it\n");
 		}
 
 		if (!fullscreen) {
@@ -375,6 +375,18 @@ OS4_DestroyWindow(_THIS, SDL_Window * window)
 		    }
 		}
 
+		// TODO: check does SDL delete possible SW framebuffer automatically?
+
+		if (data->glFrontBuffer) {
+			IGraphics->FreeBitMap(data->glFrontBuffer);
+			data->glFrontBuffer = NULL;
+		}
+
+		if (data->glBackBuffer) {
+			IGraphics->FreeBitMap(data->glBackBuffer);
+			data->glBackBuffer = NULL;
+		}
+
 		SDL_free(data);
 	}
 
@@ -384,9 +396,9 @@ OS4_DestroyWindow(_THIS, SDL_Window * window)
 }
 
 SDL_bool
-OS4_GetWindowWMInfo(_THIS, SDL_Window * window, struct SDL_SysWMinfo *info)
+OS4_GetWindowWMInfo(_THIS, SDL_Window * window, struct SDL_SysWMinfo * info)
 {
-	struct Window * syswin = ((SDL_WindowData *) window->driverdata)->syswin;
+	struct Window *syswin = ((SDL_WindowData *) window->driverdata)->syswin;
 
 	dprintf("Called\n");
 

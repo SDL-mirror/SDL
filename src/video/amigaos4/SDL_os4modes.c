@@ -35,8 +35,6 @@ OS4_GetDisplayMode(_THIS, ULONG id, SDL_DisplayMode * mode)
 	struct DimensionInfo diminfo;
 	struct DisplayInfo dispinfo;
 
-	//dprintf("Called\n");
-
 	handle = IGraphics->FindDisplayInfo(id);
 	if (!handle) {
 		return SDL_FALSE;
@@ -47,7 +45,7 @@ OS4_GetDisplayMode(_THIS, ULONG id, SDL_DisplayMode * mode)
 		return SDL_FALSE;
 	}
 
-	if (!IGraphics->GetDisplayInfoData(handle, (UBYTE*)&dispinfo, sizeof(dispinfo), DTAG_DISP, 0)) {
+	if (!IGraphics->GetDisplayInfoData(handle, (UBYTE *)&dispinfo, sizeof(dispinfo), DTAG_DISP, 0)) {
 		dprintf("Failed to get disp info\n");
 		return SDL_FALSE;
 	}
@@ -177,7 +175,7 @@ OS4_GetDisplayModes(_THIS, SDL_VideoDisplay * display)
 }
 
 void
-OS4_CloseScreenInternal(_THIS, struct Screen *screen)
+OS4_CloseScreenInternal(_THIS, struct Screen * screen)
 {
 	if (screen) {
 		dprintf("Close screen %p\n", screen);
@@ -199,11 +197,6 @@ OS4_SetDisplayMode(_THIS, SDL_VideoDisplay * display, SDL_DisplayMode * mode)
 	ULONG openError = 0;
 	int bpp = SDL_BITSPERPIXEL(mode->format);
 
-	if (displaydata->screen) {
-		OS4_CloseScreenInternal(_this, displaydata->screen);
-		displaydata->screen = NULL;
-	}
-
 	if (SDL_memcmp(mode, &display->desktop_mode, sizeof(SDL_DisplayMode)) == 0)
 	{
 		// Don't create another "Workbench"
@@ -211,6 +204,11 @@ OS4_SetDisplayMode(_THIS, SDL_VideoDisplay * display, SDL_DisplayMode * mode)
 		
 		//TODO: should we check the current display ID and reopen the screen when needed?
 		return 0;
+	}
+
+	if (displaydata->screen) {
+		OS4_CloseScreenInternal(_this, displaydata->screen);
+		displaydata->screen = NULL;
 	}
 
 	dprintf("Opening screen id %d: %d*%d*%d\n", data->modeid, mode->w, mode->h, bpp);

@@ -33,6 +33,11 @@ typedef struct
 	struct BitMap   * bitmap;
 	struct MsgPort  * userport;
 	Uint32            pointerGrabTicks;
+
+	struct GLContextIFace *IGL;
+	struct BitMap   * glFrontBuffer;
+	struct BitMap   * glBackBuffer;
+
 } SDL_WindowData;
 
 
