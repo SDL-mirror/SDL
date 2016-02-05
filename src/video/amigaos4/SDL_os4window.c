@@ -377,15 +377,7 @@ OS4_DestroyWindow(_THIS, SDL_Window * window)
 
 		// TODO: check does SDL delete possible SW framebuffer automatically?
 
-		if (data->glFrontBuffer) {
-			IGraphics->FreeBitMap(data->glFrontBuffer);
-			data->glFrontBuffer = NULL;
-		}
-
-		if (data->glBackBuffer) {
-			IGraphics->FreeBitMap(data->glBackBuffer);
-			data->glBackBuffer = NULL;
-		}
+		OS4_GL_FreeBuffers(_this, data);
 
 		SDL_free(data);
 	}

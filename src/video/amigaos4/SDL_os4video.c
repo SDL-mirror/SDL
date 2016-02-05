@@ -79,7 +79,6 @@ OS4_OpenLibraries(_THIS)
 
 	if (!MiniGLBase) {
 		dprintf("Failed to open minigl.library\n");
-		_this->gl_config.driver_loaded = 0;
 	}
 
 	IGraphics  = (struct GraphicsIFace *)  IExec->GetInterface(GfxBase, "main", 1, NULL);
@@ -96,10 +95,8 @@ OS4_OpenLibraries(_THIS)
 
 	if (!IMiniGL) {
 		dprintf("Failed to open MiniGL interace\n");
-        _this->gl_config.driver_loaded = 0;
 	} else {
 		dprintf("MiniGL opened\n");
-		_this->gl_config.driver_loaded = 1;
 	}
 
 	return SDL_TRUE;
@@ -407,6 +404,10 @@ OS4_VideoInit(_THIS)
 
 	// We don't want SDL to change  window setup in SDL_OnWindowFocusLost()
 	SDL_SetHint(SDL_HINT_VIDEO_MINIMIZE_ON_FOCUS_LOSS, "0");
+
+	if (IMiniGL) {
+        _this->gl_config.driver_loaded = 1;
+	}
 
 	return 0;
 }

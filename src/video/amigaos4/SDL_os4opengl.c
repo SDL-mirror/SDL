@@ -45,7 +45,7 @@ void *AmiGetGLProc(const char *proc);
 
 int OS4_GL_LoadLibrary(_THIS, const char *path)
 {
-	dprintf("Called\n");
+	dprintf("Called %d\n", _this->gl_config.driver_loaded);
 
 	// MiniGL was loaded during CreateDevice(), so we don't have to anything here
 
@@ -107,6 +107,21 @@ static SDL_bool OS4_GL_AllocateBuffers(_THIS, int width, int height, int depth, 
 	return SDL_TRUE;
 }
 
+void OS4_GL_FreeBuffers(_THIS, SDL_WindowData * data)
+{
+	dprintf("Called\n");
+
+	if (data->glFrontBuffer) {
+		IGraphics->FreeBitMap(data->glFrontBuffer);
+		data->glFrontBuffer = NULL;
+	}
+
+	if (data->glBackBuffer) {
+		IGraphics->FreeBitMap(data->glBackBuffer);
+		data->glBackBuffer = NULL;
+	}
+}
+
 // TODO: what about resizable windows? Does SDL ask us for a new context?
 
 SDL_GLContext OS4_GL_CreateContext(_THIS, SDL_Window * window)
@@ -127,6 +142,15 @@ SDL_GLContext OS4_GL_CreateContext(_THIS, SDL_Window * window)
         int depth = 16; // TODO: should we read this from screen?
 
 		SDL_WindowData * data = window->driverdata;
+
+		if (data->IGL) {
+			dprintf("Old context %p found\n", data->IGL);
+
+			data->IGL->DeleteContext();
+			data->IGL = NULL;
+
+			OS4_GL_FreeBuffers(_this, data);
+		}
 
 		IIntuition->GetWindowAttrs(
 						data->syswin,
@@ -167,11 +191,7 @@ SDL_GLContext OS4_GL_CreateContext(_THIS, SDL_Window * window)
 
 			_this->gl_config.driver_loaded = 0;
 
-			IGraphics->FreeBitMap(data->glFrontBuffer);
-			IGraphics->FreeBitMap(data->glBackBuffer);
-
-			data->glFrontBuffer = NULL;
-			data->glBackBuffer = NULL;
+			OS4_GL_FreeBuffers(_this, data);
 
 			return NULL;
 		}
@@ -269,7 +289,8 @@ void OS4_GL_SwapWindow(_THIS, SDL_Window * window)
 
 		IIntuition->GetWindowAttrs(data->syswin, WA_InnerWidth, &w, WA_InnerHeight, &h, TAG_DONE);
 
-		data->IGL->MGLWaitGL(); /* besure all has finished before we start blitting (testing to find lockup cause */
+		/* besure all has finished before we start blitting (testing to find lockup cause) */
+		data->IGL->MGLWaitGL(); // TODO: still needed?
 
 		glGetIntegerv(GL_DRAW_BUFFER, &buf);
 
