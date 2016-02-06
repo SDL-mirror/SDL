@@ -206,7 +206,8 @@ OS4_AllocSystemResources(_THIS)
 	if (!(data->pool = IExec->AllocSysObjectTags(ASOT_MEMPOOL,
 		ASOPOOL_MFlags,    MEMF_SHARED,
 		ASOPOOL_Threshold, 16384,
-	    ASOPOOL_Puddle,    16384,
+		ASOPOOL_Puddle,    16384,
+		ASOPOOL_Protected, TRUE,
 		TAG_DONE))) {
 	
 		SDL_SetError("Couldn't allocate pool");
