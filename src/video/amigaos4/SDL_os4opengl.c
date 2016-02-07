@@ -205,20 +205,23 @@ SDL_GLContext OS4_GL_CreateContext(_THIS, SDL_Window * window)
 
 int OS4_GL_MakeCurrent(_THIS, SDL_Window * window, SDL_GLContext context)
 {
-	dprintf("Called\n");
+	dprintf("Called w=%p c=%p\n", window, context);
 
 	if (_this->gl_config.driver_loaded) {
 
-		SDL_WindowData * data = window->driverdata;
+		if (window) {
+			SDL_WindowData * data = window->driverdata;
 
-		if (context != data->IGL) {
-			dprintf("Context pointer mismatch: %p<>%p\n", context, data->IGL);
-			SDL_SetError("Context pointer mismatch");
-			return -1;
+			if (context != data->IGL) {
+				dprintf("Context pointer mismatch: %p<>%p\n", context, data->IGL);
+				SDL_SetError("Context pointer mismatch");
+				return -1;
+			}
+
+			mglMakeCurrent(context);
 		}
+		// TODO: is there anything to clear in MiniGL in case of NULL context?
 
-		mglMakeCurrent(context);
-	
 	} else {
 		dprintf("No OpenGL\n");
 		SDL_SetError("OpenGL not available");
@@ -340,8 +343,10 @@ void OS4_GL_DeleteContext(_THIS, SDL_GLContext context)
 
 	if (_this->gl_config.driver_loaded) {
 		
-		struct GLContextIFace * IGL = context;
-		IGL->DeleteContext();
+		if (context) {
+			struct GLContextIFace * IGL = context;
+			IGL->DeleteContext();
+		}
 
 		_this->gl_config.driver_loaded = 0;
 
