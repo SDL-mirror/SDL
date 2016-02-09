@@ -52,7 +52,6 @@ typedef struct
 	struct IOStdReq        *inputReq;
 	
 	APTR 					pool;
-	struct SignalSemaphore *poolSemaphore;
 
 	struct Library			*gfxbase;
 	struct Library			*layersbase;

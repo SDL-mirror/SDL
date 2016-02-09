@@ -196,12 +196,6 @@ OS4_AllocSystemResources(_THIS)
 		return SDL_FALSE;
 	}
 
-	/* Create the semaphore used for the pool */
-	if (!(data->poolSemaphore = IExec->AllocSysObjectTags(ASOT_SEMAPHORE, TAG_DONE))) {
-		SDL_SetError("Couldn't allocate pool semaphore");
-		return SDL_FALSE;
-	}
-
 	/* Create the pool we'll be using (Shared, might be used from threads) */
 	if (!(data->pool = IExec->AllocSysObjectTags(ASOT_MEMPOOL,
 		ASOPOOL_MFlags,    MEMF_SHARED,
@@ -263,13 +257,7 @@ OS4_FreeSystemResources(_THIS)
 	}
 
 	if (data->pool) {
-		//IExec->ObtainSemaphore(data->poolSemaphore);
 		IExec->FreeSysObject(ASOT_MEMPOOL, data->pool);
-		//IExec->ReleaseSemaphore(data->poolSemaphore);
-	}
-
-	if (data->poolSemaphore) {
-		IExec->FreeSysObject(ASOT_SEMAPHORE, data->poolSemaphore);
 	}
 
 	if (data->userport) {
@@ -427,26 +415,16 @@ void *
 OS4_SaveAllocPooled(_THIS, uint32 size)
 {
 	SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;	  
-	void *res;
 
-	IExec->ObtainSemaphore(data->poolSemaphore);
-	res = IExec->AllocPooled(data->pool, size);
-	IExec->ReleaseSemaphore(data->poolSemaphore);
-
-	return res;
+	return IExec->AllocPooled(data->pool, size);
 }
 
 void *
 OS4_SaveAllocVecPooled(_THIS, uint32 size)
 {
 	SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
-	void *res;
 
-	IExec->ObtainSemaphore(data->poolSemaphore);
-	res = IExec->AllocVecPooled(data->pool, size);
-	IExec->ReleaseSemaphore(data->poolSemaphore);
-
-	return res;
+	return IExec->AllocVecPooled(data->pool, size);
 }
 
 void
@@ -454,9 +432,7 @@ OS4_SaveFreePooled(_THIS, void * mem, uint32 size)
 {
 	SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
 
-	IExec->ObtainSemaphore(data->poolSemaphore);
 	IExec->FreePooled(data->pool, mem, size);
-	IExec->ReleaseSemaphore(data->poolSemaphore);
 }
 
 void
@@ -464,9 +440,7 @@ OS4_SaveFreeVecPooled(_THIS, void * mem)
 {
 	SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
 
-	IExec->ObtainSemaphore(data->poolSemaphore);
 	IExec->FreeVecPooled(data->pool, mem);
-	IExec->ReleaseSemaphore(data->poolSemaphore);
 }
 
 #endif /* SDL_VIDEO_DRIVER_AMIGAOS4 */
