@@ -23,6 +23,7 @@
 #if SDL_VIDEO_DRIVER_AMIGAOS4
 
 #include "SDL_os4video.h"
+#include "SDL_os4opengl.h"
 #include "SDL_syswm.h"
 
 #define DEBUG
@@ -340,7 +341,7 @@ OS4_SetWindowGrabInternal(_THIS, struct Window * w, BOOL activate)
 		IIntuition->SetWindowAttrs(w, WA_MouseLimits, &grabBox, sizeof(grabBox));
 		IIntuition->SetWindowAttrs(w, WA_GrabFocus, activate ? POINTER_GRAB_TIMEOUT : 0, sizeof(ULONG));
 
-		dprintf("Window %p input was %s\n", w, (activate == TRUE) ? "grabbed" : "released");
+		dprintf("Window %p ('%s') input was %s\n", w, w->Title, (activate == TRUE) ? "grabbed" : "released");
 	}
 }
 
@@ -369,13 +370,12 @@ OS4_DestroyWindow(_THIS, SDL_Window * window)
 			struct Screen *screen = data->syswin->WScreen;
 
 			OS4_CloseWindowInternal(_this, data->syswin);
+			data->syswin = NULL;
 
 			if (screen != videodata->publicScreen) {
 				OS4_CloseScreenInternal(_this, screen);
 		    }
 		}
-
-		// TODO: check does SDL delete possible SW framebuffer automatically?
 
 		OS4_GL_FreeBuffers(_this, data);
 
