@@ -27,6 +27,27 @@
 #define DEBUG
 #include "../../main/amigaos4/SDL_os4debug.h"
 
+static PIX_FMT OS4_DepthToPixf(int depth)
+{
+	switch (depth) {
+		case 32: return PIXF_A8R8G8B8;
+		case 16: return PIXF_R5G6B5;
+		case 8: return PIXF_CLUT;
+		default: return PIXF_NONE;
+	}
+}
+
+static Uint32 OS4_PixfToSdlPixelFormat(PIX_FMT from)
+{
+	switch (from)
+	{
+		case PIXF_A8R8G8B8: return SDL_PIXELFORMAT_ARGB8888;
+		case PIXF_R5G6B5: return SDL_PIXELFORMAT_RGB565;
+		case PIXF_CLUT: return SDL_PIXELFORMAT_INDEX8;
+		default: return SDL_PIXELFORMAT_UNKNOWN;
+	}
+}
+
 int
 OS4_CreateWindowFramebuffer(_THIS, SDL_Window * window, Uint32 * format, void ** pixels, int *pitch)
 {
@@ -36,6 +57,8 @@ OS4_CreateWindowFramebuffer(_THIS, SDL_Window * window, Uint32 * format, void **
 		APTR lock;
 		APTR base_address;
 		uint32 bytes_per_row;
+		uint32 depth;
+		PIX_FMT pixf;
 
 		if (data->bitmap) {
 
@@ -44,16 +67,19 @@ OS4_CreateWindowFramebuffer(_THIS, SDL_Window * window, Uint32 * format, void **
 			IGraphics->FreeBitMap(data->bitmap);
 		}
 
-		dprintf("Allocating %d*%d bitmap\n", window->w, window->h);
+		depth = IGraphics->GetBitMapAttr(data->syswin->RPort->BitMap, BMA_BITSPERPIXEL);
+		pixf = OS4_DepthToPixf(depth);
+
+		dprintf("Allocating %d*%d*%d bitmap\n", window->w, window->h, depth);
 
 		data->bitmap = IGraphics->AllocBitMapTags(
 			window->w,
 			window->h,
-			32, // TODO: what we use for the depth and format?
+			depth,
 			BMATags_Clear, TRUE,
 			BMATags_UserPrivate, TRUE,
-			//BMATags_Friend,,
-			BMATags_PixelFormat, PIXF_A8R8G8B8,
+			//BMATags_Friend, data->syswin->RPort->BitMap,
+			BMATags_PixelFormat, pixf,
 			TAG_DONE);
 
 		if (!data->bitmap) {
@@ -63,7 +89,9 @@ OS4_CreateWindowFramebuffer(_THIS, SDL_Window * window, Uint32 * format, void **
 			return -1;
 		}
 
-		*format = SDL_PIXELFORMAT_ARGB8888;
+		*format = OS4_PixfToSdlPixelFormat(pixf);
+
+		dprintf("Native format %d, SDL format %d\n", pixf, *format);
 
 		/* Lock the bitmap to get details. Since it's user private,
 		it should be safe to cache address and pitch. */
@@ -125,7 +153,7 @@ OS4_UpdateWindowFramebuffer(_THIS, SDL_Window * window, const SDL_Rect * rects, 
 
 				int32 ret = IGraphics->BltBitMapTags(
 					BLITA_Source, data->bitmap,
-					BLITA_SrcType, BLITT_BITMAP,
+					//BLITA_SrcType, BLITT_BITMAP,
 					BLITA_Dest, syswin->RPort,
 					BLITA_DestType, BLITT_RASTPORT,
 					BLITA_SrcX, r->x,
