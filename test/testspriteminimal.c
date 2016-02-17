@@ -126,7 +126,7 @@ main(int argc, char *argv[])
     int i, done;
     SDL_Event event;
 
-	/* Enable standard application logging */
+    /* Enable standard application logging */
     SDL_LogSetPriority(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_INFO);
 
     if (SDL_CreateWindowAndRenderer(WINDOW_WIDTH, WINDOW_HEIGHT, 0, &window, &renderer) < 0) {
@@ -163,6 +163,12 @@ main(int argc, char *argv[])
         }
         MoveSprites(renderer, sprite);
     }
+
+    SDL_DestroyWindow(window);
+    SDL_DestroyRenderer(renderer);
+    SDL_DestroyTexture(sprite);
+    SDL_VideoQuit();
+    SDL_Quit();
 
     quit(0);
 

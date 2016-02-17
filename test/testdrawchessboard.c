@@ -105,6 +105,10 @@ main(int argc, char *argv[])
 
 	}
 
+	SDL_DestroyWindow(window);
+	SDL_DestroyRenderer(renderer);
+	SDL_Quit();
+
 	return 0;
 }
 
