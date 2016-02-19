@@ -35,6 +35,7 @@
 #include "SDL_os4framebuffer.h"
 #include "SDL_os4mouse.h"
 #include "SDL_os4opengl.h"
+#include "SDL_os4shape.h"
 
 #define DEBUG
 #include "../../main/amigaos4/SDL_os4debug.h"
@@ -347,6 +348,10 @@ OS4_CreateDevice(int devindex)
 	device->DestroyWindowFramebuffer = OS4_DestroyWindowFramebuffer;
 	
 	//device->OnWindowEnter = OS4_OnWindowEnter;
+
+	device->shape_driver.CreateShaper = OS4_CreateShaper;
+	device->shape_driver.SetWindowShape = OS4_SetWindowShape;
+	device->shape_driver.ResizeWindowShape = OS4_ResizeWindowShape;
 
 	device->GetWindowWMInfo = OS4_GetWindowWMInfo;
 
