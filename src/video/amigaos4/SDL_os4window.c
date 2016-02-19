@@ -307,6 +307,8 @@ void OS4_SetWindowFullscreen(_THIS, SDL_Window * window, SDL_VideoDisplay * disp
 		    dprintf("Reopening window '%s' due to mode change\n", window->title);
 
 		    OS4_CloseWindowInternal(_this, data->syswin);
+			data->syswin = NULL;
+
 		} else {
 			dprintf("System window doesn't exist yet, let's open it\n");
 		}
@@ -380,6 +382,7 @@ OS4_DestroyWindow(_THIS, SDL_Window * window)
 		OS4_GL_FreeBuffers(_this, data);
 
 		SDL_free(data);
+		window->driverdata = NULL;
 	}
 
 	if (window->flags & SDL_WINDOW_OPENGL) {
