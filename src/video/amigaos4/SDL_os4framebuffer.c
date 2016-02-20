@@ -61,10 +61,14 @@ OS4_CreateWindowFramebuffer(_THIS, SDL_Window * window, Uint32 * format, void **
 		PIX_FMT pixf;
 
 		if (data->bitmap) {
-
 			dprintf("Freeing old bitmap %p\n", data->bitmap);
-
 			IGraphics->FreeBitMap(data->bitmap);
+		}
+
+		if (!data->syswin) {
+			dprintf("No system window\n");
+			SDL_SetError("No system window");
+			return -1;
 		}
 
 		depth = IGraphics->GetBitMapAttr(data->syswin->RPort->BitMap, BMA_BITSPERPIXEL);

@@ -32,10 +32,13 @@
 static void OS4_CloseWindowInternal(_THIS, struct Window * window);
 
 static int
-OS4_SetupWindowData(_THIS, SDL_Window * sdlwin, struct Window * syswin, SDL_bool created)
+OS4_SetupWindowData(_THIS, SDL_Window * sdlwin, struct Window * syswin, SDL_bool native)
 {
 	SDL_WindowData *data;
 	
+	int width;
+	int height;
+
 	data = (SDL_WindowData *) SDL_calloc(1, sizeof(*data));
 	if (!data) {
 		return SDL_OutOfMemory();
@@ -43,10 +46,21 @@ OS4_SetupWindowData(_THIS, SDL_Window * sdlwin, struct Window * syswin, SDL_bool
 
 	data->sdlwin = sdlwin;
 	data->syswin = syswin;
-	data->created = created;
+	data->native = native;
 	data->pointerGrabTicks = 0;
 
 	sdlwin->driverdata = data;
+
+	IIntuition->GetWindowAttrs(
+		data->syswin,
+		WA_InnerWidth, &width,
+		WA_InnerHeight, &height,
+		TAG_DONE);
+
+	dprintf("'%s' dimensions %d*%d\n", sdlwin->title, width, height);
+
+	sdlwin->w = width;
+	sdlwin->h = height;
 
 	return 0;
 }
@@ -176,7 +190,7 @@ OS4_CreateWindow(_THIS, SDL_Window * window)
 	    }
 	}
 
-	if (OS4_SetupWindowData(_this, window, syswin, SDL_TRUE) < 0) {
+	if (OS4_SetupWindowData(_this, window, syswin, SDL_FALSE) < 0) {
 		if (syswin) {
 			OS4_CloseWindowInternal(_this, syswin);
 		}
@@ -198,7 +212,7 @@ OS4_CreateWindowFrom(_THIS, SDL_Window * window, const void * data)
 		window->title = SDL_strdup(syswin->Title);
 	}
 
-	if (OS4_SetupWindowData(_this, window, syswin, SDL_FALSE) < 0) {
+	if (OS4_SetupWindowData(_this, window, syswin, SDL_TRUE) < 0) {
 		return -1;
 	}
 
@@ -212,6 +226,8 @@ OS4_SetWindowTitle(_THIS, SDL_Window * window)
 {
 	SDL_WindowData *data = window->driverdata;
 
+	dprintf("Called\n");
+
 	if (data && data->syswin) {
 		STRPTR title = window->title ? window->title : "";
 
@@ -223,6 +239,8 @@ void
 OS4_SetWindowPosition(_THIS, SDL_Window * window)
 {
 	SDL_WindowData *data = window->driverdata;
+
+	dprintf("Called\n");
 
 	if (data && data->syswin) {
 	
@@ -237,6 +255,8 @@ void
 OS4_SetWindowSize(_THIS, SDL_Window * window)
 {
 	SDL_WindowData *data = window->driverdata;
+
+	dprintf("Called\n");
 
 	if (data && data->syswin) {
 
@@ -253,6 +273,8 @@ OS4_ShowWindow(_THIS, SDL_Window * window)
 {
 	SDL_WindowData *data = window->driverdata;
 
+	dprintf("Called\n");
+
 	if (data && data->syswin) {
 	
 		// TODO: could use ShowWindow but what we pass for the Other?
@@ -267,6 +289,8 @@ OS4_HideWindow(_THIS, SDL_Window * window)
 {
 	SDL_WindowData *data = window->driverdata;
 
+	dprintf("Called\n");
+
 	if (data && data->syswin) {
 
 		IIntuition->HideWindow(data->syswin);
@@ -277,6 +301,8 @@ void
 OS4_RaiseWindow(_THIS, SDL_Window * window)
 {
 	SDL_WindowData *data = window->driverdata;
+
+	dprintf("Called\n");
 
 	if (data && data->syswin) {
 		IIntuition->WindowToFront(data->syswin);
@@ -303,28 +329,32 @@ void OS4_SetWindowFullscreen(_THIS, SDL_Window * window, SDL_VideoDisplay * disp
 	} else {
 	    SDL_WindowData *data = window->driverdata;
 		
-		if (data->syswin) {
-		    dprintf("Reopening window '%s' due to mode change\n", window->title);
-
-		    OS4_CloseWindowInternal(_this, data->syswin);
-			data->syswin = NULL;
-
+		if (data->native) {
+			dprintf("Native window '%s', mode change ignored\n", window->title);
 		} else {
-			dprintf("System window doesn't exist yet, let's open it\n");
+			if (data->syswin) {
+			    dprintf("Reopening window '%s' due to mode change\n", window->title);
+
+			    OS4_CloseWindowInternal(_this, data->syswin);
+				data->syswin = NULL;
+
+			} else {
+				dprintf("System window doesn't exist yet, let's open it\n");
+			}
+
+			if (!fullscreen) {
+				SDL_DisplayData * displayData = display->driverdata;
+
+				if (displayData->screen) {
+					OS4_CloseScreenInternal(_this, displayData->screen);
+					displayData->screen = NULL;
+			    }
+
+				display = NULL;
+			}
+
+		    data->syswin = OS4_CreateWindowInternal(_this, window, display);
 		}
-
-		if (!fullscreen) {
-			SDL_DisplayData * displayData = display->driverdata;
-
-			if (displayData->screen) {
-				OS4_CloseScreenInternal(_this, displayData->screen);
-				displayData->screen = NULL;
-		    }
-
-			display = NULL;
-		}
-
-	    data->syswin = OS4_CreateWindowInternal(_this, window, display);
 	}
 }
 
@@ -366,7 +396,7 @@ OS4_DestroyWindow(_THIS, SDL_Window * window)
 	dprintf("Called for '%s'\n", window->title);
 
 	if (data) {
-		if (data->created && data->syswin) {
+		if (!data->native && data->syswin) {
 			SDL_VideoData *videodata = (SDL_VideoData *) _this->driverdata;
 			
 			struct Screen *screen = data->syswin->WScreen;
