@@ -420,8 +420,9 @@ int main(int argc, char **argv)
     SDL_Surface *surface;
     GLuint texture;
     GLfloat texcoords[4];
+    SDL_GLContext c;
 
-	/* Enable standard application logging */
+    /* Enable standard application logging */
     SDL_LogSetPriority(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_INFO);
 
     /* Initialize SDL for video output */
@@ -438,7 +439,7 @@ int main(int argc, char **argv)
         exit(2);
     }
 
-    if ( !SDL_GL_CreateContext(window)) {
+    if ( !(c = SDL_GL_CreateContext(window))) {
         SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Unable to create OpenGL context: %s\n", SDL_GetError());
         SDL_Quit();
         exit(2);
@@ -482,6 +483,8 @@ int main(int argc, char **argv)
         }
     }
     QuitShaders();
+
+    SDL_GL_DeleteContext(c);
     SDL_Quit();
     return 1;
 }
