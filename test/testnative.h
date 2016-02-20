@@ -36,6 +36,11 @@ extern NativeWindowFactory WindowsWindowFactory;
 extern NativeWindowFactory X11WindowFactory;
 #endif
 
+#ifdef SDL_VIDEO_DRIVER_AMIGAOS4
+#define TEST_NATIVE_AMIGAOS4
+extern NativeWindowFactory AmigaOS4WindowFactory;
+#endif
+
 #ifdef SDL_VIDEO_DRIVER_COCOA
 /* Actually, we don't really do this, since it involves adding Objective C
    support to the build system, which is a little tricky.  You can uncomment

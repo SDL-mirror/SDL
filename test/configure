@@ -600,6 +600,7 @@ PKG_CONFIG
 ISUNIX
 ISWINDOWS
 ISMACOSX
+ISAMIGAOS
 MATHLIB
 EXE
 OSMESA_CONFIG
@@ -2895,8 +2896,12 @@ fi
 ISUNIX="false"
 ISWINDOWS="false"
 ISMACOSX="false"
+ISAMIGAOS="false"
 
 case "$host" in
+    *-*-amigaos*)
+        ISAMIGAOS="true"
+        ;;
     *-*-cygwin* | *-*-mingw32*)
         ISWINDOWS="true"
         EXE=".exe"
@@ -4807,7 +4812,7 @@ cat >>$CONFIG_STATUS <<_ACEOF || ac_write_fail=1
 _ACAWK
 cat >>"\$ac_tmp/subs1.awk" <<_ACAWK &&
   for (key in S) S_is_set[key] = 1
-  FS = ""
+  FS = ""
 
 }
 {

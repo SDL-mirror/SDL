@@ -32,6 +32,9 @@ static NativeWindowFactory *factories[] = {
 #ifdef TEST_NATIVE_COCOA
     &CocoaWindowFactory,
 #endif
+#ifdef TEST_NATIVE_AMIGAOS4
+    &AmigaOS4WindowFactory,
+#endif
     NULL
 };
 static NativeWindowFactory *factory = NULL;
@@ -131,7 +134,7 @@ main(int argc, char *argv[])
     int sprite_w, sprite_h;
     SDL_Event event;
 
-	/* Enable standard application logging */
+    /* Enable standard application logging */
     SDL_LogSetPriority(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_INFO);
 
     if (SDL_VideoInit(NULL) < 0) {
@@ -164,6 +167,7 @@ main(int argc, char *argv[])
         SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Couldn't create SDL window: %s\n", SDL_GetError());
         quit(4);
     }
+
     SDL_SetWindowTitle(window, "SDL Native Window Test");
 
     /* Create the renderer */

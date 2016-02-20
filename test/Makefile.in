@@ -186,6 +186,11 @@ testnative$(EXE): $(srcdir)/testnative.c \
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS) @XLIB@
 endif
 
+ifeq (@ISAMIGAOS@,true)
+testnative$(EXE): $(srcdir)/testnative.c $(srcdir)/testnativeamigaos4.c
+	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
+endif
+
 testoverlay2$(EXE): $(srcdir)/testoverlay2.c
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
 
