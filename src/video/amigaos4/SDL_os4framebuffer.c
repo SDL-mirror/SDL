@@ -129,7 +129,7 @@ OS4_UpdateWindowFramebuffer(_THIS, SDL_Window * window, const SDL_Rect * rects, 
 {
 	SDL_WindowData * data = window->driverdata;
 
-	dprintf("Called\n");
+	//dprintf("Called\n");
 
 	if (data && data->bitmap) {
 		if (data->syswin) {

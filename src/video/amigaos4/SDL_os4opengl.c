@@ -279,7 +279,7 @@ int OS4_GL_GetSwapInterval(_THIS)
 
 void OS4_GL_SwapWindow(_THIS, SDL_Window * window)
 {
-	dprintf("Called\n");
+	//dprintf("Called\n");
 
 	if (_this->gl_config.driver_loaded) {
 
