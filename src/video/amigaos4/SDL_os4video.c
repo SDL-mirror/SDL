@@ -36,6 +36,7 @@
 #include "SDL_os4mouse.h"
 #include "SDL_os4opengl.h"
 #include "SDL_os4shape.h"
+#include "SDL_os4messagebox.h"
 
 #define DEBUG
 #include "../../main/amigaos4/SDL_os4debug.h"
@@ -371,7 +372,7 @@ OS4_CreateDevice(int devindex)
 	//device->SetClipboardText = OS4_SetClipboardText;
 	//device->GetClipboardText = OS4_GetClipboardText;
 	//device->HasClipboardText = OS4_HasClipboardText;
-	//device->ShowMessageBox = OS4_ShowMessageBox;
+	device->ShowMessageBox = OS4_ShowMessageBox;
 
 	device->free = OS4_DeleteDevice;
 
