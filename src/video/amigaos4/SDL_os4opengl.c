@@ -23,7 +23,7 @@
 #if SDL_VIDEO_DRIVER_AMIGAOS4
 
 #include "SDL_os4video.h"
-//#include "SDL_os4window.h"
+#include "SDL_os4window.h"
 
 #include <GL/gl.h>
 //#include <mgl/gl.h>
@@ -42,6 +42,7 @@ struct GLContextIFace *mini_CurrentContext = 0;
 
 void *AmiGetGLProc(const char *proc);
 
+// TODO: fix driver_loaded usage. It's a counter
 
 int OS4_GL_LoadLibrary(_THIS, const char *path)
 {
@@ -356,6 +357,39 @@ void OS4_GL_DeleteContext(_THIS, SDL_GLContext context)
 	}
 }
 
+SDL_bool OS4_GL_ResizeContext(_THIS, SDL_Window * window)
+{
+	if (_this->gl_config.driver_loaded) {
+		SDL_WindowData *data = window->driverdata;
+
+		if (data) {
+
+			OS4_GL_FreeBuffers(_this, data);
+
+			if (OS4_GL_AllocateBuffers(_this, window->w, window->h, 16 /* FIXME */, data)) {
+
+				dprintf("Resizing context\n");
+
+				data->IGL->MGLUpdateContextTags(
+								MGLCC_FrontBuffer, data->glFrontBuffer,
+								MGLCC_BackBuffer, data->glBackBuffer,
+								TAG_DONE);
+
+				data->IGL->GLViewport(0, 0, window->w, window->h);
+
+				return SDL_TRUE;
+
+			} else {
+				dprintf("Failed to re-allocate OpenGL buffers\n");
+				//SDL_Quit();
+			}
+		}
+	} else {
+		dprintf("No OpenGL\n");
+	}
+
+	return SDL_FALSE;
+}
 
 #endif /* SDL_VIDEO_DRIVER_AMIGAOS4 */
 

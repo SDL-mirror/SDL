@@ -23,6 +23,7 @@
 #if SDL_VIDEO_DRIVER_AMIGAOS4
 
 #include "SDL_os4video.h"
+#include "SDL_os4opengl.h"
 
 #include "../../events/SDL_keyboard_c.h"
 #include "../../events/SDL_mouse_c.h"
@@ -220,9 +221,17 @@ OS4_HandleResize(_THIS, struct MyIntuiMessage *imsg)
 {
 	SDL_Window * sdlwin = OS4_FindWindow(_this, imsg->IDCMPWindow);
 
+	dprintf("Called\n");
+
 	if (sdlwin) {
-		SDL_SendWindowEvent(sdlwin, SDL_WINDOWEVENT_RESIZED,
-			imsg->Width, imsg->Height);
+		if (imsg->Width != sdlwin->w || imsg->Height != sdlwin->h) {
+			SDL_SendWindowEvent(sdlwin, SDL_WINDOWEVENT_RESIZED,
+				imsg->Width, imsg->Height);
+
+			if (sdlwin->flags & SDL_WINDOW_OPENGL) {
+				OS4_GL_ResizeContext(_this, sdlwin);
+			}
+		}
 	}
 }
 

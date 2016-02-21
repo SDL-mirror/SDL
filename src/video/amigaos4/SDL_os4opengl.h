@@ -35,6 +35,7 @@ extern void OS4_GL_SwapWindow(_THIS, SDL_Window * window);
 extern void OS4_GL_DeleteContext(_THIS, SDL_GLContext context);
 
 extern void OS4_GL_FreeBuffers(_THIS, SDL_WindowData * data);
+extern SDL_bool OS4_GL_ResizeContext(_THIS, SDL_Window * window);
 
 #endif /* _SDL_os4opengl_h */
 

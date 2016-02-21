@@ -51,18 +51,115 @@ OS4_SetupWindowData(_THIS, SDL_Window * sdlwin, struct Window * syswin, SDL_bool
 
 	sdlwin->driverdata = data;
 
-	IIntuition->GetWindowAttrs(
-		data->syswin,
-		WA_InnerWidth, &width,
-		WA_InnerHeight, &height,
-		TAG_DONE);
+	if (data->syswin) {
+		IIntuition->GetWindowAttrs(
+			data->syswin,
+			WA_InnerWidth, &width,
+			WA_InnerHeight, &height,
+			TAG_DONE);
 
-	dprintf("'%s' dimensions %d*%d\n", sdlwin->title, width, height);
+		dprintf("'%s' dimensions %d*%d\n", sdlwin->title, width, height);
 
-	sdlwin->w = width;
-	sdlwin->h = height;
+		sdlwin->w = width;
+		sdlwin->h = height;
+	}
 
 	return 0;
+}
+
+static uint32 OS4_GetIDCMPFlags(SDL_Window * window, SDL_bool fullscreen)
+{
+	uint32 IDCMPFlags  = IDCMP_NEWSIZE | IDCMP_MOUSEBUTTONS | IDCMP_MOUSEMOVE
+					   | IDCMP_DELTAMOVE | IDCMP_RAWKEY | IDCMP_ACTIVEWINDOW
+					   | IDCMP_INACTIVEWINDOW | IDCMP_INTUITICKS
+					   | IDCMP_EXTENDEDMOUSE;
+
+	dprintf("Called\n");
+
+	if (!fullscreen) {
+		if (!(window->flags & SDL_WINDOW_BORDERLESS)) {
+			IDCMPFlags  |= IDCMP_CLOSEWINDOW;
+		}
+
+		if (window->flags & SDL_WINDOW_RESIZABLE) {
+			//IDCMPFlags  |= IDCMP_SIZEVERIFY; no handling so far
+		}
+	}
+
+	return IDCMPFlags;
+}
+
+static uint32 OS4_GetWindowFlags(SDL_Window * window, SDL_bool fullscreen)
+{
+	uint32 windowFlags = WFLG_REPORTMOUSE | WFLG_RMBTRAP;
+
+	dprintf("Called\n");
+
+	if (fullscreen) {
+		windowFlags |= WFLG_BORDERLESS | WFLG_SIMPLE_REFRESH | WFLG_BACKDROP;
+	} else {
+		windowFlags |= WFLG_SMART_REFRESH | WFLG_NOCAREREFRESH | WFLG_NEWLOOKMENUS;
+
+		if (window->flags & SDL_WINDOW_BORDERLESS) {
+			windowFlags |= WFLG_BORDERLESS;
+		} else {			
+			windowFlags |= WFLG_DRAGBAR | WFLG_DEPTHGADGET | WFLG_CLOSEGADGET;
+		}
+
+		if (window->flags & SDL_WINDOW_RESIZABLE) {			   
+			windowFlags |= WFLG_SIZEGADGET | WFLG_SIZEBBOTTOM;
+		}
+	}
+
+	return windowFlags;
+}
+
+static int32 OS4_CalculateWindowX(_THIS, SDL_Window * window, struct Screen * screen)
+{
+	int32 x;
+
+	dprintf("Called\n");
+
+	if (window->x == SDL_WINDOWPOS_CENTERED) {
+		/* Approximation: this doesn't know about window borders */
+		x = (screen->Width - window->w) / 2;
+	} else {
+		x = window->x;
+	}
+
+	return x;
+}
+
+static int32 OS4_CalculateWindowY(_THIS, SDL_Window * window, struct Screen * screen)
+{
+	int32 y;
+
+	dprintf("Called\n");
+
+	if (window->y == SDL_WINDOWPOS_CENTERED) {
+		/* Approximation: this doesn't know about window borders */
+		y = (screen->Height - window->h) / 2;
+	} else {
+		y = window->y;
+	}
+
+	return y;
+}
+
+static struct Screen *
+OS4_GetScreenForWindow(_THIS, SDL_VideoDisplay * display)
+{
+	if (display) {
+        SDL_DisplayData *displaydata = (SDL_DisplayData *) display->driverdata;
+
+		dprintf("Fullscreen\n");
+		return displaydata->screen;
+	} else {
+	    SDL_VideoData *videodata = (SDL_VideoData *) _this->driverdata;
+
+		dprintf("Window mode\n");
+		return videodata->publicScreen;
+	}
 }
 
 static struct Window *
@@ -70,60 +167,20 @@ OS4_CreateWindowInternal(_THIS, SDL_Window * window, SDL_VideoDisplay * display)
 {
 	SDL_VideoData *videodata = (SDL_VideoData *) _this->driverdata;
 	struct Window *syswin;
-	struct Screen *screen;
 
-	uint32 windowFlags = WFLG_REPORTMOUSE | WFLG_RMBTRAP;
+	SDL_bool fullscreen = display ? SDL_TRUE : SDL_FALSE;
+	
+	uint32 IDCMPFlags = OS4_GetIDCMPFlags(window, fullscreen);
+	uint32 windowFlags = OS4_GetWindowFlags(window, fullscreen);
 
-	uint32 IDCMPFlags  = IDCMP_NEWSIZE | IDCMP_MOUSEBUTTONS | IDCMP_MOUSEMOVE
-					   | IDCMP_DELTAMOVE | IDCMP_RAWKEY | IDCMP_ACTIVEWINDOW
-					   | IDCMP_INACTIVEWINDOW | IDCMP_INTUITICKS
-					   | IDCMP_EXTENDEDMOUSE;
+	struct Screen *screen = OS4_GetScreenForWindow(_this, display);
 
-	uint32 windowX;
-	uint32 windowY;
+	int32 windowX = OS4_CalculateWindowX(_this, window, screen);
+	int32 windowY = OS4_CalculateWindowY(_this, window, screen);
 
-	dprintf("Called\n");
-
-	if (/*window->flags & SDL_WINDOW_FULLSCREEN*/ display) {
-		windowFlags |= WFLG_BORDERLESS | WFLG_SIMPLE_REFRESH | WFLG_BACKDROP;
-
-		windowX = 0;
-		windowY = 0;
-
-	} else {
-
-		windowFlags |= WFLG_SMART_REFRESH | WFLG_NOCAREREFRESH | WFLG_NEWLOOKMENUS;
-
-		windowX = window->x;
-		windowY = window->y;
-
-		if (window->flags & SDL_WINDOW_BORDERLESS) {
-			windowFlags |= WFLG_BORDERLESS;
-		} else {
-			windowFlags |= WFLG_DRAGBAR | WFLG_DEPTHGADGET | WFLG_CLOSEGADGET;
-
-			IDCMPFlags  |= IDCMP_CLOSEWINDOW;
-		}
-
-		if (window->flags & SDL_WINDOW_RESIZABLE) {
-			windowFlags |= WFLG_SIZEGADGET | WFLG_SIZEBBOTTOM;
-
-			IDCMPFlags  |= IDCMP_SIZEVERIFY;
-		}
-	}
 
 	dprintf("Trying to open window '%s' at (%d,%d) of size (%dx%d)\n",
 		window->title, windowX, windowY, window->w, window->h);
-
-	if (display) {
-        SDL_DisplayData *displaydata = (SDL_DisplayData *) display->driverdata;
-		
-		dprintf("Fullscreen\n");
-		screen = displaydata->screen;
-	} else {
-		dprintf("Window mode\n");
-		screen = videodata->publicScreen;
-	}
 
 	syswin = IIntuition->OpenWindowTags(
 		NULL,
@@ -159,11 +216,6 @@ OS4_CreateWindowInternal(_THIS, SDL_Window * window, SDL_VideoDisplay * display)
 			syswin->BorderTop + syswin->BorderBottom + 100,
 			-1,
 			-1);
-	}
-
-	// TODO: OpenGL context
-	if (window->flags & SDL_WINDOW_OPENGL) {
-		// ...
 	}
 
 	if (window->flags & SDL_WINDOW_FULLSCREEN) {
@@ -243,10 +295,14 @@ OS4_SetWindowPosition(_THIS, SDL_Window * window)
 	dprintf("Called\n");
 
 	if (data && data->syswin) {
+		struct Screen * screen = data->syswin->WScreen;
+
+		int32 windowX = OS4_CalculateWindowX(_this, window, screen);
+		int32 windowY = OS4_CalculateWindowY(_this, window, screen);
 	
 		IIntuition->SetWindowAttrs(data->syswin,
-			WA_Left, window->x,
-			WA_Top, window->y,
+			WA_Left, windowX,
+			WA_Top, windowY,
 			TAG_DONE);
 	}
 }
@@ -264,6 +320,10 @@ OS4_SetWindowSize(_THIS, SDL_Window * window)
 			WA_InnerWidth, window->w,
 			WA_InnerHeight, window->h,
 			TAG_DONE);
+
+    	if (window->flags & SDL_WINDOW_OPENGL) {
+			OS4_GL_ResizeContext(_this, window);
+		}
 	}
 }
 
@@ -409,14 +469,13 @@ OS4_DestroyWindow(_THIS, SDL_Window * window)
 		    }
 		}
 
-		OS4_GL_FreeBuffers(_this, data);
+    	if (window->flags & SDL_WINDOW_OPENGL) {
+	    	OS4_GL_FreeBuffers(_this, data);
+			// TODO: should context be free'd automatically?
+		}
 
 		SDL_free(data);
 		window->driverdata = NULL;
-	}
-
-	if (window->flags & SDL_WINDOW_OPENGL) {
-		// TODO: OpenGL context removal
 	}
 }
 
