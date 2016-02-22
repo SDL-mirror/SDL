@@ -22,12 +22,57 @@
 
 #if SDL_VIDEO_DRIVER_AMIGAOS4
 
+#include <proto/exec.h>
+#include <proto/intuition.h>
+
 #include "SDL_os4video.h"
 
 #define DEBUG
 #include "../../main/amigaos4/SDL_os4debug.h"
 
 #define BUTTON_BUF_SIZE 1024
+
+static struct Library *MB_IntuitionBase = NULL;
+static struct IntuitionIFace *MB_IIntuition = NULL;
+
+/* Message box can be popped up without video initialization,
+so let's fetch Intuition interface */
+
+static BOOL
+OS4_OpenIntuition()
+{
+	dprintf("Called\n");
+
+	MB_IntuitionBase = IExec->OpenLibrary("intuition.library", 51);
+	
+	if (MB_IntuitionBase) {
+
+		MB_IIntuition = (struct IntuitionIFace *)
+		    IExec->GetInterface(MB_IntuitionBase, "main", 1, NULL);
+
+		if (MB_IIntuition) {
+			return TRUE;
+		}
+	}
+
+	return FALSE;
+}
+
+static void
+OS4_CloseIntuition()
+{
+	dprintf("Called\n");
+
+	if (MB_IIntuition) {
+		IExec->DropInterface((struct Interface *) MB_IIntuition);
+		MB_IIntuition = NULL;
+	}
+
+	if (MB_IntuitionBase) {
+		IExec->CloseLibrary(MB_IntuitionBase);
+		MB_IntuitionBase = NULL;
+	}
+}
 
 static char *
 OS4_MakeButtonString(const SDL_MessageBoxData * messageboxdata)
@@ -55,46 +100,60 @@ OS4_MakeButtonString(const SDL_MessageBoxData * messageboxdata)
 }
 
 int
-OS4_ShowMessageBox(_THIS, const SDL_MessageBoxData * messageboxdata, int * buttonid)
+OS4_ShowMessageBox(const SDL_MessageBoxData * messageboxdata, int * buttonid)
 {
 	char *buttonString;
+	int result = -1;
 
-	if ((buttonString = OS4_MakeButtonString(messageboxdata))) {
-		
-		struct EasyStruct es = {
-			sizeof(struct EasyStruct),
-			0, // Flags
-			messageboxdata->title,
-			messageboxdata->message,
-			buttonString,
-			NULL, // Screen
-			NULL  // TagList
-		};
+	if (OS4_OpenIntuition()) {
 
-		const int LAST_BUTTON = messageboxdata->numbuttons;
+		if ((buttonString = OS4_MakeButtonString(messageboxdata))) {
+			struct Window * syswin = NULL;
 
-		/* Amiga button order is 1, 2, ..., N, 0! */
-
-		int amigaButton = IIntuition->EasyRequest(NULL, &es, 0, NULL);
-		
-		dprintf("Button %d chosen\n", amigaButton);
-
-		if (amigaButton >= 0 && amigaButton < LAST_BUTTON) {
-			if (amigaButton == 0) {
-				/* Last */
-				*buttonid = messageboxdata->buttons[LAST_BUTTON - 1].buttonid;
-			} else {
-				*buttonid = messageboxdata->buttons[amigaButton - 1].buttonid;
+			if (messageboxdata->window) {
+				SDL_WindowData *data = messageboxdata->window->driverdata;
+				syswin = data->syswin;
 			}
 
-			dprintf("Mapped button %d\n", *buttonid);
-		}
+			struct EasyStruct es = {
+				sizeof(struct EasyStruct),
+				0, // Flags
+				messageboxdata->title,
+				messageboxdata->message,
+				buttonString,
+				NULL, // Screen
+				NULL  // TagList
+			};
 
-		SDL_free(buttonString);
-		return 0;
+			const int LAST_BUTTON = messageboxdata->numbuttons;
+
+			/* Amiga button order is 1, 2, ..., N, 0! */
+
+			int amigaButton = MB_IIntuition->EasyRequest(syswin, &es, 0, NULL);
+			
+			dprintf("Button %d chosen\n", amigaButton);
+
+			if (amigaButton >= 0 && amigaButton < LAST_BUTTON) {
+				if (amigaButton == 0) {
+					/* Last */
+					*buttonid = messageboxdata->buttons[LAST_BUTTON - 1].buttonid;
+				} else {
+					*buttonid = messageboxdata->buttons[amigaButton - 1].buttonid;
+				}
+
+				dprintf("Mapped button %d\n", *buttonid);
+			}
+
+			SDL_free(buttonString);
+			result = 0;
+		}
+	} else {
+		dprintf("Failed to open IIntuition\n");
 	}
 
-	return -1;
+	OS4_CloseIntuition();
+
+	return result;
 }
 
 #endif /* SDL_VIDEO_DRIVER_AMIGAOS4 */

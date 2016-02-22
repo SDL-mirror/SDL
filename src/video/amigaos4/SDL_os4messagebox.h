@@ -20,10 +20,11 @@
 */
 #include "../../SDL_internal.h"
 
-#if SDL_VIDEO_DRIVER_AMIGAOS4
+#ifndef _SDL_os4messagebox_h
+#define _SDL_os4messagebox_h
 
-extern int OS4_ShowMessageBox(_THIS, const SDL_MessageBoxData * messageboxdata, int * buttonid);
+extern int OS4_ShowMessageBox(const SDL_MessageBoxData * messageboxdata, int * buttonid);
 
-#endif /* SDL_VIDEO_DRIVER_AMIGAOS4 */
+#endif /* _SDL_os4messagebox_h */
 
 /* vi: set ts=4 sw=4 expandtab: */

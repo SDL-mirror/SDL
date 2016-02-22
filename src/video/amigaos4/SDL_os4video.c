@@ -372,7 +372,7 @@ OS4_CreateDevice(int devindex)
 	//device->SetClipboardText = OS4_SetClipboardText;
 	//device->GetClipboardText = OS4_GetClipboardText;
 	//device->HasClipboardText = OS4_HasClipboardText;
-	device->ShowMessageBox = OS4_ShowMessageBox;
+	//device->ShowMessageBox = OS4_ShowMessageBox; Can be called without video initialization
 
 	device->free = OS4_DeleteDevice;
 
