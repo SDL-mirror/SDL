@@ -86,10 +86,10 @@ OS4_MakeButtonString(const SDL_MessageBoxData * messageboxdata)
 
 		/* Generate "Button 1|Button2... "*/
 		for (b = 0; b < messageboxdata->numbuttons; b++) {
-			strncat(buttonBuffer, messageboxdata->buttons[b].text, BUTTON_BUF_SIZE - sizeof(buttonBuffer) - 1);
+			strncat(buttonBuffer, messageboxdata->buttons[b].text, BUTTON_BUF_SIZE - strlen(buttonBuffer) - 1);
 
 			if (b != (messageboxdata->numbuttons - 1)) {
-				strncat(buttonBuffer, "|", BUTTON_BUF_SIZE - sizeof(buttonBuffer) - 1);
+				strncat(buttonBuffer, "|", BUTTON_BUF_SIZE - strlen(buttonBuffer) - 1);
 			}
 		}
 
