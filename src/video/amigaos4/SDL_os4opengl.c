@@ -62,6 +62,10 @@ void *OS4_GL_GetProcAddress(_THIS, const char *proc)
 	if (_this->gl_config.driver_loaded) {
 		func = (void *)AmiGetGLProc(proc);
 	}
+	
+	if (func == NULL) {
+		dprintf("Failed to load '%s'\n", proc);
+	}
 
 	return func;
 }
@@ -237,12 +241,15 @@ void OS4_GL_GetDrawableSize(_THIS, SDL_Window * window, int *w, int *h)
 
 	if (_this->gl_config.driver_loaded) {
 		SDL_WindowData * data = window->driverdata;
+		int width, height;
 
 		IIntuition->GetWindowAttrs(
 						data->syswin,
-						WA_InnerWidth, &w,
-						WA_InnerHeight, &h,
+						WA_InnerWidth, &width,
+						WA_InnerHeight, &height,
 						TAG_DONE);
+		*w = width;
+		*h = height;
 	} else {
 		dprintf("No OpenGL\n");
 		SDL_SetError("OpenGL not available");
