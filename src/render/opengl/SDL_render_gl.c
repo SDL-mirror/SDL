@@ -268,6 +268,12 @@ GL_LoadFunctions(GL_RenderData * data)
 #ifdef __SDL_NOGETPROCADDR__
 #define SDL_PROC(ret,func,params) data->func=func;
 #else
+#ifdef __amigaos4__
+#define SDL_PROC(ret,func,params) \
+    do { \
+        data->func = SDL_GL_GetProcAddress(#func); \
+    } while ( 0 );
+#else
 #define SDL_PROC(ret,func,params) \
     do { \
         data->func = SDL_GL_GetProcAddress(#func); \
@@ -276,6 +282,7 @@ GL_LoadFunctions(GL_RenderData * data)
         } \
     } while ( 0 );
 #endif /* __SDL_NOGETPROCADDR__ */
+#endif
 
 #include "SDL_glfuncs.h"
 #undef SDL_PROC
@@ -392,7 +399,7 @@ GL_CreateRenderer(SDL_Window * window, Uint32 flags)
     SDL_GL_GetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, &profile_mask);
     SDL_GL_GetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, &major);
     SDL_GL_GetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, &minor);
-    
+
     window_flags = SDL_GetWindowFlags(window);
     if (!(window_flags & SDL_WINDOW_OPENGL) ||
         profile_mask == SDL_GL_CONTEXT_PROFILE_ES || major != RENDERER_CONTEXT_MAJOR || minor != RENDERER_CONTEXT_MINOR) {
@@ -608,10 +615,10 @@ convert_format(GL_RenderData *renderdata, Uint32 pixel_format,
         break;
 #ifdef __MACOSX__
     case SDL_PIXELFORMAT_UYVY:
-		*internalFormat = GL_RGB8;
-		*format = GL_YCBCR_422_APPLE;
-		*type = GL_UNSIGNED_SHORT_8_8_APPLE;
-		break;
+        *internalFormat = GL_RGB8;
+        *format = GL_YCBCR_422_APPLE;
+        *type = GL_UNSIGNED_SHORT_8_8_APPLE;
+        break;
 #endif
     default:
         return SDL_FALSE;
@@ -1008,6 +1015,38 @@ GL_SetColor(GL_RenderData * data, Uint8 r, Uint8 g, Uint8 b, Uint8 a)
     }
 }
 
+#ifdef __amigaos4__
+
+static void
+GL_SetBlendMode(GL_RenderData * data, int blendMode)
+{
+    /* We don't have luxury of glBlendFuncSeparate so this is a crippled version */
+    if (blendMode != data->current.blendMode) {
+        switch (blendMode) {
+        case SDL_BLENDMODE_NONE:
+            data->glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+            data->glDisable(GL_BLEND);
+            break;
+        case SDL_BLENDMODE_BLEND:
+            data->glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+            data->glEnable(GL_BLEND);
+            data->glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+            break;
+        case SDL_BLENDMODE_ADD:
+            data->glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+            data->glDisable(GL_BLEND); /* TODO */
+            break;
+        case SDL_BLENDMODE_MOD:
+            data->glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+            data->glDisable(GL_BLEND); /* TODO */
+            break;
+        }
+        data->current.blendMode = blendMode;
+    }
+}
+
+#else
+
 static void
 GL_SetBlendMode(GL_RenderData * data, int blendMode)
 {
@@ -1036,6 +1075,8 @@ GL_SetBlendMode(GL_RenderData * data, int blendMode)
         data->current.blendMode = blendMode;
     }
 }
+
+#endif
 
 static void
 GL_SetDrawingState(SDL_Renderer * renderer)
