@@ -369,6 +369,10 @@ GL_GetFBO(GL_RenderData *data, Uint32 w, Uint32 h)
 {
     GL_FBOList *result = data->framebuffers;
 
+    if (!data->GL_EXT_framebuffer_object_supported) {
+        return NULL;
+    }
+
     while (result && ((result->w != w) || (result->h != h))) {
         result = result->next;
     }
@@ -454,7 +458,12 @@ GL_CreateRenderer(SDL_Window * window, Uint32 flags)
     renderer->GL_BindTexture = GL_BindTexture;
     renderer->GL_UnbindTexture = GL_UnbindTexture;
     renderer->info = GL_RenderDriver.info;
+#ifdef __amigaos4__
+    /* No frame buffer objects yet */
+    renderer->info.flags = SDL_RENDERER_ACCELERATED;
+#else
     renderer->info.flags = (SDL_RENDERER_ACCELERATED | SDL_RENDERER_TARGETTEXTURE);
+#endif
     renderer->driverdata = data;
     renderer->window = window;
 
