@@ -139,7 +139,7 @@ main(int argc, char *argv[])
     int frames;
     Uint32 then, now;
 
-	/* Enable standard application logging */
+    /* Enable standard application logging */
     SDL_LogSetPriority(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_INFO);
 
     /* Initialize test framework */
@@ -167,6 +167,11 @@ main(int argc, char *argv[])
 
         drawstate->window = state->windows[i];
         drawstate->renderer = state->renderers[i];
+
+        if (!SDL_RenderTargetSupported(drawstate->renderer)) {
+            printf("Render targets are not supported for this renderer\n");
+            quit(2);
+        }
         drawstate->sprite = LoadTexture(drawstate->renderer, "icon.bmp", SDL_TRUE);
         drawstate->background = LoadTexture(drawstate->renderer, "sample.bmp", SDL_FALSE);
         if (!drawstate->sprite || !drawstate->background) {

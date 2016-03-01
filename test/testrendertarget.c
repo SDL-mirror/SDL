@@ -260,6 +260,12 @@ main(int argc, char *argv[])
 
         drawstate->window = state->windows[i];
         drawstate->renderer = state->renderers[i];
+
+        if (!SDL_RenderTargetSupported(drawstate->renderer)) {
+            printf("Render targets are not supported for this renderer\n");
+            quit(2);
+        }
+
         if (test_composite) {
             drawstate->sprite = LoadTexture(drawstate->renderer, "icon-alpha.bmp", SDL_TRUE);
         } else {
