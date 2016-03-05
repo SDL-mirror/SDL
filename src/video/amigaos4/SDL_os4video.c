@@ -68,7 +68,7 @@ OS4_OpenLibraries(_THIS)
 	dprintf("Called\n");
 
 	GfxBase       = IExec->OpenLibrary("graphics.library", MIN_LIB_VERSION);
-	LayersBase    = IExec->OpenLibrary("layers.library", MIN_LIB_VERSION);
+	LayersBase    = IExec->OpenLibrary("layers.library", 53);
 	//P96Base       = IExec->OpenLibrary("Picasso96API.library", 0);
 	IntuitionBase = IExec->OpenLibrary("intuition.library", MIN_LIB_VERSION);
 	IconBase      = IExec->OpenLibrary("icon.library", MIN_LIB_VERSION);
