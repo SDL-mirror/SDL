@@ -24,6 +24,8 @@
 
 #include "SDL_os4video.h"
 #include "SDL_os4opengl.h"
+#include "SDL_os4shape.h"
+
 #include "SDL_syswm.h"
 
 #define DEBUG
@@ -312,17 +314,34 @@ OS4_SetWindowSize(_THIS, SDL_Window * window)
 {
 	SDL_WindowData *data = window->driverdata;
 
-	dprintf("Called\n");
-
 	if (data && data->syswin) {
 
-		IIntuition->SetWindowAttrs(data->syswin,
-			WA_InnerWidth, window->w,
-			WA_InnerHeight, window->h,
-			TAG_DONE);
+		int width, height;
 
-    	if (window->flags & SDL_WINDOW_OPENGL) {
-			OS4_GL_ResizeContext(_this, window);
+		IIntuition->GetWindowAttrs(
+						data->syswin,
+						WA_InnerWidth, &width,
+						WA_InnerHeight, &height,
+						TAG_DONE);
+
+		if (width != window->w || height != window->h) {
+
+			dprintf("New window size %d*%d\n", window->w, window->h);
+
+			if (SDL_IsShapedWindow(window)) {
+				OS4_ResizeWindowShape(window);
+			}
+
+			IIntuition->SetWindowAttrs(data->syswin,
+				WA_InnerWidth, window->w,
+				WA_InnerHeight, window->h,
+				TAG_DONE);
+
+	    	if (window->flags & SDL_WINDOW_OPENGL) {
+				OS4_GL_ResizeContext(_this, window);
+			}
+		} else {
+			dprintf("Ignored size request %d*%d\n", width, height);
 		}
 	}
 }
@@ -456,17 +475,25 @@ OS4_DestroyWindow(_THIS, SDL_Window * window)
 	dprintf("Called for '%s'\n", window->title);
 
 	if (data) {
-		if (!data->native && data->syswin) {
-			SDL_VideoData *videodata = (SDL_VideoData *) _this->driverdata;
-			
-			struct Screen *screen = data->syswin->WScreen;
 
-			OS4_CloseWindowInternal(_this, data->syswin);
-			data->syswin = NULL;
+		if (data->syswin) {
 
-			if (screen != videodata->publicScreen) {
-				OS4_CloseScreenInternal(_this, screen);
-		    }
+			if (!data->native) {
+				SDL_VideoData *videodata = (SDL_VideoData *) _this->driverdata;
+				
+				struct Screen *screen = data->syswin->WScreen;
+
+				if (SDL_IsShapedWindow(window)) {
+					OS4_DestroyShape(_this, window);
+				}
+
+				OS4_CloseWindowInternal(_this, data->syswin);
+				data->syswin = NULL;
+
+				if (screen != videodata->publicScreen) {
+					OS4_CloseScreenInternal(_this, screen);
+			    }
+			}
 		}
 
     	if (window->flags & SDL_WINDOW_OPENGL) {

@@ -228,6 +228,10 @@ OS4_HandleResize(_THIS, struct MyIntuiMessage *imsg)
 			SDL_SendWindowEvent(sdlwin, SDL_WINDOWEVENT_RESIZED,
 				imsg->Width, imsg->Height);
 
+			if (SDL_IsShapedWindow(sdlwin)) {
+				OS4_ResizeWindowShape(sdlwin);
+        	}
+
 			if (sdlwin->flags & SDL_WINDOW_OPENGL) {
 				OS4_GL_ResizeContext(_this, sdlwin);
 			}

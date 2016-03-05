@@ -23,9 +23,19 @@
 #ifndef _SDL_os4shape_h
 #define _SDL_os4shape_h
 
+typedef struct {
+	struct BitMap* sysbm;
+	struct ClipRect* cliprect;
+	void* bitmap;
+	int width;
+	int height;
+} SDL_ShapeData;
+
 extern SDL_WindowShaper* OS4_CreateShaper(SDL_Window * window);
 extern int OS4_SetWindowShape(SDL_WindowShaper * shaper, SDL_Surface * shape, SDL_WindowShapeMode * shape_mode);
 extern int OS4_ResizeWindowShape(SDL_Window * window);
+
+extern void OS4_DestroyShape(_THIS, SDL_Window * window);
 
 #endif /* _SDL_os4shape_h */
 
