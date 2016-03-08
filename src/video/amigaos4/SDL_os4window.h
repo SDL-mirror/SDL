@@ -29,7 +29,6 @@ typedef struct
 {
 	SDL_Window      * sdlwin;
 	struct Window   * syswin;
-	SDL_bool          native;
 	struct BitMap   * bitmap;
 	struct MsgPort  * userport;
 	Uint32            pointerGrabTicks;

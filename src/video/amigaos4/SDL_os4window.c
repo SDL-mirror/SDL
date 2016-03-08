@@ -34,7 +34,7 @@
 static void OS4_CloseWindowInternal(_THIS, struct Window * window);
 
 static int
-OS4_SetupWindowData(_THIS, SDL_Window * sdlwin, struct Window * syswin, SDL_bool native)
+OS4_SetupWindowData(_THIS, SDL_Window * sdlwin, struct Window * syswin)
 {
 	SDL_WindowData *data;
 	
@@ -48,7 +48,6 @@ OS4_SetupWindowData(_THIS, SDL_Window * sdlwin, struct Window * syswin, SDL_bool
 
 	data->sdlwin = sdlwin;
 	data->syswin = syswin;
-	data->native = native;
 	data->pointerGrabTicks = 0;
 
 	sdlwin->driverdata = data;
@@ -244,7 +243,7 @@ OS4_CreateWindow(_THIS, SDL_Window * window)
 	    }
 	}
 
-	if (OS4_SetupWindowData(_this, window, syswin, SDL_FALSE) < 0) {
+	if (OS4_SetupWindowData(_this, window, syswin) < 0) {
 		if (syswin) {
 			OS4_CloseWindowInternal(_this, syswin);
 		}
@@ -260,13 +259,13 @@ OS4_CreateWindowFrom(_THIS, SDL_Window * window, const void * data)
 {
 	struct Window *syswin = (struct Window *) data;
 
-	dprintf("Called\n");
+	dprintf("Called for native window %p (flags 0x%X)\n", data, window->flags);
 
 	if (syswin->Title && SDL_strlen(syswin->Title)) {
 		window->title = SDL_strdup(syswin->Title);
 	}
 
-	if (OS4_SetupWindowData(_this, window, syswin, SDL_TRUE) < 0) {
+	if (OS4_SetupWindowData(_this, window, syswin) < 0) {
 		return -1;
 	}
 
@@ -408,7 +407,7 @@ void OS4_SetWindowFullscreen(_THIS, SDL_Window * window, SDL_VideoDisplay * disp
 	} else {
 	    SDL_WindowData *data = window->driverdata;
 		
-		if (data->native) {
+		if (window->flags & SDL_WINDOW_FOREIGN) {
 			dprintf("Native window '%s', mode change ignored\n", window->title);
 		} else {
 			if (data->syswin) {
@@ -472,13 +471,13 @@ OS4_DestroyWindow(_THIS, SDL_Window * window)
 {
 	SDL_WindowData *data = window->driverdata;
 
-	dprintf("Called for '%s'\n", window->title);
+	dprintf("Called for '%s' (flags 0x%X)\n", window->title, window->flags);
 
 	if (data) {
 
 		if (data->syswin) {
 
-			if (!data->native) {
+			if (!(window->flags & SDL_WINDOW_FOREIGN)) {
 				SDL_VideoData *videodata = (SDL_VideoData *) _this->driverdata;
 				
 				struct Screen *screen = data->syswin->WScreen;
@@ -493,6 +492,8 @@ OS4_DestroyWindow(_THIS, SDL_Window * window)
 				if (screen != videodata->publicScreen) {
 					OS4_CloseScreenInternal(_this, screen);
 			    }
+			} else {
+				dprintf("Ignored for native window\n");
 			}
 		}
 
