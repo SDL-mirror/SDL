@@ -57,7 +57,9 @@ CreateWindowAmigaOS4(int w, int h)
 static void
 DestroyWindowAmigaOS4(void *window)
 {
-	/* User closes the window so we don't have to */
+	_THIS = SDL_GetVideoDevice();
+	
+	IIntuition->CloseWindow(window);
 }
 
 #endif
