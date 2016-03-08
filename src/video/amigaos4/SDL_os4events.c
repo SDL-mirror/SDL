@@ -24,6 +24,7 @@
 
 #include "SDL_os4video.h"
 #include "SDL_os4opengl.h"
+#include "SDL_os4shape.h"
 
 #include "../../events/SDL_keyboard_c.h"
 #include "../../events/SDL_mouse_c.h"
