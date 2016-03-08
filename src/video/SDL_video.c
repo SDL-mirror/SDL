@@ -1183,13 +1183,13 @@ SDL_UpdateFullscreenMode(SDL_Window * window, SDL_bool fullscreen)
 }
 
 #ifdef __AMIGAOS4__
-	/* Without this hack, SDL would trigger us to open a window before screen which causes unnecessary
-	work, because then we would have to close the window first and re-open it on the custom screen */
-	#define CREATE_FLAGS \
-		(SDL_WINDOW_OPENGL | SDL_WINDOW_BORDERLESS | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_FULLSCREEN)
+    /* Without this hack, SDL would trigger us to open a window before screen which causes unnecessary
+    work, because then we would have to close the window first and re-open it on the custom screen */
+    #define CREATE_FLAGS \
+        (SDL_WINDOW_OPENGL | SDL_WINDOW_BORDERLESS | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_FULLSCREEN)
 #else
-	#define CREATE_FLAGS \
-		(SDL_WINDOW_OPENGL | SDL_WINDOW_BORDERLESS | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI)
+    #define CREATE_FLAGS \
+        (SDL_WINDOW_OPENGL | SDL_WINDOW_BORDERLESS | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI)
 #endif
 
 static void
@@ -1404,6 +1404,10 @@ SDL_RecreateWindow(SDL_Window * window, Uint32 flags)
             }
             return -1;
         }
+    }
+
+    if (flags & SDL_WINDOW_FOREIGN) {
+        window->flags |= SDL_WINDOW_FOREIGN;
     }
 
     if (title) {
@@ -3310,11 +3314,11 @@ SDL_ShowMessageBox(const SDL_MessageBoxData *messageboxdata, int *buttonid)
     }
 #endif
 #if SDL_VIDEO_DRIVER_AMIGAOS4
-	if (retval == -1 &&
-		SDL_MessageboxValidForDriver(messageboxdata, SDL_SYSWM_OS4) &&
-		OS4_ShowMessageBox(messageboxdata, buttonid) == 0) {
-		retval = 0;
-	}
+    if (retval == -1 &&
+        SDL_MessageboxValidForDriver(messageboxdata, SDL_SYSWM_OS4) &&
+        OS4_ShowMessageBox(messageboxdata, buttonid) == 0) {
+        retval = 0;
+    }
 #endif
     if (retval == -1) {
         SDL_SetError("No message system available");
