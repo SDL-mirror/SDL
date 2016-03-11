@@ -448,8 +448,10 @@ OS4_SetWindowGrabInternal(_THIS, struct Window * w, BOOL activate)
 			w->Height - w->BorderTop  - w->BorderBottom
 		};
 
-		IIntuition->SetWindowAttrs(w, WA_MouseLimits, &grabBox, sizeof(grabBox));
-		IIntuition->SetWindowAttrs(w, WA_GrabFocus, activate ? POINTER_GRAB_TIMEOUT : 0, sizeof(ULONG));
+		IIntuition->SetWindowAttrs(w,
+			WA_MouseLimits, activate ? &grabBox : NULL,
+			WA_GrabFocus, activate ? POINTER_GRAB_TIMEOUT : 0,
+			TAG_DONE);
 
 		dprintf("Window %p ('%s') input was %s\n", w, w->Title, (activate == TRUE) ? "grabbed" : "released");
 	}
