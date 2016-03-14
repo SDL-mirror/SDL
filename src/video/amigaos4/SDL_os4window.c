@@ -28,6 +28,8 @@
 
 #include "SDL_syswm.h"
 
+#include <unistd.h> // usleep
+
 #define DEBUG
 #include "../../main/amigaos4/SDL_os4debug.h"
 
@@ -151,12 +153,12 @@ static struct Screen *
 OS4_GetScreenForWindow(_THIS, SDL_VideoDisplay * display)
 {
 	if (display) {
-        SDL_DisplayData *displaydata = (SDL_DisplayData *) display->driverdata;
+		SDL_DisplayData *displaydata = (SDL_DisplayData *) display->driverdata;
 
 		dprintf("Fullscreen\n");
 		return displaydata->screen;
 	} else {
-	    SDL_VideoData *videodata = (SDL_VideoData *) _this->driverdata;
+		SDL_VideoData *videodata = (SDL_VideoData *) _this->driverdata;
 
 		dprintf("Window mode\n");
 		return videodata->publicScreen;
@@ -301,10 +303,40 @@ OS4_SetWindowPosition(_THIS, SDL_Window * window)
 		int32 windowX = OS4_CalculateWindowX(_this, window, screen);
 		int32 windowY = OS4_CalculateWindowY(_this, window, screen);
 	
-		IIntuition->SetWindowAttrs(data->syswin,
+		LONG ret = IIntuition->SetWindowAttrs(data->syswin,
 			WA_Left, windowX,
 			WA_Top, windowY,
 			TAG_DONE);
+
+		if (ret) {
+			dprintf("SetWindowAttrs() returned %d\n", ret);
+		}
+	}
+}
+
+/* HACK: since window resizing doesn't not seem to happen immediately,
+wait until it's done to avoid issues where following GetDrawableSize()
+would return old size! */
+static void
+OS4_WaitForResize(_THIS, struct Window * window, int newWidth, int newHeight)
+{
+	int counter = 0;
+
+	while (counter++ < 100) {
+		int width = 0;
+		int height = 0;
+
+		IIntuition->GetWindowAttrs(window,
+			WA_InnerWidth, &width,
+			WA_InnerHeight, &height,
+			TAG_DONE);
+
+		if (width != newWidth || height != newHeight) {
+			dprintf("Waiting for Intuition %d\n", counter);
+			usleep(1000);
+		} else {
+			break;
+		}
 	}
 }
 
@@ -324,6 +356,7 @@ OS4_SetWindowSize(_THIS, SDL_Window * window)
 						TAG_DONE);
 
 		if (width != window->w || height != window->h) {
+			LONG ret;
 
 			dprintf("New window size %d*%d\n", window->w, window->h);
 
@@ -331,12 +364,18 @@ OS4_SetWindowSize(_THIS, SDL_Window * window)
 				OS4_ResizeWindowShape(window);
 			}
 
-			IIntuition->SetWindowAttrs(data->syswin,
+			ret = IIntuition->SetWindowAttrs(data->syswin,
 				WA_InnerWidth, window->w,
 				WA_InnerHeight, window->h,
 				TAG_DONE);
 
-	    	if (window->flags & SDL_WINDOW_OPENGL) {
+			if (ret) {
+				dprintf("SetWindowAttrs() returned %d\n", ret);
+			}
+
+			OS4_WaitForResize(_this, data->syswin, window->w, window->h);
+
+			if (window->flags & SDL_WINDOW_OPENGL) {
 				OS4_GL_ResizeContext(_this, window);
 			}
 		} else {
@@ -356,9 +395,13 @@ OS4_ShowWindow(_THIS, SDL_Window * window)
 	if (data && data->syswin) {
 	
 		// TODO: could use ShowWindow but what we pass for the Other?
-		IIntuition->SetWindowAttrs(data->syswin,
+		LONG ret = IIntuition->SetWindowAttrs(data->syswin,
 			WA_Hidden, FALSE,
 			TAG_DONE);
+
+		if (ret) {
+			dprintf("SetWindowAttrs() returned %d\n", ret);
+		}
 	}
 }
 
@@ -448,12 +491,17 @@ OS4_SetWindowGrabInternal(_THIS, struct Window * w, BOOL activate)
 			w->Height - w->BorderTop  - w->BorderBottom
 		};
 
-		IIntuition->SetWindowAttrs(w,
+		LONG ret = IIntuition->SetWindowAttrs(w,
 			WA_MouseLimits, activate ? &grabBox : NULL,
 			WA_GrabFocus, activate ? POINTER_GRAB_TIMEOUT : 0,
 			TAG_DONE);
 
-		dprintf("Window %p ('%s') input was %s\n", w, w->Title, (activate == TRUE) ? "grabbed" : "released");
+		if (ret) {
+			dprintf("SetWindowAttrs() returned %d\n", ret);
+		} else {
+			dprintf("Window %p ('%s') input was %s\n",
+			    w, w->Title, (activate == TRUE) ? "grabbed" : "released");
+		}
 	}
 }
 

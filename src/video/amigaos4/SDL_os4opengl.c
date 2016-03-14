@@ -237,8 +237,6 @@ int OS4_GL_MakeCurrent(_THIS, SDL_Window * window, SDL_GLContext context)
 
 void OS4_GL_GetDrawableSize(_THIS, SDL_Window * window, int *w, int *h)
 {
-	dprintf("Called\n");
-
 	if (_this->gl_config.driver_loaded) {
 		SDL_WindowData * data = window->driverdata;
 		int width, height;
@@ -250,6 +248,8 @@ void OS4_GL_GetDrawableSize(_THIS, SDL_Window * window, int *w, int *h)
 						TAG_DONE);
 		*w = width;
 		*h = height;
+
+		dprintf("w=%d, h=%d\n", *w, *h);
 	} else {
 		dprintf("No OpenGL\n");
 		SDL_SetError("OpenGL not available");
@@ -375,7 +375,7 @@ SDL_bool OS4_GL_ResizeContext(_THIS, SDL_Window * window)
 
 			if (OS4_GL_AllocateBuffers(_this, window->w, window->h, 16 /* FIXME */, data)) {
 
-				dprintf("Resizing context\n");
+				dprintf("Resizing context to %d*%d\n", window->w, window->h);
 
 				data->IGL->MGLUpdateContextTags(
 								MGLCC_FrontBuffer, data->glFrontBuffer,
