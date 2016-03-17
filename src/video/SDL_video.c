@@ -124,7 +124,12 @@ static SDL_VideoDevice *_this = NULL;
         return retval; \
     }
 
+#ifdef __AMIGAOS4__
+/* Let's have only one kind of full screen */
+#define FULLSCREEN_MASK ( SDL_WINDOW_FULLSCREEN )
+#else
 #define FULLSCREEN_MASK ( SDL_WINDOW_FULLSCREEN_DESKTOP | SDL_WINDOW_FULLSCREEN )
+#endif
 
 #ifdef __MACOSX__
 /* Support for Mac OS X fullscreen spaces */

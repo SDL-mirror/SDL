@@ -35,6 +35,11 @@
 
 static void OS4_CloseWindowInternal(_THIS, struct Window * window);
 
+static SDL_bool OS4_IsFullscreen(SDL_Window * window)
+{
+	return (window->flags & (SDL_WINDOW_FULLSCREEN | SDL_WINDOW_FULLSCREEN_DESKTOP));
+}
+
 static int
 OS4_SetupWindowData(_THIS, SDL_Window * sdlwin, struct Window * syswin)
 {
@@ -117,38 +122,6 @@ static uint32 OS4_GetWindowFlags(SDL_Window * window, SDL_bool fullscreen)
 	return windowFlags;
 }
 
-static int32 OS4_CalculateWindowX(_THIS, SDL_Window * window, struct Screen * screen)
-{
-	int32 x;
-
-	dprintf("Called\n");
-
-	if (window->x == SDL_WINDOWPOS_CENTERED) {
-		/* Approximation: this doesn't know about window borders */
-		x = (screen->Width - window->w) / 2;
-	} else {
-		x = window->x;
-	}
-
-	return x;
-}
-
-static int32 OS4_CalculateWindowY(_THIS, SDL_Window * window, struct Screen * screen)
-{
-	int32 y;
-
-	dprintf("Called\n");
-
-	if (window->y == SDL_WINDOWPOS_CENTERED) {
-		/* Approximation: this doesn't know about window borders */
-		y = (screen->Height - window->h) / 2;
-	} else {
-		y = window->y;
-	}
-
-	return y;
-}
-
 static struct Screen *
 OS4_GetScreenForWindow(_THIS, SDL_VideoDisplay * display)
 {
@@ -178,20 +151,16 @@ OS4_CreateWindowInternal(_THIS, SDL_Window * window, SDL_VideoDisplay * display)
 
 	struct Screen *screen = OS4_GetScreenForWindow(_this, display);
 
-	int32 windowX = OS4_CalculateWindowX(_this, window, screen);
-	int32 windowY = OS4_CalculateWindowY(_this, window, screen);
-
-
 	dprintf("Trying to open window '%s' at (%d,%d) of size (%dx%d)\n",
-		window->title, windowX, windowY, window->w, window->h);
+		window->title, window->x, window->y, window->w, window->h);
 
 	syswin = IIntuition->OpenWindowTags(
 		NULL,
 		WA_PubScreen, screen,
-		WA_Title, window->title,
+		WA_Title, fullscreen ? NULL : window->title,
 		WA_ScreenTitle, window->title,
-		WA_Left, windowX,
-		WA_Top, windowY,
+		WA_Left, window->x,
+		WA_Top, window->y,
 		WA_InnerWidth, window->w,
 		WA_InnerHeight, window->h,
 		WA_Flags, windowFlags,
@@ -221,7 +190,7 @@ OS4_CreateWindowInternal(_THIS, SDL_Window * window, SDL_VideoDisplay * display)
 			-1);
 	}
 
-	if (window->flags & SDL_WINDOW_FULLSCREEN) {
+	if (OS4_IsFullscreen(window)) {
 		IIntuition->ScreenToFront(screen);
 	}
 
@@ -235,7 +204,7 @@ OS4_CreateWindow(_THIS, SDL_Window * window)
 {	 
 	struct Window *syswin = NULL;
 
-	if (window->flags & SDL_WINDOW_FULLSCREEN) {
+	if (OS4_IsFullscreen(window)) {
 		// We may not have the screen opened yet, so let's wait that SDL calls us back with
 		// SDL_SetWindowFullscreen() and open the window then.
 		dprintf("Open fullscreen window with delay\n");
@@ -298,14 +267,10 @@ OS4_SetWindowPosition(_THIS, SDL_Window * window)
 	dprintf("Called\n");
 
 	if (data && data->syswin) {
-		struct Screen * screen = data->syswin->WScreen;
-
-		int32 windowX = OS4_CalculateWindowX(_this, window, screen);
-		int32 windowY = OS4_CalculateWindowY(_this, window, screen);
 	
 		LONG ret = IIntuition->SetWindowAttrs(data->syswin,
-			WA_Left, windowX,
-			WA_Top, windowY,
+			WA_Left, window->x,
+			WA_Top, window->y,
 			TAG_DONE);
 
 		if (ret) {
@@ -444,6 +409,8 @@ OS4_CloseWindowInternal(_THIS, struct Window * window)
 
 void OS4_SetWindowFullscreen(_THIS, SDL_Window * window, SDL_VideoDisplay * display, SDL_bool fullscreen)
 {
+	dprintf("Trying to set '%s' into %s mode\n", window->title, fullscreen ? "fullscreen" : "window");
+
     if (window->is_destroying) {
 		// This function gets also called during window closing
 		dprintf("Window '%s' is being destroyed, mode change ignored\n", window->title);

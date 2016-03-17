@@ -139,12 +139,12 @@ OS4_GetDisplayBounds(_THIS, SDL_VideoDisplay * display, SDL_Rect * rect)
 {
 	SDL_DisplayModeData *data = (SDL_DisplayModeData *) display->current_mode.driverdata;
 
-	dprintf("Called\n");
-
 	rect->x = data->x;
 	rect->y = data->y;
 	rect->w = display->current_mode.w;
 	rect->h = display->current_mode.h;
+
+	dprintf("x=%d, y=%d, w=%d, h=%d\n", rect->x, rect->y, rect->w, rect->h);
 
 	return 0;
 }
@@ -250,6 +250,10 @@ OS4_SetDisplayMode(_THIS, SDL_VideoDisplay * display, SDL_DisplayMode * mode)
 		}
 		return -1;
 	}
+
+	/* Paint it black (it helps in cases where window doesn't fill the screen)
+	...do we need a backfill hook? */
+	IGraphics->RectFillColor(&displaydata->screen->RastPort, 0, 0, mode->w - 1, mode->h - 1, 0xFF000000);
 
 	return 0;
 }

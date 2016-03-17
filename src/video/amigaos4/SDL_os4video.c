@@ -286,7 +286,7 @@ OS4_CreateDevice(int devindex)
 	SDL_VideoDevice *device;
 	SDL_VideoData *data;
 
-	dprintf("Called\n");
+	dprintf("*** SDL2 video initialization starts ***\n");
 
 	/* Initialize all variables that we clean on shutdown */
 	device = (SDL_VideoDevice *) SDL_calloc(1, sizeof(SDL_VideoDevice));
