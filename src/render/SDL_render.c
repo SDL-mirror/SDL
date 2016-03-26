@@ -47,6 +47,9 @@
 
 #if !SDL_RENDER_DISABLED
 static const SDL_RenderDriver *render_drivers[] = {
+#if SDL_VIDEO_RENDER_AMIGAOS4
+	&OS4_RenderDriver,
+#endif
 #if SDL_VIDEO_RENDER_D3D
     &D3D_RenderDriver,
 #endif
