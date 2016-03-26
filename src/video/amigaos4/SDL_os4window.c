@@ -340,7 +340,7 @@ OS4_SetWindowSize(_THIS, SDL_Window * window)
 
 			OS4_WaitForResize(_this, data->syswin, window->w, window->h);
 
-			if (window->flags & SDL_WINDOW_OPENGL) {
+			if (data->IGL /*window->flags & SDL_WINDOW_OPENGL*/) {
 				OS4_GL_ResizeContext(_this, window);
 			}
 		} else {
@@ -448,7 +448,7 @@ void OS4_SetWindowFullscreen(_THIS, SDL_Window * window, SDL_VideoDisplay * disp
 
 /* This may be called from os4events.c, too */
 void
-OS4_SetWindowGrabInternal(_THIS, struct Window * w, BOOL activate)
+OS4_SetWindowGrabInternal(_THIS, struct Window * w, SDL_bool activate)
 {
 	if (w) {
 		struct IBox grabBox = {
@@ -467,7 +467,7 @@ OS4_SetWindowGrabInternal(_THIS, struct Window * w, BOOL activate)
 			dprintf("SetWindowAttrs() returned %d\n", ret);
 		} else {
 			dprintf("Window %p ('%s') input was %s\n",
-			    w, w->Title, (activate == TRUE) ? "grabbed" : "released");
+				w, w->Title, activate ? "grabbed" : "released");
 		}
 	}
 }
@@ -478,7 +478,7 @@ OS4_SetWindowGrab(_THIS, SDL_Window * window, SDL_bool grabbed)
 	SDL_WindowData *data = window->driverdata;
 
 	if (data) {
-		OS4_SetWindowGrabInternal(_this, data->syswin, grabbed ? TRUE : FALSE);
+		OS4_SetWindowGrabInternal(_this, data->syswin, grabbed);
 		data->pointerGrabTicks = 0;
 	}
 }

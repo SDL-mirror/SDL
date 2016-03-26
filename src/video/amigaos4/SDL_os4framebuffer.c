@@ -27,7 +27,8 @@
 #define DEBUG
 #include "../../main/amigaos4/SDL_os4debug.h"
 
-static PIX_FMT OS4_DepthToPixf(int depth)
+static PIX_FMT
+OS4_DepthToPixf(int depth)
 {
 	switch (depth) {
 		case 32: return PIXF_A8R8G8B8;
@@ -37,7 +38,8 @@ static PIX_FMT OS4_DepthToPixf(int depth)
 	}
 }
 
-static Uint32 OS4_PixfToSdlPixelFormat(PIX_FMT from)
+static Uint32
+OS4_PixfToSdlPixelFormat(PIX_FMT from)
 {
 	switch (from)
 	{

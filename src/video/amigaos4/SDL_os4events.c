@@ -226,6 +226,8 @@ OS4_HandleResize(_THIS, struct MyIntuiMessage *imsg)
 
 	if (sdlwin) {
 		if (imsg->Width != sdlwin->w || imsg->Height != sdlwin->h) {
+			SDL_WindowData * data = (SDL_WindowData *)sdlwin->driverdata;
+
 			SDL_SendWindowEvent(sdlwin, SDL_WINDOWEVENT_RESIZED,
 				imsg->Width, imsg->Height);
 
@@ -233,7 +235,7 @@ OS4_HandleResize(_THIS, struct MyIntuiMessage *imsg)
 				OS4_ResizeWindowShape(sdlwin);
         	}
 
-			if (sdlwin->flags & SDL_WINDOW_OPENGL) {
+			if (data->IGL /*sdlwin->flags & SDL_WINDOW_OPENGL*/ ) {
 				OS4_GL_ResizeContext(_this, sdlwin);
 			}
 		}
