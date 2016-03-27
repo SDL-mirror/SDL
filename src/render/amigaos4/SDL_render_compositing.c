@@ -30,6 +30,7 @@
 #include "../../video/amigaos4/SDL_os4video.h"
 
 #include <proto/graphics.h>
+#include <proto/layers.h>
 #include <intuition/intuition.h>
 
 #define DEBUG
@@ -80,9 +81,10 @@ static int OS4_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
 static int OS4_RenderCopyEx(SDL_Renderer * renderer, SDL_Texture * texture,
                           const SDL_Rect * srcrect, const SDL_FRect * dstrect,
                           const double angle, const SDL_FPoint * center, const SDL_RendererFlip flip);
+*/
 static int OS4_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
                                Uint32 format, void * pixels, int pitch);
-*/
+
 static void OS4_RenderPresent(SDL_Renderer * renderer);
 
 static void OS4_DestroyTexture(SDL_Renderer * renderer, SDL_Texture * texture);
@@ -113,6 +115,7 @@ SDL_RenderDriver OS4_RenderDriver = {
 typedef struct
 {
 	struct GraphicsIFace *iGraphics;
+	struct LayersIFace * iLayers;
 	struct BitMap *bitmap;
 	struct BitMap *target;
 	struct RastPort rastport;
@@ -136,7 +139,7 @@ OS4_ActivateRenderer(SDL_Renderer * renderer)
 
 		int width = renderer->window->w;
 		int height = renderer->window->h;
-		int depth = 32; // TODO, more formats needed?
+		int depth = 32;
 
 		dprintf("Allocating bitmap %d*%d*%d\n", width, height, depth);
 
@@ -163,6 +166,7 @@ OS4_ActivateRenderer(SDL_Renderer * renderer)
 SDL_Renderer *
 OS4_CreateRenderer(SDL_Window * window, Uint32 flags)
 {
+	SDL_VideoData *videodata = (SDL_VideoData *)SDL_GetVideoDevice()->driverdata;
 	SDL_Renderer *renderer;
 	OS4_RenderData *data;
 
@@ -199,7 +203,7 @@ OS4_CreateRenderer(SDL_Window * window, Uint32 flags)
 	renderer->RenderFillRects = OS4_RenderFillRects;
 	renderer->RenderCopy = OS4_RenderCopy;
 	//renderer->RenderCopyEx = OS4_RenderCopyEx;
-	//renderer->RenderReadPixels = OS4_RenderReadPixels;
+	renderer->RenderReadPixels = OS4_RenderReadPixels;
 	renderer->RenderPresent = OS4_RenderPresent;
 	renderer->DestroyTexture = OS4_DestroyTexture;
 	renderer->DestroyRenderer = OS4_DestroyRenderer;
@@ -207,7 +211,8 @@ OS4_CreateRenderer(SDL_Window * window, Uint32 flags)
 
     renderer->driverdata = data;
 
-	data->iGraphics = ((SDL_VideoData *)SDL_GetVideoDevice()->driverdata)->iGraphics;
+	data->iGraphics = videodata->iGraphics;
+	data->iLayers = videodata->iLayers;
 
 	data->iGraphics->InitRastPort(&data->rastport);
 
@@ -287,22 +292,18 @@ OS4_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 		//BMATags_Friend, data->bitmap,
 		TAG_DONE);
 
+	if (!texturedata->bitmap) {
+		dprintf("Failed to allocate bitmap\n");
+		SDL_free(texturedata);
+        return -1;
+    }
+
 	/* TODO:
 	SDL_SetSurfaceColorMod(texture->driverdata, texture->r, texture->g,
                            texture->b);
     SDL_SetSurfaceAlphaMod(texture->driverdata, texture->a);
     SDL_SetSurfaceBlendMode(texture->driverdata, texture->blendMode);
 	*/
-
-	// TODO: for dynamic textures, shall we also create a RAM buffer?
-
-	//if (texture->access == SDL_TEXTUREACCESS_STATIC) {}
-
-	if (!texturedata->bitmap) {
-		dprintf("Failed to allocate bitmap\n");
-		SDL_free(texturedata);
-        return -1;
-    }
 
 	texture->driverdata = texturedata;
 
@@ -353,52 +354,24 @@ OS4_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
 {
 	OS4_RenderData *data = (OS4_RenderData *) renderer->driverdata;
 	OS4_TextureData *texturedata = (OS4_TextureData *) texture->driverdata;
-	
-	APTR baseaddress;
-	uint32 bytesperrow;
 
-	//dprintf("Called %p\n", texturedata->bitmap);
-
-	texturedata->lock = data->iGraphics->LockBitMapTags(
-		texturedata->bitmap,
-		LBM_BaseAddress, &baseaddress,
-		LBM_BytesPerRow, &bytesperrow,
+	int32 ret = data->iGraphics->BltBitMapTags(
+		BLITA_Source, pixels,
+		BLITA_SrcType, BLITT_ARGB32,
+		BLITA_SrcBytesPerRow, pitch,
+		BLITA_Dest, texturedata->bitmap,
+		BLITA_DestX, rect->x,
+		BLITA_DestY, rect->y,
+		BLITA_Width, rect->w,
+		BLITA_Height, rect->h,
 		TAG_DONE);
 
-	if (texturedata->lock) {
-	    int row;
-
-		Uint32 *src;
-		Uint32 *dst;
-
-		pitch /= 4;
-		bytesperrow /= 4;
-
-		// Optimized for 32-bit pixel copy
-		src = (Uint32 *) pixels;
-		dst = (Uint32 *) baseaddress +
-						 rect->y * bytesperrow +
-						 rect->x;
-
-		for (row = 0; row < rect->h; ++row) {
-			int col;
-			
-			for (col = 0; col < rect->w; ++col) {
-				dst[col] = src[col];
-			}
-
-			src += pitch;
-			dst += bytesperrow;
-		}
-
-		data->iGraphics->UnlockBitMap(texturedata->lock);
-		texturedata->lock = NULL;
-	} else {
-		dprintf("Lock failed\n");
+	if (ret != -1) {
+		dprintf("BltBitMapTags(): %d\n", ret);
 		return -1;
 	}
 
-    return 0;
+	return 0;
 }
 
 static int
@@ -515,7 +488,7 @@ OS4_UpdateClipRect(SDL_Renderer * renderer)
         } else {
             SDL_SetClipRect(surface, NULL);
         }
-'	 //}
+    //}
 */
     return 0;
 }
@@ -527,7 +500,7 @@ OS4_RenderClear(SDL_Renderer * renderer)
     Uint32 color;
 
 	OS4_RenderData *data = (OS4_RenderData *) renderer->driverdata;
-Sint32 s = SDL_GetTicks();
+	//Sint32 s = SDL_GetTicks();
 	//dprintf("Called\n");
 
 	if (!bitmap) {
@@ -549,7 +522,7 @@ Sint32 s = SDL_GetTicks();
 		renderer->window->h - 1,
 		color); // graphics.lib v54!
 
-//dprintf("Took %d\n", SDL_GetTicks() - s);
+    //dprintf("Took %d\n", SDL_GetTicks() - s);
 
 	return 0;
 }
@@ -706,7 +679,8 @@ OS4_RenderFillRects(SDL_Renderer * renderer, const SDL_FRect * rects, int count)
     int i, status;
 
 	//dprintf("Called for %d rects\n", count);
-Sint32 s = SDL_GetTicks();
+	//Sint32 s = SDL_GetTicks();
+	
 	if (!bitmap) {
         return -1;
     }
@@ -770,7 +744,7 @@ Sint32 s = SDL_GetTicks();
 		status = 0;
     }
     SDL_stack_free(final_rects);
-//dprintf("Took %d\n", SDL_GetTicks() - s);
+    //dprintf("Took %d\n", SDL_GetTicks() - s);
 
     return status;
 }
@@ -791,7 +765,7 @@ OS4_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
 	uint32 flags, ret_code;
 
 	//dprintf("Called\n");
-Sint32 s = SDL_GetTicks();
+	//Sint32 s = SDL_GetTicks();
 	if (!dst) {
         return -1;
     }
@@ -839,13 +813,14 @@ Sint32 s = SDL_GetTicks();
 		COMPTAG_Flags,      flags,
 		TAG_END);
 
-		if (ret_code) {
-			dprintf("CompositeTags: %d\n", ret_code);
-		}
+	if (ret_code) {
+		dprintf("CompositeTags: %d\n", ret_code);
+		return -1;
+	}
 
-//dprintf("Took %d\n", SDL_GetTicks() - s);
+    //dprintf("Took %d\n", SDL_GetTicks() - s);
 
-	return (ret_code == 0) ? 0 : -1;
+	return 0;
 }
 
 /*
@@ -953,17 +928,18 @@ SW_RenderCopyEx(SDL_Renderer * renderer, SDL_Texture * texture,
 }
 #endif
 
-/*
 static int
-SW_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
+OS4_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
                     Uint32 format, void * pixels, int pitch)
 {
-    SDL_Surface *surface = SW_ActivateRenderer(renderer);
-    Uint32 src_format;
-    void *src_pixels;
-    SDL_Rect final_rect;
+	OS4_RenderData *data = (OS4_RenderData *) renderer->driverdata;
+	SDL_Rect final_rect;
+	
+	struct BitMap *bitmap = OS4_ActivateRenderer(renderer);
 
-    if (!surface) {
+	dprintf("Called\n");
+
+	if (!bitmap) {
         return -1;
     }
 
@@ -975,21 +951,31 @@ SW_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
         rect = &final_rect;
     }
 
-    if (rect->x < 0 || rect->x+rect->w > surface->w ||
-        rect->y < 0 || rect->y+rect->h > surface->h) {
-        return SDL_SetError("Tried to read outside of surface bounds");
+	if (rect->x < 0 || rect->x+rect->w > renderer->window->w ||
+		rect->y < 0 || rect->y+rect->h > renderer->window->h) {
+		return SDL_SetError("Tried to read outside of surface bounds");
     }
 
-    src_format = surface->format->format;
-    src_pixels = (void*)((Uint8 *) surface->pixels +
-                    rect->y * surface->pitch +
-                    rect->x * surface->format->BytesPerPixel);
+	if (format != SDL_PIXELFORMAT_ARGB8888) {
+		return SDL_SetError("Unsupported pixel format");
+	}
 
-    return SDL_ConvertPixels(rect->w, rect->h,
-                             src_format, src_pixels, surface->pitch,
-                             format, pixels, pitch);
+	data->rastport.BitMap = bitmap;
+
+	data->iGraphics->ReadPixelArray(
+		&data->rastport,
+		rect->x,
+		rect->y,
+		pixels,
+		0,
+		0,
+		pitch,
+		PIXF_A8R8G8B8,
+		rect->w,
+		rect->h);
+
+	return 0;
 }
-*/
 
 static void
 OS4_RenderPresent(SDL_Renderer * renderer)
@@ -997,15 +983,20 @@ OS4_RenderPresent(SDL_Renderer * renderer)
     SDL_Window *window = renderer->window;
 
 	//dprintf("Called\n");
-Uint32 s = SDL_GetTicks();
-    if (window) {
+	//Uint32 s = SDL_GetTicks();
+	
+	if (window) {
 		//SDL_UpdateWindowSurface(window);
 		OS4_RenderData *data = (OS4_RenderData *)renderer->driverdata;
 		SDL_WindowData *windowdata = (SDL_WindowData *)window->driverdata;
 
 		struct Window *syswin = windowdata->syswin;
 
+		// TODO: should we take viewport into account?
+		// TODO: VSYNC
 		if (syswin) {
+			data->iLayers->LockLayer(0, syswin->WLayer);
+			
 			int32 ret = data->iGraphics->BltBitMapTags(
 				BLITA_Source, data->bitmap,
 				BLITA_DestType, data->target ? BLITT_BITMAP : BLITT_RASTPORT,
@@ -1015,13 +1006,15 @@ Uint32 s = SDL_GetTicks();
 				BLITA_Width, window->w,
 				BLITA_Height, window->h,
 				TAG_DONE);
+			
+			data->iLayers->UnlockLayer(syswin->WLayer);
 
 			if (ret != -1) {
 				dprintf("BltBitMapTags(): %d\n", ret);
 			}
 		}
     }
-//dprintf("Took %d\n", SDL_GetTicks() - s);
+    //dprintf("Took %d\n", SDL_GetTicks() - s);
 }
 
 static void
