@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2014 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2016 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -67,17 +67,19 @@ OS4_OpenLibraries(_THIS)
 {
 	dprintf("Called\n");
 
-	GfxBase       = IExec->OpenLibrary("graphics.library", MIN_LIB_VERSION);
+	GfxBase       = IExec->OpenLibrary("graphics.library", 54);
 	LayersBase    = IExec->OpenLibrary("layers.library", 53);
 	//P96Base       = IExec->OpenLibrary("Picasso96API.library", 0);
 	IntuitionBase = IExec->OpenLibrary("intuition.library", MIN_LIB_VERSION);
 	IconBase      = IExec->OpenLibrary("icon.library", MIN_LIB_VERSION);
 	WorkbenchBase = IExec->OpenLibrary("workbench.library", MIN_LIB_VERSION);
 	KeymapBase    = IExec->OpenLibrary("keymap.library", MIN_LIB_VERSION);
-	MiniGLBase    = IExec->OpenLibrary("minigl.library", 0);
+	MiniGLBase    = IExec->OpenLibrary("minigl.library", 2);
 
-	if (!GfxBase || !LayersBase || /*!P96Base ||*/ !IntuitionBase || !IconBase || !WorkbenchBase || !KeymapBase)
+	if (!GfxBase || !LayersBase || /*!P96Base ||*/ !IntuitionBase || !IconBase || !WorkbenchBase || !KeymapBase) {
+		dprintf("Failed to open system library\n");
 		return SDL_FALSE;
+	}
 
 	if (!MiniGLBase) {
 		dprintf("Failed to open minigl.library\n");
@@ -92,8 +94,10 @@ OS4_OpenLibraries(_THIS)
 	IKeymap    = (struct KeymapIFace *)    IExec->GetInterface(KeymapBase, "main", 1, NULL);
 	IMiniGL	   = (struct MiniGLIFace *)    IExec->GetInterface(MiniGLBase, "main", 1, NULL);
 
-	if (!IGraphics || !ILayers || /*!IP96 ||*/ !IIntuition || !IIcon || !IWorkbench || !IKeymap)
+	if (!IGraphics || !ILayers || /*!IP96 ||*/ !IIntuition || !IIcon || !IWorkbench || !IKeymap) {
+		dprintf("Failed to get library interface\n");
 		return SDL_FALSE;
+	}
 
 	if (!IMiniGL) {
 		dprintf("Failed to open MiniGL interace\n");
