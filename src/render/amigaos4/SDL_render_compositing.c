@@ -96,17 +96,10 @@ SDL_RenderDriver OS4_RenderDriver = {
 	OS4_CreateRenderer,
     {
 	 "compositing",
-	 SDL_RENDERER_ACCELERATED | SDL_RENDERER_TARGETTEXTURE,
+	 SDL_RENDERER_ACCELERATED | SDL_RENDERER_TARGETTEXTURE | SDL_RENDERER_PRESENTVSYNC,
 	 1,
      {
-	  //SDL_PIXELFORMAT_RGB555,
-	  //SDL_PIXELFORMAT_RGB565,
-	  //SDL_PIXELFORMAT_RGB888,
-	  //SDL_PIXELFORMAT_BGR888,
       SDL_PIXELFORMAT_ARGB8888,
-	  //SDL_PIXELFORMAT_RGBA8888,
-	  //SDL_PIXELFORMAT_ABGR8888,
-	  //SDL_PIXELFORMAT_BGRA8888
      },
      0,
      0}
@@ -128,6 +121,18 @@ typedef struct
 	APTR lock;
 } OS4_TextureData;
 
+static SDL_bool
+OS4_IsVsyncEnabled()
+{
+	const char *hint = SDL_GetHint(SDL_HINT_RENDER_VSYNC);
+
+	if (hint && *hint == '1') {
+		return SDL_TRUE;
+	}
+
+	return SDL_FALSE;
+}
+
 static struct BitMap *
 OS4_ActivateRenderer(SDL_Renderer * renderer)
 {
@@ -141,7 +146,7 @@ OS4_ActivateRenderer(SDL_Renderer * renderer)
 		int height = renderer->window->h;
 		int depth = 32;
 
-		dprintf("Allocating bitmap %d*%d*%d\n", width, height, depth);
+		dprintf("Allocating VRAM bitmap %d*%d*%d for renderer\n", width, height, depth);
 
 		data->bitmap = data->iGraphics->AllocBitMapTags(
 			width,
@@ -152,7 +157,9 @@ OS4_ActivateRenderer(SDL_Renderer * renderer)
 			//BMATags_Friend, windowdata->syswin->RPort->BitMap,
 			TAG_DONE);
 
-		if (data->bitmap) {			   
+	    data->rastport.BitMap = data->bitmap;
+
+		if (data->bitmap) {
 			OS4_UpdateViewport(renderer);
 			OS4_UpdateClipRect(renderer);
 		} else {
@@ -216,7 +223,7 @@ OS4_CreateRenderer(SDL_Window * window, Uint32 flags)
 
 	data->iGraphics->InitRastPort(&data->rastport);
 
-	//OS4_ActivateRenderer();
+	dprintf("VSYNC: %s\n", OS4_IsVsyncEnabled() ? "on" : "off");
 
 	return renderer;
 }
@@ -226,10 +233,15 @@ OS4_WindowEvent(SDL_Renderer * renderer, const SDL_WindowEvent *event)
 {
 	OS4_RenderData *data = (OS4_RenderData *) renderer->driverdata;
 
-	dprintf("Called\n");
+	dprintf("Called with event %d\n", event->event);
 
     if (event->event == SDL_WINDOWEVENT_SIZE_CHANGED) {
+
+		/* Next time ActivateRenderer() is called, new bitmap will be created */
 		if (data->bitmap) {
+
+			dprintf("Freeing renderer bitmap %p\n", data->bitmap);
+
 			data->iGraphics->FreeBitMap(data->bitmap);
 			data->bitmap = NULL;
 		}
@@ -260,6 +272,32 @@ OS4_GetOutputSize(SDL_Renderer * renderer, int *w, int *h)
     }
 }
 
+static SDL_bool
+OS4_IsBlendModeSupported(SDL_BlendMode mode)
+{
+	switch (mode) {
+		case SDL_BLENDMODE_NONE:
+		case SDL_BLENDMODE_BLEND:
+		case SDL_BLENDMODE_ADD:
+			dprintf("Texture blend mode: %d\n", mode);
+			return SDL_TRUE;
+		default:
+			dprintf("Not supported blend mode %d\n", mode);
+			return SDL_FALSE;
+	}
+}
+
+static SDL_bool
+OS4_IsColorModSupported(Uint8 r, Uint8 g, Uint8 b)
+{
+	if ((r & g & b) != 255) {
+		dprintf("Color mod not supported (%d, %d, %d)\n", r, g, b);
+		return SDL_FALSE;
+	}
+
+	return SDL_TRUE;
+}
+
 static int
 OS4_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 {
@@ -268,12 +306,13 @@ OS4_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 	OS4_RenderData *data = (OS4_RenderData *) renderer->driverdata;
 	OS4_TextureData *texturedata;
 
+	// TODO: should we block all but ARGB8888?
     if (!SDL_PixelFormatEnumToMasks
         (texture->format, &bpp, &Rmask, &Gmask, &Bmask, &Amask)) {
         return SDL_SetError("Unknown texture format");
     }
 
-	dprintf("Creating texture %d*%d*%d\n", texture->w, texture->h, bpp);
+	dprintf("Allocation VRAM bitmap %d*%d*%d for texture\n", texture->w, texture->h, bpp);
 
 	texturedata = SDL_calloc(1, sizeof(*texturedata));
 	if (!texturedata)
@@ -298,12 +337,9 @@ OS4_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
         return -1;
     }
 
-	/* TODO:
-	SDL_SetSurfaceColorMod(texture->driverdata, texture->r, texture->g,
-                           texture->b);
-    SDL_SetSurfaceAlphaMod(texture->driverdata, texture->a);
-    SDL_SetSurfaceBlendMode(texture->driverdata, texture->blendMode);
-	*/
+	/* Check texture parameters just for debug */
+	OS4_IsColorModSupported(texture->r, texture->g, texture->b);
+	OS4_IsBlendModeSupported(texture->blendMode);
 
 	texture->driverdata = texturedata;
 
@@ -313,25 +349,13 @@ OS4_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 static int
 OS4_SetTextureColorMod(SDL_Renderer * renderer, SDL_Texture * texture)
 {
-	/*
-	SDL_Surface *surface = (SDL_Surface *) texture->driverdata;
-    return SDL_SetSurfaceColorMod(surface, texture->r, texture->g,
-                                  texture->b);
-	*/
-
-	dprintf("TODO\n");
-	return 0;
+	return OS4_IsColorModSupported(texture->r, texture->g, texture->b) ? 0 : -1;
 }
 
 static int
 OS4_SetTextureAlphaMod(SDL_Renderer * renderer, SDL_Texture * texture)
 {
-	/*
-    SDL_Surface *surface = (SDL_Surface *) texture->driverdata;
-    return SDL_SetSurfaceAlphaMod(surface, texture->a);
-	*/
-
-	dprintf("TODO\n");
+	dprintf("Texture alpha %d\n", texture->a);
 	return 0;
 }
 
@@ -339,13 +363,7 @@ OS4_SetTextureAlphaMod(SDL_Renderer * renderer, SDL_Texture * texture)
 static int
 OS4_SetTextureBlendMode(SDL_Renderer * renderer, SDL_Texture * texture)
 {
-	/*
-    SDL_Surface *surface = (SDL_Surface *) texture->driverdata;
-    return SDL_SetSurfaceBlendMode(surface, texture->blendMode);
-	*/
-
-	dprintf("TODO\n");
-	return 0;
+	return OS4_IsBlendModeSupported(texture->blendMode) ? 0 : -1;
 }
 
 static int
@@ -395,7 +413,7 @@ OS4_LockTexture(SDL_Renderer * renderer, SDL_Texture * texture,
 	if (texturedata->lock) {
 	    *pixels =
 			 (void *) ((Uint8 *) baseaddress + rect->y * bytesperrow +
-				  rect->x * 4); // TODO: supports only 32-bit
+				  rect->x * 4);
 		
 		*pitch = bytesperrow;
 	
@@ -496,8 +514,9 @@ OS4_UpdateClipRect(SDL_Renderer * renderer)
 static int
 OS4_RenderClear(SDL_Renderer * renderer)
 {
-	struct BitMap *bitmap = OS4_ActivateRenderer(renderer);
     Uint32 color;
+
+	struct BitMap *bitmap = OS4_ActivateRenderer(renderer);
 
 	OS4_RenderData *data = (OS4_RenderData *) renderer->driverdata;
 	//Sint32 s = SDL_GetTicks();
@@ -511,8 +530,6 @@ OS4_RenderClear(SDL_Renderer * renderer)
 			renderer->r << 16 |
 			renderer->g << 8 |
 			renderer->b;
-
-	data->rastport.BitMap = data->bitmap;
 	
 	data->iGraphics->RectFillColor(
 		&data->rastport,
@@ -567,8 +584,6 @@ OS4_RenderDrawPoints(SDL_Renderer * renderer, const SDL_FPoint * points,
 			renderer->g << 8 |
 			renderer->b;
 
-		data->rastport.BitMap = bitmap;
-
 		// TODO: clipping?
 		for (i = 0; i < count; ++i) {
 			ret |= data->iGraphics->WritePixelColor(
@@ -577,7 +592,6 @@ OS4_RenderDrawPoints(SDL_Renderer * renderer, const SDL_FPoint * points,
 				final_points[i].y,
 				color);
 		}
-		//status = SDL_DrawPoints(surface, final_points, count, color);
 
     } else {
 		/*
@@ -636,8 +650,6 @@ OS4_RenderDrawLines(SDL_Renderer * renderer, const SDL_FPoint * points,
 			renderer->r << 16 |
 			renderer->g << 8 |
 			renderer->b;
-
-		data->rastport.BitMap = bitmap;
 		
 		data->iGraphics->SetRPAttrs(&data->rastport, RPTAG_APenColor, color, TAG_DONE);
 
@@ -716,8 +728,6 @@ OS4_RenderFillRects(SDL_Renderer * renderer, const SDL_FRect * rects, int count)
 				renderer->g << 8 |
 				renderer->b;
 
-		data->rastport.BitMap = data->bitmap;
-
 		// TODO: clipping?
 		for (i = 0; i < count; ++i) {
 			
@@ -750,6 +760,37 @@ OS4_RenderFillRects(SDL_Renderer * renderer, const SDL_FRect * rects, int count)
 }
 
 static int
+OS4_GetScaleQuality(void)
+{
+    const char *hint = SDL_GetHint(SDL_HINT_RENDER_SCALE_QUALITY);
+
+    if (!hint || *hint == '0' || SDL_strcasecmp(hint, "nearest") == 0) {
+        return 0;
+    } else {
+        return 1;
+    }
+}
+
+static uint32
+OS4_ConvertBlendMode(SDL_BlendMode mode)
+{
+	switch (mode) {
+		case SDL_BLENDMODE_NONE:
+			return COMPOSITE_Src;
+		case SDL_BLENDMODE_BLEND:
+			return COMPOSITE_Src_Over_Dest;
+		case SDL_BLENDMODE_ADD:
+			return COMPOSITE_Plus;
+		case SDL_BLENDMODE_MOD:
+			// This is not correct, but we can't do modulation at the moment
+			return COMPOSITE_Src_Over_Dest;
+		default:
+			dprintf("Yikes!\n");
+			return COMPOSITE_Src_Over_Dest;
+	}
+}
+
+static int
 OS4_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
               const SDL_Rect * srcrect, const SDL_FRect * dstrect)
 {
@@ -761,7 +802,7 @@ OS4_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
 
     SDL_Rect final_rect;
 
-	float scalex, scaley;
+	float scalex, scaley, alpha;
 	uint32 flags, ret_code;
 
 	//dprintf("Called\n");
@@ -779,25 +820,27 @@ OS4_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
     }
     final_rect.w = (int)dstrect->w;
     final_rect.h = (int)dstrect->h;
+	
+	if (texture->blendMode == SDL_BLENDMODE_NONE) {
+		alpha = 1.0f;
+	} else {
+		alpha = (float)texture->a / 255.0f;
+	}
 
-/*
-    if ( srcrect->w == final_rect.w && srcrect->h == final_rect.h ) {
-        return SDL_BlitSurface(src, srcrect, surface, &final_rect);
-    } else {
-        return SDL_BlitScaled(src, srcrect, surface, &final_rect);
-    }
-*/
 	flags = COMPFLAG_IgnoreDestAlpha | COMPFLAG_HardwareOnly;
+
+	if (OS4_GetScaleQuality()) {
+		flags |= COMPFLAG_SrcFilter;
+	}
 
 	scalex = srcrect->w ? (float)final_rect.w / srcrect->w : 1.0f;
 	scaley = srcrect->h ? (float)final_rect.h / srcrect->h : 1.0f;
 	
 	ret_code = data->iGraphics->CompositeTags(
-		COMPOSITE_Src_Over_Dest,
+		OS4_ConvertBlendMode(texture->blendMode),
 		src,
 		dst,
-		COMPTAG_SrcAlpha, COMP_FLOAT_TO_FIX(texture->a / 255.0f), // TODO: blend modes
-		//COMPTAG_SrcAlphaMask, colorkey_bm,
+		COMPTAG_SrcAlpha,   COMP_FLOAT_TO_FIX(alpha),
 		COMPTAG_SrcX,		srcrect->x,
 		COMPTAG_SrcY,		srcrect->y,
 		COMPTAG_SrcWidth,   srcrect->w,
@@ -808,8 +851,8 @@ OS4_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
 		COMPTAG_ScaleY,	    COMP_FLOAT_TO_FIX(scaley),
 		//COMPTAG_DestX,      dstrect->x, // TODO: clipping?
 		//COMPTAG_DestY,      dstrect->y,
-		//COMPTAG_DestWidth,  srcrect->w,
-		//COMPTAG_DestHeight, srcrect->h,
+		//COMPTAG_DestWidth,  final_rect.w,
+		//COMPTAG_DestHeight, final_rect.h,
 		COMPTAG_Flags,      flags,
 		TAG_END);
 
@@ -822,20 +865,6 @@ OS4_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
 
 	return 0;
 }
-
-/*
-static int
-GetScaleQuality(void)
-{
-    const char *hint = SDL_GetHint(SDL_HINT_RENDER_SCALE_QUALITY);
-
-    if (!hint || *hint == '0' || SDL_strcasecmp(hint, "nearest") == 0) {
-        return 0;
-    } else {
-        return 1;
-    }
-}
-*/
 
 #if 0
 static int
@@ -960,8 +989,6 @@ OS4_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
 		return SDL_SetError("Unsupported pixel format");
 	}
 
-	data->rastport.BitMap = bitmap;
-
 	data->iGraphics->ReadPixelArray(
 		&data->rastport,
 		rect->x,
@@ -986,28 +1013,35 @@ OS4_RenderPresent(SDL_Renderer * renderer)
 	//Uint32 s = SDL_GetTicks();
 	
 	if (window) {
-		//SDL_UpdateWindowSurface(window);
-		OS4_RenderData *data = (OS4_RenderData *)renderer->driverdata;
 		SDL_WindowData *windowdata = (SDL_WindowData *)window->driverdata;
 
 		struct Window *syswin = windowdata->syswin;
 
-		// TODO: should we take viewport into account?
-		// TODO: VSYNC
 		if (syswin) {
-			data->iLayers->LockLayer(0, syswin->WLayer);
+			OS4_RenderData *data = (OS4_RenderData *)renderer->driverdata;
+
+			if (OS4_IsVsyncEnabled()) {
+				data->iGraphics->WaitTOF();
+			}
 			
+			if (!data->target) {
+			    data->iLayers->LockLayer(0, syswin->WLayer);
+			}
+
+    		// TODO: should we take viewport into account?
 			int32 ret = data->iGraphics->BltBitMapTags(
 				BLITA_Source, data->bitmap,
 				BLITA_DestType, data->target ? BLITT_BITMAP : BLITT_RASTPORT,
-				BLITA_Dest, data->target ? (APTR) data->target : (APTR) syswin->RPort, // ?,
+				BLITA_Dest, data->target ? (APTR) data->target : (APTR) syswin->RPort,
 				BLITA_DestX, syswin->BorderLeft,
 				BLITA_DestY, syswin->BorderTop,
 				BLITA_Width, window->w,
 				BLITA_Height, window->h,
 				TAG_DONE);
 			
-			data->iLayers->UnlockLayer(syswin->WLayer);
+			if (!data->target) {
+			    data->iLayers->UnlockLayer(syswin->WLayer);
+			}
 
 			if (ret != -1) {
 				dprintf("BltBitMapTags(): %d\n", ret);
@@ -1023,10 +1057,10 @@ OS4_DestroyTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 	OS4_RenderData *data = (OS4_RenderData *) renderer->driverdata;
 	OS4_TextureData *texturedata = (OS4_TextureData *) texture->driverdata;
 
-	dprintf("Called %p %p\n", renderer, texture);
-
 	if (texturedata) {
 		if (texturedata->bitmap) {
+			dprintf("Freeing texture bitmap %p\n", texturedata->bitmap);
+
 			data->iGraphics->FreeBitMap(texturedata->bitmap);
 			texturedata->bitmap = NULL;
 		}
@@ -1040,9 +1074,9 @@ OS4_DestroyRenderer(SDL_Renderer * renderer)
 {
 	OS4_RenderData *data = (OS4_RenderData *) renderer->driverdata;
 
-	dprintf("Called\n");
-
 	if (data->bitmap) {
+		dprintf("Freeing renderer bitmap %p\n", data->bitmap);
+
 		data->iGraphics->FreeBitMap(data->bitmap);
 		data->bitmap = NULL;
 	}
