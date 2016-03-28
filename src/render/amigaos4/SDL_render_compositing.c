@@ -77,11 +77,11 @@ static int OS4_RenderFillRects(SDL_Renderer * renderer,
                               const SDL_FRect * rects, int count);
 static int OS4_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
                          const SDL_Rect * srcrect, const SDL_FRect * dstrect);
-/*
+
 static int OS4_RenderCopyEx(SDL_Renderer * renderer, SDL_Texture * texture,
                           const SDL_Rect * srcrect, const SDL_FRect * dstrect,
                           const double angle, const SDL_FPoint * center, const SDL_RendererFlip flip);
-*/
+
 static int OS4_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
                                Uint32 format, void * pixels, int pitch);
 
@@ -210,7 +210,7 @@ OS4_CreateRenderer(SDL_Window * window, Uint32 flags)
 	renderer->RenderDrawLines = OS4_RenderDrawLines;
 	renderer->RenderFillRects = OS4_RenderFillRects;
 	renderer->RenderCopy = OS4_RenderCopy;
-	//renderer->RenderCopyEx = OS4_RenderCopyEx;
+	renderer->RenderCopyEx = OS4_RenderCopyEx;
 	renderer->RenderReadPixels = OS4_RenderReadPixels;
 	renderer->RenderPresent = OS4_RenderPresent;
 	renderer->DestroyTexture = OS4_DestroyTexture;
@@ -289,14 +289,14 @@ OS4_IsBlendModeSupported(SDL_BlendMode mode)
 }
 
 static SDL_bool
-OS4_IsColorModSupported(Uint8 r, Uint8 g, Uint8 b)
+OS4_IsColorModEnabled(Uint8 r, Uint8 g, Uint8 b)
 {
 	if ((r & g & b) != 255) {
-		dprintf("Color mod not supported (%d, %d, %d)\n", r, g, b);
-		return SDL_FALSE;
+		dprintf("Color mod enabled (%d, %d, %d)\n", r, g, b);
+		return SDL_TRUE;
 	}
 
-	return SDL_TRUE;
+	return SDL_FALSE;
 }
 
 static int
@@ -341,7 +341,7 @@ OS4_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
     }
 
 	/* Check texture parameters just for debug */
-	OS4_IsColorModSupported(texture->r, texture->g, texture->b);
+	OS4_IsColorModEnabled(texture->r, texture->g, texture->b);
 	OS4_IsBlendModeSupported(texture->blendMode);
 
 	texture->driverdata = texturedata;
@@ -352,7 +352,9 @@ OS4_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 static int
 OS4_SetTextureColorMod(SDL_Renderer * renderer, SDL_Texture * texture)
 {
-	return OS4_IsColorModSupported(texture->r, texture->g, texture->b) ? 0 : -1;
+	OS4_IsColorModEnabled(texture->r, texture->g, texture->b);
+
+	return 0;
 }
 
 static int
@@ -786,6 +788,36 @@ OS4_ConvertBlendMode(SDL_BlendMode mode)
 	}
 }
 
+static uint32
+OS4_GetCompositeFlags(SDL_Texture * texture)
+{
+	uint32 flags = COMPFLAG_IgnoreDestAlpha | COMPFLAG_HardwareOnly;
+
+	if (OS4_GetScaleQuality()) {
+		flags |= COMPFLAG_SrcFilter;
+	}
+
+	if (OS4_IsColorModEnabled(texture->r, texture->g, texture->b)) {
+		flags |= COMPFLAG_Color1Modulate;
+	}
+
+	return flags;
+}
+
+static float
+OS4_GetCompositeAlpha(SDL_Texture * texture)
+{
+	float alpha;
+
+	if (texture->blendMode == SDL_BLENDMODE_NONE) {
+		alpha = 1.0f;
+	} else {
+		alpha = (float)texture->a / 255.0f;
+	}
+
+	return alpha;
+}
+
 static int
 OS4_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
               const SDL_Rect * srcrect, const SDL_FRect * dstrect)
@@ -799,7 +831,7 @@ OS4_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
     SDL_Rect final_rect;
 
 	float scalex, scaley, alpha;
-	uint32 flags, ret_code;
+	uint32 ret_code, colormod;
 
 	//dprintf("Called\n");
 	//Sint32 s = SDL_GetTicks();
@@ -823,11 +855,7 @@ OS4_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
 		alpha = (float)texture->a / 255.0f;
 	}
 
-	flags = COMPFLAG_IgnoreDestAlpha | COMPFLAG_HardwareOnly;
-
-	if (OS4_GetScaleQuality()) {
-		flags |= COMPFLAG_SrcFilter;
-	}
+	colormod = 0xFF << 24 | texture->r << 16 | texture->g << 8 | texture->b;
 
 	scalex = srcrect->w ? (float)final_rect.w / srcrect->w : 1.0f;
 	scaley = srcrect->h ? (float)final_rect.h / srcrect->h : 1.0f;
@@ -843,7 +871,7 @@ OS4_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
 		OS4_ConvertBlendMode(texture->blendMode),
 		src,
 		dst,
-		COMPTAG_SrcAlpha,   COMP_FLOAT_TO_FIX(alpha),
+		COMPTAG_SrcAlpha,   COMP_FLOAT_TO_FIX(OS4_GetCompositeAlpha(texture)),
 		COMPTAG_SrcX,		srcrect->x,
 		COMPTAG_SrcY,		srcrect->y,
 		COMPTAG_SrcWidth,   srcrect->w,
@@ -856,7 +884,8 @@ OS4_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
 		//COMPTAG_DestY,      dstrect->y,
 		//COMPTAG_DestWidth,  final_rect.w,
 		//COMPTAG_DestHeight, final_rect.h,
-		COMPTAG_Flags,      flags,
+		COMPTAG_Flags,      OS4_GetCompositeFlags(texture),
+		COMPTAG_Color1,	    colormod,
 		TAG_END);
 
 	if (ret_code) {
@@ -869,21 +898,92 @@ OS4_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
 	return 0;
 }
 
-#if 0
+typedef struct {
+	float x, y;
+	float s, t, w;
+} MyLittleVertex;
+
+static void
+OS4_FillVertexData(MyLittleVertex *vertices, const SDL_Rect * srcrect, const SDL_Rect *dstrect,
+	const SDL_RendererFlip flip)
+{
+	/* Flip texture coordinates if needed */
+	
+	Uint16 left, right, top, bottom, tmp;
+
+	left = srcrect->x;
+	right = left + srcrect->w;
+	top = srcrect->y;
+	bottom = top + srcrect->h;
+
+	if (flip == SDL_FLIP_NONE) {
+		// do nothing
+	} else if (flip == SDL_FLIP_HORIZONTAL) {
+		tmp = left;
+		left = right;
+		right = tmp;
+	} else if (flip == SDL_FLIP_VERTICAL) {
+		tmp = bottom;
+		bottom = top;
+		top = tmp;
+	} else {
+		dprintf("Unknown flip mode %d\n", flip);
+	}
+
+	/*
+	
+	Plan is to draw quad with two triangles:
+
+	v0-v3
+	| \ |
+	v1-v2
+	
+	*/
+
+	vertices[0].x = dstrect->x;
+	vertices[0].y = dstrect->y;
+	vertices[0].s = left;
+	vertices[0].t = top;
+	vertices[0].w = 1.0f;
+
+	vertices[1].x = dstrect->x;
+	vertices[1].y = dstrect->y + dstrect->h;
+	vertices[1].s = left;
+	vertices[1].t = bottom;
+	vertices[1].w = 1.0f;
+
+	vertices[2].x = dstrect->x + dstrect->w;
+	vertices[2].y = dstrect->y + dstrect->h;
+	vertices[2].s = right;
+	vertices[2].t = bottom;
+	vertices[2].w = 1.0f;
+
+	vertices[3].x = dstrect->x + dstrect->w;
+	vertices[3].y = dstrect->y;
+	vertices[3].s = right;
+	vertices[3].t = top;
+	vertices[3].w = 1.0f;
+}
+
 static int
-SW_RenderCopyEx(SDL_Renderer * renderer, SDL_Texture * texture,
+OS4_RenderCopyEx(SDL_Renderer * renderer, SDL_Texture * texture,
                 const SDL_Rect * srcrect, const SDL_FRect * dstrect,
                 const double angle, const SDL_FPoint * center, const SDL_RendererFlip flip)
 {
-    SDL_Surface *surface = SW_ActivateRenderer(renderer);
-    SDL_Surface *src = (SDL_Surface *) texture->driverdata;
-    SDL_Rect final_rect, tmp_rect;
-    SDL_Surface *surface_rotated, *surface_scaled;
-    Uint32 colorkey;
-    int retval, dstwidth, dstheight, abscenterx, abscentery;
-    double cangle, sangle, px, py, p1x, p1y, p2x, p2y, p3x, p3y, p4x, p4y;
+	OS4_RenderData *data = (OS4_RenderData *) renderer->driverdata;
+	OS4_TextureData *texturedata = (OS4_TextureData *) texture->driverdata;
 
-    if (!surface) {
+	struct BitMap *dst = OS4_ActivateRenderer(renderer);
+	struct BitMap *src = texturedata->bitmap;
+
+	SDL_Rect final_rect;
+
+	uint32 ret_code, colormod;
+
+	MyLittleVertex vertices[4];
+	uint16 indices[6];
+
+	if (!dst) {
         return -1;
     }
 
@@ -897,68 +997,43 @@ SW_RenderCopyEx(SDL_Renderer * renderer, SDL_Texture * texture,
     final_rect.w = (int)dstrect->w;
     final_rect.h = (int)dstrect->h;
 
-    surface_scaled = SDL_CreateRGBSurface(SDL_SWSURFACE, final_rect.w, final_rect.h, src->format->BitsPerPixel,
-                                          src->format->Rmask, src->format->Gmask,
-                                          src->format->Bmask, src->format->Amask );
-    if (surface_scaled) {
-        SDL_GetColorKey(src, &colorkey);
-        SDL_SetColorKey(surface_scaled, SDL_TRUE, colorkey);
-        tmp_rect = final_rect;
-        tmp_rect.x = 0;
-        tmp_rect.y = 0;
+	OS4_FillVertexData(vertices, srcrect, &final_rect, flip);
 
-        retval = SDL_BlitScaled(src, srcrect, surface_scaled, &tmp_rect);
-        if (!retval) {
-            SDLgfx_rotozoomSurfaceSizeTrig(tmp_rect.w, tmp_rect.h, -angle, &dstwidth, &dstheight, &cangle, &sangle);
-            surface_rotated = SDLgfx_rotateSurface(surface_scaled, -angle, dstwidth/2, dstheight/2, GetScaleQuality(), flip & SDL_FLIP_HORIZONTAL, flip & SDL_FLIP_VERTICAL, dstwidth, dstheight, cangle, sangle);
-            if(surface_rotated) {
-                /* Find out where the new origin is by rotating the four final_rect points around the center and then taking the extremes */
-                abscenterx = final_rect.x + (int)center->x;
-                abscentery = final_rect.y + (int)center->y;
-                /* Compensate the angle inversion to match the behaviour of the other backends */
-                sangle = -sangle;
+	indices[0] = 0;
+	indices[1] = 1;
+	indices[2] = 2;
+	indices[3] = 2;
+	indices[4] = 3;
+	indices[5] = 0;
 
-                /* Top Left */
-                px = final_rect.x - abscenterx;
-                py = final_rect.y - abscentery;
-                p1x = px * cangle - py * sangle + abscenterx;
-                p1y = px * sangle + py * cangle + abscentery;
+	// TODO: rotating
 
-                /* Top Right */
-                px = final_rect.x + final_rect.w - abscenterx;
-                py = final_rect.y - abscentery;
-                p2x = px * cangle - py * sangle + abscenterx;
-                p2y = px * sangle + py * cangle + abscentery;
+	colormod = 0xFF << 24 | texture->r << 16 | texture->g << 8 | texture->b;
 
-                /* Bottom Left */
-                px = final_rect.x - abscenterx;
-                py = final_rect.y + final_rect.h - abscentery;
-                p3x = px * cangle - py * sangle + abscenterx;
-                p3y = px * sangle + py * cangle + abscentery;
+	ret_code = data->iGraphics->CompositeTags(
+		OS4_ConvertBlendMode(texture->blendMode),
+		src,
+		dst,
+		COMPTAG_SrcAlpha,   COMP_FLOAT_TO_FIX(OS4_GetCompositeAlpha(texture)),
+		//COMPTAG_DestX,      dstrect->x, // TODO: clipping?
+		//COMPTAG_DestY,      dstrect->y,
+		//COMPTAG_DestWidth,  final_rect.w,
+		//COMPTAG_DestHeight, final_rect.h,
+		COMPTAG_Flags,      OS4_GetCompositeFlags(texture),
+		COMPTAG_Color1,	    colormod,
+		COMPTAG_VertexArray, vertices,
+		COMPTAG_VertexFormat, COMPVF_STW0_Present,
+		COMPTAG_NumTriangles, 2,
+		COMPTAG_IndexArray,  indices,
+		TAG_END);
 
-                /* Bottom Right */
-                px = final_rect.x + final_rect.w - abscenterx;
-                py = final_rect.y + final_rect.h - abscentery;
-                p4x = px * cangle - py * sangle + abscenterx;
-                p4y = px * sangle + py * cangle + abscentery;
+	if (ret_code) {
+		dprintf("CompositeTags: %d\n", ret_code);
+		return -1;
+	}
 
-                tmp_rect.x = (int)MIN(MIN(p1x, p2x), MIN(p3x, p4x));
-                tmp_rect.y = (int)MIN(MIN(p1y, p2y), MIN(p3y, p4y));
-                tmp_rect.w = dstwidth;
-                tmp_rect.h = dstheight;
-
-                retval = SDL_BlitSurface(surface_rotated, NULL, surface, &tmp_rect);
-                SDL_FreeSurface(surface_scaled);
-                SDL_FreeSurface(surface_rotated);
-                return retval;
-            }
-        }
-        return retval;
-    }
-
-    return -1;
+	return 0;
 }
-#endif
 
 static int
 OS4_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
@@ -1028,7 +1103,8 @@ OS4_RenderPresent(SDL_Renderer * renderer)
 		if (syswin) {
 
 			int32 ret;
-//dprintf("target %p\n", data->target);
+            //dprintf("target %p\n", data->target);
+
 			if (OS4_IsVsyncEnabled()) {
     			data->iGraphics->WaitTOF();
 	    	}
