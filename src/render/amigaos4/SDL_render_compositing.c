@@ -138,9 +138,11 @@ OS4_ActivateRenderer(SDL_Renderer * renderer)
 {
 	OS4_RenderData *data = (OS4_RenderData *) renderer->driverdata;
 
-	if (!data->bitmap && renderer->window) {
+	if (!data->target) {
+		data->target = data->bitmap;
+	}
 
-		//SDL_WindowData * windowdata = (SDL_WindowData *)renderer->window->driverdata;
+	if (!data->target && renderer->window) {
 
 		int width = renderer->window->w;
 		int height = renderer->window->h;
@@ -148,16 +150,13 @@ OS4_ActivateRenderer(SDL_Renderer * renderer)
 
 		dprintf("Allocating VRAM bitmap %d*%d*%d for renderer\n", width, height, depth);
 
-		data->bitmap = data->iGraphics->AllocBitMapTags(
+		data->target = data->bitmap = data->iGraphics->AllocBitMapTags(
 			width,
 			height,
 			depth,
             BMATags_Displayable, TRUE,
 			BMATags_PixelFormat, PIXF_A8R8G8B8,
-			//BMATags_Friend, windowdata->syswin->RPort->BitMap,
 			TAG_DONE);
-
-	    data->rastport.BitMap = data->bitmap;
 
 		if (data->bitmap) {
 			OS4_UpdateViewport(renderer);
@@ -167,7 +166,9 @@ OS4_ActivateRenderer(SDL_Renderer * renderer)
 		}
 	}
 
-	return data->bitmap;
+	data->rastport.BitMap = data->target;
+
+	return data->target;
 }
 
 SDL_Renderer *
@@ -306,7 +307,10 @@ OS4_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 	OS4_RenderData *data = (OS4_RenderData *) renderer->driverdata;
 	OS4_TextureData *texturedata;
 
-	// TODO: should we block all but ARGB8888?
+	if (texture->format != SDL_PIXELFORMAT_ARGB8888) {
+		return SDL_SetError("Not supported texture format");
+	}
+
     if (!SDL_PixelFormatEnumToMasks
         (texture->format, &bpp, &Rmask, &Gmask, &Bmask, &Amask)) {
         return SDL_SetError("Unknown texture format");
@@ -328,7 +332,6 @@ OS4_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 		bpp,
 		BMATags_Displayable, TRUE,
 		BMATags_PixelFormat, PIXF_A8R8G8B8,
-		//BMATags_Friend, data->bitmap,
 		TAG_DONE);
 
 	if (!texturedata->bitmap) {
@@ -443,14 +446,14 @@ OS4_SetRenderTarget(SDL_Renderer * renderer, SDL_Texture * texture)
 {
 	OS4_RenderData *data = (OS4_RenderData *) renderer->driverdata;
 
-	dprintf("Called for texture %p\n", texture);
-
 	if (texture) {
 		OS4_TextureData *texturedata = (OS4_TextureData *) texture->driverdata;
 		data->target = texturedata->bitmap;
+
+		dprintf("Render target texture %p (bitmap %p)\n", texture, data->target);
     } else {
-		//data->surface = data->window;
-		data->target = NULL;
+		data->target = data->bitmap;
+		dprintf("Render target window\n");
     }
     return 0;
 }
@@ -460,10 +463,10 @@ OS4_UpdateViewport(SDL_Renderer * renderer)
 {
 	OS4_RenderData *data = (OS4_RenderData *) renderer->driverdata;
 
-	//if (!surface) {
+	if (!data->bitmap) {
         /* We'll update the viewport after we recreate the surface */
-	//	  return 0;
-	//}
+		return 0;
+	}
 
 	if (&renderer->viewport) {
 		data->cliprect = renderer->viewport;
@@ -477,7 +480,6 @@ OS4_UpdateViewport(SDL_Renderer * renderer)
 	dprintf("Cliprect: (%d,%d) - %d*%d\n",
 	    data->cliprect.x, data->cliprect.y, data->cliprect.w, data->cliprect.h);
 
-	//SDL_SetClipRect(data->surface, &renderer->viewport);
     return 0;
 }
 
@@ -485,29 +487,23 @@ static int
 OS4_UpdateClipRect(SDL_Renderer * renderer)
 {
 	OS4_RenderData *data = (OS4_RenderData *) renderer->driverdata;
-    const SDL_Rect *rect = &renderer->clip_rect;
 
-	if (rect && !SDL_RectEmpty(rect)) {
-		data->cliprect = *rect;
-	} else {
-		data->cliprect.x = 0;
-		data->cliprect.y = 0;
-		data->cliprect.w = renderer->window->w;
-		data->cliprect.h = renderer->window->h;
+	if (data->bitmap) {
+		const SDL_Rect *rect = &renderer->clip_rect;
+		
+		if (rect && !SDL_RectEmpty(rect)) {
+			data->cliprect = *rect;
+		} else {
+			data->cliprect.x = 0;
+			data->cliprect.y = 0;
+			data->cliprect.w = renderer->window->w;
+			data->cliprect.h = renderer->window->h;
+		}
+
+		dprintf("Cliprect: (%d,%d) - %d*%d\n",
+		    data->cliprect.x, data->cliprect.y, data->cliprect.w, data->cliprect.h);
 	}
 
-	dprintf("Cliprect: (%d,%d) - %d*%d\n",
-	    data->cliprect.x, data->cliprect.y, data->cliprect.w, data->cliprect.h);
-
-/*
-	//if (surface) {
-        if (!SDL_RectEmpty(rect)) {
-            SDL_SetClipRect(surface, rect);
-        } else {
-            SDL_SetClipRect(surface, NULL);
-        }
-    //}
-*/
     return 0;
 }
 
@@ -785,7 +781,7 @@ OS4_ConvertBlendMode(SDL_BlendMode mode)
 			// This is not correct, but we can't do modulation at the moment
 			return COMPOSITE_Src_Over_Dest;
 		default:
-			dprintf("Yikes!\n");
+			dprintf("Unknown blend mode %d\n", mode);
 			return COMPOSITE_Src_Over_Dest;
 	}
 }
@@ -835,7 +831,14 @@ OS4_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
 
 	scalex = srcrect->w ? (float)final_rect.w / srcrect->w : 1.0f;
 	scaley = srcrect->h ? (float)final_rect.h / srcrect->h : 1.0f;
-	
+
+/*
+	dprintf("composite op %d, alpha %d, sx %d, sy %d\n",
+			OS4_ConvertBlendMode(texture->blendMode),
+			(int)(alpha*255),
+			(int)scalex,
+			(int)scaley );
+*/
 	ret_code = data->iGraphics->CompositeTags(
 		OS4_ConvertBlendMode(texture->blendMode),
 		src,
@@ -1008,40 +1011,41 @@ static void
 OS4_RenderPresent(SDL_Renderer * renderer)
 {
     SDL_Window *window = renderer->window;
+	struct BitMap *source = OS4_ActivateRenderer(renderer);
 
 	//dprintf("Called\n");
 	//Uint32 s = SDL_GetTicks();
 	
-	if (window) {
+	if (window && source) {
+		OS4_RenderData *data = (OS4_RenderData *)renderer->driverdata;
+
+		// TODO: should we take viewport into account?
+
 		SDL_WindowData *windowdata = (SDL_WindowData *)window->driverdata;
 
 		struct Window *syswin = windowdata->syswin;
 
 		if (syswin) {
-			OS4_RenderData *data = (OS4_RenderData *)renderer->driverdata;
 
+			int32 ret;
+//dprintf("target %p\n", data->target);
 			if (OS4_IsVsyncEnabled()) {
-				data->iGraphics->WaitTOF();
-			}
-			
-			if (!data->target) {
-			    data->iLayers->LockLayer(0, syswin->WLayer);
-			}
+    			data->iGraphics->WaitTOF();
+	    	}
 
-    		// TODO: should we take viewport into account?
-			int32 ret = data->iGraphics->BltBitMapTags(
-				BLITA_Source, data->bitmap,
-				BLITA_DestType, data->target ? BLITT_BITMAP : BLITT_RASTPORT,
-				BLITA_Dest, data->target ? (APTR) data->target : (APTR) syswin->RPort,
+		    data->iLayers->LockLayer(0, syswin->WLayer);
+
+		    ret = data->iGraphics->BltBitMapTags(
+				BLITA_Source, source,
+				BLITA_DestType, BLITT_RASTPORT,
+				BLITA_Dest, syswin->RPort,
 				BLITA_DestX, syswin->BorderLeft,
 				BLITA_DestY, syswin->BorderTop,
-				BLITA_Width, window->w,
-				BLITA_Height, window->h,
-				TAG_DONE);
-			
-			if (!data->target) {
-			    data->iLayers->UnlockLayer(syswin->WLayer);
-			}
+			    BLITA_Width, window->w,
+			    BLITA_Height, window->h,
+			    TAG_DONE);
+
+		    data->iLayers->UnlockLayer(syswin->WLayer);
 
 			if (ret != -1) {
 				dprintf("BltBitMapTags(): %d\n", ret);
