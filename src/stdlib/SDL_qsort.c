@@ -129,12 +129,12 @@ benefit!
  *                    comments. No code changes.
  */
 
-/* BEGIN SDL CHANGE ... commented this out with an #if 0 block. --ryan. */
-#if 0
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 
+/* BEGIN SDL CHANGE ... commented this out with an #if 0 block. --ryan. */
+#if 0
 #define DEBUG_QSORT
 
 static char _ID[]="<qsort.c gjm 1.14 2016-02-21>";
