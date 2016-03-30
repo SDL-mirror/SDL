@@ -6,17 +6,17 @@
 
 DEVELOPER="`xcode-select -print-path`/Platforms/MacOSX.platform/Developer"
 
-# Intel 32-bit compiler flags (10.6 runtime compatibility)
-GCC_COMPILE_X86="g++ -arch i386 -mmacosx-version-min=10.5 \
+# Intel 32-bit compiler flags (10.7 runtime compatibility)
+GCC_COMPILE_X86="g++ -arch i386 -mmacosx-version-min=10.7 \
 -I/usr/local/include"
 
-GCC_LINK_X86="-mmacosx-version-min=10.5"
+GCC_LINK_X86="-mmacosx-version-min=10.7"
 
-# Intel 64-bit compiler flags (10.6 runtime compatibility)
-GCC_COMPILE_X64="g++ -arch x86_64 -mmacosx-version-min=10.6 \
+# Intel 64-bit compiler flags (10.7 runtime compatibility)
+GCC_COMPILE_X64="g++ -arch x86_64 -mmacosx-version-min=10.7 \
 -I/usr/local/include"
 
-GCC_LINK_X64="-mmacosx-version-min=10.6"
+GCC_LINK_X64="-mmacosx-version-min=10.7"
 
 # Output both PowerPC and Intel object files
 args="$*"
