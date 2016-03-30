@@ -121,6 +121,12 @@ typedef struct
 	APTR lock;
 } OS4_TextureData;
 
+
+typedef struct {
+	float x, y;
+	float s, t, w;
+} OS4_Vertex;
+
 static SDL_bool
 OS4_IsVsyncEnabled()
 {
@@ -898,14 +904,28 @@ OS4_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
 	return 0;
 }
 
-typedef struct {
-	float x, y;
-	float s, t, w;
-} MyLittleVertex;
+static void
+OS4_RotateVertices(OS4_Vertex vertices[4], const double angle, const SDL_FPoint * center)
+{
+	int i;
+
+	float rads = angle * M_PI / 180.0f;
+
+	float sina = SDL_sinf(rads);
+	float cosa = SDL_cosf(rads);
+
+	for (i = 0; i < 4; ++i) {
+		float x = vertices[i].x - center->x;
+		float y = vertices[i].y - center->y;
+
+		vertices[i].x = x * cosa - y * sina + center->x;
+		vertices[i].y = x * sina + y * cosa + center->y;
+	}
+}
 
 static void
-OS4_FillVertexData(MyLittleVertex *vertices, const SDL_Rect * srcrect, const SDL_Rect *dstrect,
-	const SDL_RendererFlip flip)
+OS4_FillVertexData(OS4_Vertex vertices[4], const SDL_Rect * srcrect, const SDL_Rect * dstrect,
+	const double angle, const SDL_FPoint * center, const SDL_RendererFlip flip)
 {
 	/* Flip texture coordinates if needed */
 	
@@ -915,19 +935,17 @@ OS4_FillVertexData(MyLittleVertex *vertices, const SDL_Rect * srcrect, const SDL
 	right = left + srcrect->w;
 	top = srcrect->y;
 	bottom = top + srcrect->h;
-
-	if (flip == SDL_FLIP_NONE) {
-		// do nothing
-	} else if (flip == SDL_FLIP_HORIZONTAL) {
+	
+	if (flip & SDL_FLIP_HORIZONTAL) {
 		tmp = left;
 		left = right;
 		right = tmp;
-	} else if (flip == SDL_FLIP_VERTICAL) {
+	}
+	
+	if (flip & SDL_FLIP_VERTICAL) {
 		tmp = bottom;
 		bottom = top;
 		top = tmp;
-	} else {
-		dprintf("Unknown flip mode %d\n", flip);
 	}
 
 	/*
@@ -963,6 +981,8 @@ OS4_FillVertexData(MyLittleVertex *vertices, const SDL_Rect * srcrect, const SDL
 	vertices[3].s = right;
 	vertices[3].t = top;
 	vertices[3].w = 1.0f;
+
+	OS4_RotateVertices(vertices, angle, center);
 }
 
 static int
@@ -977,10 +997,11 @@ OS4_RenderCopyEx(SDL_Renderer * renderer, SDL_Texture * texture,
 	struct BitMap *src = texturedata->bitmap;
 
 	SDL_Rect final_rect;
+	SDL_FPoint final_center;
 
 	uint32 ret_code, colormod;
 
-	MyLittleVertex vertices[4];
+	OS4_Vertex vertices[4];
 	uint16 indices[6];
 
 	if (!dst) {
@@ -992,12 +1013,15 @@ OS4_RenderCopyEx(SDL_Renderer * renderer, SDL_Texture * texture,
         final_rect.y = (int)(renderer->viewport.y + dstrect->y);
     } else {
         final_rect.x = (int)dstrect->x;
-        final_rect.y = (int)dstrect->y;
+		final_rect.y = (int)dstrect->y;
     }
     final_rect.w = (int)dstrect->w;
     final_rect.h = (int)dstrect->h;
 
-	OS4_FillVertexData(vertices, srcrect, &final_rect, flip);
+	final_center.x = dstrect->x + center->x;
+	final_center.y = dstrect->y + center->y;
+
+	OS4_FillVertexData(vertices, srcrect, &final_rect, angle, &final_center, flip);
 
 	indices[0] = 0;
 	indices[1] = 1;
@@ -1005,8 +1029,6 @@ OS4_RenderCopyEx(SDL_Renderer * renderer, SDL_Texture * texture,
 	indices[3] = 2;
 	indices[4] = 3;
 	indices[5] = 0;
-
-	// TODO: rotating
 
 	colormod = 0xFF << 24 | texture->r << 16 | texture->g << 8 | texture->b;
 
