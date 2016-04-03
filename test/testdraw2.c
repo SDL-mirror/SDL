@@ -266,14 +266,15 @@ main(int argc, char *argv[])
         }
     }
 
-    SDLTest_CommonQuit(state);
-
     /* Print out some timing information */
     now = SDL_GetTicks();
     if (now > then) {
         double fps = ((double) frames * 1000) / (now - then);
         SDL_Log("%2.2f frames per second\n", fps);
     }
+
+    SDLTest_CommonQuit(state);
+
     return 0;
 }
 
