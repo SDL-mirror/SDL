@@ -250,7 +250,7 @@ OS4_SetWindowTitle(_THIS, SDL_Window * window)
 {
 	SDL_WindowData *data = window->driverdata;
 
-	dprintf("Called\n");
+	//dprintf("Called\n");
 
 	if (data && data->syswin) {
 		STRPTR title = window->title ? window->title : "";
