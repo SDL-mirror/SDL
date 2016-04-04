@@ -12,7 +12,6 @@ Some blend modes may not be supported for all renderers. These tests will give f
 TODO:
 - command line arguments for things like window size, iterations...
 - texture color + alpha modulation
-- take out randomness of primitive sizes
 
 gcc -Wall -O3 sdl2benchmark.c -lSDL2 -lpthread -use-dynld -ldl
 
@@ -28,6 +27,8 @@ gcc -Wall -O3 sdl2benchmark.c -lSDL2 -lpthread -use-dynld -ldl
 #define ITERATIONS 100
 #define OBJECTS 100
 
+#define SLEEP 0
+
 typedef struct {
 	SDL_Renderer *renderer;
 	SDL_Window *window;
@@ -42,6 +43,7 @@ typedef struct {
 	Uint64 frequency;
 	int iterations;
 	int objects;
+	int sleep;
 } Context;
 
 typedef struct {
@@ -108,7 +110,7 @@ static void printInfo(Context *ctx)
 	}
 }
 
-static void updateWindowTitle(Context *ctx)
+static void updateWindowTitle(Context *ctx, Test *test)
 {
 	SDL_RendererInfo ri;
 	int result;
@@ -120,8 +122,8 @@ static void updateWindowTitle(Context *ctx)
 	} else {
 		char title[128];
 
-		snprintf(title, sizeof(title), "Testing renderer: %s (blend mode %s)",
-			ri.name, getModeName(ctx->mode));
+		snprintf(title, sizeof(title), "Testing '%s' renderer - %s, blend mode %s",
+			ri.name, test->name, getModeName(ctx->mode));
 
 		SDL_SetWindowTitle(ctx->window, title);
 	}
@@ -131,7 +133,11 @@ static SDL_bool clearDisplay(Context *ctx)
 {
 	int result;
 
-	result = SDL_SetRenderDrawColor(ctx->renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
+	if (ctx->mode != SDL_BLENDMODE_MOD) {
+	    result = SDL_SetRenderDrawColor(ctx->renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
+	} else {
+		result = SDL_SetRenderDrawColor(ctx->renderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
+	}
 
 	if (result) {
 		SDL_Log("[%s]Failed to set draw color\n", __FUNCTION__);
@@ -150,12 +156,17 @@ static SDL_bool clearDisplay(Context *ctx)
 	return SDL_TRUE;
 }
 
+static float interpolate(float min, float max, float percentage)
+{
+	return min + percentage * (max - min);
+}
+
 static SDL_bool runTest(Context *ctx, Test *test)
 {
 	Uint64 start, finish;
 	double duration;
 
-	updateWindowTitle(ctx);
+	updateWindowTitle(ctx, test);
 
 	if (!clearDisplay(ctx)) {
 		return SDL_FALSE;
@@ -173,6 +184,10 @@ static SDL_bool runTest(Context *ctx, Test *test)
 	duration = (finish - start) / (double)ctx->frequency;
 
 	SDL_Log("...%f seconds, %.1f frames per second\n", duration, ctx->iterations / duration);
+
+	if (ctx->sleep) {
+		SDL_Delay(ctx->sleep);
+	}
 
 	return SDL_TRUE;
 }
@@ -290,16 +305,19 @@ static SDL_bool testFillRects(Context *ctx)
 
 		SDL_Rect rects[ctx->objects];
 		int object;
+		int rectsize;
 
 		if (!setRandomColor(ctx)) {
 			return SDL_FALSE;
 		}
 
+		rectsize = ctx->rectsize + iteration;
+
 		for (object = 0; object < ctx->objects; object++) {
-			rects[object].x = getRand(ctx->width - ctx->rectsize);
-			rects[object].y = getRand(ctx->height - ctx->rectsize);
-			rects[object].w = getRand(ctx->rectsize);
-			rects[object].h = getRand(ctx->rectsize);
+			rects[object].x = getRand(ctx->width - rectsize);
+			rects[object].y = getRand(ctx->height - rectsize);
+			rects[object].w = rectsize;
+			rects[object].h = rectsize;
     	}
 
 		result = SDL_RenderFillRects(ctx->renderer, rects, ctx->objects);
@@ -319,11 +337,18 @@ static SDL_bool testFillRects(Context *ctx)
 static SDL_bool prepareTexture(Context *ctx)
 {
 	int result;
-	
+
+	result = SDL_SetColorKey(ctx->surface, 1, 0);
+
+	if (result) {
+		SDL_Log("[%s]Failed to set color key\n", __FUNCTION__);
+		return SDL_FALSE;
+	}
+
 	ctx->texture = SDL_CreateTextureFromSurface(ctx->renderer, ctx->surface);
 
 	if (!ctx->texture) {
-		SDL_Log("[%s]Failed to create texture\n");
+		SDL_Log("[%s]Failed to create texture\n", __FUNCTION__);
 		return SDL_FALSE;
 	}
 
@@ -342,7 +367,7 @@ static SDL_bool prepareTexture(Context *ctx)
 
 static SDL_bool testRenderCopy(Context *ctx)
 {
-	int iteration, result;
+	int iteration;
 
 	if (!prepareTexture(ctx)) {
 		return SDL_FALSE;
@@ -350,16 +375,23 @@ static SDL_bool testRenderCopy(Context *ctx)
 
 	for (iteration = 0; iteration < ctx->iterations; iteration++) {
 
+		int result;
+		int w, h;
+		float scale;
+
 		//int object;
+		scale = interpolate(0.5f, 2.0f, (float)iteration / ctx->iterations);
+
+		w = ctx->texturewidth * scale;
+		h = ctx->textureheight * scale;
 
 		//for (object = 0; object < ctx->objects; object++) {
     		SDL_Rect rect;
 
-			/* Scale and place texture randomly */
-			rect.x = getRand(ctx->width - 2 * ctx->texturewidth);
-			rect.y = getRand(ctx->height - 2 * ctx->textureheight);
-			rect.w = getRand(2 * ctx->texturewidth);
-			rect.h = getRand(2 * ctx->textureheight);
+			rect.x = getRand(ctx->width - w);
+			rect.y = getRand(ctx->height - h);
+			rect.w = w;
+			rect.h = h;
 
 			result = SDL_RenderCopy(ctx->renderer, ctx->texture, NULL, &rect);
 
@@ -377,24 +409,30 @@ static SDL_bool testRenderCopy(Context *ctx)
 
 static SDL_bool testRenderCopyEx(Context *ctx)
 {
-	int iteration, result;
+	int iteration;
 
 	if (!prepareTexture(ctx)) {
 		return SDL_FALSE;
 	}
 
 	for (iteration = 0; iteration < ctx->iterations; iteration++) {
+		int result;
+		int w, h;
+		float scale;
 
 		//int object;
+		scale = interpolate(0.5f, 2.0f, (float)iteration / ctx->iterations);
+
+		w = ctx->texturewidth * scale;
+		h = ctx->textureheight * scale;
 
 		//for (object = 0; object < ctx->objects; object++) {
     		SDL_Rect rect;
 
-			/* Scale, rotate and place randomly */
-			rect.x = getRand(ctx->width);
-			rect.y = getRand(ctx->height);
-			rect.w = getRand(2 * ctx->texturewidth);
-			rect.h = getRand(2 * ctx->textureheight);
+			rect.x = getRand(ctx->width - w);
+			rect.y = getRand(ctx->height - h);
+			rect.w = w;
+			rect.h = h;
 
 			result = SDL_RenderCopyEx(
 				ctx->renderer,
@@ -443,9 +481,23 @@ static void initContext(Context *ctx)
 	ctx->rectsize = RECTSIZE;
 	ctx->iterations = ITERATIONS;
 	ctx->objects = OBJECTS;
+	ctx->sleep = SLEEP;
 
-	SDL_Log("Parameters: width %d, height %d, iterations %d, objects %d\n",
-		ctx->width, ctx->height, ctx->iterations, ctx->objects);
+	SDL_Log("Parameters: width %d, height %d, iterations %d, objects %d, sleep %d\n",
+		ctx->width, ctx->height, ctx->iterations, ctx->objects, ctx->sleep);
+}
+
+static void checkPixelFormat(Context *ctx)
+{
+	Uint32 pf;
+	
+	pf = SDL_GetWindowPixelFormat(ctx->window);
+
+	SDL_Log("Pixel format 0x%X (%s)\n", pf, SDL_GetPixelFormatName(pf));
+	
+	if (pf != SDL_PIXELFORMAT_ARGB8888) {
+		SDL_Log("NOTE: window's pixel format not ARGB8888 - possible bitmap conversion can slow down\n");
+	}
 }
 
 int main(int argc, char **argv)
@@ -479,7 +531,7 @@ int main(int argc, char **argv)
 
 			int r;
 
-			SDL_Log("Pixel format 0x%X\n", SDL_GetWindowPixelFormat(ctx.window));
+			checkPixelFormat(&ctx);
 
 			for (r = 0; r < SDL_GetNumRenderDrivers(); r++) {
 
@@ -493,6 +545,7 @@ int main(int argc, char **argv)
 
 					if (ctx.texture) {
 				    	SDL_DestroyTexture(ctx.texture);
+						ctx.texture = NULL;
 					}
 
 					SDL_DestroyRenderer(ctx.renderer);
