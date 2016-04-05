@@ -49,6 +49,7 @@ typedef struct {
 typedef struct {
 	const char *name;
 	SDL_bool (*testfp)(Context *);
+	SDL_bool usetexture;
 } Test;
 
 typedef struct {
@@ -65,11 +66,11 @@ static SDL_bool testRenderCopyEx(Context *);
 
 /* Insert here new tests */
 static Test tests[] = {
-	{ "Points", testPoints },
-	{ "Lines", testLines },
-	{ "FillRects", testFillRects },
-	{ "RenderCopy", testRenderCopy },
-	{ "RenderCopyEx", testRenderCopyEx },
+	{ "Points", testPoints, SDL_FALSE },
+	{ "Lines", testLines, SDL_FALSE },
+	{ "FillRects", testFillRects, SDL_FALSE },
+	{ "RenderCopy", testRenderCopy, SDL_TRUE },
+	{ "RenderCopyEx", testRenderCopyEx, SDL_TRUE },
 };
 
 static BlendMode modes[] = {
@@ -161,21 +162,87 @@ static float interpolate(float min, float max, float percentage)
 	return min + percentage * (max - min);
 }
 
-static SDL_bool runTest(Context *ctx, Test *test)
+static SDL_bool prepareTexture(Context *ctx)
 {
-	Uint64 start, finish;
-	double duration;
+	int result;
 
+	result = SDL_SetColorKey(ctx->surface, 1, 0);
+
+	if (result) {
+		SDL_Log("[%s]Failed to set color key\n", __FUNCTION__);
+		return SDL_FALSE;
+	}
+
+	if (ctx->texture) {
+		SDL_Log("Old texture!\n");
+	}
+
+	ctx->texture = SDL_CreateTextureFromSurface(ctx->renderer, ctx->surface);
+
+	if (!ctx->texture) {
+		SDL_Log("[%s]Failed to create texture\n", __FUNCTION__);
+		return SDL_FALSE;
+	}
+
+	result = SDL_SetTextureBlendMode(ctx->texture, ctx->mode);
+
+	if (result) {
+		SDL_Log("[%s]Failed to set texture blend mode\n", __FUNCTION__);
+		
+		SDL_DestroyTexture(ctx->texture);
+		ctx->texture = NULL;
+
+    	return SDL_FALSE;
+	}
+
+	ctx->texturewidth = ctx->surface->w;
+	ctx->textureheight = ctx->surface->h;
+
+	return SDL_TRUE;
+}
+
+static SDL_bool prepareTest(Context *ctx, Test *test)
+{
 	updateWindowTitle(ctx, test);
 
 	if (!clearDisplay(ctx)) {
 		return SDL_FALSE;
 	}
 
+	if (test->usetexture) {
+		if (!prepareTexture(ctx)) {
+			return SDL_FALSE;
+		}
+	}
+
+	return SDL_TRUE;
+}
+
+static void afterTest(Context *ctx)
+{
+	if (ctx->texture) {
+		SDL_DestroyTexture(ctx->texture);
+		ctx->texture = NULL;
+	}
+
+	if (ctx->sleep) {
+		SDL_Delay(ctx->sleep);
+	}
+}
+
+static SDL_bool runTest(Context *ctx, Test *test)
+{
+	Uint64 start, finish;
+	double duration;
+
+	if (!prepareTest(ctx, test)) {
+		return SDL_FALSE;
+	}
+
 	start = SDL_GetPerformanceCounter();
 
 	if (!test->testfp(ctx)) {
-		SDL_Log("[%s]...failed!\n", __FUNCTION__);
+		afterTest(ctx);
 		return SDL_FALSE;
 	}
 
@@ -183,11 +250,10 @@ static SDL_bool runTest(Context *ctx, Test *test)
 
 	duration = (finish - start) / (double)ctx->frequency;
 
-	SDL_Log("...%f seconds, %.1f frames per second\n", duration, ctx->iterations / duration);
+	SDL_Log("%s, blend mode: %s...%f seconds, %.1f frames per second\n",
+		test->name, getModeName(ctx->mode), duration, ctx->iterations / duration);
 
-	if (ctx->sleep) {
-		SDL_Delay(ctx->sleep);
-	}
+	afterTest(ctx);
 
 	return SDL_TRUE;
 }
@@ -334,44 +400,9 @@ static SDL_bool testFillRects(Context *ctx)
 	return SDL_TRUE;
 }
 
-static SDL_bool prepareTexture(Context *ctx)
-{
-	int result;
-
-	result = SDL_SetColorKey(ctx->surface, 1, 0);
-
-	if (result) {
-		SDL_Log("[%s]Failed to set color key\n", __FUNCTION__);
-		return SDL_FALSE;
-	}
-
-	ctx->texture = SDL_CreateTextureFromSurface(ctx->renderer, ctx->surface);
-
-	if (!ctx->texture) {
-		SDL_Log("[%s]Failed to create texture\n", __FUNCTION__);
-		return SDL_FALSE;
-	}
-
-	result = SDL_SetTextureBlendMode(ctx->texture, ctx->mode);
-
-	if (result) {
-		SDL_Log("[%s]Failed to set texture blend mode\n", __FUNCTION__);
-    	return SDL_FALSE;
-	}
-
-	ctx->texturewidth = ctx->surface->w;
-	ctx->textureheight = ctx->surface->h;
-
-	return SDL_TRUE;
-}
-
 static SDL_bool testRenderCopy(Context *ctx)
 {
 	int iteration;
-
-	if (!prepareTexture(ctx)) {
-		return SDL_FALSE;
-	}
 
 	for (iteration = 0; iteration < ctx->iterations; iteration++) {
 
@@ -410,10 +441,6 @@ static SDL_bool testRenderCopy(Context *ctx)
 static SDL_bool testRenderCopyEx(Context *ctx)
 {
 	int iteration;
-
-	if (!prepareTexture(ctx)) {
-		return SDL_FALSE;
-	}
 
 	for (iteration = 0; iteration < ctx->iterations; iteration++) {
 		int result;
@@ -462,8 +489,6 @@ static void runTestSuite(Context *ctx)
 	for (t = 0; t < sizeof(tests) / sizeof(tests[0]); t++) {
 		for (m = 0; m < sizeof(modes) / sizeof(modes[0]); m++) {
 			ctx->mode = modes[m].mode;
-
-			SDL_Log("%s, blend mode: %s...\n", tests[t].name, getModeName(ctx->mode));
 			
 			runTest(ctx, &tests[t]);
 		}
@@ -494,8 +519,8 @@ static void checkPixelFormat(Context *ctx)
 	pf = SDL_GetWindowPixelFormat(ctx->window);
 
 	SDL_Log("Pixel format 0x%X (%s)\n", pf, SDL_GetPixelFormatName(pf));
-	
-	if (pf != SDL_PIXELFORMAT_ARGB8888) {
+
+	if (pf != SDL_PIXELFORMAT_ARGB8888 && pf != SDL_PIXELFORMAT_RGB888) {
 		SDL_Log("NOTE: window's pixel format not ARGB8888 - possible bitmap conversion can slow down\n");
 	}
 }
@@ -542,11 +567,6 @@ int main(int argc, char **argv)
 				    printInfo(&ctx);
 
 					runTestSuite(&ctx);
-
-					if (ctx.texture) {
-				    	SDL_DestroyTexture(ctx.texture);
-						ctx.texture = NULL;
-					}
 
 					SDL_DestroyRenderer(ctx.renderer);
 
