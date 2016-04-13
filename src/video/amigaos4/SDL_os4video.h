@@ -70,6 +70,8 @@ typedef struct
 	struct WorkbenchIFace	*iWorkbench;
 	struct KeymapIFace		*iKeymap;
 	struct MiniGLIFace      *iMiniGL;
+
+	BOOL                    vsyncEnabled;
 } SDL_VideoData;
 
 #define GfxBase ((SDL_VideoData *) _this->driverdata)->gfxbase

@@ -404,10 +404,6 @@ OS4_VideoInit(_THIS)
 	// We don't want SDL to change  window setup in SDL_OnWindowFocusLost()
 	SDL_SetHint(SDL_HINT_VIDEO_MINIMIZE_ON_FOCUS_LOSS, "0");
 
-	if (IMiniGL) {
-        _this->gl_config.driver_loaded = 1;
-	}
-
 	return 0;
 }
 
