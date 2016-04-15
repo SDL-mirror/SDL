@@ -29,6 +29,7 @@
 #include "../../events/SDL_keyboard_c.h"
 #include "../../events/SDL_mouse_c.h"
 #include "../../events/SDL_windowevents_c.h"
+#include "../../events/scancodes_amiga.h"
 
 //#define DEBUG
 #include "../../main/amigaos4/SDL_os4debug.h"
@@ -123,20 +124,24 @@ OS4_HandleKeyboard(_THIS, struct MyIntuiMessage *imsg)
 {
 	if ((imsg->Qualifier & IEQUALIFIER_REPEAT) == 0) {
 
-		SDL_Scancode s = (uint8)imsg->Code;
+		uint8 rawkey = imsg->Code & 0x7F;
 
-		if (imsg->Code <= 127) {
+		if (rawkey < sizeof(amiga_scancode_table) / sizeof(amiga_scancode_table[0])) {
 
-			char text[2];
-			
-			text[0]	= OS4_TranslateUnicode(_this, imsg->Code, imsg->Qualifier);
-			text[1] = '\0';
+			SDL_Scancode s = amiga_scancode_table[rawkey];
 
-			SDL_SendKeyboardKey(SDL_PRESSED, s);
-			SDL_SendKeyboardText(text);
-		} else {
-			// TODO: SDL doesn't seem to send KEYUPs, even though this gets called
-			SDL_SendKeyboardKey(SDL_RELEASED, s);
+			if (imsg->Code <= 127) {
+
+				char text[2];
+				
+				text[0]	= OS4_TranslateUnicode(_this, imsg->Code, imsg->Qualifier);
+				text[1] = '\0';
+
+				SDL_SendKeyboardKey(SDL_PRESSED, s);
+				SDL_SendKeyboardText(text);
+			} else {
+				SDL_SendKeyboardKey(SDL_RELEASED, s);
+			}
 		}
 	}
 }
