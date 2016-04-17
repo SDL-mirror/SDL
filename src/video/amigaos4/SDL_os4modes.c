@@ -206,11 +206,6 @@ OS4_SetDisplayMode(_THIS, SDL_VideoDisplay * display, SDL_DisplayMode * mode)
 		return 0;
 	}
 
-	if (displaydata->screen) {
-		OS4_CloseScreenInternal(_this, displaydata->screen);
-		displaydata->screen = NULL;
-	}
-
 	dprintf("Opening screen id %d: %d*%d*%d\n", data->modeid, mode->w, mode->h, bpp);
 
 	displaydata->screen = IIntuition->OpenScreenTags(NULL,
