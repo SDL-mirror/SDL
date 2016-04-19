@@ -497,7 +497,7 @@ static void runTestSuite(Context *ctx)
 
 static void initContext(Context *ctx)
 {
-	SDL_memset(ctx, 0, sizeof(ctx));
+	SDL_memset(ctx, 0, sizeof(*ctx));
 
 	ctx->frequency = SDL_GetPerformanceFrequency();
 
