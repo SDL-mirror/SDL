@@ -29,110 +29,125 @@
 #define DEBUG
 #include "../../main/amigaos4/SDL_os4debug.h"
 
+typedef struct {
+    int x1, y1, x2, y2;
+    Uint32 (*blendfp)(Uint32, Uint8, Uint8, Uint8, Uint8);
+    Uint32 *baseaddress;
+    Uint32 width;
+    SDL_bool last;
+    Uint8 sr;
+    Uint8 sg;
+    Uint8 sb;
+    Uint8 sa;
+} OS4_LineData;
+
+#define ABS(a) (((a) < 0) ? -(a) : (a))
+#define ROUNDF(a) (int)((a) + 0.5f)
+
 static inline Uint32*
 OS4_GetMemoryAddress(Uint32 * memory, Uint32 width, Uint16 x, Uint16 y)
 {
-	return memory + x + y * width;
+    return memory + x + y * width;
 }
 
 static inline Uint32
 OS4_GetPixel(Uint32 * memory, Uint32 width, Uint16 x, Uint16 y)
 {
-	return *(memory + x + y * width);
+    return *(memory + x + y * width);
 }
 
 static inline void
 OS4_SetPixel(Uint32 * memory, Uint32 width, Uint16 x, Uint16 y, Uint32 color)
 {
-	*(memory + x + y * width) = color;
+    *(memory + x + y * width) = color;
 }
 
 static inline Uint8
 ALPHA(Uint32 c)
 {
-	return (c >> 24);
+    return (c >> 24);
 }
 
 static inline Uint8
 RED(Uint32 c)
 {
-	return (c >> 16);
+    return (c >> 16);
 }
 
 static inline Uint8
 GREEN(Uint32 c)
 {
-	return (c >> 8);
+    return (c >> 8);
 }
 
 static inline Uint8
 BLUE(Uint32 c)
 {
-	return c;
+    return c;
 }
 
 static inline Uint8
 MUL(Uint8 a, Uint8 b)
 {
-	Uint32 u = (a * b) / 255;
-	return u;
+    Uint32 u = (a * b) / 255;
+    return u;
 }
 
 static inline Uint8
 ADD(Uint8 a, Uint8 b)
 {
-	Uint32 c = a + b;
+    Uint32 c = a + b;
 
-	if (c > 255) c = 255;
+    if (c > 255) c = 255;
 
-	return c;
+    return c;
 }
 
 static Uint32
 BlendPoint(Uint32 old, Uint8 sr, Uint8 sg, Uint8 sb, Uint8 sa)
 {
-	Uint8 dr, dg, db, da, one_minus_alpha;
+    Uint8 dr, dg, db, da, one_minus_alpha;
 
-	one_minus_alpha = 255 - sa;
+    one_minus_alpha = 255 - sa;
 
-	dr = sr + MUL(one_minus_alpha, RED(old));
-	dg = sg + MUL(one_minus_alpha, GREEN(old));
-	db = sb + MUL(one_minus_alpha, BLUE(old));
-	da = sa + MUL(one_minus_alpha, ALPHA(old));
+    dr = sr + MUL(one_minus_alpha, RED(old));
+    dg = sg + MUL(one_minus_alpha, GREEN(old));
+    db = sb + MUL(one_minus_alpha, BLUE(old));
+    da = sa + MUL(one_minus_alpha, ALPHA(old));
 
-	return da << 24 | dr << 16 | dg << 8 | db;
+    return da << 24 | dr << 16 | dg << 8 | db;
 }
 
 static Uint32
 AddPoint(Uint32 old, Uint8 sr, Uint8 sg, Uint8 sb, Uint8 sa)
 {
-	Uint8 dr, dg, db, da;
+    Uint8 dr, dg, db, da;
 
     dr = ADD(sr, RED(old));
-	dg = ADD(sg, GREEN(old));
-	db = ADD(sb, BLUE(old));
-	da = ALPHA(old);
+    dg = ADD(sg, GREEN(old));
+    db = ADD(sb, BLUE(old));
+    da = ALPHA(old);
 
-	return da << 24 | dr << 16 | dg << 8 | db;
+    return da << 24 | dr << 16 | dg << 8 | db;
 }
 
 static Uint32
 ModPoint(Uint32 old, Uint8 sr, Uint8 sg, Uint8 sb, Uint8 sa)
 {
-	Uint8 dr, dg, db, da;
+    Uint8 dr, dg, db, da;
 
-	dr = MUL(sr, RED(old));
-	dg = MUL(sg, GREEN(old));
-	db = MUL(sb, BLUE(old));
-	da = ALPHA(old);
+    dr = MUL(sr, RED(old));
+    dg = MUL(sg, GREEN(old));
+    db = MUL(sb, BLUE(old));
+    da = ALPHA(old);
 
-	return da << 24 | dr << 16 | dg << 8 | db;
+    return da << 24 | dr << 16 | dg << 8 | db;
 }
 
 static Uint32
 NopPoint(Uint32 old, Uint8 sr, Uint8 sg, Uint8 sb, Uint8 sa)
 {
-	return old;
+    return old;
 }
 
 int
@@ -144,6 +159,8 @@ OS4_RenderDrawPoints(SDL_Renderer * renderer, const SDL_FPoint * points,
     SDL_Point *final_points;
     int i, status;
 
+    int minx, miny, maxx, maxy;
+
     if (!bitmap) {
         return -1;
     }
@@ -152,6 +169,7 @@ OS4_RenderDrawPoints(SDL_Renderer * renderer, const SDL_FPoint * points,
     if (!final_points) {
         return SDL_OutOfMemory();
     }
+
     if (renderer->viewport.x || renderer->viewport.y) {
         int x = renderer->viewport.x;
         int y = renderer->viewport.y;
@@ -167,6 +185,11 @@ OS4_RenderDrawPoints(SDL_Renderer * renderer, const SDL_FPoint * points,
         }
     }
 
+    minx = data->cliprect.x;
+    miny = data->cliprect.y;
+    maxx = data->cliprect.x + data->cliprect.w - 1;
+    maxy = data->cliprect.y + data->cliprect.h - 1;
+
     if (renderer->blendMode == SDL_BLENDMODE_NONE) {
 
         int32 ret = 0;
@@ -177,12 +200,22 @@ OS4_RenderDrawPoints(SDL_Renderer * renderer, const SDL_FPoint * points,
             renderer->g << 8 |
             renderer->b;
 
-        // TODO: clipping?
         for (i = 0; i < count; ++i) {
+
+            int x, y;
+
+            x = final_points[i].x;
+            y = final_points[i].y;
+
+            /* Clipping - is it possible clip with RastPort? */
+            if (x < minx || x > maxx || y < miny || y > maxy) {
+                continue;
+            }
+
             ret |= data->iGraphics->WritePixelColor(
                 &data->rastport,
-                final_points[i].x,
-                final_points[i].y,
+                x,
+                y,
                 color);
         }
 
@@ -190,71 +223,80 @@ OS4_RenderDrawPoints(SDL_Renderer * renderer, const SDL_FPoint * points,
 
     } else {
 
-		APTR baseaddress;
-		uint32 bytesperrow;
+        APTR baseaddress;
+        uint32 bytesperrow;
 
-		APTR lock = data->iGraphics->LockBitMapTags(
-			bitmap,
-    		LBM_BaseAddress, &baseaddress,
-	 		LBM_BytesPerRow, &bytesperrow,
-			TAG_DONE);
+        APTR lock = data->iGraphics->LockBitMapTags(
+            bitmap,
+            LBM_BaseAddress, &baseaddress,
+            LBM_BytesPerRow, &bytesperrow,
+            TAG_DONE);
 
-		if (lock) {
+        if (lock) {
 
-			Uint32 (*blendfp)(Uint32, Uint8, Uint8, Uint8, Uint8);
+            Uint32 (*blendfp)(Uint32, Uint8, Uint8, Uint8, Uint8);
 
-			Uint32 width = bytesperrow / 4;
-			Uint8 sr, sg, sb, sa;
+            Uint32 width = bytesperrow / 4;
+            Uint8 sr, sg, sb, sa;
 
-			switch (renderer->blendMode) {
-				case SDL_BLENDMODE_BLEND:
-					sr = MUL(renderer->a, renderer->r);
-					sg = MUL(renderer->a, renderer->g);
-					sb = MUL(renderer->a, renderer->b);
-        			sa = renderer->a;
-					blendfp = BlendPoint;
-					break;
-				case SDL_BLENDMODE_ADD:
-					sr = MUL(renderer->a, renderer->r);
-					sg = MUL(renderer->a, renderer->g);
-					sb = MUL(renderer->a, renderer->b);
-					sa = 0;
-					blendfp = AddPoint;
-					break;
-				case SDL_BLENDMODE_MOD:
-					sr = renderer->r;
-					sg = renderer->g;
-					sb = renderer->b;
-					sa = 0;
-					blendfp = ModPoint;
-					break;
-				default:
-					dprintf("Unknown blend mode %d\n", renderer->blendMode);
-					sr = renderer->r;
-					sg = renderer->g;
-					sb = renderer->b;
-					sa = renderer->a;
-					blendfp = NopPoint;
-					break;
-			}
+            switch (renderer->blendMode) {
+                case SDL_BLENDMODE_BLEND:
+                    sr = MUL(renderer->a, renderer->r);
+                    sg = MUL(renderer->a, renderer->g);
+                    sb = MUL(renderer->a, renderer->b);
+                    sa = renderer->a;
+                    blendfp = BlendPoint;
+                    break;
+                case SDL_BLENDMODE_ADD:
+                    sr = MUL(renderer->a, renderer->r);
+                    sg = MUL(renderer->a, renderer->g);
+                    sb = MUL(renderer->a, renderer->b);
+                    sa = 0;
+                    blendfp = AddPoint;
+                    break;
+                case SDL_BLENDMODE_MOD:
+                    sr = renderer->r;
+                    sg = renderer->g;
+                    sb = renderer->b;
+                    sa = 0;
+                    blendfp = ModPoint;
+                    break;
+                default:
+                    dprintf("Unknown blend mode %d\n", renderer->blendMode);
+                    sr = renderer->r;
+                    sg = renderer->g;
+                    sb = renderer->b;
+                    sa = renderer->a;
+                    blendfp = NopPoint;
+                    break;
+            }
 
-			for (i = 0; i < count; ++i) {
-				Uint32 newcolor, oldcolor;
+            for (i = 0; i < count; ++i) {
+                Uint32 newcolor, oldcolor;
+                int x, y;
 
-				oldcolor = OS4_GetPixel(baseaddress, width, final_points[i].x, final_points[i].y);
+                x = final_points[i].x;
+                y = final_points[i].y;
 
-				newcolor = blendfp(oldcolor, sr, sg, sb, sa);
+                /* Clipping */
+                if (x < minx || x > maxx || y < miny || y > maxy) {
+                    continue;
+                }
 
-				OS4_SetPixel(baseaddress, width, final_points[i].x, final_points[i].y, newcolor);
-			}
+                oldcolor = OS4_GetPixel(baseaddress, width, x, y);
 
-			data->iGraphics->UnlockBitMap(lock);
+                newcolor = blendfp(oldcolor, sr, sg, sb, sa);
 
-			status = 0;
-		} else {
-			dprintf("Lock failed\n");
-    		status = -1;
-		}
+                OS4_SetPixel(baseaddress, width, x, y, newcolor);
+            }
+
+            data->iGraphics->UnlockBitMap(lock);
+
+            status = 0;
+        } else {
+            dprintf("Lock failed\n");
+            status = -1;
+        }
     }
 
     SDL_stack_free(final_points);
@@ -262,227 +304,212 @@ OS4_RenderDrawPoints(SDL_Renderer * renderer, const SDL_FPoint * points,
     return status;
 }
 
-typedef struct {
-	int x1, y1, x2, y2;
-	Uint32 (*blendfp)(Uint32, Uint8, Uint8, Uint8, Uint8);
-	Uint32 *baseaddress;
-	Uint32 width;
-	SDL_bool last;
-	Uint8 sr;
-	Uint8 sg;
-	Uint8 sb;
-	Uint8 sa;
-} OS4_LineData;
-
-#define ABS(a) (((a) < 0) ? -(a) : (a))
-#define ROUNDF(a) (int)((a) + 0.5f)
-
 static void
 OS4_HLine(OS4_LineData * data)
 {
-	int x, minx, maxx;
-	Uint32 *memory;
+    int x, minx, maxx;
+    Uint32 *memory;
 
-	if (data->x1 < data->x2) {
-		minx = data->x1;
-		maxx = data->x2;
+    if (data->x1 < data->x2) {
+        minx = data->x1;
+        maxx = data->x2;
 
-		if (!data->last) {
-			--maxx;
-		}
-	} else {
-		minx = data->x2;
-		maxx = data->x1;
+        if (!data->last) {
+            --maxx;
+        }
+    } else {
+        minx = data->x2;
+        maxx = data->x1;
 
-		if (!data->last) {
-			++minx;
-		}
-	}
+        if (!data->last) {
+            ++minx;
+        }
+    }
 
-	memory = OS4_GetMemoryAddress(data->baseaddress, data->width, minx, data->y1);
+    memory = OS4_GetMemoryAddress(data->baseaddress, data->width, minx, data->y1);
 
-	for (x = minx; x <= maxx; ++x) {
-		Uint32 oldcolor, newcolor;
-		
-		oldcolor = *memory;
-		newcolor = data->blendfp(oldcolor, data->sr, data->sg, data->sb, data->sa);
-		*memory++ = newcolor;
-	}
+    for (x = minx; x <= maxx; ++x) {
+        Uint32 oldcolor, newcolor;
+        
+        oldcolor = *memory;
+        newcolor = data->blendfp(oldcolor, data->sr, data->sg, data->sb, data->sa);
+        *memory++ = newcolor;
+    }
 }
 
 static void
 OS4_VLine(OS4_LineData * data)
 {
-	int y, miny, maxy;
-	Uint32 *memory;
+    int y, miny, maxy;
+    Uint32 *memory;
 
-	if (data->y1 < data->y2) {
-		miny = data->y1;
-		maxy = data->y2;
+    if (data->y1 < data->y2) {
+        miny = data->y1;
+        maxy = data->y2;
 
-		if (!data->last) {
-			--maxy;
-		}
-	} else {
-		miny = data->y2;
-		maxy = data->y1;
+        if (!data->last) {
+            --maxy;
+        }
+    } else {
+        miny = data->y2;
+        maxy = data->y1;
 
-		if (!data->last) {
-			++miny;
-		}
-	}
+        if (!data->last) {
+            ++miny;
+        }
+    }
 
-	memory = OS4_GetMemoryAddress(data->baseaddress, data->width, data->x1, miny);
+    memory = OS4_GetMemoryAddress(data->baseaddress, data->width, data->x1, miny);
 
-	for (y = miny; y <= maxy; ++y) {
-		Uint32 oldcolor, newcolor;
+    for (y = miny; y <= maxy; ++y) {
+        Uint32 oldcolor, newcolor;
 
-		oldcolor = *memory;
-		newcolor = data->blendfp(oldcolor, data->sr, data->sg, data->sb, data->sa);
-		*memory = newcolor;
-		memory += data->width;
-	}
+        oldcolor = *memory;
+        newcolor = data->blendfp(oldcolor, data->sr, data->sg, data->sb, data->sa);
+        *memory = newcolor;
+        memory += data->width;
+    }
 }
 
 static void
 OS4_DLine(OS4_LineData * data)
 {
-	int x, y, startx, starty, endx, endy, ystep, width;
-	Uint32 *memory;
+    int x, y, startx, starty, endx, endy, ystep, width;
+    Uint32 *memory;
 
-	if (data->x1 < data->x2) {
-		startx = data->x1;
-		starty = data->y1;
+    if (data->x1 < data->x2) {
+        startx = data->x1;
+        starty = data->y1;
 
-		endx = data->x2;
-		endy = data->y2;
+        endx = data->x2;
+        endy = data->y2;
 
-		if (!data->last) {
-			//--endx;
-		}
-	} else {
-		startx = data->x2;
-		starty = data->y2;
+        if (!data->last) {
+            //--endx;
+        }
+    } else {
+        startx = data->x2;
+        starty = data->y2;
 
-		endx = data->x1;
-		endy = data->y1;
+        endx = data->x1;
+        endy = data->y1;
 
-		if (!data->last) {
-			//++startx;
-		}
-	}
+        if (!data->last) {
+            //++startx;
+        }
+    }
 
-	if (endy < starty) {
-		ystep = -1;
-		width = -data->width;
-	} else {
-		ystep = 1;
-		width = data->width;
-	}
+    if (endy < starty) {
+        ystep = -1;
+        width = -data->width;
+    } else {
+        ystep = 1;
+        width = data->width;
+    }
 
-	memory = OS4_GetMemoryAddress(data->baseaddress, data->width, startx, starty);
+    memory = OS4_GetMemoryAddress(data->baseaddress, data->width, startx, starty);
 
     //dprintf("%d, %d -> %d, %d, ystep %d\n", data->x1, data->y1, data->x2, data->y2, ystep);
 
-	for (x = startx, y = starty; x <= endx; ++x, y += ystep) {
-		Uint32 oldcolor, newcolor;
+    for (x = startx, y = starty; x <= endx; ++x, y += ystep) {
+        Uint32 oldcolor, newcolor;
 
-		oldcolor = *memory;
-		newcolor = data->blendfp(oldcolor, data->sr, data->sg, data->sb, data->sa);
-		*memory++ = newcolor;
-		memory += width;
-	}
+        oldcolor = *memory;
+        newcolor = data->blendfp(oldcolor, data->sr, data->sg, data->sb, data->sa);
+        *memory++ = newcolor;
+        memory += width;
+    }
 }
 
 static void
 OS4_Line(OS4_LineData *data)
 {
-	float ystep;
-	int x, y, startx, starty, endx, endy;
-	Uint32 *memory;
+    float ystep;
+    int x, y, startx, starty, endx, endy;
+    Uint32 *memory;
 
-	if (data->x1 < data->x2) {
-		startx = data->x1;
-		starty = data->y1;
+    if (data->x1 < data->x2) {
+        startx = data->x1;
+        starty = data->y1;
 
-		endx = data->x2;
-		endy = data->y2;
-	} else {
-		startx = data->x2;
-		starty = data->y2;
+        endx = data->x2;
+        endy = data->y2;
+    } else {
+        startx = data->x2;
+        starty = data->y2;
 
-		endx = data->x1;
-		endy = data->y1;
-	}
+        endx = data->x1;
+        endy = data->y1;
+    }
 
     // TODO: last
-	ystep = (float)(endy - starty) / (float)(endx - startx);
+    ystep = (float)(endy - starty) / (float)(endx - startx);
 
     //dprintf("%d, %d -> %d, %d, ystep %d\n", data->x1, data->y1, data->x2, data->y2, (int)(10 * ystep));
 
-	memory = OS4_GetMemoryAddress(data->baseaddress, data->width, startx, starty);
+    memory = OS4_GetMemoryAddress(data->baseaddress, data->width, startx, starty);
 
-	if (ystep > 0.5f || ystep < -0.5f) {
-	
-		float xstep = 1.0f / ystep;
-		float fx = startx;
+    if (ystep > 0.5f || ystep < -0.5f) {
+    
+        float xstep = 1.0f / ystep;
+        float fx = startx;
 
-		int lastx = startx;
+        int lastx = startx;
 
-		for (y = starty ; y <= endy; fx += xstep, ++y) {
-		
-			Uint32 oldcolor, newcolor;
+        for (y = starty ; y <= endy; fx += xstep, ++y) {
+        
+            Uint32 oldcolor, newcolor;
 
-			x = ROUNDF(fx);
+            x = ROUNDF(fx);
 
-			oldcolor = *memory;
-			newcolor = data->blendfp(oldcolor, data->sr, data->sg, data->sb, data->sa);
-			*memory = newcolor;
-			memory += data->width;
+            oldcolor = *memory;
+            newcolor = data->blendfp(oldcolor, data->sr, data->sg, data->sb, data->sa);
+            *memory = newcolor;
+            memory += data->width;
 
-			memory += (x - lastx);
-			lastx = x;
-		}
+            memory += (x - lastx);
+            lastx = x;
+        }
 
-	} else {
-		float fy = starty;
+    } else {
+        float fy = starty;
 
-		int lasty = starty;
-		int diff;
+        int lasty = starty;
+        int diff;
 
-		for (x = startx ; x <= endx; ++x, fy += ystep ) {
-			Uint32 oldcolor, newcolor;
+        for (x = startx ; x <= endx; ++x, fy += ystep ) {
+            Uint32 oldcolor, newcolor;
 
-			y = ROUNDF(fy);
+            y = ROUNDF(fy);
 
-			oldcolor = *memory;
-			newcolor = data->blendfp(oldcolor, data->sr, data->sg, data->sb, data->sa);
-			*memory++ = newcolor;
+            oldcolor = *memory;
+            newcolor = data->blendfp(oldcolor, data->sr, data->sg, data->sb, data->sa);
+            *memory++ = newcolor;
 
-			diff = y - lasty;
-			if (diff < 0) {
-				memory -= data->width;
-				lasty = y;
-			} else if (diff > 0) {
-				memory += data->width;
-				lasty = y;
-			}
-		}
-	}
+            diff = y - lasty;
+            if (diff < 0) {
+                memory -= data->width;
+                lasty = y;
+            } else if (diff > 0) {
+                memory += data->width;
+                lasty = y;
+            }
+        }
+    }
 }
 
 static void
 OS4_BlendLine(OS4_LineData * data)
 {
-	if (data->y1 == data->y2) {
-		OS4_HLine(data);
-	} else if (data->x1 == data->x2) {
-		OS4_VLine(data);
-	} else if (ABS(data->x1 - data->x2) == ABS(data->y1 - data->y2)) {
-		OS4_DLine(data);
-	} else {
-		OS4_Line(data);
-	}
+    if (data->y1 == data->y2) {
+        OS4_HLine(data);
+    } else if (data->x1 == data->x2) {
+        OS4_VLine(data);
+    } else if (ABS(data->x1 - data->x2) == ABS(data->y1 - data->y2)) {
+        OS4_DLine(data);
+    } else {
+        OS4_Line(data);
+    }
 }
 
 int
@@ -528,91 +555,108 @@ OS4_RenderDrawLines(SDL_Renderer * renderer, const SDL_FPoint * points,
 
         data->iGraphics->SetRPAttrs(&data->rastport, RPTAG_APenColor, color, TAG_DONE);
 
-        // TODO: clipping?
         for (i = 0; i < count - 1; ++i) {
+
+            int x1, y1, x2, y2;
+
+            x1 = final_points[i].x;
+            y1 = final_points[i].y;
+            x2 = final_points[i + 1].x;
+            y2 = final_points[i + 1].y;
+
+            /* Clipping - is it possible to do with RastPort? */
+            if (!SDL_IntersectRectAndLine(&data->cliprect, &x1, &y1, &x2, &y2)) {
+                continue;
+            }
+
             data->iGraphics->Move(
                 &data->rastport,
-                final_points[i].x,
-                final_points[i].y);
+                x1,
+                y1);
 
             data->iGraphics->Draw(
                 &data->rastport,
-                final_points[i + 1].x,
-                final_points[i + 1].y);
+                x2,
+                y2);
         }
 
         status = 0;
     } else {
 
-		APTR baseaddress;
-		uint32 bytesperrow;
+        APTR baseaddress;
+        uint32 bytesperrow;
 
-		APTR lock = data->iGraphics->LockBitMapTags(
-			bitmap,
-    		LBM_BaseAddress, &baseaddress,
-	 		LBM_BytesPerRow, &bytesperrow,
-			TAG_DONE);
+        APTR lock = data->iGraphics->LockBitMapTags(
+            bitmap,
+            LBM_BaseAddress, &baseaddress,
+            LBM_BytesPerRow, &bytesperrow,
+            TAG_DONE);
 
-		if (lock) {
+        if (lock) {
 
-			OS4_LineData ld;
-			ld.baseaddress = baseaddress;
-			ld.width = bytesperrow / 4;
-			ld.last = SDL_FALSE;
+            OS4_LineData ld;
+            ld.baseaddress = baseaddress;
+            ld.width = bytesperrow / 4;
+            ld.last = SDL_FALSE;
 
-			switch (renderer->blendMode) {
-				case SDL_BLENDMODE_BLEND:
-					ld.sr = MUL(renderer->a, renderer->r);
-					ld.sg = MUL(renderer->a, renderer->g);
-					ld.sb = MUL(renderer->a, renderer->b);
-					ld.sa = renderer->a;
-					ld.blendfp = BlendPoint;
-					break;
-				case SDL_BLENDMODE_ADD:
-					ld.sr = MUL(renderer->a, renderer->r);
-					ld.sg = MUL(renderer->a, renderer->g);
-					ld.sb = MUL(renderer->a, renderer->b);
-					ld.sa = 0;
-					ld.blendfp = AddPoint;
-					break;
-				case SDL_BLENDMODE_MOD:
-					ld.sr = renderer->r;
-					ld.sg = renderer->g;
-					ld.sb = renderer->b;
-					ld.sa = renderer->a;
-					ld.blendfp = ModPoint;
-					break;
-				default:
-					dprintf("Unknown blend mode %d\n", renderer->blendMode);
-					ld.sr = renderer->r;
-					ld.sg = renderer->g;
-					ld.sb = renderer->b;
-					ld.sa = renderer->a;
-					ld.blendfp = NopPoint;
-					break;
-			}
+            switch (renderer->blendMode) {
+                case SDL_BLENDMODE_BLEND:
+                    ld.sr = MUL(renderer->a, renderer->r);
+                    ld.sg = MUL(renderer->a, renderer->g);
+                    ld.sb = MUL(renderer->a, renderer->b);
+                    ld.sa = renderer->a;
+                    ld.blendfp = BlendPoint;
+                    break;
+                case SDL_BLENDMODE_ADD:
+                    ld.sr = MUL(renderer->a, renderer->r);
+                    ld.sg = MUL(renderer->a, renderer->g);
+                    ld.sb = MUL(renderer->a, renderer->b);
+                    ld.sa = 0;
+                    ld.blendfp = AddPoint;
+                    break;
+                case SDL_BLENDMODE_MOD:
+                    ld.sr = renderer->r;
+                    ld.sg = renderer->g;
+                    ld.sb = renderer->b;
+                    ld.sa = renderer->a;
+                    ld.blendfp = ModPoint;
+                    break;
+                default:
+                    dprintf("Unknown blend mode %d\n", renderer->blendMode);
+                    ld.sr = renderer->r;
+                    ld.sg = renderer->g;
+                    ld.sb = renderer->b;
+                    ld.sa = renderer->a;
+                    ld.blendfp = NopPoint;
+                    break;
+            }
 
-			for (i = 0; i < count - 1; ++i) {
+            for (i = 0; i < count - 1; ++i) {
 
-				ld.x1 = final_points[i].x;
-				ld.y1 = final_points[i].y;
-				ld.x2 = final_points[i + 1].x;
-				ld.y2 = final_points[i + 1].y;
+                ld.x1 = final_points[i].x;
+                ld.y1 = final_points[i].y;
+                ld.x2 = final_points[i + 1].x;
+                ld.y2 = final_points[i + 1].y;
 
-				if (i == count - 2) {
-					ld.last = SDL_TRUE;
-				}
+                /* Clipping */
+                if (!SDL_IntersectRectAndLine(&data->cliprect, &ld.x1, &ld.y1, &ld.x2, &ld.y2)) {
+                    continue;
+                }
 
-				OS4_BlendLine(&ld);
-			}
+                if (i == count - 2) {
+                    ld.last = SDL_TRUE;
+                }
 
-			data->iGraphics->UnlockBitMap(lock);
+                OS4_BlendLine(&ld);
+            }
 
-			status = 0;
-		} else {
-			dprintf("Lock failed\n");
-    		status = -1;
-		}
+            data->iGraphics->UnlockBitMap(lock);
+
+            status = 0;
+        } else {
+            dprintf("Lock failed\n");
+            status = -1;
+        }
 
     }
 

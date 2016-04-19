@@ -40,16 +40,19 @@
 #define DEBUG
 #include "../../main/amigaos4/SDL_os4debug.h"
 
-/* AmigaOS4 compositing renderer implementation
+/* AmigaOS4 (compositing) renderer implementation
 
 TODO:
 
-- viewport handling
-- cliprect handling
-- blended lines
 - SDL_BlendMode_Mod: is it impossible to accelerate?
 - COMPFLAG_Color1Modulate: does it work?
-- need also a benchmark tool
+- Blended line drawing could probably be optimized
+
+NOTE:
+
+- compositing is used for blended rectangles and texture blitting
+- blended lines and points are drawn with the CPU as compositing doesn't support these primitives
+    (could try small triangles to plot a point?)
 
 */
 
@@ -604,17 +607,22 @@ OS4_RenderFillRects(SDL_Renderer * renderer, const SDL_FRect * rects, int count)
             renderer->g << 8 |
             renderer->b;
 
-        // TODO: clipping?
         for (i = 0; i < count; ++i) {
             
+            SDL_Rect clipped;
             //dprintf("%d, %d - %d, %d\n", final_rects[i].x, final_rects[i].y, final_rects[i].w, final_rects[i].h);
+
+            /* Perform clipping - is it possible to use RastPort? */
+            if (!SDL_IntersectRect(&final_rects[i], &data->cliprect, &clipped)) {
+                continue;
+            }
 
             data->iGraphics->RectFillColor(
                 &data->rastport,
-                final_rects[i].x,
-                final_rects[i].y,
-                final_rects[i].x + final_rects[i].w - 1,
-                final_rects[i].y + final_rects[i].h - 1,
+                clipped.x,
+                clipped.y,
+                clipped.x + clipped.w - 1,
+                clipped.y + clipped.h - 1,
                 color); // graphics.lib v54!
         }
 
@@ -659,10 +667,10 @@ OS4_RenderFillRects(SDL_Renderer * renderer, const SDL_FRect * rects, int count)
                 OS4_ConvertBlendMode(renderer->blendMode),
                 data->solidcolor,
                 bitmap,
-                //COMPTAG_DestX,      dstrect->x, // TODO: clipping?
-                //COMPTAG_DestY,      dstrect->y,
-                //COMPTAG_DestWidth,  final_rect.w,
-                //COMPTAG_DestHeight, final_rect.h,
+                COMPTAG_DestX,      data->cliprect.x,
+                COMPTAG_DestY,      data->cliprect.y,
+                COMPTAG_DestWidth,  data->cliprect.w,
+                COMPTAG_DestHeight, data->cliprect.h,
                 COMPTAG_Flags,      OS4_GetCompositeFlags(renderer->r, renderer->g, renderer->b),
                 COMPTAG_VertexArray, vertices,
                 COMPTAG_VertexFormat, COMPVF_STW0_Present,
@@ -738,10 +746,10 @@ OS4_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
         COMPTAG_OffsetY,    final_rect.y,
         COMPTAG_ScaleX,     COMP_FLOAT_TO_FIX(scalex),
         COMPTAG_ScaleY,     COMP_FLOAT_TO_FIX(scaley),
-        //COMPTAG_DestX,      dstrect->x, // TODO: clipping?
-        //COMPTAG_DestY,      dstrect->y,
-        //COMPTAG_DestWidth,  final_rect.w,
-        //COMPTAG_DestHeight, final_rect.h,
+        COMPTAG_DestX,      data->cliprect.x,
+        COMPTAG_DestY,      data->cliprect.y,
+        COMPTAG_DestWidth,  data->cliprect.w,
+        COMPTAG_DestHeight, data->cliprect.h,
         COMPTAG_Flags,      OS4_GetCompositeFlags(texture->r, texture->g, texture->b),
         COMPTAG_Color1,     colormod,
         TAG_END);
@@ -808,10 +816,10 @@ OS4_RenderCopyEx(SDL_Renderer * renderer, SDL_Texture * texture,
         src,
         dst,
         COMPTAG_SrcAlpha,   COMP_FLOAT_TO_FIX(OS4_GetCompositeAlpha(texture)),
-        //COMPTAG_DestX,      dstrect->x, // TODO: clipping?
-        //COMPTAG_DestY,      dstrect->y,
-        //COMPTAG_DestWidth,  final_rect.w,
-        //COMPTAG_DestHeight, final_rect.h,
+        COMPTAG_DestX,      data->cliprect.x,
+        COMPTAG_DestY,      data->cliprect.y,
+        COMPTAG_DestWidth,  data->cliprect.w,
+        COMPTAG_DestHeight, data->cliprect.h,
         COMPTAG_Flags,      OS4_GetCompositeFlags(texture->r, texture->g, texture->b),
         COMPTAG_Color1,     colormod,
         COMPTAG_VertexArray, vertices,
