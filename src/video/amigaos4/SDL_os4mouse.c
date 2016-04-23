@@ -22,6 +22,8 @@
 
 #if SDL_VIDEO_DRIVER_AMIGAOS4
 
+#include <intuition/pointerclass.h>
+
 #include "SDL_os4video.h"
 #include "SDL_os4window.h"
 
@@ -31,6 +33,13 @@
 #include "../../main/amigaos4/SDL_os4debug.h"
 
 #include <devices/input.h>
+
+typedef struct SDL_CursorData {
+	int hot_x;
+	int hot_y;
+	ULONG type;
+	struct BitMap *bm;
+} SDL_CursorData;
 
 static Uint32
 OS4_GetDoubleClickTimeInMillis(_THIS)
@@ -49,42 +58,158 @@ OS4_GetDoubleClickTimeInMillis(_THIS)
 }
 
 static SDL_Cursor*
+OS4_CreateCursorInternal()
+{
+	SDL_Cursor *cursor = SDL_calloc(1, sizeof(SDL_Cursor));
+
+	dprintf("Called\n");
+
+	if (cursor) {
+
+		SDL_CursorData *data = SDL_calloc(1, sizeof(SDL_CursorData));
+
+		if (data) {
+			cursor->driverdata = data;
+		} else {
+			dprintf("Failed to create cursor data\n");
+	    }
+
+	} else {
+		dprintf("Failed to create cursor\n");
+    }
+
+	return cursor;
+
+}
+
+static SDL_Cursor*
 OS4_CreateDefaultCursor()
 {
-	return NULL;
+	SDL_Cursor *cursor = OS4_CreateCursorInternal();
+
+	dprintf("Called\n");
+
+	if (cursor && cursor->driverdata) {
+		SDL_CursorData *data = cursor->driverdata;
+
+		data->type = POINTERTYPE_NORMAL;
+	}
+	
+	return cursor;
 }
 
 static SDL_Cursor*
 OS4_CreateCursor(SDL_Surface * surface, int hot_x, int hot_y)
 {
-	return NULL;
+	SDL_Cursor *cursor = OS4_CreateCursorInternal();
+
+	dprintf("Called %p %d %d\n", surface, hot_x, hot_y);
+
+	if (cursor && cursor->driverdata) {
+		// TODO
+	}
+
+	return cursor;
+}
+
+static ULONG
+OS4_MapCursorIdToNative(SDL_SystemCursor id)
+{
+	switch (id) {
+		case SDL_SYSTEM_CURSOR_ARROW: return POINTERTYPE_NORMAL;
+		case SDL_SYSTEM_CURSOR_IBEAM: return POINTERTYPE_SELECT;
+		case SDL_SYSTEM_CURSOR_WAITARROW:
+		case SDL_SYSTEM_CURSOR_WAIT: return POINTERTYPE_BUSY;
+		case SDL_SYSTEM_CURSOR_CROSSHAIR: return POINTERTYPE_CROSS;
+		case SDL_SYSTEM_CURSOR_SIZENWSE: return POINTERTYPE_NORTHWESTSOUTHEASTRESIZE;
+		case SDL_SYSTEM_CURSOR_SIZENESW: return POINTERTYPE_NORTHEASTSOUTHWESTRESIZE;
+		case SDL_SYSTEM_CURSOR_SIZEWE: return POINTERTYPE_EASTWESTRESIZE;
+		case SDL_SYSTEM_CURSOR_SIZENS: return POINTERTYPE_NORTHSOUTHRESIZE;
+		case SDL_SYSTEM_CURSOR_NO: return POINTERTYPE_NOTALLOWED;
+		case SDL_SYSTEM_CURSOR_HAND: return POINTERTYPE_HAND;
+		//
+		case SDL_SYSTEM_CURSOR_SIZEALL:
+		default:
+			dprintf("Unknown mapping from type %d\n", id);
+		    return POINTERTYPE_NORMAL;
+	}
 }
 
 static SDL_Cursor*
 OS4_CreateSystemCursor(SDL_SystemCursor id)
 {
-	return NULL;
+	SDL_Cursor *cursor = OS4_CreateCursorInternal();
+
+	dprintf("Called %d\n", id);
+
+	if (cursor && cursor->driverdata) {
+		SDL_CursorData *data = cursor->driverdata;
+
+		data->type = OS4_MapCursorIdToNative(id);
+	}
+
+	return cursor;
 }
 
 static int
 OS4_ShowCursor(SDL_Cursor * cursor)
 {
+	SDL_CursorData *data = cursor->driverdata;
+
+	dprintf("Called %p %p\n", cursor, data);
+
+	if (data) {
+        SDL_Mouse *mouse = SDL_GetMouse();
+
+		if (mouse->focus) {
+			_THIS = SDL_GetVideoDevice();
+
+			SDL_WindowData *windowdata = mouse->focus->driverdata;
+
+			IIntuition->SetWindowPointer(
+			    windowdata->syswin,
+				//WA_Pointer,
+				WA_PointerType, data->type,
+				TAG_DONE);
+
+		} else {
+			dprintf("Don't know which window\n");
+			return -1;
+		}
+	}
+
 	return 0;
 }
 
 static void
 OS4_FreeCursor(SDL_Cursor * cursor)
 {
+	SDL_CursorData *data = cursor->driverdata;
+	
+	dprintf("Called %p\n", cursor);
+
+	if (data) {
+
+		if (data->bm) {
+			_THIS = SDL_GetVideoDevice();
+
+			IGraphics->FreeBitMap(data->bm);
+			data->bm = NULL;
+		}
+
+		SDL_free(data);
+		cursor->driverdata = NULL;
+	}
 }
 
 static void
 OS4_WarpMouse(SDL_Window * window, int x, int y)
 {
-	SDL_VideoDevice * device    = SDL_GetVideoDevice();
-	SDL_VideoData * videoData   = device->driverdata;
+	SDL_VideoDevice *device    = SDL_GetVideoDevice();
+	SDL_VideoData *videoData   = device->driverdata;
 
-	SDL_WindowData * winData    = window->driverdata;
-	struct Window * syswin      = winData->syswin;
+	SDL_WindowData *winData    = window->driverdata;
+	struct Window *syswin      = winData->syswin;
 
 	BOOL warpHostPointer;
 
@@ -188,7 +313,7 @@ OS4_QuitMouse(_THIS)
     SDL_Mouse *mouse = SDL_GetMouse();
 
     if ( mouse->def_cursor ) {
-        SDL_free(mouse->def_cursor);
+		OS4_FreeCursor(mouse->def_cursor);
         mouse->def_cursor = NULL;
         mouse->cur_cursor = NULL;
     }
