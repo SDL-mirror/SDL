@@ -38,8 +38,14 @@ typedef struct SDL_CursorData {
 	int hot_x;
 	int hot_y;
 	ULONG type;
-	struct BitMap *bm;
+	Object *object;
 } SDL_CursorData;
+
+static UWORD fallbackPointerData[2 * 16] = { 0 };
+
+static struct BitMap fallbackPointerBitMap = { 2, 16, 0, 2, 0,
+	{ (PLANEPTR)fallbackPointerData, (PLANEPTR)(fallbackPointerData + 16) } };
+
 
 static Uint32
 OS4_GetDoubleClickTimeInMillis(_THIS)
@@ -62,7 +68,7 @@ OS4_CreateCursorInternal()
 {
 	SDL_Cursor *cursor = SDL_calloc(1, sizeof(SDL_Cursor));
 
-	dprintf("Called\n");
+	//dprintf("Called\n");
 
 	if (cursor) {
 
@@ -106,7 +112,38 @@ OS4_CreateCursor(SDL_Surface * surface, int hot_x, int hot_y)
 	dprintf("Called %p %d %d\n", surface, hot_x, hot_y);
 
 	if (cursor && cursor->driverdata) {
-		// TODO
+
+		if (surface->w > 64) {		  
+			dprintf("Invalid width %d\n", surface->w);
+		} else if (surface->h > 64) {
+			dprintf("Invalid height %d\n", surface->h);
+		} else {
+			_THIS = SDL_GetVideoDevice();
+
+			/* We need to pass some compatibility parameters
+			even though we are going to use just ARGB pointer */
+
+			Object *object = IIntuition->NewObject(
+				NULL,
+				POINTERCLASS,
+				POINTERA_BitMap, &fallbackPointerBitMap,
+				POINTERA_XOffset, hot_x,
+				POINTERA_YOffset, hot_y,
+				//POINTERA_WordWidth, 1,
+				//POINTERA_XResolution, POINTERXRESN_SCREENRES,
+				//POINTERA_YResolution, POINTERYRESN_SCREENRES,
+				POINTERA_ImageData, surface->pixels,
+				POINTERA_Width, surface->w,
+				POINTERA_Height, surface->h,
+				TAG_DONE);
+
+			if (object) {
+				SDL_CursorData *data = cursor->driverdata;
+				data->object = object;
+			} else {
+				dprintf("Failed to create pointer object\n");
+			}
+		}
 	}
 
 	return cursor;
@@ -140,7 +177,7 @@ OS4_CreateSystemCursor(SDL_SystemCursor id)
 {
 	SDL_Cursor *cursor = OS4_CreateCursorInternal();
 
-	dprintf("Called %d\n", id);
+	//dprintf("Called %d\n", id);
 
 	if (cursor && cursor->driverdata) {
 		SDL_CursorData *data = cursor->driverdata;
@@ -151,32 +188,61 @@ OS4_CreateSystemCursor(SDL_SystemCursor id)
 	return cursor;
 }
 
+static void
+OS4_SetPointerForEachWindow(ULONG type, Object *object)
+{
+	SDL_Window *sdlwin;
+
+	_THIS = SDL_GetVideoDevice();
+
+	for (sdlwin = _this->windows; sdlwin; sdlwin = sdlwin->next) {
+
+		SDL_WindowData *data = sdlwin->driverdata;
+
+		if (data->syswin) {
+
+			dprintf("Setting pointer object/type %p/%d for window %p\n", object, type, data->syswin);
+
+			if (object) {
+				IIntuition->SetWindowPointer(
+					data->syswin,
+					WA_Pointer, object,
+					TAG_DONE);
+			} else {
+				IIntuition->SetWindowPointer(
+					data->syswin,
+					WA_PointerType, type,
+					TAG_DONE);
+			}
+		}
+	}
+}
+
+
 static int
 OS4_ShowCursor(SDL_Cursor * cursor)
 {
-	SDL_CursorData *data = cursor->driverdata;
+	ULONG type = POINTERTYPE_NORMAL;
+	Object *object = NULL;
 
-	dprintf("Called %p %p\n", cursor, data);
+	if (cursor) {
+		SDL_CursorData *data = cursor->driverdata;
 
-	if (data) {
-        SDL_Mouse *mouse = SDL_GetMouse();
+		dprintf("Called %p %p\n", cursor, data);
 
-		if (mouse->focus) {
-			_THIS = SDL_GetVideoDevice();
-
-			SDL_WindowData *windowdata = mouse->focus->driverdata;
-
-			IIntuition->SetWindowPointer(
-			    windowdata->syswin,
-				//WA_Pointer,
-				WA_PointerType, data->type,
-				TAG_DONE);
-
+		if (data) {
+			type = data->type;
+			object = data->object;
 		} else {
-			dprintf("Don't know which window\n");
+			dprintf("No cursor data\n");
 			return -1;
 		}
+	} else {
+		dprintf("Hiding cursor\n");
+		type = POINTERTYPE_NONE;
 	}
+
+	OS4_SetPointerForEachWindow(type, object);
 
 	return 0;
 }
@@ -190,11 +256,11 @@ OS4_FreeCursor(SDL_Cursor * cursor)
 
 	if (data) {
 
-		if (data->bm) {
+		if (data->object) {
 			_THIS = SDL_GetVideoDevice();
 
-			IGraphics->FreeBitMap(data->bm);
-			data->bm = NULL;
+			IIntuition->DisposeObject(data->object);
+			data->object = NULL;
 		}
 
 		SDL_free(data);
