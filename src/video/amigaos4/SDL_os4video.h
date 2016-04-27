@@ -33,6 +33,7 @@
 //#include <proto/Picasso96API.h> // P96 is deprecated
 #include <proto/icon.h>
 #include <proto/minigl.h>
+#include <proto/textclip.h>
 
 #include "../SDL_sysvideo.h"
 
@@ -61,6 +62,7 @@ typedef struct
 	struct Library			*workbenchbase;
 	struct Library			*keymapbase;
 	struct Library          *miniglbase;
+	struct Library 	        *textclipbase;
 
 	struct GraphicsIFace	*iGraphics;
 	struct LayersIFace		*iLayers;
@@ -70,6 +72,7 @@ typedef struct
 	struct WorkbenchIFace	*iWorkbench;
 	struct KeymapIFace		*iKeymap;
 	struct MiniGLIFace      *iMiniGL;
+	struct TextClipIFace    *iTextClip;
 
 	BOOL                    vsyncEnabled;
 } SDL_VideoData;
@@ -82,7 +85,7 @@ typedef struct
 #define WorkbenchBase ((SDL_VideoData *) _this->driverdata)->workbenchbase
 #define KeymapBase ((SDL_VideoData *) _this->driverdata)->keymapbase
 #define MiniGLBase ((SDL_VideoData *) _this->driverdata)->miniglbase
-
+#define TextClipBase ((SDL_VideoData *) _this->driverdata)->textclipbase
 #define IGraphics ((SDL_VideoData *) _this->driverdata)->iGraphics
 #define ILayers ((SDL_VideoData *) _this->driverdata)->iLayers
 //#define IP96 ((SDL_VideoData *) _this->driverdata)->iP96
@@ -91,6 +94,7 @@ typedef struct
 #define IWorkbench ((SDL_VideoData *) _this->driverdata)->iWorkbench
 #define IKeymap ((SDL_VideoData *) _this->driverdata)->iKeymap
 #define IMiniGL ((SDL_VideoData *) _this->driverdata)->iMiniGL
+#define ITextClip ((SDL_VideoData *) _this->driverdata)->iTextClip
 
 extern void * OS4_SaveAllocPooled(_THIS, uint32 size);
 extern void * OS4_SaveAllocVecPooled(_THIS, uint32 size);

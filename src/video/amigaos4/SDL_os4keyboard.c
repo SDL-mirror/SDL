@@ -27,6 +27,9 @@
 #include "../../events/SDL_keyboard_c.h"
 #include "../../events/scancodes_amiga.h"
 
+#define DEBUG
+#include "../../main/amigaos4/SDL_os4debug.h"
+
 static SDL_Keycode
 OS4_MapRawKey(_THIS, int code)
 {
@@ -77,6 +80,59 @@ OS4_UpdateKeymap(_THIS)
 	}
 
 	SDL_SetKeymap(0, keymap, SDL_NUM_SCANCODES);
+}
+
+int
+OS4_SetClipboardText(_THIS, const char *text)
+{
+	LONG result = ITextClip->WriteClipVector(text, SDL_strlen(text));
+
+	//dprintf("Result %s\n", result ? "OK" : "NOK");
+
+	return result ? 0 : -1;
+}
+
+char *
+OS4_GetClipboardText(_THIS)
+{
+	STRPTR from;
+	ULONG size;
+	char *to = NULL;
+
+	LONG result = ITextClip->ReadClipVector(&from, &size);
+
+	//dprintf("Read '%s' (%d bytes) from clipboard\n", from, size);
+
+	if (result) {
+
+		if (size) {
+			to = SDL_malloc( ++size );
+
+			if (to) {
+			   SDL_strlcpy(to, from, size);
+			} else {
+				dprintf("Failed to allocate memory\n");
+			}
+		}
+
+		ITextClip->DisposeClipVector(from);
+	}
+
+	return to;
+}
+
+SDL_bool
+OS4_HasClipboardText(_THIS)
+{
+	/* This is silly but is there a better way to check? */
+	char *to = OS4_GetClipboardText(_this);
+
+	if (to) {
+		SDL_free(to);
+		return SDL_TRUE;
+	}
+
+	return SDL_FALSE;
 }
 
 /* Alphabetic scancodes for PC keyboards */

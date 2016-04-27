@@ -75,13 +75,15 @@ OS4_OpenLibraries(_THIS)
 	WorkbenchBase = IExec->OpenLibrary("workbench.library", MIN_LIB_VERSION);
 	KeymapBase    = IExec->OpenLibrary("keymap.library", MIN_LIB_VERSION);
 	MiniGLBase    = IExec->OpenLibrary("minigl.library", 2);
+	TextClipBase  = IExec->OpenLibrary("textclip.library", 0);
 
-	if (!GfxBase || !LayersBase || /*!P96Base ||*/ !IntuitionBase || !IconBase || !WorkbenchBase || !KeymapBase) {
+	if (!GfxBase || !LayersBase || /*!P96Base ||*/ !IntuitionBase || !IconBase || !WorkbenchBase || !KeymapBase || !TextClipBase) {
 		dprintf("Failed to open system library\n");
 		return SDL_FALSE;
 	}
 
 	if (!MiniGLBase) {
+		/* We should still be able to use SDL2 library so don't fail */
 		dprintf("Failed to open minigl.library\n");
 	}
 
@@ -93,8 +95,9 @@ OS4_OpenLibraries(_THIS)
 	IWorkbench = (struct WorkbenchIFace *) IExec->GetInterface(WorkbenchBase, "main", 1, NULL);
 	IKeymap    = (struct KeymapIFace *)    IExec->GetInterface(KeymapBase, "main", 1, NULL);
 	IMiniGL	   = (struct MiniGLIFace *)    IExec->GetInterface(MiniGLBase, "main", 1, NULL);
+	ITextClip  = (struct TextClipIFace *)  IExec->GetInterface(TextClipBase, "main", 1, NULL);
 
-	if (!IGraphics || !ILayers || /*!IP96 ||*/ !IIntuition || !IIcon || !IWorkbench || !IKeymap) {
+	if (!IGraphics || !ILayers || /*!IP96 ||*/ !IIntuition || !IIcon || !IWorkbench || !IKeymap || !ITextClip) {
 		dprintf("Failed to get library interface\n");
 		return SDL_FALSE;
 	}
@@ -112,6 +115,11 @@ static void
 OS4_CloseLibraries(_THIS)
 {
 	dprintf("Called\n");
+
+	if (ITextClip) {
+		IExec->DropInterface((struct Interface *) ITextClip);
+		ITextClip = NULL;
+	}
 
 	if (IMiniGL) {
 		IExec->DropInterface((struct Interface *) IMiniGL);
@@ -147,6 +155,11 @@ OS4_CloseLibraries(_THIS)
 	if (IGraphics) {
 		IExec->DropInterface((struct Interface *) IGraphics);
 		IGraphics = NULL;
+	}
+
+	if (TextClipBase) {
+		IExec->CloseLibrary(TextClipBase);
+		TextClipBase = NULL;
 	}
 
 	if (MiniGLBase) {
@@ -373,9 +386,9 @@ OS4_CreateDevice(int devindex)
 
 	device->PumpEvents = OS4_PumpEvents;
 	//device->SuspendScreenSaver = OS4_SuspendScreenSaver;
-	//device->SetClipboardText = OS4_SetClipboardText;
-	//device->GetClipboardText = OS4_GetClipboardText;
-	//device->HasClipboardText = OS4_HasClipboardText;
+	device->SetClipboardText = OS4_SetClipboardText;
+	device->GetClipboardText = OS4_GetClipboardText;
+	device->HasClipboardText = OS4_HasClipboardText;
 	//device->ShowMessageBox = OS4_ShowMessageBox; Can be called without video initialization
 
 	device->free = OS4_DeleteDevice;
