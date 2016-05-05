@@ -20497,7 +20497,6 @@ $as_echo "#define SDL_VIDEO_DRIVER_AMIGAOS4 1" >>confdefs.h
 $as_echo "#define SDL_VIDEO_RENDER_AMIGAOS4 1" >> confdefs.h
 
         SOURCES="$SOURCES $srcdir/src/video/amigaos4/*.c"
-        SOURCES="$SOURCES $srcdir/src/render/amigaos4/*.c"
 
         have_video=yes
         SUMMARY_video="${SUMMARY_video} amigaos4"
