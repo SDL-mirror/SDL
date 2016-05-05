@@ -177,7 +177,11 @@ SDL_Delay(Uint32 ms)
 #if HAVE_NANOSLEEP
     struct timespec elapsed, tv;
 #else
+
+#ifndef __amigaos4__
     struct timeval tv;
+#endif
+
     Uint32 then, now, elapsed;
 #endif
 

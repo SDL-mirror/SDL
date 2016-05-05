@@ -119,8 +119,10 @@ SDL_SYS_CreateThread(SDL_Thread * thread, void *args)
 void
 SDL_SYS_SetupThread(const char *name)
 {
+#ifndef __amigaos4__
     int i;
     sigset_t mask;
+#endif
 
     if (name != NULL) {
         #if defined(__MACOSX__) || defined(__IPHONEOS__) || defined(__LINUX__)
@@ -193,9 +195,9 @@ SDL_SYS_SetThreadPriority(SDL_ThreadPriority priority)
     int value;
 
     if (priority == SDL_THREAD_PRIORITY_LOW) {
-        value = 5;
-    } else if (priority == SDL_THREAD_PRIORITY_HIGH) {
         value = -5;
+    } else if (priority == SDL_THREAD_PRIORITY_HIGH) {
+        value = 5;
     } else {
         value = 0;
     }
