@@ -113,6 +113,8 @@ OS4_GetClipboardText(_THIS)
 			} else {
 				dprintf("Failed to allocate memory\n");
 			}
+		} else {
+			to = SDL_strdup("");
 		}
 
 		ITextClip->DisposeClipVector(from);
