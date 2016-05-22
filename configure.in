@@ -2018,7 +2018,7 @@ CheckAmigaOS4GL()
         AC_DEFINE(SDL_VIDEO_OPENGL, 1, [ ])
         AC_DEFINE(SDL_VIDEO_OPENGL_AMIGAOS4, 1, [ ])
         AC_DEFINE(SDL_VIDEO_RENDER_OGL, 1, [ ])
-        EXTRA_LDFLAGS="$EXTRA_LDFLAGS -lGL -lGLU"
+        #EXTRA_LDFLAGS="$EXTRA_LDFLAGS -lGL -lGLU"
         SUMMARY_video="${SUMMARY_video} opengl"
     fi
 }
@@ -2969,7 +2969,7 @@ AC_HELP_STRING([--enable-render-d3d], [enable the Direct3D render driver [[defau
         CheckDummyAudio
         CheckAmigaOS4Video
         CheckAmigaOS4GL
-        CheckDLOPEN
+        #CheckDLOPEN
         CheckPTHREAD
 
         # Set up files for the thread library
@@ -3009,9 +3009,16 @@ AC_HELP_STRING([--enable-render-d3d], [enable the Direct3D render driver [[defau
             SOURCES="$SOURCES $srcdir/src/filesystem/amigaos4/*.c"
             have_filesystem=yes
         fi
+        # Set up files for the shared object loading library
+        if test x$enable_loadso = xyes; then
+            AC_DEFINE(SDL_LOADSO_AMIGAOS4, 1, [ ])
+            SOURCES="$SOURCES $srcdir/src/loadso/amigaos4/*.c"
+            have_loadso=yes
+        fi
         # The AmigaOS4 platform requires special setup.
         SOURCES="$srcdir/src/main/amigaos4/*.c $SOURCES"
-        EXTRA_LDFLAGS="-use-dynld -Wl,-export-dynamic -Wl,-no-undefined $EXTRA_LDFLAGS -ldl"
+        #EXTRA_LDFLAGS="-use-dynld -Wl,-export-dynamic -Wl,-no-undefined $EXTRA_LDFLAGS -ldl"
+        EXTRA_LDFLAGS=""
         EXTRA_CFLAGS="$EXTRA_CFLAGS -mstrict-align"
         ;;
     arm*-apple-darwin*)
@@ -3245,6 +3252,9 @@ else
 fi
 
 SDL_STATIC_LIBS="$SDL_LIBS $EXTRA_LDFLAGS"
+
+# AmigaOS4 hack! This is only to pass "-use-dynld" for sdl2-config 
+SDL_LIBS="-use-dynld $SDL_LIBS"
 
 dnl Expand the cflags and libraries needed by apps using SDL
 AC_SUBST(SDL_CFLAGS)

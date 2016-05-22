@@ -21167,7 +21167,8 @@ $as_echo "#define SDL_VIDEO_OPENGL_AMIGAOS4 1" >>confdefs.h
 
 $as_echo "#define SDL_VIDEO_RENDER_OGL 1" >>confdefs.h
 
-        EXTRA_LDFLAGS="$EXTRA_LDFLAGS -lGL -lGLU"
+#        EXTRA_LDFLAGS="$EXTRA_LDFLAGS -lGL -lGLU"
+
         SUMMARY_video="${SUMMARY_video} opengl"
     fi
 }
@@ -22975,7 +22976,7 @@ $as_echo "#define SDL_FILESYSTEM_HAIKU 1" >>confdefs.h
         CheckDummyAudio
         CheckAmigaOS4Video
         CheckAmigaOS4GL
-        CheckDLOPEN
+        #CheckDLOPEN
         CheckPTHREAD
 
         # Set up files for the thread library
@@ -23024,11 +23025,23 @@ $as_echo "#define SDL_FILESYSTEM_AMIGAOS4 1" >>confdefs.h
 
             SOURCES="$SOURCES $srcdir/src/filesystem/amigaos4/*.c"
             have_filesystem=yes
-        fi	
+        fi
+
+        # Set up files for the shared object loading library
+        if test x$enable_loadso = xyes; then
+
+$as_echo "#define SDL_LOADSO_AMIGAOS4 1" >>confdefs.h
+
+            SOURCES="$SOURCES $srcdir/src/loadso/amigaos4/*.c"
+            have_loadso=yes
+        fi
+        
         # The AmigaOS4 platform requires special setup.
         SOURCES="$srcdir/src/main/amigaos4/*.c $SOURCES"
-        EXTRA_LDFLAGS="-use-dynld -Wl,-export-dynamic -Wl,-no-undefined $EXTRA_LDFLAGS -ldl"
-		EXTRA_CFLAGS="$EXTRA_CFLAGS -mstrict-align"
+        #EXTRA_LDFLAGS="-use-dynld -Wl,-export-dynamic -Wl,-no-undefined $EXTRA_LDFLAGS -ldl"
+        EXTRA_LDFLAGS=""
+
+        EXTRA_CFLAGS="$EXTRA_CFLAGS -mstrict-align"
         ;;
     arm*-apple-darwin*)
         # iOS - We are not writing anything to confdefs.h because you have to replace
@@ -23285,9 +23298,8 @@ fi
 
 SDL_STATIC_LIBS="$SDL_LIBS $EXTRA_LDFLAGS"
 
-
-
-
+# AmigaOS4 hack! This is only to pass "-use-dynld" for sdl2-config
+SDL_LIBS="-use-dynld $SDL_LIBS"
 
 if test x$enable_shared = xyes; then
     ENABLE_SHARED_TRUE=
