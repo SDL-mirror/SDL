@@ -220,12 +220,110 @@ static SDL_INLINE void *get_sdlapi_entry(const char *fname, const char *sym)
     }
     return retval;
 }
-#elif defined(unix) || defined(__unix__) || defined(__APPLE__) || defined(__amigaos4__)
+#elif defined(unix) || defined(__unix__) || defined(__APPLE__) //|| defined(__amigaos4__)
 #include <dlfcn.h>
 static SDL_INLINE void *get_sdlapi_entry(const char *fname, const char *sym)
 {
     void *lib = dlopen(fname, RTLD_NOW | RTLD_LOCAL);
     return lib ? dlsym(lib, sym) : NULL;
+}
+#elif defined(__amigaos4__)
+
+#include <proto/exec.h>
+#include <proto/elf.h>
+#include <proto/dos.h>
+
+#define DEBUG
+#include "../main/amigaos4/SDL_os4debug.h"
+
+static struct Library *ElfBase;
+struct ElfIFace *IElf;
+
+SDL_bool OS4_open_elf()
+{
+    SDL_bool result = SDL_FALSE;
+
+    ElfBase = IExec->OpenLibrary("elf.library", 52);
+
+    if (ElfBase) {
+    
+        IElf = (struct ElfIFace *)IExec->GetInterface(ElfBase, "main", 1, NULL);
+
+        if (IElf) {
+            dprintf("Got elf interface\n");
+            result = SDL_TRUE;
+        } else {
+            dprintf("Failed to get elf interface\n");
+        }
+    } else {
+        dprintf("Failed to get elf base\n");
+    }
+
+    return result;
+}
+
+void OS4_close_elf()
+{
+    dprintf("Dropping elf interface\n");
+
+    if (IElf) {
+        IExec->DropInterface((struct Interface *) IElf);
+        IElf = NULL;
+    }
+
+    if (ElfBase) {
+        IExec->CloseLibrary(ElfBase);
+        ElfBase = NULL;
+    }
+}
+
+static SDL_INLINE void *get_sdlapi_entry(const char *fname, const char *sym)
+{
+    void *address = NULL;
+
+    if (OS4_open_elf()) {
+
+        BPTR seglist = IDOS->GetProcSegList(NULL, GPSLF_RUN);
+
+        if (seglist) {
+            Elf32_Handle eh = NULL;
+
+            /* Get the current, closed, elf handle */
+            IDOS->GetSegListInfoTags(seglist, GSLI_ElfHandle, &eh, TAG_DONE);
+            if (eh) {
+                /* Re-open the elf handle for DL calls */
+                eh = IElf->OpenElfTags(OET_ElfHandle, eh, TAG_DONE);
+                if (eh) {
+                    APTR so;
+                    dprintf("Elf handle %p\n", eh);
+                    so = IElf->DLOpen(eh, fname, 0 /*ELF32_RTLD_LOCAL*/);
+                    if (so) {
+                        APTR sym_address;
+                        Elf32_Error result = IElf->DLSym(eh, so, sym, &sym_address);
+                        if (result == ELF32_NO_ERROR) {
+                            address = sym_address;
+                            dprintf("Symbol '%s' found at %p\n", sym, address);
+                        } else {
+                            dprintf("Symbol '%s' not found\n");
+                        }
+                    } else {
+                        dprintf("Failed to open '%s'\n", fname);
+                    }
+                    IElf->CloseElfTags(eh, CET_CloseAll, TAG_DONE); /* BUG: we will not close the so! */
+                } else {
+                    dprintf("Failed to re-open the elf handle\n");
+                }
+            } else {
+                dprintf("Failed to get elf handle of running task\n");
+            }
+        } else {
+            dprintf("Failed to get seglist\n");
+        }
+    }
+
+    OS4_close_elf();
+
+    return address;
 }
 #else
 #error Please define your platform.
