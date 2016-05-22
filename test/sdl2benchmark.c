@@ -13,7 +13,7 @@ TODO:
 - command line arguments for things like window size, iterations...
 - texture color + alpha modulation
 
-gcc -Wall -O3 sdl2benchmark.c -lSDL2 -lpthread -use-dynld -ldl
+gcc -Wall -O3 sdl2benchmark.c -lSDL2 -lpthread -use-dynld
 
 */
 

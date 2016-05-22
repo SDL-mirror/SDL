@@ -25,7 +25,7 @@ Using SDL2 in your projects
 ...do magical SDL2 things...
 
 
-gcc helloworld.c -use-dynld -lSDL2 -lpthread -ldl
+gcc helloworld.c -use-dynld -lSDL2 -lpthread
 
 
 ================================================================================
