@@ -243,6 +243,7 @@
 #undef SDL_LOADSO_DUMMY
 #undef SDL_LOADSO_LDG
 #undef SDL_LOADSO_WINDOWS
+#undef SDL_LOADSO_AMIGAOS4
 
 /* Enable various threading systems */
 #undef SDL_THREAD_PTHREAD
