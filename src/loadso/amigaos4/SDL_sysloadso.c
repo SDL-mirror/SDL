@@ -122,8 +122,11 @@ SDL_UnloadObject(void *handle)
 
         dprintf("DLClose %s\n", (result == ELF32_NO_ERROR) ? "OK" : "failed" );
 
-        IElf->CloseElfTags(oh->elf_handle, CET_CloseAll, TAG_DONE);
-
+/* BUG: testloadso crashes on Final Update...removed this block for now, until a solution is found.
+        IElf->CloseElfTags(
+            oh->elf_handle,
+            TAG_DONE);
+*/
         SDL_free(handle);
     }
 
