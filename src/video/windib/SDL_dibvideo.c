@@ -807,7 +807,7 @@ SDL_Surface *DIB_SetVideoMode(_THIS, SDL_Surface *current,
 	} else {
 #ifndef NO_CHANGEDISPLAYSETTINGS
 		if ( (prev_flags & SDL_FULLSCREEN) == SDL_FULLSCREEN ) {
-			ChangeDisplaySettings(NULL, 0);
+			ChangeDisplaySettings(NULL, CDS_FULLSCREEN);
 		}
 #endif
 		if ( flags & SDL_NOFRAME ) {
@@ -1186,7 +1186,7 @@ void DIB_VideoQuit(_THIS)
 			}
 #ifndef NO_CHANGEDISPLAYSETTINGS
 			if ( this->screen->flags & SDL_FULLSCREEN ) {
-				ChangeDisplaySettings(NULL, 0);
+				ChangeDisplaySettings(NULL, CDS_FULLSCREEN);
 				ShowWindow(SDL_Window, SW_HIDE);
 			}
 #endif
