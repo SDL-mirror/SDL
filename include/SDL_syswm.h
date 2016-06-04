@@ -117,7 +117,7 @@ typedef enum
     SDL_SYSWM_WAYLAND,
     SDL_SYSWM_MIR,
     SDL_SYSWM_WINRT,
-    SDL_SYSWM_OS4,
+    SDL_SYSWM_OS4
 } SDL_SYSWM_TYPE;
 
 /**
