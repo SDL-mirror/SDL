@@ -14,8 +14,11 @@ Building SDL2 library
 sh configure --disable-altivec --prefix=/SDK/local/newlib/
 make
 
-After building, "make install" should work.
+After building, "make install" should work. Optionally you can also build tests:
 
+cd test
+sh configure
+make
 
 ================================================================================
 Using SDL2 in your projects
@@ -33,7 +36,7 @@ About renderers
 ================================================================================
 
 A renderer is a subsystem that can do 2D drawing. We have three renderers:
-software, opengl and compositing.
+software, OpenGL and compositing.
 
 Software renderer is always available. Pixels are plotted by the CPU so this is
 usually the slowest option.
@@ -61,7 +64,7 @@ There is a benchmark tool called sdl2benchmark which was written to test
 available renderers.
 
 If you want to draw accelerated 3D graphics or use explicitly OpenGL functions,
-you have to create an OpenGL context instead of SDL_Renderer.
+you have to create an OpenGL context, instead of SDL_Renderer.
 
 ================================================================================
 Tips
