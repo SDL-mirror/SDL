@@ -25,6 +25,7 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 /* System dependent library loading routines                           */
 
+#include <proto/exec.h>
 #include <proto/elf.h>
 #include <proto/dos.h>
 
@@ -38,13 +39,57 @@ typedef struct {
     APTR shared_object;
 } OS4_ObjectHandle;
 
-SDL_bool OS4_open_elf();
-void OS4_close_elf();
+static struct Library *ElfBase;
+struct ElfIFace *IElf;
+
+static SDL_bool
+OS4_OpenElf()
+{
+    SDL_bool result = SDL_FALSE;
+
+    if (IElf) {
+        result = SDL_TRUE;
+    } else {
+        ElfBase = IExec->OpenLibrary("elf.library", 52);
+
+        if (ElfBase) {
+
+            IElf = (struct ElfIFace *)IExec->GetInterface(ElfBase, "main", 1, NULL);
+
+            if (IElf) {
+                dprintf("Got elf interface\n");
+                result = SDL_TRUE;
+            } else {
+                dprintf("Failed to get elf interface\n");
+            }
+        } else {
+            dprintf("Failed to get elf base\n");
+        }
+    }
+
+    return result;
+}
+
+static void
+OS4_CloseElf()
+{
+    dprintf("Dropping elf interface\n");
+
+    if (IElf) {
+        IExec->DropInterface((struct Interface *) IElf);
+        IElf = NULL;
+    }
+
+    if (ElfBase) {
+        IExec->CloseLibrary(ElfBase);
+        ElfBase = NULL;
+    }
+}
 
 void *
 SDL_LoadObject(const char *sofile)
 {
-    if (OS4_open_elf()) {
+    if (OS4_OpenElf()) {
         
         OS4_ObjectHandle *handle = SDL_malloc(sizeof(OS4_ObjectHandle));
 
@@ -92,7 +137,7 @@ SDL_LoadFunction(void *handle, const char *name)
 {
     void *symbol = NULL;
 
-    if (handle) {
+    if (OS4_OpenElf() && handle) {
         APTR address;
         OS4_ObjectHandle *oh = handle;
 
@@ -113,7 +158,7 @@ SDL_LoadFunction(void *handle, const char *name)
 void
 SDL_UnloadObject(void *handle)
 {
-    if (handle) {
+    if (OS4_OpenElf() && handle) {
 
         Elf32_Error result;
         OS4_ObjectHandle *oh = handle;
@@ -122,7 +167,7 @@ SDL_UnloadObject(void *handle)
 
         dprintf("DLClose %s\n", (result == ELF32_NO_ERROR) ? "OK" : "failed" );
 
-/* BUG: testloadso crashes on Final Update...removed this block for now, until a solution is found.
+/* BUG: testloadso crashes on Final Edition...removed this block for now, until a solution is found.
         IElf->CloseElfTags(
             oh->elf_handle,
             TAG_DONE);
@@ -130,7 +175,7 @@ SDL_UnloadObject(void *handle)
         SDL_free(handle);
     }
 
-    OS4_close_elf();
+    OS4_CloseElf();
 }
 
 #endif /* SDL_LOADSO_AMIGAOS4 */

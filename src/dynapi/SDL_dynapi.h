@@ -47,6 +47,8 @@
 #define SDL_DYNAMIC_API 0
 #elif SDL_BUILDING_WINRT /* probaly not useful on WinRT, given current .dll loading restrictions */
 #define SDL_DYNAMIC_API 0
+#elif __amigaos4__ /* It seems we cannot load .so from a statically linked binary */
+#define SDL_DYNAMIC_API 0
 #else   /* everyone else. */
 #define SDL_DYNAMIC_API 1
 #endif
