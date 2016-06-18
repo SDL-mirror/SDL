@@ -85,7 +85,7 @@ static SDL_Scancode const amiga_scancode_table[] = {
     /*  56 */    SDL_SCANCODE_COMMA,
     /*  57 */    SDL_SCANCODE_PERIOD,
     /*  58 */    SDL_SCANCODE_SLASH,
-    /*  59 */    SDL_SCANCODE_SLASH, // or SDL_SCANCODE_INTERNATIONAL1,
+    /*  59 */    SDL_SCANCODE_UNKNOWN, // or SDL_SCANCODE_INTERNATIONAL1,
     /*  60 */    SDL_SCANCODE_KP_PERIOD,
     /*  61 */    SDL_SCANCODE_KP_7,
     /*  62 */    SDL_SCANCODE_KP_8,
