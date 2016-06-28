@@ -45,7 +45,6 @@
 TODO:
 
 - SDL_BlendMode_Mod: is it impossible to accelerate?
-- COMPFLAG_Color1Modulate: does it work?
 - Blended line drawing could probably be optimized
 
 NOTE:
@@ -53,6 +52,7 @@ NOTE:
 - compositing is used for blended rectangles and texture blitting
 - blended lines and points are drawn with the CPU as compositing doesn't support these primitives
     (could try small triangles to plot a point?)
+- texture color modulation is implemented by CPU
 
 */
 
@@ -102,6 +102,10 @@ typedef struct {
     float s, t, w;
 } OS4_Vertex;
 
+static const uint16 OS4_QuadIndices[] = {
+    0, 1, 2, 2, 3, 0
+};
+
 static SDL_bool
 OS4_IsVsyncEnabled()
 {
@@ -114,15 +118,30 @@ OS4_IsVsyncEnabled()
     return SDL_FALSE;
 }
 
-static SDL_bool
-OS4_IsColorModEnabled(Uint8 r, Uint8 g, Uint8 b)
+SDL_bool
+OS4_IsColorModEnabled(SDL_Texture * texture)
 {
-    if ((r & g & b) != 255) {
+    if ((texture->r & texture->g & texture->b) != 255) {
         //dprintf("Color mod enabled (%d, %d, %d)\n", r, g, b);
         return SDL_TRUE;
     }
 
     return SDL_FALSE;
+}
+
+struct BitMap *
+OS4_AllocBitMap(SDL_Renderer * renderer, int width, int height, int depth) {
+    OS4_RenderData *data = (OS4_RenderData *) renderer->driverdata;
+
+    struct BitMap *bitmap = data->iGraphics->AllocBitMapTags(
+        width,
+        height,
+        depth,
+        BMATags_Displayable, TRUE,
+        BMATags_PixelFormat, PIXF_A8R8G8B8,
+        TAG_DONE);
+
+    return bitmap;
 }
 
 struct BitMap *
@@ -142,13 +161,7 @@ OS4_ActivateRenderer(SDL_Renderer * renderer)
 
         dprintf("Allocating VRAM bitmap %d*%d*%d for renderer\n", width, height, depth);
 
-        data->target = data->bitmap = data->iGraphics->AllocBitMapTags(
-            width,
-            height,
-            depth,
-            BMATags_Displayable, TRUE,
-            BMATags_PixelFormat, PIXF_A8R8G8B8,
-            TAG_DONE);
+        data->target = data->bitmap = OS4_AllocBitMap(renderer, width, height, depth);
 
         if (data->bitmap) {
             OS4_UpdateViewport(renderer);
@@ -163,13 +176,7 @@ OS4_ActivateRenderer(SDL_Renderer * renderer)
         int height = 1;
         int depth = 32;
 
-        data->solidcolor = data->iGraphics->AllocBitMapTags(
-            width,
-            height,
-            depth,
-            BMATags_Displayable, TRUE,
-            BMATags_PixelFormat, PIXF_A8R8G8B8,
-            TAG_DONE);
+        data->solidcolor = OS4_AllocBitMap(renderer, width, height, depth);
 
         if (!data->solidcolor) {
             dprintf("Failed to allocate solid color bitmap\n");
@@ -457,10 +464,6 @@ OS4_GetCompositeFlags(Uint8 r, Uint8 g, Uint8 b)
         flags |= COMPFLAG_SrcFilter;
     }
 
-    if (OS4_IsColorModEnabled(r, g, b)) {
-        flags |= COMPFLAG_Color1Modulate;
-    }
-
     return flags;
 }
 
@@ -638,7 +641,7 @@ OS4_RenderFillRects(SDL_Renderer * renderer, const SDL_FRect * rects, int count)
 
         colormod = renderer->a << 24 | renderer->r << 16 | renderer->g << 8 | renderer->b;
 
-        // FIXME: Couldn't get COMPFLAG_Color1Modulate to work, so hack the texture then
+        // Color modulation is implemented through fill texture manipulation
         if (!OS4_SetSolidColor(renderer, colormod)) {
             SDL_stack_free(final_rects);
             return -1;
@@ -651,17 +654,9 @@ OS4_RenderFillRects(SDL_Renderer * renderer, const SDL_FRect * rects, int count)
 
             OS4_Vertex vertices[4];
 
-            uint16 indices[6];
             uint32 ret_code;
 
             OS4_FillVertexData(vertices, &srcrect, &final_rects[i], 0.0, NULL, SDL_FLIP_NONE);
-
-            indices[0] = 0;
-            indices[1] = 1;
-            indices[2] = 2;
-            indices[3] = 2;
-            indices[4] = 3;
-            indices[5] = 0;
 
             ret_code = data->iGraphics->CompositeTags(
                 OS4_ConvertBlendMode(renderer->blendMode),
@@ -675,7 +670,7 @@ OS4_RenderFillRects(SDL_Renderer * renderer, const SDL_FRect * rects, int count)
                 COMPTAG_VertexArray, vertices,
                 COMPTAG_VertexFormat, COMPVF_STW0_Present,
                 COMPTAG_NumTriangles, 2,
-                COMPTAG_IndexArray,  indices,
+                COMPTAG_IndexArray, OS4_QuadIndices,
                 TAG_END);
 
             if (ret_code) {
@@ -699,12 +694,13 @@ OS4_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
     OS4_TextureData *texturedata = (OS4_TextureData *) texture->driverdata;
     
     struct BitMap *dst = OS4_ActivateRenderer(renderer);
-    struct BitMap *src = texturedata->bitmap;
+    struct BitMap *src = OS4_IsColorModEnabled(texture) ?
+        texturedata->finalbitmap : texturedata->bitmap;
 
     SDL_Rect final_rect;
 
     float scalex, scaley, alpha;
-    uint32 ret_code, colormod;
+    uint32 ret_code;
 
     //dprintf("Called\n");
     //Sint32 s = SDL_GetTicks();
@@ -728,8 +724,6 @@ OS4_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
         alpha = (float)texture->a / 255.0f;
     }
 
-    colormod = 0xFF << 24 | texture->r << 16 | texture->g << 8 | texture->b;
-
     scalex = srcrect->w ? (float)final_rect.w / srcrect->w : 1.0f;
     scaley = srcrect->h ? (float)final_rect.h / srcrect->h : 1.0f;
 
@@ -751,7 +745,6 @@ OS4_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
         COMPTAG_DestWidth,  data->cliprect.w,
         COMPTAG_DestHeight, data->cliprect.h,
         COMPTAG_Flags,      OS4_GetCompositeFlags(texture->r, texture->g, texture->b),
-        COMPTAG_Color1,     colormod,
         TAG_END);
 
     if (ret_code) {
@@ -773,15 +766,15 @@ OS4_RenderCopyEx(SDL_Renderer * renderer, SDL_Texture * texture,
     OS4_TextureData *texturedata = (OS4_TextureData *) texture->driverdata;
 
     struct BitMap *dst = OS4_ActivateRenderer(renderer);
-    struct BitMap *src = texturedata->bitmap;
+    struct BitMap *src = OS4_IsColorModEnabled(texture) ?
+        texturedata->finalbitmap : texturedata->bitmap;
 
     SDL_Rect final_rect;
     SDL_FPoint final_center;
 
-    uint32 ret_code, colormod;
+    uint32 ret_code;
 
     OS4_Vertex vertices[4];
-    uint16 indices[6];
 
     if (!dst) {
         return -1;
@@ -802,15 +795,6 @@ OS4_RenderCopyEx(SDL_Renderer * renderer, SDL_Texture * texture,
 
     OS4_FillVertexData(vertices, srcrect, &final_rect, angle, &final_center, flip);
 
-    indices[0] = 0;
-    indices[1] = 1;
-    indices[2] = 2;
-    indices[3] = 2;
-    indices[4] = 3;
-    indices[5] = 0;
-
-    colormod = 0xFF << 24 | texture->r << 16 | texture->g << 8 | texture->b;
-
     ret_code = data->iGraphics->CompositeTags(
         OS4_ConvertBlendMode(texture->blendMode),
         src,
@@ -821,11 +805,10 @@ OS4_RenderCopyEx(SDL_Renderer * renderer, SDL_Texture * texture,
         COMPTAG_DestWidth,  data->cliprect.w,
         COMPTAG_DestHeight, data->cliprect.h,
         COMPTAG_Flags,      OS4_GetCompositeFlags(texture->r, texture->g, texture->b),
-        COMPTAG_Color1,     colormod,
         COMPTAG_VertexArray, vertices,
         COMPTAG_VertexFormat, COMPVF_STW0_Present,
         COMPTAG_NumTriangles, 2,
-        COMPTAG_IndexArray,  indices,
+        COMPTAG_IndexArray, OS4_QuadIndices,
         TAG_END);
 
     if (ret_code) {

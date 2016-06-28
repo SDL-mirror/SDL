@@ -39,6 +39,8 @@ typedef struct
 } OS4_RenderData;
 
 extern struct BitMap * OS4_ActivateRenderer(SDL_Renderer * renderer);
+extern struct BitMap * OS4_AllocBitMap(SDL_Renderer * renderer, int width, int height, int depth);
+extern SDL_bool OS4_IsColorModEnabled(SDL_Texture * texture);
 
 #endif
 

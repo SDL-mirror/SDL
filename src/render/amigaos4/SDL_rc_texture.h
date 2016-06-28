@@ -28,7 +28,10 @@
 typedef struct
 {
     struct BitMap *bitmap;
+    struct BitMap *finalbitmap; /* Contains color modulated version of bitmap */
     APTR lock;
+    Uint8 r, g, b; /* Last known color modulation parameters */
+    Uint8 *rambuf; /* Work buffer for color modulation */
 } OS4_TextureData;
 
 extern int OS4_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture);
