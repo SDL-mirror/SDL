@@ -40,9 +40,11 @@ typedef struct {
     Uint32 texturewidth;
     Uint32 textureheight;
     Uint64 frequency;
-    int iterations;
-    int objects;
-    int sleep;
+    Uint32 iterations;
+    Uint32 objects;
+    Uint32 sleep;
+    Uint32 frames;
+    Uint32 operations;
     Uint32 *buffer;
 } Context;
 
@@ -136,6 +138,12 @@ static void updateWindowTitle(Context *ctx, Test *test)
 
         SDL_SetWindowTitle(ctx->window, title);
     }
+}
+
+static void render(Context *ctx)
+{
+    SDL_RenderPresent(ctx->renderer);
+    ctx->frames++;
 }
 
 static SDL_bool clearDisplay(Context *ctx)
@@ -252,6 +260,9 @@ static SDL_bool prepareTest(Context *ctx, Test *test)
         }
     }
 
+    ctx->frames = 0;
+    ctx->operations = 0;
+
     return SDL_TRUE;
 }
 
@@ -276,6 +287,7 @@ static SDL_bool runTest(Context *ctx, Test *test)
 {
     Uint64 start, finish;
     double duration;
+    float fps, ops;
 
     if (!prepareTest(ctx, test)) {
         return SDL_FALSE;
@@ -292,8 +304,22 @@ static SDL_bool runTest(Context *ctx, Test *test)
 
     duration = (finish - start) / (double)ctx->frequency;
 
-    SDL_Log("%s, blend mode: %s...%f seconds, %.1f frames per second\n",
-        test->name, getModeName(ctx->mode), duration, ctx->iterations / duration);
+    if (duration == 0.0) {
+        SDL_Log("Division by zero!\n");
+        afterTest(ctx);
+        return SDL_FALSE;
+    }
+
+    fps = ctx->frames / duration;
+    ops = ctx->operations / duration;
+
+    if (fps == ops) {
+        SDL_Log("%s [mode: %s]...%d frames drawn in %.3f seconds => %.1f frames per second\n",
+            test->name, getModeName(ctx->mode), ctx->frames, duration, fps);
+    } else {
+        SDL_Log("%s [mode: %s]...%d frames drawn in %.3f seconds => %.1f frames per second, %.1f operations per second\n",
+            test->name, getModeName(ctx->mode), ctx->frames, duration, fps, ops);
+    }
 
     afterTest(ctx);
 
@@ -315,7 +341,7 @@ static SDL_bool setRandomColor(Context *ctx)
     return SDL_TRUE;
 }
 
-static SDL_bool testPoints(Context *ctx)
+static SDL_bool testPointsInner(Context *ctx, SDL_bool linemode)
 {
     int iteration, result;
 
@@ -340,57 +366,34 @@ static SDL_bool testPoints(Context *ctx)
             points[object].y = getRand(ctx->height);
         }
 
-        result = SDL_RenderDrawPoints(ctx->renderer, points, ctx->objects);
+        if (linemode) {
+            result = SDL_RenderDrawLines(ctx->renderer, points, ctx->objects);
+        } else {
+            result = SDL_RenderDrawPoints(ctx->renderer, points, ctx->objects);
+        }
         
+        ctx->operations++;
+
         if (result) {
             SDL_Log("[%s]Failed to draw points\n", __FUNCTION__);
             return SDL_FALSE;
         }
 
 
-        SDL_RenderPresent(ctx->renderer);
+        render(ctx);
     }
 
     return SDL_TRUE;
 }
 
+static SDL_bool testPoints(Context *ctx)
+{
+    return testPointsInner(ctx, SDL_FALSE);
+}
+
 static SDL_bool testLines(Context *ctx)
 {
-    int iteration, result;
-
-    result = SDL_SetRenderDrawBlendMode(ctx->renderer, ctx->mode);
-
-    if (result) {
-        SDL_Log("[%s]Failed to set blend mode\n", __FUNCTION__);
-        return SDL_FALSE;
-    }
-
-    for (iteration = 0; iteration < ctx->iterations; iteration++) {
-
-        SDL_Point points[ctx->objects];
-        int object;
-
-        if (!setRandomColor(ctx)) {
-            return SDL_FALSE;
-        }
-
-        for (object = 0; object < ctx->objects; object++) {
-            points[object].x = getRand(ctx->width);
-            points[object].y = getRand(ctx->height);
-        }
-
-        result = SDL_RenderDrawLines(ctx->renderer, points, ctx->objects);
-
-        if (result) {
-            SDL_Log("[%s]Failed to draw lines\n", __FUNCTION__);
-            return SDL_FALSE;
-        }
-
-
-        SDL_RenderPresent(ctx->renderer);
-    }
-
-    return SDL_TRUE;
+    return testPointsInner(ctx, SDL_TRUE);
 }
 
 static SDL_bool testFillRects(Context *ctx)
@@ -430,8 +433,9 @@ static SDL_bool testFillRects(Context *ctx)
             return SDL_FALSE;
         }
 
+        ctx->operations++;
 
-        SDL_RenderPresent(ctx->renderer);
+        render(ctx);
     }
 
     return SDL_TRUE;
@@ -477,9 +481,11 @@ static SDL_bool testRenderCopyInner(Context *ctx, SDL_bool ex) {
                 SDL_Log("[%s]Failed to draw texture\n", __FUNCTION__);
                 return SDL_FALSE;
             }
+
+            ctx->operations++;
         //}
 
-        SDL_RenderPresent(ctx->renderer);
+        render(ctx);
     }
 
     return SDL_TRUE;
@@ -573,6 +579,8 @@ static SDL_bool testUpdateTexture(Context *ctx)
             break;
         }
 
+        ctx->operations++;
+
         result = testRenderCopyInner(ctx, SDL_FALSE);
     }
 
@@ -607,6 +615,8 @@ static SDL_bool testReadPixels(Context *ctx)
             result = SDL_FALSE;
             break;
         }
+
+        ctx->operations++;
     }
 
     return result;
