@@ -828,7 +828,7 @@ OS4_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
     
     struct BitMap *bitmap = OS4_ActivateRenderer(renderer);
 
-    dprintf("Called\n");
+    //dprintf("Called\n");
 
     if (!bitmap) {
         return -1;
