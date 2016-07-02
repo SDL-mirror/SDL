@@ -44,16 +44,11 @@ struct MyIntuiMessage
 
 	struct Window *IDCMPWindow;
 
-	int16  MouseDX;		/* Relative mouse movement */
-	int16  MouseDY;
-
 	int16  PointerX;	/* Absolute pointer position, relative to */
 	int16  PointerY;	/* top-left corner of inner window */
 
 	int16  Width;		/* Inner window dimensions */
 	int16  Height;
-
-	int8   wantDelta;	/* Do we want to report delta movements or absolute position */
 };
 
 /* We could possibly use also Window.userdata field to contain SDL_Window,
@@ -152,22 +147,9 @@ OS4_HandleMouseMotion(_THIS, struct MyIntuiMessage *imsg)
 	SDL_Window * sdlwin = OS4_FindWindow(_this, imsg->IDCMPWindow);
 
 	if (sdlwin) {
-		if (imsg->wantDelta)
-		{
-			// TODO: implement relative mouse
-			if (imsg->MouseDX != 0 || imsg->MouseDY != 0)
-			{
-				dprintf("dX:%d dY:%d\n", imsg->MouseDX, imsg->MouseDY);
+		dprintf("X:%d Y:%d\n", imsg->PointerX, imsg->PointerY);
 
-				SDL_SendMouseMotion(sdlwin, 0 /*mouse->mouseID*/, 1, imsg->MouseDX, imsg->MouseDY);
-			}
-		}
-		else
-		{
-			dprintf("X:%d Y:%d\n", imsg->PointerX, imsg->PointerY);
-
-			SDL_SendMouseMotion(sdlwin, 0 /*mouse->mouseID*/, 0, imsg->PointerX, imsg->PointerY);
-		}	 
+		SDL_SendMouseMotion(sdlwin, 0 /*mouse->mouseID*/, 0, imsg->PointerX, imsg->PointerY);
 	}
 }
 
@@ -316,11 +298,6 @@ OS4_CopyRelevantFields(struct IntuiMessage * src, struct MyIntuiMessage * dst)
 
 	dst->IDCMPWindow     = src->IDCMPWindow;
 
-	/* We've got IDCMP_DELTAMOVE set on our window, so the intuimsg will report
-	* relative mouse movements in MouseX/Y not absolute pointer position. */
-	dst->MouseDX 		 = src->MouseX;
-	dst->MouseDY 		 = src->MouseY;
-
 	/* The window's MouseX/Y fields, however, always contain the absolute pointer
 	* position (relative to the window's upper-left corner). */
 	dst->PointerX		 = src->IDCMPWindow->MouseX - src->IDCMPWindow->BorderLeft;
@@ -328,10 +305,6 @@ OS4_CopyRelevantFields(struct IntuiMessage * src, struct MyIntuiMessage * dst)
 
 	dst->Width 			 = src->IDCMPWindow->Width  - src->IDCMPWindow->BorderLeft - src->IDCMPWindow->BorderRight;
 	dst->Height 		 = src->IDCMPWindow->Height - src->IDCMPWindow->BorderTop  - src->IDCMPWindow->BorderBottom;
-
-	/* Report delta movements when pointer when in
-	* full-screen mode or when the input is grabbed */
-	// TODO: dst->wantDelta		  = hidden->isMouseRelative;
 }
 
 static void
