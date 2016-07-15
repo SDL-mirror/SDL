@@ -25,6 +25,12 @@
 #include "SDL_stdinc.h"
 #include "SDL_endian.h"
 
+#ifdef __AMIGAOS4__
+/* HACK: AmigaOS 4 iconv implementation doesn't support all conversions, making testiconv fail.
+As a workaround, fallback to custom implementation. */
+#undef HAVE_ICONV
+#endif
+
 #ifdef HAVE_ICONV
 
 /* Depending on which standard the iconv() was implemented with,
