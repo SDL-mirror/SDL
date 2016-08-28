@@ -61,6 +61,7 @@ extern "C" {
 #include "../../core/winrt/SDL_winrtapp_xaml.h"
 #include "SDL_winrtvideo_cpp.h"
 #include "SDL_winrtevents_c.h"
+#include "SDL_winrtgamebar_cpp.h"
 #include "SDL_winrtmouse_c.h"
 #include "SDL_main.h"
 #include "SDL_system.h"
@@ -127,7 +128,6 @@ WINRT_CreateDevice(int devindex)
         SDL_free(device);
         return (0);
     }
-    SDL_zerop(data);
     device->driverdata = data;
 
     /* Set the function pointers */
@@ -178,6 +178,7 @@ WINRT_VideoInit(_THIS)
     }
     WINRT_InitMouse(_this);
     WINRT_InitTouch(_this);
+    WINRT_InitGameBar(_this);
 
     return 0;
 }
@@ -420,6 +421,7 @@ WINRT_SetDisplayMode(_THIS, SDL_VideoDisplay * display, SDL_DisplayMode * mode)
 void
 WINRT_VideoQuit(_THIS)
 {
+    WINRT_QuitGameBar(_this);
     WINRT_QuitMouse(_this);
 }
 
