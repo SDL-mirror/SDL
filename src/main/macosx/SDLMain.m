@@ -358,25 +358,16 @@ static int IsRootCwd()
     return (cwd && (strcmp(cwd, "/") == 0));
 }
 
-static int IsTenPointNineOrLater()
-{
-    /* Gestalt() is deprecated in 10.8, but I don't care. Stop using SDL 1.2. */
-    SInt32 major, minor;
-    Gestalt(gestaltSystemVersionMajor, &major);
-    Gestalt(gestaltSystemVersionMinor, &minor);
-    return ( ((major << 16) | minor) >= ((10 << 16) | 9) );
-}
-
 static int IsFinderLaunch(const int argc, char **argv)
 {
-    const int bIsNewerOS = IsTenPointNineOrLater();
-    /* -psn_XXX is passed if we are launched from Finder in 10.8 and earlier */
-    if ( (!bIsNewerOS) && (argc >= 2) && (strncmp(argv[1], "-psn", 4) == 0) ) {
+    /* -psn_XXX is passed if we are launched from Finder, SOMETIMES */
+    if ( (argc >= 2) && (strncmp(argv[1], "-psn", 4) == 0) ) {
         return 1;
-    } else if ((bIsNewerOS) && (argc == 1) && IsRootCwd()) {
+    } else if ((argc == 1) && IsRootCwd()) {
         /* we might still be launched from the Finder; on 10.9+, you might not
-        get the -psn command line anymore. Check version, if there's no
-        command line, and if our current working directory is "/". */
+        get the -psn command line anymore. If there's no
+        command line, and if our current working directory is "/", it
+        might as well be a Finder launch. */
         return 1;
     }
     return 0;  /* not a Finder launch. */
