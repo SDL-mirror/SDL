@@ -138,6 +138,29 @@ OS4_GetScreenForWindow(_THIS, SDL_VideoDisplay * display)
 	}
 }
 
+static ULONG
+OS4_BackFill(const struct Hook *hook, struct RastPort *rastport, struct BackFillMessage *message)
+{
+	struct Rectangle *rect = &message->Bounds;
+	struct GraphicsIFace *igfx = hook->h_Data;
+
+	struct RastPort bfRastport;
+
+	igfx->InitRastPort(&bfRastport);
+	bfRastport.BitMap = rastport->BitMap;
+
+	igfx->RectFillColor(&bfRastport, rect->MinX, rect->MinY, rect->MaxX, rect->MaxY, 0xFF000000);
+
+	return 0;
+}
+
+static struct Hook OS4_BackFillHook = {
+	{0, 0},       /* h_MinNode */
+	OS4_BackFill, /* h_Entry */
+	0,            /* h_SubEntry */
+	0             /* h_Data */
+};
+
 static struct Window *
 OS4_CreateWindowInternal(_THIS, SDL_Window * window, SDL_VideoDisplay * display)
 {
@@ -150,6 +173,8 @@ OS4_CreateWindowInternal(_THIS, SDL_Window * window, SDL_VideoDisplay * display)
 	uint32 windowFlags = OS4_GetWindowFlags(window, fullscreen);
 
 	struct Screen *screen = OS4_GetScreenForWindow(_this, display);
+
+	OS4_BackFillHook.h_Data = IGraphics; /* Smuggle interface ptr for the hook */
 
 	dprintf("Trying to open window '%s' at (%d,%d) of size (%dx%d)\n",
 		window->title, window->x, window->y, window->w, window->h);
@@ -168,6 +193,7 @@ OS4_CreateWindowInternal(_THIS, SDL_Window * window, SDL_VideoDisplay * display)
 		WA_Hidden, (window->flags & SDL_WINDOW_SHOWN) ? FALSE : TRUE,
 		WA_GrabFocus, (window->flags & SDL_WINDOW_INPUT_GRABBED) ? POINTER_GRAB_TIMEOUT : 0,
 		WA_UserPort, videodata->userport,
+		WA_BackFill, &OS4_BackFillHook,
 		TAG_DONE);
 
 	if (!syswin) {
