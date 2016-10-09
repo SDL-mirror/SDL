@@ -10,6 +10,8 @@ LIBS	= @LIBS@
 TARGETS = \
 	checkkeys$(EXE) \
 	loopwave$(EXE) \
+	loopwavequeue$(EXE) \
+	testatomic$(EXE) \
 	testaudioinfo$(EXE) \
 	testautomation$(EXE) \
 	testdraw2$(EXE) \
@@ -23,6 +25,7 @@ TARGETS = \
 	testgles$(EXE) \
 	testgles2$(EXE) \
 	testhaptic$(EXE) \
+	testhittesting$(EXE) \
 	testrumble$(EXE) \
 	testhotplug$(EXE) \
 	testthread$(EXE) \
@@ -35,6 +38,7 @@ TARGETS = \
 	testloadso$(EXE) \
 	testlock$(EXE) \
 	testmultiaudio$(EXE) \
+	testaudiohotplug$(EXE) \
 	testnative$(EXE) \
 	testoverlay2$(EXE) \
 	testplatform$(EXE) \
@@ -56,6 +60,7 @@ TARGETS = \
 	torturethread$(EXE) \
 	testrendercopyex$(EXE) \
 	testmessage$(EXE) \
+	testdisplayinfo$(EXE) \
 	controllermap$(EXE) \
 	
 all: Makefile $(TARGETS)
@@ -67,6 +72,9 @@ checkkeys$(EXE): $(srcdir)/checkkeys.c
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
 
 loopwave$(EXE): $(srcdir)/loopwave.c
+	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
+
+loopwavequeue$(EXE): $(srcdir)/loopwavequeue.c
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
 
 testresample$(EXE): $(srcdir)/testresample.c
@@ -92,10 +100,14 @@ testautomation$(EXE): $(srcdir)/testautomation.c \
 		      $(srcdir)/testautomation_surface.c \
 		      $(srcdir)/testautomation_syswm.c \
 		      $(srcdir)/testautomation_timer.c \
-		      $(srcdir)/testautomation_video.c
+		      $(srcdir)/testautomation_video.c \
+		      $(srcdir)/testautomation_hints.c
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS) 
 
 testmultiaudio$(EXE): $(srcdir)/testmultiaudio.c
+	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
+
+testaudiohotplug$(EXE): $(srcdir)/testaudiohotplug.c
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
 
 testatomic$(EXE): $(srcdir)/testatomic.c
@@ -105,6 +117,9 @@ testintersections$(EXE): $(srcdir)/testintersections.c
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
 
 testrelative$(EXE): $(srcdir)/testrelative.c
+	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
+
+testhittesting$(EXE): $(srcdir)/testhittesting.c
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
 
 testdraw2$(EXE): $(srcdir)/testdraw2.c
@@ -191,6 +206,17 @@ testnative$(EXE): $(srcdir)/testnative.c $(srcdir)/testnativeamigaos4.c
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
 endif
 
+#there's probably a better way of doing this
+ifeq (@ISMACOSX@,false)
+ifeq (@ISWINDOWS@,false)
+ifeq (@ISUNIX@,false)
+ifeq (@ISAMIGAOS@,false)
+testnative$(EXE): ;
+endif
+endif
+endif
+endif
+
 testoverlay2$(EXE): $(srcdir)/testoverlay2.c
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
 
@@ -246,6 +272,9 @@ testrendercopyex$(EXE): $(srcdir)/testrendercopyex.c
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS) @MATHLIB@
 
 testmessage$(EXE): $(srcdir)/testmessage.c
+	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
+
+testdisplayinfo$(EXE): $(srcdir)/testdisplayinfo.c
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
 
 controllermap$(EXE): $(srcdir)/controllermap.c

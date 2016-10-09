@@ -8,10 +8,17 @@
 #define _CRT_NONSTDC_NO_DEPRECATE
 
 #include <stdio.h>
+#ifndef _MSC_VER
+#include <unistd.h>
+#endif
 #include <sys/stat.h>
 
 #include "SDL.h"
 #include "SDL_test.h"
+
+#ifdef __MACOSX__
+#include <unistd.h> /* For unlink() */
+#endif
 
 /* ================= Test Case Implementation ================== */
 
@@ -610,7 +617,7 @@ static const SDLTest_TestCaseReference surfaceTest8 =
 
 /* TODO: rewrite test case, define new test data and re-enable; current implementation fails */
 static const SDLTest_TestCaseReference surfaceTest9 =
-        { (SDLTest_TestCaseFp)surface_testBlitBlendLoop, "surface_testBlitBlendLoop", "Test blittin routines with verious blending modes", TEST_DISABLED};
+        { (SDLTest_TestCaseFp)surface_testBlitBlendLoop, "surface_testBlitBlendLoop", "Test blitting routines with various blending modes", TEST_DISABLED};
 
 /* TODO: rewrite test case, define new test data and re-enable; current implementation fails */
 static const SDLTest_TestCaseReference surfaceTest10 =

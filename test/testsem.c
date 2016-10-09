@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 1997-2014 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2016 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -17,7 +17,6 @@
 #include <signal.h>
 
 #include "SDL.h"
-#include "SDL_thread.h"
 
 #define NUM_THREADS 10
 
@@ -83,7 +82,7 @@ main(int argc, char **argv)
     uintptr_t i;
     int init_sem;
 
-	/* Enable standard application logging */
+    /* Enable standard application logging */
     SDL_LogSetPriority(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_INFO);
 
     if (argc < 2) {

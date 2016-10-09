@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 1997-2014 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2016 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -17,7 +17,6 @@
 #include <signal.h>
 
 #include "SDL.h"
-#include "SDL_thread.h"
 
 static int alive = 0;
 
@@ -33,7 +32,7 @@ int SDLCALL
 ThreadFunc(void *data)
 {
     /* Set the child thread error string */
-    SDL_SetError("Thread %s (%lu) had a problem: %s",
+    SDL_SetError("Thread %s (%u) had a problem: %s",
                  (char *) data, SDL_ThreadID(), "nevermind");
     while (alive) {
         SDL_Log("Thread '%s' is alive!\n", (char *) data);

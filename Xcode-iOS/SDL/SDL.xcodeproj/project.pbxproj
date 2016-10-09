@@ -143,6 +143,7 @@
 		AABCC3941640643D00AB8930 /* SDL_uikitmessagebox.h in Headers */ = {isa = PBXBuildFile; fileRef = AABCC3921640643D00AB8930 /* SDL_uikitmessagebox.h */; };
 		AABCC3951640643D00AB8930 /* SDL_uikitmessagebox.m in Sources */ = {isa = PBXBuildFile; fileRef = AABCC3931640643D00AB8930 /* SDL_uikitmessagebox.m */; };
 		AADA5B8F16CCAB7C00107CF7 /* SDL_bits.h in Headers */ = {isa = PBXBuildFile; fileRef = AADA5B8E16CCAB7C00107CF7 /* SDL_bits.h */; };
+		FAD4F7021BA3C4E8008346CE /* SDL_sysjoystick_c.h in Headers */ = {isa = PBXBuildFile; fileRef = FAD4F7011BA3C4E8008346CE /* SDL_sysjoystick_c.h */; settings = {ASSET_TAGS = (); }; };
 		FD3F4A760DEA620800C5B771 /* SDL_getenv.c in Sources */ = {isa = PBXBuildFile; fileRef = FD3F4A700DEA620800C5B771 /* SDL_getenv.c */; };
 		FD3F4A770DEA620800C5B771 /* SDL_iconv.c in Sources */ = {isa = PBXBuildFile; fileRef = FD3F4A710DEA620800C5B771 /* SDL_iconv.c */; };
 		FD3F4A780DEA620800C5B771 /* SDL_malloc.c in Sources */ = {isa = PBXBuildFile; fileRef = FD3F4A720DEA620800C5B771 /* SDL_malloc.c */; };
@@ -175,8 +176,6 @@
 		FD6526800DE8FCDD002AD96B /* SDL_timer.c in Sources */ = {isa = PBXBuildFile; fileRef = FD99BA2E0DD52EDC00FB1D6B /* SDL_timer.c */; };
 		FD6526810DE8FCDD002AD96B /* SDL_systimer.c in Sources */ = {isa = PBXBuildFile; fileRef = FD99BA310DD52EDC00FB1D6B /* SDL_systimer.c */; };
 		FD689F030E26E5B600F90B21 /* SDL_sysjoystick.m in Sources */ = {isa = PBXBuildFile; fileRef = FD689F000E26E5B600F90B21 /* SDL_sysjoystick.m */; };
-		FD689F040E26E5B600F90B21 /* SDLUIAccelerationDelegate.h in Headers */ = {isa = PBXBuildFile; fileRef = FD689F010E26E5B600F90B21 /* SDLUIAccelerationDelegate.h */; };
-		FD689F050E26E5B600F90B21 /* SDLUIAccelerationDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = FD689F020E26E5B600F90B21 /* SDLUIAccelerationDelegate.m */; };
 		FD689F1C0E26E5D900F90B21 /* SDL_uikitevents.h in Headers */ = {isa = PBXBuildFile; fileRef = FD689F0C0E26E5D900F90B21 /* SDL_uikitevents.h */; };
 		FD689F1D0E26E5D900F90B21 /* SDL_uikitevents.m in Sources */ = {isa = PBXBuildFile; fileRef = FD689F0D0E26E5D900F90B21 /* SDL_uikitevents.m */; };
 		FD689F1E0E26E5D900F90B21 /* SDL_uikitopengles.h in Headers */ = {isa = PBXBuildFile; fileRef = FD689F0E0E26E5D900F90B21 /* SDL_uikitopengles.h */; };
@@ -341,6 +340,7 @@
 		AABCC3921640643D00AB8930 /* SDL_uikitmessagebox.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_uikitmessagebox.h; sourceTree = "<group>"; };
 		AABCC3931640643D00AB8930 /* SDL_uikitmessagebox.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SDL_uikitmessagebox.m; sourceTree = "<group>"; };
 		AADA5B8E16CCAB7C00107CF7 /* SDL_bits.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_bits.h; sourceTree = "<group>"; };
+		FAD4F7011BA3C4E8008346CE /* SDL_sysjoystick_c.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_sysjoystick_c.h; sourceTree = "<group>"; };
 		FD0BBFEF0E3933DD00D833B1 /* SDL_uikitview.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_uikitview.h; sourceTree = "<group>"; };
 		FD3F4A700DEA620800C5B771 /* SDL_getenv.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_getenv.c; sourceTree = "<group>"; };
 		FD3F4A710DEA620800C5B771 /* SDL_iconv.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = SDL_iconv.c; sourceTree = "<group>"; };
@@ -353,8 +353,6 @@
 		FD5F9D200E0E08B3008E885B /* SDL_sysjoystick.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_sysjoystick.h; sourceTree = "<group>"; };
 		FD6526630DE8FCCB002AD96B /* libSDL2.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libSDL2.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		FD689F000E26E5B600F90B21 /* SDL_sysjoystick.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SDL_sysjoystick.m; sourceTree = "<group>"; };
-		FD689F010E26E5B600F90B21 /* SDLUIAccelerationDelegate.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDLUIAccelerationDelegate.h; sourceTree = "<group>"; };
-		FD689F020E26E5B600F90B21 /* SDLUIAccelerationDelegate.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SDLUIAccelerationDelegate.m; sourceTree = "<group>"; };
 		FD689F0C0E26E5D900F90B21 /* SDL_uikitevents.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_uikitevents.h; sourceTree = "<group>"; };
 		FD689F0D0E26E5D900F90B21 /* SDL_uikitevents.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SDL_uikitevents.m; sourceTree = "<group>"; };
 		FD689F0E0E26E5D900F90B21 /* SDL_uikitopengles.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SDL_uikitopengles.h; sourceTree = "<group>"; };
@@ -638,9 +636,8 @@
 		FD689EFF0E26E5B600F90B21 /* iphoneos */ = {
 			isa = PBXGroup;
 			children = (
+				FAD4F7011BA3C4E8008346CE /* SDL_sysjoystick_c.h */,
 				FD689F000E26E5B600F90B21 /* SDL_sysjoystick.m */,
-				FD689F010E26E5B600F90B21 /* SDLUIAccelerationDelegate.h */,
-				FD689F020E26E5B600F90B21 /* SDLUIAccelerationDelegate.m */,
 			);
 			path = iphoneos;
 			sourceTree = "<group>";
@@ -972,7 +969,6 @@
 				FDA686000DF244C800F98A1A /* SDL_nullvideo.h in Headers */,
 				FD5F9D300E0E08B3008E885B /* SDL_joystick_c.h in Headers */,
 				FD5F9D310E0E08B3008E885B /* SDL_sysjoystick.h in Headers */,
-				FD689F040E26E5B600F90B21 /* SDLUIAccelerationDelegate.h in Headers */,
 				FD689F1C0E26E5D900F90B21 /* SDL_uikitevents.h in Headers */,
 				FD689F1E0E26E5D900F90B21 /* SDL_uikitopengles.h in Headers */,
 				FD689F200E26E5D900F90B21 /* SDL_uikitvideo.h in Headers */,
@@ -1044,6 +1040,7 @@
 				AA7558BE1595D55500BBD41B /* SDL_scancode.h in Headers */,
 				AA7558BF1595D55500BBD41B /* SDL_shape.h in Headers */,
 				AA7558C01595D55500BBD41B /* SDL_stdinc.h in Headers */,
+				FAD4F7021BA3C4E8008346CE /* SDL_sysjoystick_c.h in Headers */,
 				AA7558C11595D55500BBD41B /* SDL_surface.h in Headers */,
 				AA7558C21595D55500BBD41B /* SDL_system.h in Headers */,
 				AA7558C31595D55500BBD41B /* SDL_syswm.h in Headers */,
@@ -1089,7 +1086,7 @@
 		29B97313FDCFA39411CA2CEA /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0420;
+				LastUpgradeCheck = 0630;
 			};
 			buildConfigurationList = C01FCF4E08A954540054247B /* Build configuration list for PBXProject "SDL" */;
 			compatibilityVersion = "Xcode 3.2";
@@ -1181,7 +1178,6 @@
 				FDA685FF0DF244C800F98A1A /* SDL_nullvideo.c in Sources */,
 				FD5F9D2F0E0E08B3008E885B /* SDL_joystick.c in Sources */,
 				FD689F030E26E5B600F90B21 /* SDL_sysjoystick.m in Sources */,
-				FD689F050E26E5B600F90B21 /* SDLUIAccelerationDelegate.m in Sources */,
 				FD689F1D0E26E5D900F90B21 /* SDL_uikitevents.m in Sources */,
 				FD689F1F0E26E5D900F90B21 /* SDL_uikitopengles.m in Sources */,
 				FD689F210E26E5D900F90B21 /* SDL_uikitvideo.m in Sources */,
@@ -1257,12 +1253,12 @@
 		C01FCF4F08A954540054247B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				GCC_OPTIMIZATION_LEVEL = 0;
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 3.1.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 5.1.1;
+				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -1271,11 +1267,10 @@
 		C01FCF5008A954540054247B /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ARCHS = "$(ARCHS_STANDARD_32_BIT)";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				GCC_SYMBOLS_PRIVATE_EXTERN = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 3.1.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 5.1.1;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -1284,7 +1279,13 @@
 		FD6526640DE8FCCB002AD96B /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_OBJC_IMPLICIT_ATOMIC_PROPERTIES = YES;
 				COPY_PHASE_STRIP = NO;
+				GCC_WARN_MULTIPLE_DEFINITION_TYPES_FOR_SELECTOR = YES;
+				GCC_WARN_STRICT_SELECTOR_MATCH = YES;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
 				PRODUCT_NAME = SDL2;
 				SKIP_INSTALL = YES;
 			};
@@ -1293,7 +1294,13 @@
 		FD6526650DE8FCCB002AD96B /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_OBJC_IMPLICIT_ATOMIC_PROPERTIES = YES;
 				COPY_PHASE_STRIP = YES;
+				GCC_WARN_MULTIPLE_DEFINITION_TYPES_FOR_SELECTOR = YES;
+				GCC_WARN_STRICT_SELECTOR_MATCH = YES;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
 				PRODUCT_NAME = SDL2;
 				SKIP_INSTALL = YES;
 			};

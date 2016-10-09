@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 1997-2014 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2016 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -16,6 +16,10 @@
 #include <stdio.h>
 #include <time.h>
 
+#ifdef __EMSCRIPTEN__
+#include <emscripten/emscripten.h>
+#endif
+
 #include "SDL_test_common.h"
 
 #define NUM_OBJECTS 100
@@ -28,6 +32,8 @@ static int cycle_direction = 1;
 static int current_alpha = 255;
 static int current_color = 255;
 static SDL_BlendMode blendMode = SDL_BLENDMODE_NONE;
+
+int done;
 
 void
 DrawPoints(SDL_Renderer * renderer)
@@ -169,15 +175,44 @@ DrawRects(SDL_Renderer * renderer)
     }
 }
 
+void
+loop()
+{
+    int i;
+    SDL_Event event;
+
+    /* Check for events */
+    while (SDL_PollEvent(&event)) {
+        SDLTest_CommonEvent(state, &event, &done);
+    }
+    for (i = 0; i < state->num_windows; ++i) {
+        SDL_Renderer *renderer = state->renderers[i];
+        if (state->windows[i] == NULL)
+            continue;
+        SDL_SetRenderDrawColor(renderer, 0xA0, 0xA0, 0xA0, 0xFF);
+        SDL_RenderClear(renderer);
+
+        DrawRects(renderer);
+        DrawLines(renderer);
+        DrawPoints(renderer);
+
+        SDL_RenderPresent(renderer);
+    }
+#ifdef __EMSCRIPTEN__
+    if (done) {
+        emscripten_cancel_main_loop();
+    }
+#endif
+}
+
 int
 main(int argc, char *argv[])
 {
-    int i, done;
-    SDL_Event event;
+    int i;
     Uint32 then, now, frames;
 
-	/* Enable standard application logging */
-	SDL_LogSetPriority(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_INFO);
+    /* Enable standard application logging */
+    SDL_LogSetPriority(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_INFO);
 
     /* Initialize parameters */
     num_objects = NUM_OBJECTS;
@@ -245,26 +280,16 @@ main(int argc, char *argv[])
     frames = 0;
     then = SDL_GetTicks();
     done = 0;
+
+#ifdef __EMSCRIPTEN__
+    emscripten_set_main_loop(loop, 0, 1);
+#else
     while (!done) {
-        /* Check for events */
         ++frames;
-        while (SDL_PollEvent(&event)) {
-            SDLTest_CommonEvent(state, &event, &done);
+        loop();
         }
-        for (i = 0; i < state->num_windows; ++i) {
-            SDL_Renderer *renderer = state->renderers[i];
-            if (state->windows[i] == NULL)
-                continue;
-            SDL_SetRenderDrawColor(renderer, 0xA0, 0xA0, 0xA0, 0xFF);
-            SDL_RenderClear(renderer);
+#endif
 
-            DrawRects(renderer);
-            DrawLines(renderer);
-            DrawPoints(renderer);
-
-            SDL_RenderPresent(renderer);
-        }
-    }
 
     /* Print out some timing information */
     now = SDL_GetTicks();

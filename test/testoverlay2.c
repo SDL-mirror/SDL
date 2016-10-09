@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 1997-2014 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2016 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -19,6 +19,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+
+#ifdef __EMSCRIPTEN__
+#include <emscripten/emscripten.h>
+#endif
 
 #include "SDL.h"
 
@@ -139,6 +143,18 @@ SDL_Color MooseColors[84] = {
     , {239, 206, 173}
 };
 
+Uint8 MooseFrame[MOOSEFRAMES_COUNT][MOOSEFRAME_SIZE*2];
+SDL_Texture *MooseTexture;
+SDL_Rect displayrect;
+int window_w;
+int window_h;
+SDL_Window *window;
+SDL_Renderer *renderer;
+int paused = 0;
+int i;
+SDL_bool done = SDL_FALSE;
+Uint32 pixel_format = SDL_PIXELFORMAT_YV12;
+int fpsdelay;
 
 /* Call this instead of exit(), so we can clean up SDL: atexit() is evil. */
 static void
@@ -210,6 +226,29 @@ ConvertRGBtoYV12(Uint8 *rgb, Uint8 *out, int w, int h,
     }
 }
 
+void
+ConvertRGBtoNV12(Uint8 *rgb, Uint8 *out, int w, int h,
+                 int monochrome, int luminance)
+{
+    int x, y;
+    int yuv[3];
+    Uint8 *op[2];
+
+    op[0] = out;
+    op[1] = op[0] + w*h;
+    for (y = 0; y < h; ++y) {
+        for (x = 0; x < w; ++x) {
+            RGBtoYUV(rgb, yuv, monochrome, luminance);
+            *(op[0]++) = yuv[0];
+            if (x % 2 == 0 && y % 2 == 0) {
+                *(op[1]++) = yuv[1];
+                *(op[1]++) = yuv[2];
+            }
+            rgb += 3;
+        }
+    }
+}
+
 static void
 PrintUsage(char *argv0)
 {
@@ -227,27 +266,80 @@ PrintUsage(char *argv0)
     SDL_Log("\n");
 }
 
+void
+loop()
+{
+    SDL_Event event;
+
+    while (SDL_PollEvent(&event)) {
+        switch (event.type) {
+        case SDL_WINDOWEVENT:
+            if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
+                SDL_RenderSetViewport(renderer, NULL);
+                displayrect.w = window_w = event.window.data1;
+                displayrect.h = window_h = event.window.data2;
+            }
+            break;
+        case SDL_MOUSEBUTTONDOWN:
+            displayrect.x = event.button.x - window_w / 2;
+            displayrect.y = event.button.y - window_h / 2;
+            break;
+        case SDL_MOUSEMOTION:
+            if (event.motion.state) {
+                displayrect.x = event.motion.x - window_w / 2;
+                displayrect.y = event.motion.y - window_h / 2;
+            }
+            break;
+        case SDL_KEYDOWN:
+            if (event.key.keysym.sym == SDLK_SPACE) {
+                paused = !paused;
+                break;
+            }
+            if (event.key.keysym.sym != SDLK_ESCAPE) {
+                break;
+            }
+        case SDL_QUIT:
+            done = SDL_TRUE;
+            break;
+        }
+    }
+
+#ifndef __EMSCRIPTEN__
+    SDL_Delay(fpsdelay);
+#endif
+
+    if (!paused) {
+        i = (i + 1) % MOOSEFRAMES_COUNT;
+
+        SDL_UpdateTexture(MooseTexture, NULL, MooseFrame[i], MOOSEPIC_W*SDL_BYTESPERPIXEL(pixel_format));
+    }
+    SDL_RenderClear(renderer);
+    SDL_RenderCopy(renderer, MooseTexture, NULL, &displayrect);
+    SDL_RenderPresent(renderer);
+
+#ifdef __EMSCRIPTEN__
+    if (done) {
+        emscripten_cancel_main_loop();
+    }
+#endif
+}
+
 int
 main(int argc, char **argv)
 {
     Uint8 *RawMooseData;
     SDL_RWops *handle;
-    int window_w;
-    int window_h;
     SDL_Window *window;
-    SDL_Renderer *renderer;
-    Uint8 MooseFrame[MOOSEFRAMES_COUNT][MOOSEFRAME_SIZE*2];
-    SDL_Texture *MooseTexture;
-    SDL_Rect displayrect;
-    SDL_Event event;
-    int paused = 0;
-    int i, j;
+    int j;
     int fps = 12;
     int fpsdelay;
     int nodelay = 0;
+#ifdef TEST_NV12
+    Uint32 pixel_format = SDL_PIXELFORMAT_NV12;
+#else
     Uint32 pixel_format = SDL_PIXELFORMAT_YV12;
+#endif
     int scale = 5;
-    SDL_bool done = SDL_FALSE;
 
     /* Enable standard application logging */
     SDL_LogSetPriority(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_INFO);
@@ -375,7 +467,17 @@ main(int argc, char **argv)
             rgb[2] = MooseColors[frame[j]].b;
             rgb += 3;
         }
-        ConvertRGBtoYV12(MooseFrameRGB, MooseFrame[i], MOOSEPIC_W, MOOSEPIC_H, 0, 100);
+        switch (pixel_format) {
+        case SDL_PIXELFORMAT_YV12:
+            ConvertRGBtoYV12(MooseFrameRGB, MooseFrame[i], MOOSEPIC_W, MOOSEPIC_H, 0, 100);
+            break;
+        case SDL_PIXELFORMAT_NV12:
+            ConvertRGBtoNV12(MooseFrameRGB, MooseFrame[i], MOOSEPIC_W, MOOSEPIC_H, 0, 100);
+            break;
+        default:
+            SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Unsupported pixel format\n");
+            break;
+        }
     }
 
     free(RawMooseData);
@@ -397,50 +499,14 @@ main(int argc, char **argv)
     SDL_EventState(SDL_KEYUP, SDL_IGNORE);
 
     /* Loop, waiting for QUIT or RESIZE */
+#ifdef __EMSCRIPTEN__
+    emscripten_set_main_loop(loop, nodelay ? 0 : fps, 1);
+#else
     while (!done) {
-        while (SDL_PollEvent(&event)) {
-            switch (event.type) {
-            case SDL_WINDOWEVENT:
-                if (event.window.event == SDL_WINDOWEVENT_RESIZED) {
-                    SDL_RenderSetViewport(renderer, NULL);
-                    displayrect.w = window_w = event.window.data1;
-                    displayrect.h = window_h = event.window.data2;
-                }
-                break;
-            case SDL_MOUSEBUTTONDOWN:
-                displayrect.x = event.button.x - window_w / 2;
-                displayrect.y = event.button.y - window_h / 2;
-                break;
-            case SDL_MOUSEMOTION:
-                if (event.motion.state) {
-                    displayrect.x = event.motion.x - window_w / 2;
-                    displayrect.y = event.motion.y - window_h / 2;
-                }
-                break;
-            case SDL_KEYDOWN:
-                if (event.key.keysym.sym == SDLK_SPACE) {
-                    paused = !paused;
-                    break;
-                }
-                if (event.key.keysym.sym != SDLK_ESCAPE) {
-                    break;
-                }
-            case SDL_QUIT:
-                done = SDL_TRUE;
-                break;
+        loop();
             }
-        }
-        SDL_Delay(fpsdelay);
+#endif
 
-        if (!paused) {
-            i = (i + 1) % MOOSEFRAMES_COUNT;
-
-            SDL_UpdateTexture(MooseTexture, NULL, MooseFrame[i], MOOSEPIC_W*SDL_BYTESPERPIXEL(pixel_format));
-        }
-        SDL_RenderClear(renderer);
-        SDL_RenderCopy(renderer, MooseTexture, NULL, &displayrect);
-        SDL_RenderPresent(renderer);
-    }
     SDL_DestroyRenderer(renderer);
 
     quit(0);

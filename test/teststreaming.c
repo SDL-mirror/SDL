@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 1997-2014 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2016 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -18,6 +18,10 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#ifdef __EMSCRIPTEN__
+#include <emscripten/emscripten.h>
+#endif
+
 #include "SDL.h"
 
 #define MOOSEPIC_W 64
@@ -27,30 +31,35 @@
 #define MOOSEFRAMES_COUNT 10
 
 SDL_Color MooseColors[84] = {
-    {49, 49, 49}, {66, 24, 0}, {66, 33, 0}, {66, 66, 66},
-    {66, 115, 49}, {74, 33, 0}, {74, 41, 16}, {82, 33, 8},
-    {82, 41, 8}, {82, 49, 16}, {82, 82, 82}, {90, 41, 8},
-    {90, 41, 16}, {90, 57, 24}, {99, 49, 16}, {99, 66, 24},
-    {99, 66, 33}, {99, 74, 33}, {107, 57, 24}, {107, 82, 41},
-    {115, 57, 33}, {115, 66, 33}, {115, 66, 41}, {115, 74, 0},
-    {115, 90, 49}, {115, 115, 115}, {123, 82, 0}, {123, 99, 57},
-    {132, 66, 41}, {132, 74, 41}, {132, 90, 8}, {132, 99, 33},
-    {132, 99, 66}, {132, 107, 66}, {140, 74, 49}, {140, 99, 16},
-    {140, 107, 74}, {140, 115, 74}, {148, 107, 24}, {148, 115, 82},
-    {148, 123, 74}, {148, 123, 90}, {156, 115, 33}, {156, 115, 90},
-    {156, 123, 82}, {156, 132, 82}, {156, 132, 99}, {156, 156, 156},
-    {165, 123, 49}, {165, 123, 90}, {165, 132, 82}, {165, 132, 90},
-    {165, 132, 99}, {165, 140, 90}, {173, 132, 57}, {173, 132, 99},
-    {173, 140, 107}, {173, 140, 115}, {173, 148, 99}, {173, 173, 173},
-    {181, 140, 74}, {181, 148, 115}, {181, 148, 123}, {181, 156, 107},
-    {189, 148, 123}, {189, 156, 82}, {189, 156, 123}, {189, 156, 132},
-    {189, 189, 189}, {198, 156, 123}, {198, 165, 132}, {206, 165, 99},
-    {206, 165, 132}, {206, 173, 140}, {206, 206, 206}, {214, 173, 115},
-    {214, 173, 140}, {222, 181, 148}, {222, 189, 132}, {222, 189, 156},
-    {222, 222, 222}, {231, 198, 165}, {231, 231, 231}, {239, 206, 173}
+    {49, 49, 49, 255}, {66, 24, 0, 255}, {66, 33, 0, 255}, {66, 66, 66, 255},
+    {66, 115, 49, 255}, {74, 33, 0, 255}, {74, 41, 16, 255}, {82, 33, 8, 255},
+    {82, 41, 8, 255}, {82, 49, 16, 255}, {82, 82, 82, 255}, {90, 41, 8, 255},
+    {90, 41, 16, 255}, {90, 57, 24, 255}, {99, 49, 16, 255}, {99, 66, 24, 255},
+    {99, 66, 33, 255}, {99, 74, 33, 255}, {107, 57, 24, 255}, {107, 82, 41, 255},
+    {115, 57, 33, 255}, {115, 66, 33, 255}, {115, 66, 41, 255}, {115, 74, 0, 255},
+    {115, 90, 49, 255}, {115, 115, 115, 255}, {123, 82, 0, 255}, {123, 99, 57, 255},
+    {132, 66, 41, 255}, {132, 74, 41, 255}, {132, 90, 8, 255}, {132, 99, 33, 255},
+    {132, 99, 66, 255}, {132, 107, 66, 255}, {140, 74, 49, 255}, {140, 99, 16, 255},
+    {140, 107, 74, 255}, {140, 115, 74, 255}, {148, 107, 24, 255}, {148, 115, 82, 255},
+    {148, 123, 74, 255}, {148, 123, 90, 255}, {156, 115, 33, 255}, {156, 115, 90, 255},
+    {156, 123, 82, 255}, {156, 132, 82, 255}, {156, 132, 99, 255}, {156, 156, 156, 255},
+    {165, 123, 49, 255}, {165, 123, 90, 255}, {165, 132, 82, 255}, {165, 132, 90, 255},
+    {165, 132, 99, 255}, {165, 140, 90, 255}, {173, 132, 57, 255}, {173, 132, 99, 255},
+    {173, 140, 107, 255}, {173, 140, 115, 255}, {173, 148, 99, 255}, {173, 173, 173, 255},
+    {181, 140, 74, 255}, {181, 148, 115, 255}, {181, 148, 123, 255}, {181, 156, 107, 255},
+    {189, 148, 123, 255}, {189, 156, 82, 255}, {189, 156, 123, 255}, {189, 156, 132, 255},
+    {189, 189, 189, 255}, {198, 156, 123, 255}, {198, 165, 132, 255}, {206, 165, 99, 255},
+    {206, 165, 132, 255}, {206, 173, 140, 255}, {206, 206, 206, 255}, {214, 173, 115, 255},
+    {214, 173, 140, 255}, {222, 181, 148, 255}, {222, 189, 132, 255}, {222, 189, 156, 255},
+    {222, 222, 222, 255}, {231, 198, 165, 255}, {231, 231, 231, 255}, {239, 206, 173, 255}
 };
 
 Uint8 MooseFrames[MOOSEFRAMES_COUNT][MOOSEFRAME_SIZE];
+
+SDL_Renderer *renderer;
+int frame;
+SDL_Texture *MooseTexture;
+SDL_bool done = SDL_FALSE;
 
 void quit(int rc)
 {
@@ -82,18 +91,45 @@ void UpdateTexture(SDL_Texture *texture, int frame)
     SDL_UnlockTexture(texture);
 }
 
+void
+loop()
+{
+    SDL_Event event;
+
+    while (SDL_PollEvent(&event)) {
+        switch (event.type) {
+        case SDL_KEYDOWN:
+            if (event.key.keysym.sym == SDLK_ESCAPE) {
+                done = SDL_TRUE;
+            }
+            break;
+        case SDL_QUIT:
+            done = SDL_TRUE;
+            break;
+        }
+    }
+
+    frame = (frame + 1) % MOOSEFRAMES_COUNT;
+    UpdateTexture(MooseTexture, frame);
+
+    SDL_RenderClear(renderer);
+    SDL_RenderCopy(renderer, MooseTexture, NULL, NULL);
+    SDL_RenderPresent(renderer);
+
+#ifdef __EMSCRIPTEN__
+    if (done) {
+        emscripten_cancel_main_loop();
+    }
+#endif
+}
+
 int
 main(int argc, char **argv)
 {
     SDL_Window *window;
-    SDL_Renderer *renderer;
     SDL_RWops *handle;
-    SDL_Texture *MooseTexture;
-    SDL_Event event;
-    SDL_bool done = SDL_FALSE;
-    int frame;
 
-	/* Enable standard application logging */
+    /* Enable standard application logging */
     SDL_LogSetPriority(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_INFO);
 
     if (SDL_Init(SDL_INIT_VIDEO) < 0) {
@@ -136,27 +172,15 @@ main(int argc, char **argv)
 
     /* Loop, waiting for QUIT or the escape key */
     frame = 0;
+
+#ifdef __EMSCRIPTEN__
+    emscripten_set_main_loop(loop, 0, 1);
+#else
     while (!done) {
-        while (SDL_PollEvent(&event)) {
-            switch (event.type) {
-            case SDL_KEYDOWN:
-                if (event.key.keysym.sym == SDLK_ESCAPE) {
-                    done = SDL_TRUE;
-                }
-                break;
-            case SDL_QUIT:
-                done = SDL_TRUE;
-                break;
-            }
+        loop();
         }
+#endif
 
-        frame = (frame + 1) % MOOSEFRAMES_COUNT;
-        UpdateTexture(MooseTexture, frame);
-
-        SDL_RenderClear(renderer);
-        SDL_RenderCopy(renderer, MooseTexture, NULL, NULL);
-        SDL_RenderPresent(renderer);
-    }
     SDL_DestroyRenderer(renderer);
 
     quit(0);

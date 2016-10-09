@@ -500,6 +500,14 @@ static void testClipboard()
 	SDL_SetClipboardText("Amiga rules!");
 }
 
+static void testHint()
+{
+	char *result1 = (char *)SDL_GetHint(SDL_HINT_VIDEO_MINIMIZE_ON_FOCUS_LOSS);
+	char *result2 = (char *)SDL_GetHint("SDL_VIDEO_MINIMIZE_ON_FOCUS_LOSS");
+
+	printf("%s, %s\n", result1, result2);
+}
+
 int main(void)
 {
 	if (SDL_Init(SDL_INIT_VIDEO|SDL_INIT_TIMER) == 0)
@@ -519,7 +527,8 @@ int main(void)
 		//testPC();
 		//testSystemCursors();
 		//testCustomCursor();
-		testClipboard();
+		//testClipboard();
+		testHint();
 
 		SDL_Quit();
 	}

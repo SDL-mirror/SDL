@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 1997-2014 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2016 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -15,6 +15,10 @@
 #include <stdio.h>
 #include <time.h>
 
+#ifdef __EMSCRIPTEN__
+#include <emscripten/emscripten.h>
+#endif
+
 #include "SDL_test_common.h"
 
 
@@ -28,6 +32,9 @@ typedef struct {
     SDL_Rect sprite_rect;
     int scale_direction;
 } DrawState;
+
+DrawState *drawstates;
+int done;
 
 /* Call this instead of exit(), so we can clean up SDL: atexit() is evil. */
 static void
@@ -130,12 +137,32 @@ Draw(DrawState *s)
     /* SDL_Delay(10); */
 }
 
+void loop()
+{
+    int i;
+    SDL_Event event;
+
+    /* Check for events */
+
+    while (SDL_PollEvent(&event)) {
+        SDLTest_CommonEvent(state, &event, &done);
+    }
+    for (i = 0; i < state->num_windows; ++i) {
+        if (state->windows[i] == NULL)
+            continue;
+        Draw(&drawstates[i]);
+    }
+#ifdef __EMSCRIPTEN__
+    if (done) {
+        emscripten_cancel_main_loop();
+    }
+#endif
+}
+
 int
 main(int argc, char *argv[])
 {
-    DrawState *drawstates;
-    int i, done;
-    SDL_Event event;
+    int i;
     int frames;
     Uint32 then, now;
 
@@ -186,19 +213,15 @@ main(int argc, char *argv[])
     frames = 0;
     then = SDL_GetTicks();
     done = 0;
-    while (!done) {
-        /* Check for events */
-        ++frames;
-        while (SDL_PollEvent(&event)) {
-            SDLTest_CommonEvent(state, &event, &done);
-        }
-        for (i = 0; i < state->num_windows; ++i) {
-            if (state->windows[i] == NULL)
-                continue;
-            Draw(&drawstates[i]);
-        }
-    }
 
+#ifdef __EMSCRIPTEN__
+    emscripten_set_main_loop(loop, 0, 1);
+#else
+    while (!done) {
+        ++frames;
+        loop();
+        }
+#endif
     /* Print out some timing information */
     now = SDL_GetTicks();
     if (now > then) {

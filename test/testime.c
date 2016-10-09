@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 1997-2014 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2016 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -289,7 +289,7 @@ int main(int argc, char *argv[]) {
                              break;
                         case SDLK_BACKSPACE:
                              {
-                                 int textlen=SDL_strlen(text);
+                                 size_t textlen = SDL_strlen(text);
 
                                  do {
                                      if (textlen==0)

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 1997-2014 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2016 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -31,7 +31,7 @@ main(int argc, char *argv[])
     int i, done;
     SDL_Event event;
 
-	/* Enable standard application logging */
+    /* Enable standard application logging */
     SDL_LogSetPriority(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_INFO);
 
     /* Initialize test framework */
@@ -44,7 +44,7 @@ main(int argc, char *argv[])
         int consumed;
 
         consumed = SDLTest_CommonArg(state, i);
-        // needed vodoo to allow app to launch via OS X Finder
+        /* needed voodoo to allow app to launch via OS X Finder */
         if (SDL_strncmp(argv[i], "-psn", 4)==0) {
             consumed = 1;
         }

@@ -1,5 +1,5 @@
 /*
-  Copyright (C) 1997-2014 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2016 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -18,60 +18,53 @@
 
 #include "SDL.h"
 
+#ifdef __EMSCRIPTEN__
+#include <emscripten/emscripten.h>
+#endif
+
 #ifndef SDL_JOYSTICK_DISABLED
 
 #ifdef __IPHONEOS__
-#define SCREEN_WIDTH    320
-#define SCREEN_HEIGHT    480
+#define SCREEN_WIDTH    480
+#define SCREEN_HEIGHT    320
 #else
 #define SCREEN_WIDTH    512
 #define SCREEN_HEIGHT   317
 #endif
 
-static const char *
-ControllerAxisName(const SDL_GameControllerAxis axis)
-{
-    switch (axis)
-    {
-        #define AXIS_CASE(ax) case SDL_CONTROLLER_AXIS_##ax: return #ax
-        AXIS_CASE(INVALID);
-        AXIS_CASE(LEFTX);
-        AXIS_CASE(LEFTY);
-        AXIS_CASE(RIGHTX);
-        AXIS_CASE(RIGHTY);
-        AXIS_CASE(TRIGGERLEFT);
-        AXIS_CASE(TRIGGERRIGHT);
-        #undef AXIS_CASE
-        default: return "???";
-    }
-}
+/* This is indexed by SDL_GameControllerButton. */
+static const struct { int x; int y; } button_positions[] = {
+    {387, 167},  /* A */
+    {431, 132},  /* B */
+    {342, 132},  /* X */
+    {389, 101},  /* Y */
+    {174, 132},  /* BACK */
+    {233, 132},  /* GUIDE */
+    {289, 132},  /* START */
+    {75,  154},  /* LEFTSTICK */
+    {305, 230},  /* RIGHTSTICK */
+    {77,  40},   /* LEFTSHOULDER */
+    {396, 36},   /* RIGHTSHOULDER */
+    {154, 188},  /* DPAD_UP */
+    {154, 249},  /* DPAD_DOWN */
+    {116, 217},  /* DPAD_LEFT */
+    {186, 217},  /* DPAD_RIGHT */
+};
 
-static const char *
-ControllerButtonName(const SDL_GameControllerButton button)
-{
-    switch (button)
-    {
-        #define BUTTON_CASE(btn) case SDL_CONTROLLER_BUTTON_##btn: return #btn
-        BUTTON_CASE(INVALID);
-        BUTTON_CASE(A);
-        BUTTON_CASE(B);
-        BUTTON_CASE(X);
-        BUTTON_CASE(Y);
-        BUTTON_CASE(BACK);
-        BUTTON_CASE(GUIDE);
-        BUTTON_CASE(START);
-        BUTTON_CASE(LEFTSTICK);
-        BUTTON_CASE(RIGHTSTICK);
-        BUTTON_CASE(LEFTSHOULDER);
-        BUTTON_CASE(RIGHTSHOULDER);
-        BUTTON_CASE(DPAD_UP);
-        BUTTON_CASE(DPAD_DOWN);
-        BUTTON_CASE(DPAD_LEFT);
-        BUTTON_CASE(DPAD_RIGHT);
-        #undef BUTTON_CASE
-        default: return "???";
-    }
-}
+/* This is indexed by SDL_GameControllerAxis. */
+static const struct { int x; int y; double angle; } axis_positions[] = {
+    {75,  154, 0.0},  /* LEFTX */
+    {75,  154, 90.0},  /* LEFTY */
+    {305, 230, 0.0},  /* RIGHTX */
+    {305, 230, 90.0},  /* RIGHTY */
+    {91, 0, 90.0},     /* TRIGGERLEFT */
+    {375, 0, 90.0},    /* TRIGGERRIGHT */
+};
+
+SDL_Renderer *screen = NULL;
+SDL_bool retval = SDL_FALSE;
+SDL_bool done = SDL_FALSE;
+SDL_Texture *background, *button, *axis;
 
 static SDL_Texture *
 LoadTexture(SDL_Renderer *renderer, char *file, SDL_bool transparent)
@@ -85,9 +78,13 @@ LoadTexture(SDL_Renderer *renderer, char *file, SDL_bool transparent)
     } else {
         /* Set transparent pixel as the pixel at (0,0) */
         if (transparent) {
-            SDL_assert(!temp->format->palette);
-            SDL_assert(temp->format->BitsPerPixel == 24);
-            SDL_SetColorKey(temp, SDL_TRUE, (*(Uint32 *) temp->pixels) & 0x00FFFFFF);
+            if (temp->format->BytesPerPixel == 1) {
+                SDL_SetColorKey(temp, SDL_TRUE, *(Uint8 *)temp->pixels);
+            } else {
+                SDL_assert(!temp->format->palette);
+                SDL_assert(temp->format->BitsPerPixel == 24);
+                SDL_SetColorKey(temp, SDL_TRUE, (*(Uint32 *)temp->pixels) & 0x00FFFFFF);
+            }
         }
 
         texture = SDL_CreateTextureFromSurface(renderer, temp);
@@ -101,49 +98,80 @@ LoadTexture(SDL_Renderer *renderer, char *file, SDL_bool transparent)
     return texture;
 }
 
+void
+loop(void *arg)
+{
+    SDL_Event event;
+    int i;
+    SDL_GameController *gamecontroller = (SDL_GameController *)arg;
+
+    /* blank screen, set up for drawing this frame. */
+    SDL_SetRenderDrawColor(screen, 0xFF, 0xFF, 0xFF, SDL_ALPHA_OPAQUE);
+    SDL_RenderClear(screen);
+    SDL_RenderCopy(screen, background, NULL, NULL);
+
+    while (SDL_PollEvent(&event)) {
+        switch (event.type) {
+        case SDL_KEYDOWN:
+            if (event.key.keysym.sym != SDLK_ESCAPE) {
+                break;
+            }
+            /* Fall through to signal quit */
+        case SDL_QUIT:
+            done = SDL_TRUE;
+            break;
+        default:
+            break;
+        }
+    }
+
+    /* Update visual controller state */
+    for (i = 0; i < SDL_CONTROLLER_BUTTON_MAX; ++i) {
+        if (SDL_GameControllerGetButton(gamecontroller, (SDL_GameControllerButton)i) == SDL_PRESSED) {
+            const SDL_Rect dst = { button_positions[i].x, button_positions[i].y, 50, 50 };
+            SDL_RenderCopyEx(screen, button, NULL, &dst, 0, NULL, 0);
+        }
+    }
+
+    for (i = 0; i < SDL_CONTROLLER_AXIS_MAX; ++i) {
+        const Sint16 deadzone = 8000;  /* !!! FIXME: real deadzone */
+        const Sint16 value = SDL_GameControllerGetAxis(gamecontroller, (SDL_GameControllerAxis)(i));
+        if (value < -deadzone) {
+            const SDL_Rect dst = { axis_positions[i].x, axis_positions[i].y, 50, 50 };
+            const double angle = axis_positions[i].angle;
+            SDL_RenderCopyEx(screen, axis, NULL, &dst, angle, NULL, 0);
+        } else if (value > deadzone) {
+            const SDL_Rect dst = { axis_positions[i].x, axis_positions[i].y, 50, 50 };
+            const double angle = axis_positions[i].angle + 180.0;
+            SDL_RenderCopyEx(screen, axis, NULL, &dst, angle, NULL, 0);
+        }
+    }
+
+    SDL_RenderPresent(screen);
+
+    if (!SDL_GameControllerGetAttached(gamecontroller)) {
+        done = SDL_TRUE;
+        retval = SDL_TRUE;  /* keep going, wait for reattach. */
+    }
+
+#ifdef __EMSCRIPTEN__
+    if (done) {
+        emscripten_cancel_main_loop();
+    }
+#endif
+}
+
 SDL_bool
 WatchGameController(SDL_GameController * gamecontroller)
 {
-    /* This is indexed by SDL_GameControllerButton. */
-    static const struct { int x; int y; } button_positions[] = {
-        {387, 167},  /* A */
-        {431, 132},  /* B */
-        {342, 132},  /* X */
-        {389, 101},  /* Y */
-        {174, 132},  /* BACK */
-        {233, 132},  /* GUIDE */
-        {289, 132},  /* START */
-        {75,  154},  /* LEFTSTICK */
-        {305, 230},  /* RIGHTSTICK */
-        {77,  40},   /* LEFTSHOULDER */
-        {396, 36},   /* RIGHTSHOULDER */
-        {154, 188},  /* DPAD_UP */
-        {154, 249},  /* DPAD_DOWN */
-        {116, 217},  /* DPAD_LEFT */
-        {186, 217},  /* DPAD_RIGHT */
-    };
-
-    /* This is indexed by SDL_GameControllerAxis. */
-    static const struct { int x; int y; double angle; } axis_positions[] = {
-        {75,  154, 0.0},  /* LEFTX */
-        {75,  154, 90.0},  /* LEFTY */
-        {305, 230, 0.0},  /* RIGHTX */
-        {305, 230, 90.0},  /* RIGHTY */
-        {91, 0, 90.0},     /* TRIGGERLEFT */
-        {375, 0, 90.0},    /* TRIGGERRIGHT */
-    };
-
     const char *name = SDL_GameControllerName(gamecontroller);
     const char *basetitle = "Game Controller Test: ";
     const size_t titlelen = SDL_strlen(basetitle) + SDL_strlen(name) + 1;
     char *title = (char *)SDL_malloc(titlelen);
-    SDL_Texture *background, *button, *axis;
     SDL_Window *window = NULL;
-    SDL_Renderer *screen = NULL;
-    SDL_bool retval = SDL_FALSE;
-    SDL_bool done = SDL_FALSE;
-    SDL_Event event;
-    int i;
+
+    retval = SDL_FALSE;
+    done = SDL_FALSE;
 
     if (title) {
         SDL_snprintf(title, titlelen, "%s%s", basetitle, name);
@@ -192,58 +220,19 @@ WatchGameController(SDL_GameController * gamecontroller)
     SDL_Log("Watching controller %s\n",  name ? name : "Unknown Controller");
 
     /* Loop, getting controller events! */
+#ifdef __EMSCRIPTEN__
+    emscripten_set_main_loop_arg(loop, gamecontroller, 0, 1);
+#else
     while (!done) {
-        /* blank screen, set up for drawing this frame. */
-        SDL_SetRenderDrawColor(screen, 0xFF, 0xFF, 0xFF, SDL_ALPHA_OPAQUE);
-        SDL_RenderClear(screen);
-        SDL_RenderCopy(screen, background, NULL, NULL);
-
-        while (SDL_PollEvent(&event)) {
-            switch (event.type) {
-            case SDL_KEYDOWN:
-                if (event.key.keysym.sym != SDLK_ESCAPE) {
-                    break;
-                }
-                /* Fall through to signal quit */
-            case SDL_QUIT:
-                done = SDL_TRUE;
-                break;
-            default:
-                break;
-            }
-        }
-
-        /* Update visual controller state */
-        for (i = 0; i < SDL_CONTROLLER_BUTTON_MAX; ++i) {
-            if (SDL_GameControllerGetButton(gamecontroller, (SDL_GameControllerButton)i) == SDL_PRESSED) {
-                const SDL_Rect dst = { button_positions[i].x, button_positions[i].y, 50, 50 };
-                SDL_RenderCopyEx(screen, button, NULL, &dst, 0, NULL, 0);
-            }
-        }
-
-        for (i = 0; i < SDL_CONTROLLER_AXIS_MAX; ++i) {
-            const Sint16 deadzone = 8000;  /* !!! FIXME: real deadzone */
-            const Sint16 value = SDL_GameControllerGetAxis(gamecontroller, (SDL_GameControllerAxis)(i));
-            if (value < -deadzone) {
-                const SDL_Rect dst = { axis_positions[i].x, axis_positions[i].y, 50, 50 };
-                const double angle = axis_positions[i].angle;
-                SDL_RenderCopyEx(screen, axis, NULL, &dst, angle, NULL, 0);
-            } else if (value > deadzone) {
-                const SDL_Rect dst = { axis_positions[i].x, axis_positions[i].y, 50, 50 };
-                const double angle = axis_positions[i].angle + 180.0;
-                SDL_RenderCopyEx(screen, axis, NULL, &dst, angle, NULL, 0);
-            }
-        }
-
-        SDL_RenderPresent(screen);
-
-        if (!SDL_GameControllerGetAttached(gamecontroller)) {
-            done = SDL_TRUE;
-            retval = SDL_TRUE;  /* keep going, wait for reattach. */
-        }
+        loop(gamecontroller);
     }
+#endif
 
     SDL_DestroyRenderer(screen);
+    screen = NULL;
+    background = NULL;
+    button = NULL;
+    axis = NULL;
     SDL_DestroyWindow(window);
     return retval;
 }
@@ -258,7 +247,7 @@ main(int argc, char *argv[])
     SDL_GameController *gamecontroller;
 
     /* Enable standard application logging */
-	SDL_LogSetPriority(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_INFO);
+    SDL_LogSetPriority(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_INFO);
 
     /* Initialize SDL (Note: video is required to start event loop) */
     if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK | SDL_INIT_GAMECONTROLLER ) < 0) {
@@ -295,20 +284,23 @@ main(int argc, char *argv[])
         SDL_Event event;
         int device = atoi(argv[1]);
         if (device >= SDL_NumJoysticks()) {
-			SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "%i is an invalid joystick index.\n", device);
+            SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "%i is an invalid joystick index.\n", device);
             retcode = 1;
         } else {
             SDL_JoystickGetGUIDString(SDL_JoystickGetDeviceGUID(device),
                                       guid, sizeof (guid));
             SDL_Log("Attempting to open device %i, guid %s\n", device, guid);
             gamecontroller = SDL_GameControllerOpen(device);
+
+            if (gamecontroller != NULL) {
+                SDL_assert(SDL_GameControllerFromInstanceID(SDL_JoystickInstanceID(SDL_GameControllerGetJoystick(gamecontroller))) == gamecontroller);
+            }
+
             while (keepGoing) {
                 if (gamecontroller == NULL) {
                     if (!reportederror) {
-                        if (gamecontroller == NULL) {
-                            SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Couldn't open gamecontroller %d: %s\n", device, SDL_GetError());
-                            retcode = 1;
-                        }
+                        SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Couldn't open gamecontroller %d: %s\n", device, SDL_GetError());
+                        retcode = 1;
                         keepGoing = SDL_FALSE;
                         reportederror = SDL_TRUE;
                     }
@@ -329,6 +321,9 @@ main(int argc, char *argv[])
                         keepGoing = SDL_FALSE;
                     } else if (event.type == SDL_CONTROLLERDEVICEADDED) {
                         gamecontroller = SDL_GameControllerOpen(event.cdevice.which);
+                        if (gamecontroller != NULL) {
+                            SDL_assert(SDL_GameControllerFromInstanceID(SDL_JoystickInstanceID(SDL_GameControllerGetJoystick(gamecontroller))) == gamecontroller);
+                        }
                         break;
                     }
                 }

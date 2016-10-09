@@ -190,15 +190,15 @@ OS4_HandleMouseWheel(_THIS, struct MyIntuiMessage *imsg)
 		struct IntuiWheelData *data = (struct IntuiWheelData *)imsg->Gadget;
 
 		if (data->WheelY < 0) {
-			SDL_SendMouseWheel(sdlwin, 0, 0, 1);
+			SDL_SendMouseWheel(sdlwin, 0, 0, 1, SDL_MOUSEWHEEL_NORMAL);
 		} else if (data->WheelY > 0) {
-			SDL_SendMouseWheel(sdlwin, 0, 0, -1);
+			SDL_SendMouseWheel(sdlwin, 0, 0, -1, SDL_MOUSEWHEEL_NORMAL);
 		}
 
 		if (data->WheelX < 0) {
-			SDL_SendMouseWheel(sdlwin, 0, 1, 0);
+			SDL_SendMouseWheel(sdlwin, 0, 1, 0, SDL_MOUSEWHEEL_NORMAL);
 		} else if (data->WheelX > 0) {
-			SDL_SendMouseWheel(sdlwin, 0, -1, 0);
+			SDL_SendMouseWheel(sdlwin, 0, -1, 0, SDL_MOUSEWHEEL_NORMAL);
 		}
 	}
 }

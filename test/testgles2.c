@@ -1,5 +1,5 @@
 /*
-  Copyright (r) 1997-2014 Sam Lantinga <slouken@libsdl.org>
+  Copyright (r) 1997-2016 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -14,9 +14,13 @@
 #include <string.h>
 #include <math.h>
 
+#ifdef __EMSCRIPTEN__
+#include <emscripten/emscripten.h>
+#endif
+
 #include "SDL_test_common.h"
 
-#if defined(__IPHONEOS__) || defined(__ANDROID__)
+#if defined(__IPHONEOS__) || defined(__ANDROID__) || defined(__EMSCRIPTEN__) || defined(__NACL__)
 #define HAVE_OPENGLES2
 #endif
 
@@ -57,7 +61,7 @@ static int LoadContext(GLES2_Context * data)
             return SDL_SetError("Couldn't load GLES2 function %s: %s\n", #func, SDL_GetError()); \
         } \
     } while ( 0 );
-#endif /* _SDL_NOGETPROCADDR_ */
+#endif /* __SDL_NOGETPROCADDR__ */
 
 #include "../src/render/opengles2/SDL_gles2funcs.h"
 #undef SDL_PROC
@@ -99,19 +103,19 @@ quit(int rc)
  * order. 
  */
 static void
-rotate_matrix(double angle, double x, double y, double z, float *r)
+rotate_matrix(float angle, float x, float y, float z, float *r)
 {
-    double radians, c, s, c1, u[3], length;
+    float radians, c, s, c1, u[3], length;
     int i, j;
 
-    radians = (angle * M_PI) / 180.0;
+    radians = (float)(angle * M_PI) / 180.0f;
 
-    c = cos(radians);
-    s = sin(radians);
+    c = SDL_cosf(radians);
+    s = SDL_sinf(radians);
 
-    c1 = 1.0 - cos(radians);
+    c1 = 1.0f - SDL_cosf(radians);
 
-    length = sqrt(x * x + y * y + z * z);
+    length = (float)SDL_sqrt(x * x + y * y + z * z);
 
     u[0] = x / length;
     u[1] = y / length;
@@ -130,7 +134,7 @@ rotate_matrix(double angle, double x, double y, double z, float *r)
 
     for (i = 0; i < 3; i++) {
         for (j = 0; j < 3; j++) {
-            r[i * 4 + j] += c1 * u[i] * u[j] + (i == j ? c : 0.0);
+            r[i * 4 + j] += c1 * u[i] * u[j] + (i == j ? c : 0.0f);
         }
     }
 }
@@ -139,12 +143,12 @@ rotate_matrix(double angle, double x, double y, double z, float *r)
  * Simulates gluPerspectiveMatrix 
  */
 static void 
-perspective_matrix(double fovy, double aspect, double znear, double zfar, float *r)
+perspective_matrix(float fovy, float aspect, float znear, float zfar, float *r)
 {
     int i;
-    double f;
+    float f;
 
-    f = 1.0/tan(fovy * 0.5);
+    f = 1.0f/SDL_tanf(fovy * 0.5f);
 
     for (i = 0; i < 16; i++) {
         r[i] = 0.0;
@@ -153,9 +157,9 @@ perspective_matrix(double fovy, double aspect, double znear, double zfar, float 
     r[0] = f / aspect;
     r[5] = f;
     r[10] = (znear + zfar) / (znear - zfar);
-    r[11] = -1.0;
-    r[14] = (2.0 * znear * zfar) / (znear - zfar);
-    r[15] = 0.0;
+    r[11] = -1.0f;
+    r[14] = (2.0f * znear * zfar) / (znear - zfar);
+    r[15] = 0.0f;
 }
 
 /* 
@@ -165,7 +169,7 @@ perspective_matrix(double fovy, double aspect, double znear, double zfar, float 
 static void
 multiply_matrix(float *lhs, float *rhs, float *r)
 {
-	int i, j, k;
+    int i, j, k;
     float tmp[16];
 
     for (i = 0; i < 4; i++) {
@@ -195,6 +199,8 @@ process_shader(GLuint *shader, const char * source, GLint shader_type)
 {
     GLint status = GL_FALSE;
     const char *shaders[1] = { NULL };
+    char buffer[1024];
+    GLsizei length;
 
     /* Create shader and load into GL. */
     *shader = GL_CHECK(ctx.glCreateShader(shader_type));
@@ -210,9 +216,11 @@ process_shader(GLuint *shader, const char * source, GLint shader_type)
     GL_CHECK(ctx.glCompileShader(*shader));
     GL_CHECK(ctx.glGetShaderiv(*shader, GL_COMPILE_STATUS, &status));
 
-    // Dump debug info (source and log) if compilation failed.
+    /* Dump debug info (source and log) if compilation failed. */
     if(status != GL_TRUE) {
-        SDL_Log("Shader compilation failed");
+        ctx.glGetProgramInfoLog(*shader, sizeof(buffer), &length, &buffer[0]);
+        buffer[length] = '\0';
+        SDL_Log("Shader compilation failed: %s", buffer);fflush(stderr);
         quit(-1);
     }
 }
@@ -372,19 +380,19 @@ Render(unsigned int width, unsigned int height, shader_data* data)
     * Do some rotation with Euler angles. It is not a fixed axis as
     * quaterions would be, but the effect is cool. 
     */
-    rotate_matrix(data->angle_x, 1.0, 0.0, 0.0, matrix_modelview);
-    rotate_matrix(data->angle_y, 0.0, 1.0, 0.0, matrix_rotate);
+    rotate_matrix((float)data->angle_x, 1.0f, 0.0f, 0.0f, matrix_modelview);
+    rotate_matrix((float)data->angle_y, 0.0f, 1.0f, 0.0f, matrix_rotate);
 
     multiply_matrix(matrix_rotate, matrix_modelview, matrix_modelview);
 
-    rotate_matrix(data->angle_z, 0.0, 1.0, 0.0, matrix_rotate);
+    rotate_matrix((float)data->angle_z, 0.0f, 1.0f, 0.0f, matrix_rotate);
 
     multiply_matrix(matrix_rotate, matrix_modelview, matrix_modelview);
 
     /* Pull the camera back from the cube */
     matrix_modelview[14] -= 2.5;
 
-    perspective_matrix(45.0, (double)width/(double)height, 0.01, 100.0, matrix_perspective);
+    perspective_matrix(45.0f, (float)width/height, 0.01f, 100.0f, matrix_perspective);
     multiply_matrix(matrix_perspective, matrix_modelview, matrix_mvp);
 
     GL_CHECK(ctx.glUniformMatrix4fv(data->attr_mvp, 1, GL_FALSE, matrix_mvp));
@@ -404,17 +412,77 @@ Render(unsigned int width, unsigned int height, shader_data* data)
     GL_CHECK(ctx.glDrawArrays(GL_TRIANGLES, 0, 36));
 }
 
+int done;
+Uint32 frames;
+shader_data *datas;
+
+void loop()
+{
+    SDL_Event event;
+    int i;
+    int status;
+
+    /* Check for events */
+    ++frames;
+    while (SDL_PollEvent(&event) && !done) {
+        switch (event.type) {
+        case SDL_WINDOWEVENT:
+            switch (event.window.event) {
+                case SDL_WINDOWEVENT_RESIZED:
+                    for (i = 0; i < state->num_windows; ++i) {
+                        if (event.window.windowID == SDL_GetWindowID(state->windows[i])) {
+                            int w, h;
+                            status = SDL_GL_MakeCurrent(state->windows[i], context[i]);
+                            if (status) {
+                                SDL_Log("SDL_GL_MakeCurrent(): %s\n", SDL_GetError());
+                                break;
+                            }
+                            /* Change view port to the new window dimensions */
+                            SDL_GL_GetDrawableSize(state->windows[i], &w, &h);
+                            ctx.glViewport(0, 0, w, h);
+                            state->window_w = event.window.data1;
+                            state->window_h = event.window.data2;
+                            /* Update window content */
+                            Render(event.window.data1, event.window.data2, &datas[i]);
+                            SDL_GL_SwapWindow(state->windows[i]);
+                            break;
+                        }
+                    }
+                    break;
+            }
+        }
+        SDLTest_CommonEvent(state, &event, &done);
+    }
+    if (!done) {
+      for (i = 0; i < state->num_windows; ++i) {
+          status = SDL_GL_MakeCurrent(state->windows[i], context[i]);
+          if (status) {
+              SDL_Log("SDL_GL_MakeCurrent(): %s\n", SDL_GetError());
+
+              /* Continue for next window */
+              continue;
+          }
+          Render(state->window_w, state->window_h, &datas[i]);
+          SDL_GL_SwapWindow(state->windows[i]);
+      }
+    }
+#ifdef __EMSCRIPTEN__
+    else {
+        emscripten_cancel_main_loop();
+    }
+#endif
+}
+
 int
 main(int argc, char *argv[])
 {
     int fsaa, accel;
     int value;
-    int i, done;
+    int i;
     SDL_DisplayMode mode;
-    SDL_Event event;
-    Uint32 then, now, frames;
+    Uint32 then, now;
     int status;
-    shader_data *datas, *data;
+    shader_data *data;
 
     /* Initialize parameters */
     fsaa = 0;
@@ -577,6 +645,7 @@ main(int argc, char *argv[])
     /* Set rendering settings for each context */
     for (i = 0; i < state->num_windows; ++i) {
 
+        int w, h;
         status = SDL_GL_MakeCurrent(state->windows[i], context[i]);
         if (status) {
             SDL_Log("SDL_GL_MakeCurrent(): %s\n", SDL_GetError());
@@ -584,7 +653,8 @@ main(int argc, char *argv[])
             /* Continue for next window */
             continue;
         }
-        ctx.glViewport(0, 0, state->window_w, state->window_h);
+        SDL_GL_GetDrawableSize(state->windows[i], &w, &h);
+        ctx.glViewport(0, 0, w, h);
 
         data = &datas[i];
         data->angle_x = 0; data->angle_y = 0; data->angle_z = 0;
@@ -626,48 +696,14 @@ main(int argc, char *argv[])
     frames = 0;
     then = SDL_GetTicks();
     done = 0;
-    while (!done) {
-        /* Check for events */
-        ++frames;
-        while (SDL_PollEvent(&event) && !done) {
-            switch (event.type) {
-            case SDL_WINDOWEVENT:
-                switch (event.window.event) {
-                    case SDL_WINDOWEVENT_RESIZED:
-                        for (i = 0; i < state->num_windows; ++i) {
-                            if (event.window.windowID == SDL_GetWindowID(state->windows[i])) {
-                                status = SDL_GL_MakeCurrent(state->windows[i], context[i]);
-                                if (status) {
-                                    SDL_Log("SDL_GL_MakeCurrent(): %s\n", SDL_GetError());
-                                    break;
-                                }
-                                /* Change view port to the new window dimensions */
-                                ctx.glViewport(0, 0, event.window.data1, event.window.data2);
-                                /* Update window content */
-                                Render(event.window.data1, event.window.data2, &datas[i]);
-                                SDL_GL_SwapWindow(state->windows[i]);
-                                break;
-                            }
-                        }
-                        break;
-                }
-            }
-            SDLTest_CommonEvent(state, &event, &done);
-        }
-        if (!done) {
-          for (i = 0; i < state->num_windows; ++i) {
-              status = SDL_GL_MakeCurrent(state->windows[i], context[i]);
-              if (status) {
-                  SDL_Log("SDL_GL_MakeCurrent(): %s\n", SDL_GetError());
 
-                  /* Continue for next window */
-                  continue;
-              }
-              Render(state->window_w, state->window_h, &datas[i]);
-              SDL_GL_SwapWindow(state->windows[i]);
-          }
-        }
+#ifdef __EMSCRIPTEN__
+    emscripten_set_main_loop(loop, 0, 1);
+#else
+    while (!done) {
+        loop();
     }
+#endif
 
     /* Print out some timing information */
     now = SDL_GetTicks();
@@ -675,7 +711,7 @@ main(int argc, char *argv[])
         SDL_Log("%2.2f frames per second\n",
                ((double) frames * 1000) / (now - then));
     }
-#if !defined(__ANDROID__)    
+#if !defined(__ANDROID__) && !defined(__NACL__)  
     quit(0);
 #endif    
     return 0;

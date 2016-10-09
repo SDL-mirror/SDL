@@ -1,15 +1,4 @@
 /*
-  Copyright (C) 1997-2014 Sam Lantinga <slouken@libsdl.org>
-
-  This software is provided 'as-is', without any express or implied
-  warranty.  In no event will the authors be held liable for any damages
-  arising from the use of this software.
-
-  Permission is granted to anyone to use this software for any purpose,
-  including commercial applications, and to alter it and redistribute it
-  freely.
-*/
-/*
 Copyright (c) 2008, Edgar Simo Serra
 All rights reserved.
 
@@ -33,8 +22,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 #ifndef SDL_HAPTIC_DISABLED
 
-#include "SDL_haptic.h"
-
 static SDL_Haptic *haptic;
 
 
@@ -56,8 +43,8 @@ main(int argc, char **argv)
     int i;
     char *name;
     int index;
-    SDL_HapticEffect efx[5];
-    int id[5];
+    SDL_HapticEffect efx[9];
+    int id[9];
     int nefx;
     unsigned int supported;
 
@@ -133,7 +120,8 @@ main(int argc, char **argv)
         SDL_Log("   effect %d: Sine Wave\n", nefx);
         efx[nefx].type = SDL_HAPTIC_SINE;
         efx[nefx].periodic.period = 1000;
-        efx[nefx].periodic.magnitude = 0x4000;
+        efx[nefx].periodic.magnitude = -0x2000;    /* Negative magnitude and ...                      */
+        efx[nefx].periodic.phase = 18000;          /* ... 180 degrees phase shift => cancel eachother */
         efx[nefx].periodic.length = 5000;
         efx[nefx].periodic.attack_length = 1000;
         efx[nefx].periodic.fade_length = 1000;
@@ -160,6 +148,7 @@ main(int argc, char **argv)
         }
         nefx++;
     }
+    
     /* Now the classical constant effect. */
     if (supported & SDL_HAPTIC_CONSTANT) {
         SDL_Log("   effect %d: Constant Force\n", nefx);
@@ -177,14 +166,15 @@ main(int argc, char **argv)
         }
         nefx++;
     }
+    
     /* The cute spring effect. */
     if (supported & SDL_HAPTIC_SPRING) {
         SDL_Log("   effect %d: Condition Spring\n", nefx);
         efx[nefx].type = SDL_HAPTIC_SPRING;
         efx[nefx].condition.length = 5000;
         for (i = 0; i < SDL_HapticNumAxes(haptic); i++) {
-            efx[nefx].condition.right_sat[i] = 0x7FFF;
-            efx[nefx].condition.left_sat[i] = 0x7FFF;
+            efx[nefx].condition.right_sat[i] = 0xFFFF;
+            efx[nefx].condition.left_sat[i] = 0xFFFF;
             efx[nefx].condition.right_coeff[i] = 0x2000;
             efx[nefx].condition.left_coeff[i] = 0x2000;
             efx[nefx].condition.center[i] = 0x1000;     /* Displace the center for it to move. */
@@ -196,17 +186,74 @@ main(int argc, char **argv)
         }
         nefx++;
     }
-    /* The pretty awesome inertia effect. */
-    if (supported & SDL_HAPTIC_INERTIA) {
-        SDL_Log("   effect %d: Condition Inertia\n", nefx);
-        efx[nefx].type = SDL_HAPTIC_SPRING;
+    /* The interesting damper effect. */
+    if (supported & SDL_HAPTIC_DAMPER) {
+        SDL_Log("   effect %d: Condition Damper\n", nefx);
+        efx[nefx].type = SDL_HAPTIC_DAMPER;
         efx[nefx].condition.length = 5000;
         for (i = 0; i < SDL_HapticNumAxes(haptic); i++) {
-            efx[nefx].condition.right_sat[i] = 0x7FFF;
-            efx[nefx].condition.left_sat[i] = 0x7FFF;
+            efx[nefx].condition.right_sat[i] = 0xFFFF;
+            efx[nefx].condition.left_sat[i] = 0xFFFF;
             efx[nefx].condition.right_coeff[i] = 0x2000;
             efx[nefx].condition.left_coeff[i] = 0x2000;
         }
+        id[nefx] = SDL_HapticNewEffect(haptic, &efx[nefx]);
+        if (id[nefx] < 0) {
+            SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "UPLOADING EFFECT ERROR: %s\n", SDL_GetError());
+            abort_execution();
+        }
+        nefx++;
+    }
+    /* The pretty awesome inertia effect. */
+    if (supported & SDL_HAPTIC_INERTIA) {
+        SDL_Log("   effect %d: Condition Inertia\n", nefx);
+        efx[nefx].type = SDL_HAPTIC_INERTIA;
+        efx[nefx].condition.length = 5000;
+        for (i = 0; i < SDL_HapticNumAxes(haptic); i++) {
+            efx[nefx].condition.right_sat[i] = 0xFFFF;
+            efx[nefx].condition.left_sat[i] = 0xFFFF;
+            efx[nefx].condition.right_coeff[i] = 0x2000;
+            efx[nefx].condition.left_coeff[i] = 0x2000;
+            efx[nefx].condition.deadband[i] = 0x1000;    /* 1/16th of axis-range around the center is 'dead'. */
+        }
+        id[nefx] = SDL_HapticNewEffect(haptic, &efx[nefx]);
+        if (id[nefx] < 0) {
+            SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "UPLOADING EFFECT ERROR: %s\n", SDL_GetError());
+            abort_execution();
+        }
+        nefx++;
+    }
+    /* The hot friction effect. */
+    if (supported & SDL_HAPTIC_FRICTION) {
+        SDL_Log("   effect %d: Condition Friction\n", nefx);
+        efx[nefx].type = SDL_HAPTIC_FRICTION;
+        efx[nefx].condition.length = 5000;
+        for (i = 0; i < SDL_HapticNumAxes(haptic); i++) {
+            efx[nefx].condition.right_sat[i] = 0xFFFF;
+            efx[nefx].condition.left_sat[i] = 0xFFFF;
+            efx[nefx].condition.right_coeff[i] = 0x2000;
+            efx[nefx].condition.left_coeff[i] = 0x2000;
+        }
+        id[nefx] = SDL_HapticNewEffect(haptic, &efx[nefx]);
+        if (id[nefx] < 0) {
+            SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "UPLOADING EFFECT ERROR: %s\n", SDL_GetError());
+            abort_execution();
+        }
+        nefx++;
+    }
+    
+    /* Now we'll try a ramp effect */
+    if (supported & SDL_HAPTIC_RAMP) {
+        SDL_Log("   effect %d: Ramp\n", nefx);
+        efx[nefx].type = SDL_HAPTIC_RAMP;
+        efx[nefx].ramp.direction.type = SDL_HAPTIC_CARTESIAN;
+        efx[nefx].ramp.direction.dir[0] = 1;     /* Force comes from                 */
+        efx[nefx].ramp.direction.dir[1] = -1;    /*                  the north-east. */
+        efx[nefx].ramp.length = 5000;
+        efx[nefx].ramp.start = 0x4000;
+        efx[nefx].ramp.end = -0x4000;
+        efx[nefx].ramp.attack_length = 1000;
+        efx[nefx].ramp.fade_length = 1000;
         id[nefx] = SDL_HapticNewEffect(haptic, &efx[nefx]);
         if (id[nefx] < 0) {
             SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "UPLOADING EFFECT ERROR: %s\n", SDL_GetError());
