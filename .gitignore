@@ -1,0 +1,8 @@
+.externalNativeBuild
+.gradle
+.idea
+build
+gradle
+gradlew
+gradlew.bat
+SDL.iml
