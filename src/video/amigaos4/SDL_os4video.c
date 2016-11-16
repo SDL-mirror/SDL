@@ -222,7 +222,7 @@ OS4_AllocSystemResources(_THIS)
 		ASOPOOL_Puddle,    16384,
 		ASOPOOL_Protected, TRUE,
 		TAG_DONE))) {
-	
+
 		SDL_SetError("Couldn't allocate pool");
 		return SDL_FALSE;
 	}
@@ -243,7 +243,7 @@ OS4_AllocSystemResources(_THIS)
 		SDL_SetError("Couldn't allocate input request");
 		return SDL_FALSE;
 	}
-	
+
 	if (IExec->OpenDevice("input.device", 0, (struct IORequest *)data->inputReq, 0))
 	{
 		SDL_SetError("Couldn't open input.device");
@@ -257,7 +257,7 @@ static void
 OS4_FreeSystemResources(_THIS)
 {
 	SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
-	
+
 	dprintf("Called\n");
 
 	if (data->inputReq) {
@@ -265,7 +265,7 @@ OS4_FreeSystemResources(_THIS)
 		//IExec->AbortIO((struct IORequest *)data->inputReq);
 		//IExec->WaitIO((struct IORequest *)data->inputReq);
 		IExec->CloseDevice((struct IORequest *)data->inputReq);
-		
+
 		dprintf("Deleting IORequest\n");
 		IExec->FreeSysObject(ASOT_IOREQUEST, (void *)data->inputReq);
 	}
@@ -325,10 +325,10 @@ OS4_CreateDevice(int devindex)
 	if (!OS4_AllocSystemResources(device)) {
 		SDL_free(device);
 		SDL_free(data);
-		
+
 		/* If we return with NULL, SDL_VideoQuit() can't clean up OS4 stuff. So let's do it now. */
 		OS4_FreeSystemResources(device);
-		
+
 		SDL_Unsupported();
 
 		return NULL;
@@ -360,12 +360,13 @@ OS4_CreateDevice(int devindex)
 	//device->GetWindowGammaRamp = OS4_GetWindowGammaRamp;
 	device->SetWindowGrab = OS4_SetWindowGrab;
 	device->DestroyWindow = OS4_DestroyWindow;
-	
+
 	device->CreateWindowFramebuffer = OS4_CreateWindowFramebuffer;
 	device->UpdateWindowFramebuffer = OS4_UpdateWindowFramebuffer;
 	device->DestroyWindowFramebuffer = OS4_DestroyWindowFramebuffer;
-	
+
 	//device->OnWindowEnter = OS4_OnWindowEnter;
+	device->SetWindowHitTest = OS4_SetWindowHitTest;
 
 	device->shape_driver.CreateShaper = OS4_CreateShaper;
 	device->shape_driver.SetWindowShape = OS4_SetWindowShape;
@@ -433,7 +434,7 @@ OS4_VideoQuit(_THIS)
 void *
 OS4_SaveAllocPooled(_THIS, uint32 size)
 {
-	SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;	  
+	SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
 
 	return IExec->AllocPooled(data->pool, size);
 }

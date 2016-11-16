@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2014 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2016 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -44,7 +44,7 @@ static int
 OS4_SetupWindowData(_THIS, SDL_Window * sdlwin, struct Window * syswin)
 {
 	SDL_WindowData *data;
-	
+
 	int width;
 	int height;
 
@@ -110,12 +110,12 @@ static uint32 OS4_GetWindowFlags(SDL_Window * window, SDL_bool fullscreen)
 
 		if (window->flags & SDL_WINDOW_BORDERLESS) {
 			windowFlags |= WFLG_BORDERLESS;
-		} else {			
+		} else {
 			windowFlags |= WFLG_DRAGBAR | WFLG_DEPTHGADGET | WFLG_CLOSEGADGET;
-		}
 
-		if (window->flags & SDL_WINDOW_RESIZABLE) {			   
-			windowFlags |= WFLG_SIZEGADGET | WFLG_SIZEBBOTTOM;
+			if (window->flags & SDL_WINDOW_RESIZABLE) {
+				windowFlags |= WFLG_SIZEGADGET | WFLG_SIZEBBOTTOM;
+			}
 		}
 	}
 
@@ -168,7 +168,7 @@ OS4_CreateWindowInternal(_THIS, SDL_Window * window, SDL_VideoDisplay * display)
 	struct Window *syswin;
 
 	SDL_bool fullscreen = display ? SDL_TRUE : SDL_FALSE;
-	
+
 	uint32 IDCMPFlags = OS4_GetIDCMPFlags(window, fullscreen);
 	uint32 windowFlags = OS4_GetWindowFlags(window, fullscreen);
 
@@ -227,7 +227,7 @@ OS4_CreateWindowInternal(_THIS, SDL_Window * window, SDL_VideoDisplay * display)
 
 int
 OS4_CreateWindow(_THIS, SDL_Window * window)
-{	 
+{
 	struct Window *syswin = NULL;
 
 	if (OS4_IsFullscreen(window)) {
@@ -290,10 +290,10 @@ OS4_SetWindowPosition(_THIS, SDL_Window * window)
 {
 	SDL_WindowData *data = window->driverdata;
 
-	dprintf("Called\n");
+	dprintf("New window position %d, %d\n", window->x, window->y);
 
 	if (data && data->syswin) {
-	
+
 		LONG ret = IIntuition->SetWindowAttrs(data->syswin,
 			WA_Left, window->x,
 			WA_Top, window->y,
@@ -323,7 +323,7 @@ OS4_WaitForResize(_THIS, struct Window * window, int newWidth, int newHeight)
 			TAG_DONE);
 
 		if (width != newWidth || height != newHeight) {
-			dprintf("Waiting for Intuition %d\n", counter);
+			//dprintf("Waiting for Intuition %d\n", counter);
 			usleep(1000);
 		} else {
 			break;
@@ -384,7 +384,7 @@ OS4_ShowWindow(_THIS, SDL_Window * window)
 	dprintf("Called\n");
 
 	if (data && data->syswin) {
-	
+
 		// TODO: could use ShowWindow but what we pass for the Other?
 		LONG ret = IIntuition->SetWindowAttrs(data->syswin,
 			WA_Hidden, FALSE,
@@ -437,12 +437,12 @@ void OS4_SetWindowFullscreen(_THIS, SDL_Window * window, SDL_VideoDisplay * disp
 {
 	dprintf("Trying to set '%s' into %s mode\n", window->title, fullscreen ? "fullscreen" : "window");
 
-    if (window->is_destroying) {
+	if (window->is_destroying) {
 		// This function gets also called during window closing
 		dprintf("Window '%s' is being destroyed, mode change ignored\n", window->title);
 	} else {
 	    SDL_WindowData *data = window->driverdata;
-		
+
 		if (window->flags & SDL_WINDOW_FOREIGN) {
 			dprintf("Native window '%s', mode change ignored\n", window->title);
 		} else {
@@ -522,7 +522,7 @@ OS4_DestroyWindow(_THIS, SDL_Window * window)
 
 			if (!(window->flags & SDL_WINDOW_FOREIGN)) {
 				SDL_VideoData *videodata = (SDL_VideoData *) _this->driverdata;
-				
+
 				struct Screen *screen = data->syswin->WScreen;
 
 				if (SDL_IsShapedWindow(window)) {
@@ -540,7 +540,7 @@ OS4_DestroyWindow(_THIS, SDL_Window * window)
 			}
 		}
 
-    	if (window->flags & SDL_WINDOW_OPENGL) {
+		if (window->flags & SDL_WINDOW_OPENGL) {
 	    	OS4_GL_FreeBuffers(_this, data);
 			// TODO: should context be free'd automatically?
 		}
@@ -566,6 +566,12 @@ OS4_GetWindowWMInfo(_THIS, SDL_Window * window, struct SDL_SysWMinfo * info)
 					SDL_MAJOR_VERSION, SDL_MINOR_VERSION);
 		return SDL_FALSE;
 	}
+}
+
+int
+OS4_SetWindowHitTest(SDL_Window * window, SDL_bool enabled)
+{
+	return 0;  /* just succeed, the real work is done elsewhere. */
 }
 
 #endif /* SDL_VIDEO_DRIVER_AMIGAOS4 */

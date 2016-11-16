@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2014 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2016 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -39,7 +39,7 @@ struct MyIntuiMessage
 	uint32 Class;
 	uint16 Code;
 	uint16 Qualifier;
-	
+
 	struct Gadget *Gadget;
 
 	struct Window *IDCMPWindow;
@@ -50,6 +50,14 @@ struct MyIntuiMessage
 	int16  Width;		/* Inner window dimensions */
 	int16  Height;
 };
+
+typedef struct HitTestInfo
+{
+	SDL_HitTestResult htr;
+	SDL_Point point;
+} HitTestInfo;
+
+static HitTestInfo hti; // TODO: move to window data?
 
 /* We could possibly use also Window.userdata field to contain SDL_Window,
 and thus avoid searching */
@@ -83,36 +91,18 @@ OS4_TranslateUnicode(_THIS, uint16 Code, uint32 Qualifier)
 	char buffer[10];
 
 	ie.ie_Class = IECLASS_RAWKEY;
-    ie.ie_SubClass = 0;
-    ie.ie_Code  = Code & ~(IECODE_UP_PREFIX);
-    ie.ie_Qualifier = Qualifier;
-    ie.ie_EventAddress = NULL;
+	ie.ie_SubClass = 0;
+	ie.ie_Code  = Code & ~(IECODE_UP_PREFIX);
+	ie.ie_Qualifier = Qualifier;
+	ie.ie_EventAddress = NULL;
 
 	res = IKeymap->MapRawKey(&ie, buffer, sizeof(buffer), 0);
-	
+
 	if (res != 1)
 	    return 0;
 	else
 	    return buffer[0];
 }
-
-/*
-static SDL_Keymod
-OS4_KMod(uint16 Qualifier)
-{
-	SDL_Keymod x = KMOD_NONE;
-	if (Qualifier & IEQUALIFIER_LSHIFT) 	x |= KMOD_LSHIFT;
-	if (Qualifier & IEQUALIFIER_RSHIFT) 	x |= KMOD_RSHIFT;
-	if (Qualifier & IEQUALIFIER_CAPSLOCK)	x |= KMOD_CAPS;
-	if (Qualifier & IEQUALIFIER_CONTROL)	x |= KMOD_LCTRL;
-	if (Qualifier & IEQUALIFIER_LALT)		x |= KMOD_LALT;
-	if (Qualifier & IEQUALIFIER_RALT)		x |= KMOD_RALT;
-	if (Qualifier & IEQUALIFIER_LCOMMAND)	x |= KMOD_LGUI;
-	if (Qualifier & IEQUALIFIER_RCOMMAND)	x |= KMOD_RGUI;
-
-	return x;
-}
-*/
 
 static void
 OS4_HandleKeyboard(_THIS, struct MyIntuiMessage *imsg)
@@ -128,7 +118,7 @@ OS4_HandleKeyboard(_THIS, struct MyIntuiMessage *imsg)
 			if (imsg->Code <= 127) {
 
 				char text[2];
-				
+
 				text[0]	= OS4_TranslateUnicode(_this, imsg->Code, imsg->Qualifier);
 				text[1] = '\0';
 
@@ -142,6 +132,101 @@ OS4_HandleKeyboard(_THIS, struct MyIntuiMessage *imsg)
 }
 
 static void
+OS4_HandleHitTestMotion(_THIS, SDL_Window * sdlwin, struct MyIntuiMessage *imsg)
+{
+	int16 newx = imsg->IDCMPWindow->WScreen->MouseX; // TODO: MyIntuiMsg?
+	int16 newy = imsg->IDCMPWindow->WScreen->MouseY;
+
+	int16 deltax = newx - hti.point.x;
+	int16 deltay = newy - hti.point.y;
+
+	int16 x, y, w, h;
+
+	if (deltax == 0 && deltay == 0) {
+		return;
+	}
+
+	x = sdlwin->x;
+	y = sdlwin->y;
+	w = sdlwin->w;
+	h = sdlwin->h;
+
+	hti.point.x = newx;
+	hti.point.y = newy;
+
+	switch (hti.htr) {
+		case SDL_HITTEST_DRAGGABLE:
+			x += deltax;
+			y += deltay;
+		    break;
+
+		case SDL_HITTEST_RESIZE_TOPLEFT:
+			x += deltax;
+			y += deltay;
+			w -= deltax;
+			h -= deltay;
+			break;
+
+		case SDL_HITTEST_RESIZE_TOP:
+			y += deltay;
+			h -= deltay;
+		    break;
+
+		case SDL_HITTEST_RESIZE_TOPRIGHT:
+			y += deltay;
+			w += deltax;
+			h -= deltay;
+			break;
+
+		case SDL_HITTEST_RESIZE_RIGHT:
+			w += deltax;
+		    break;
+
+		case SDL_HITTEST_RESIZE_BOTTOMRIGHT:
+			w += deltax;
+			h += deltay;
+			break;
+
+		case SDL_HITTEST_RESIZE_BOTTOM:
+			h += deltay;
+		    break;
+
+		case SDL_HITTEST_RESIZE_BOTTOMLEFT:
+			x += deltax;
+
+			w -= deltax;
+			h += deltay;
+			break;
+
+		case SDL_HITTEST_RESIZE_LEFT:
+			x += deltax;
+			w -= deltax;
+		    break;
+
+		default:
+		    break;
+	}
+
+	dprintf("newx %d, newy %d (dx %d, dy %d) w=%d h=%d\n", newx, newy, deltax, deltay, w, h);
+
+	sdlwin->x = x;
+	sdlwin->y = y;
+	sdlwin->w = w;
+	sdlwin->h = h;
+
+	LONG ret = IIntuition->SetWindowAttrs(imsg->IDCMPWindow,
+		WA_InnerWidth, w,
+		WA_InnerHeight, h,
+		WA_Left, x,
+		WA_Top, y,
+		TAG_DONE);
+
+	if (ret) {
+		dprintf("SetWindowAttrs() returned %d\n", ret);
+	}
+}
+
+static void
 OS4_HandleMouseMotion(_THIS, struct MyIntuiMessage *imsg)
 {
 	SDL_Window * sdlwin = OS4_FindWindow(_this, imsg->IDCMPWindow);
@@ -150,7 +235,42 @@ OS4_HandleMouseMotion(_THIS, struct MyIntuiMessage *imsg)
 		dprintf("X:%d Y:%d\n", imsg->PointerX, imsg->PointerY);
 
 		SDL_SendMouseMotion(sdlwin, 0 /*mouse->mouseID*/, 0, imsg->PointerX, imsg->PointerY);
+
+		if (hti.htr != SDL_HITTEST_NORMAL) {
+			OS4_HandleHitTestMotion(_this, sdlwin, imsg);
+		}
 	}
+}
+
+static SDL_bool OS4_HandleHitTest(_THIS, SDL_Window * sdlwin, struct MyIntuiMessage *imsg)
+{
+	if (sdlwin->hit_test) {
+		const SDL_Point point = { imsg->PointerX, imsg->PointerY };
+		const SDL_HitTestResult rc = sdlwin->hit_test(sdlwin, &point, sdlwin->hit_test_data);
+
+		switch (rc) {
+			case SDL_HITTEST_DRAGGABLE:
+			case SDL_HITTEST_RESIZE_TOPLEFT:
+			case SDL_HITTEST_RESIZE_TOP:
+			case SDL_HITTEST_RESIZE_TOPRIGHT:
+			case SDL_HITTEST_RESIZE_RIGHT:
+			case SDL_HITTEST_RESIZE_BOTTOMRIGHT:
+			case SDL_HITTEST_RESIZE_BOTTOM:
+			case SDL_HITTEST_RESIZE_BOTTOMLEFT:
+			case SDL_HITTEST_RESIZE_LEFT:
+
+				// Store the action and mouse coordinates for later use
+				hti.htr = rc;
+				hti.point.x = imsg->IDCMPWindow->WScreen->MouseX;
+				hti.point.y = imsg->IDCMPWindow->WScreen->MouseY;
+
+				return SDL_TRUE;
+
+			default: return SDL_FALSE;
+		}
+	}
+
+	return SDL_FALSE;
 }
 
 static void
@@ -160,19 +280,24 @@ OS4_HandleMouseButtons(_THIS, struct MyIntuiMessage *imsg)
 
 	if (sdlwin) {
 		uint8 button = 0;
-		uint8 state = SDL_PRESSED;
+		uint8 state = (imsg->Code & IECODE_UP_PREFIX) ? SDL_RELEASED : SDL_PRESSED;
 
-		if ((imsg->Code & ~IECODE_UP_PREFIX) == IECODE_LBUTTON)
+		if ((imsg->Code & ~IECODE_UP_PREFIX) == IECODE_LBUTTON) {
+			if (state == SDL_PRESSED) {
+				if (OS4_HandleHitTest(_this, sdlwin, imsg)) {
+				    return;
+				}
+			} else {
+				hti.htr = SDL_HITTEST_NORMAL;
+				// TODO: send window resized event to SDL?
+		    }
 			button = SDL_BUTTON_LEFT;
-		else if ((imsg->Code & ~IECODE_UP_PREFIX) == IECODE_RBUTTON)
+		} else if ((imsg->Code & ~IECODE_UP_PREFIX) == IECODE_RBUTTON)
 			button = SDL_BUTTON_RIGHT;
 		else if ((imsg->Code & ~IECODE_UP_PREFIX) == IECODE_MBUTTON)
 			button = SDL_BUTTON_MIDDLE;
 
 		// TODO: can we support more buttons?
-
-		if (imsg->Code & IECODE_UP_PREFIX)
-			state = SDL_RELEASED;
 
 		dprintf("X:%d Y:%d button:%d state:%d\n",
 			imsg->PointerX, imsg->PointerY, button, state);
@@ -207,25 +332,29 @@ OS4_HandleMouseWheel(_THIS, struct MyIntuiMessage *imsg)
 static void
 OS4_HandleResize(_THIS, struct MyIntuiMessage *imsg)
 {
-	SDL_Window * sdlwin = OS4_FindWindow(_this, imsg->IDCMPWindow);
+	if (hti.htr == SDL_HITTEST_NORMAL) {
+		SDL_Window * sdlwin = OS4_FindWindow(_this, imsg->IDCMPWindow);
 
-	dprintf("Called\n");
+		dprintf("Window resized to %d*%d\n", imsg->Width, imsg->Height);
 
-	if (sdlwin) {
-		if (imsg->Width != sdlwin->w || imsg->Height != sdlwin->h) {
-			SDL_WindowData * data = (SDL_WindowData *)sdlwin->driverdata;
+		if (sdlwin) {
+			if (imsg->Width != sdlwin->w || imsg->Height != sdlwin->h) {
+				SDL_WindowData * data = (SDL_WindowData *)sdlwin->driverdata;
 
-			SDL_SendWindowEvent(sdlwin, SDL_WINDOWEVENT_RESIZED,
-				imsg->Width, imsg->Height);
+				SDL_SendWindowEvent(sdlwin, SDL_WINDOWEVENT_RESIZED,
+					imsg->Width, imsg->Height);
 
-			if (SDL_IsShapedWindow(sdlwin)) {
-				OS4_ResizeWindowShape(sdlwin);
-        	}
+				if (SDL_IsShapedWindow(sdlwin)) {
+					OS4_ResizeWindowShape(sdlwin);
+	        	}
 
-			if (data->IGL /*sdlwin->flags & SDL_WINDOW_OPENGL*/ ) {
-				OS4_GL_ResizeContext(_this, sdlwin);
+				if (data->IGL /*sdlwin->flags & SDL_WINDOW_OPENGL*/ ) {
+					OS4_GL_ResizeContext(_this, sdlwin);
+				}
 			}
 		}
+	} else {
+		dprintf("Resize notification ignored because resize is still in progress\n");
 	}
 }
 
@@ -270,7 +399,7 @@ OS4_HandleTicks(_THIS, struct MyIntuiMessage *imsg)
 	if (sdlwin) {
 		if ((sdlwin->flags & SDL_WINDOW_INPUT_GRABBED) && !(sdlwin->flags & SDL_WINDOW_FULLSCREEN) &&
 			(SDL_GetKeyboardFocus() == sdlwin)) {
-			
+
 			SDL_WindowData *data = sdlwin->driverdata;
 
 			dprintf("Window %p ticks %d\n", imsg->IDCMPWindow, data->pointerGrabTicks);
@@ -307,11 +436,12 @@ OS4_CopyRelevantFields(struct IntuiMessage * src, struct MyIntuiMessage * dst)
 	dst->Height 		 = src->IDCMPWindow->Height - src->IDCMPWindow->BorderTop  - src->IDCMPWindow->BorderBottom;
 }
 
+// TODO: we need to handle Intuition's window move (repositioning) event and update sdlwin's x&y
 static void
 OS4_EventHandler(_THIS)
 {
 	SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
-	
+
 	struct IntuiMessage *imsg;
 	struct MyIntuiMessage msg;
 

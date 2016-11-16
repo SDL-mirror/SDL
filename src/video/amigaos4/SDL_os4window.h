@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2014 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2016 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -64,6 +64,8 @@ extern SDL_bool OS4_GetWindowWMInfo(_THIS, SDL_Window * window, struct SDL_SysWM
 
 //extern void OS4_OnWindowEnter(_THIS, SDL_Window * window);
 //extern void OS4_UpdateClipCursor(SDL_Window *window);
+
+extern int OS4_SetWindowHitTest(SDL_Window * window, SDL_bool enabled);
 
 #endif /* _SDL_os4window_h */
 
