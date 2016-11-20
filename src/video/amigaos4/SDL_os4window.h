@@ -44,6 +44,7 @@ extern int OS4_CreateWindow(_THIS, SDL_Window * window);
 extern int OS4_CreateWindowFrom(_THIS, SDL_Window * window, const void *data);
 extern void OS4_SetWindowTitle(_THIS, SDL_Window * window);
 //extern void OS4_SetWindowIcon(_THIS, SDL_Window * window, SDL_Surface * icon);
+extern void OS4_SetWindowBoxInternal(_THIS, SDL_Window * window);
 extern void OS4_SetWindowPosition(_THIS, SDL_Window * window);
 extern void OS4_SetWindowSize(_THIS, SDL_Window * window);
 extern void OS4_ShowWindow(_THIS, SDL_Window * window);

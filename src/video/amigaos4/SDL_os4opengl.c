@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2014 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2016 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -27,6 +27,8 @@
 
 #include <GL/gl.h>
 //#include <mgl/gl.h>
+
+#include <unistd.h> // usleep
 
 #define DEBUG
 #include "../../main/amigaos4/SDL_os4debug.h"
@@ -62,7 +64,7 @@ OS4_GL_GetProcAddress(_THIS, const char *proc)
     if (IMiniGL) {
         func = (void *)AmiGetGLProc(proc);
     }
-    
+
     if (func == NULL) {
         dprintf("Failed to load '%s'\n", proc);
     }
@@ -234,13 +236,30 @@ OS4_GL_GetDrawableSize(_THIS, SDL_Window * window, int *w, int *h)
 {
     if (IMiniGL) {
         SDL_WindowData * data = window->driverdata;
-        int width, height;
 
-        IIntuition->GetWindowAttrs(
+        int width = 0;
+        int height = 0;
+        int counter = 0;
+
+        while (counter++ < 100) {
+            LONG result = IIntuition->GetWindowAttrs(
                         data->syswin,
                         WA_InnerWidth, &width,
                         WA_InnerHeight, &height,
                         TAG_DONE);
+
+            if (result) {
+                dprintf("GetWindowAttrs returned %d\n", result);
+            }
+
+            if (width != window->w || height != window->h) {
+                dprintf("Waiting for Intuition %d\n", counter);
+                usleep(1000);
+            } else {
+                break;
+            }
+        }
+
         *w = width;
         *h = height;
 
@@ -248,7 +267,7 @@ OS4_GL_GetDrawableSize(_THIS, SDL_Window * window, int *w, int *h)
     } else {
         *w = 0;
         *h = 0;
-        
+
         dprintf("No OpenGL\n");
         SDL_SetError("OpenGL not available");
     }
@@ -269,7 +288,7 @@ OS4_GL_SetSwapInterval(_THIS, int interval)
                 return 0;
             default:
                 dprintf("Unsupported interval %d\n", interval);
-                break;        
+                break;
         }
 
     } else {
@@ -372,7 +391,7 @@ OS4_GL_DeleteContext(_THIS, SDL_GLContext context)
     dprintf("Called\n");
 
     if (IMiniGL) {
-        
+
         if (context) {
             struct GLContextIFace * IGL = context;
             IGL->DeleteContext();

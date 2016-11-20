@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2014 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2016 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -24,6 +24,7 @@
 
 #include <intuition/pointerclass.h>
 
+#include "SDL_os4mouse.h"
 #include "SDL_os4video.h"
 #include "SDL_os4window.h"
 
@@ -49,6 +50,8 @@ static struct BitMap fallbackPointerBitMap = { 2, 16, 0, 2, 0,
     { (PLANEPTR)fallbackPointerData, (PLANEPTR)(fallbackPointerData + 16) } };
 
 
+OS4_GlobalMouseState globalMouseState;
+
 static Uint32
 OS4_GetDoubleClickTimeInMillis(_THIS)
 {
@@ -56,7 +59,7 @@ OS4_GetDoubleClickTimeInMillis(_THIS)
     Uint32 interval;
 
     IIntuition->GetPrefs(&preferences, sizeof(preferences));
-    
+
     interval =  preferences.DoubleClick.Seconds * 1000 +
                 preferences.DoubleClick.Microseconds / 1000;
 
@@ -102,7 +105,7 @@ OS4_CreateDefaultCursor()
 
         data->type = POINTERTYPE_NORMAL;
     }
-    
+
     return cursor;
 }
 
@@ -115,7 +118,7 @@ OS4_CreateCursor(SDL_Surface * surface, int hot_x, int hot_y)
 
     if (cursor && cursor->driverdata) {
 
-        if (surface->w > 64) {        
+        if (surface->w > 64) {
             dprintf("Invalid width %d\n", surface->w);
         } else if (surface->h > 64) {
             dprintf("Invalid height %d\n", surface->h);
@@ -161,7 +164,7 @@ OS4_CreateHiddenCursor()
         0xFF000000, 0x00FF0000, 0x0000FF00, 0x000000FF);
 
     dprintf("Called\n");
-    
+
     if (surface) {
 
         SDL_FillRect(surface, NULL, 0);
@@ -227,7 +230,9 @@ OS4_SetPointerForEachWindow(ULONG type, Object * object)
 
         if (data->syswin) {
 
-            dprintf("Setting pointer object/type %p/%d for window %p\n", object, type, data->syswin);
+            if (object || type) {
+                dprintf("Setting pointer object %p (type %d) for window %p\n", object, type, data->syswin);
+            }
 
             if (object) {
                 IIntuition->SetWindowPointer(
@@ -254,7 +259,7 @@ OS4_ShowCursor(SDL_Cursor * cursor)
     if (cursor) {
         SDL_CursorData *data = cursor->driverdata;
 
-        dprintf("Called %p %p\n", cursor, data);
+        //dprintf("Called %p %p\n", cursor, data);
 
         if (data) {
             type = data->type;
@@ -265,12 +270,12 @@ OS4_ShowCursor(SDL_Cursor * cursor)
         }
     } else {
         dprintf("Hiding cursor\n");
-        
+
         type = POINTERTYPE_NONE;
-        
+
         if (hidden) {
             SDL_CursorData *data = hidden->driverdata;
-        
+
             if (data) {
                 object = data->object;
             }
@@ -286,7 +291,7 @@ static void
 OS4_FreeCursor(SDL_Cursor * cursor)
 {
     SDL_CursorData *data = cursor->driverdata;
-    
+
     dprintf("Called %p\n", cursor);
 
     if (data) {
@@ -303,12 +308,70 @@ OS4_FreeCursor(SDL_Cursor * cursor)
     }
 }
 
-static void
-OS4_WarpMouse(SDL_Window * window, int x, int y)
+static int
+OS4_WarpMouseInternal(struct Screen *screen, int x, int y)
 {
     SDL_VideoDevice *device    = SDL_GetVideoDevice();
     SDL_VideoData *videoData   = device->driverdata;
+    int result = -1;
 
+    if (videoData->inputReq != NULL) {
+        struct InputEvent     *fakeEvent;
+        struct IEPointerPixel *neoPix;
+
+        /* We move the Workbench pointer by stuffing mouse
+         * movement events in input.device's queue.
+         *
+         * This in turn will cause mouse movement events to be
+         * sent back to us
+         */
+
+        fakeEvent = (struct InputEvent *)OS4_SaveAllocPooled(
+            device, sizeof(struct InputEvent) + sizeof(struct IEPointerPixel));
+
+        if (fakeEvent) {
+            neoPix = (struct IEPointerPixel *) (fakeEvent + 1);
+
+            neoPix->iepp_Screen = screen ? screen : videoData->publicScreen;
+            neoPix->iepp_Position.Y = y;
+            neoPix->iepp_Position.X = x;
+
+            fakeEvent->ie_EventAddress = (APTR)neoPix;
+            fakeEvent->ie_NextEvent    = NULL;
+            fakeEvent->ie_Class        = IECLASS_NEWPOINTERPOS;
+            fakeEvent->ie_SubClass     = IESUBCLASS_PIXEL;
+            fakeEvent->ie_Code         = IECODE_NOBUTTON;
+            fakeEvent->ie_Qualifier    = 0;
+
+            videoData->inputReq->io_Data    = (APTR)fakeEvent;
+            videoData->inputReq->io_Length  = sizeof(struct InputEvent);
+            videoData->inputReq->io_Command = IND_WRITEEVENT;
+
+            dprintf("Sending input event\n");
+
+            IExec->DoIO((struct IORequest *)videoData->inputReq);
+
+            OS4_SaveFreePooled(device, (void *)fakeEvent,
+                sizeof(struct InputEvent) + sizeof(struct IEPointerPixel));
+
+            result = 0;
+        }
+    }
+
+    return result;
+}
+
+static int
+OS4_WarpMouseGlobal(int x, int y)
+{
+    dprintf("Warping mouse to %d, %d\n", x, y);
+
+    return OS4_WarpMouseInternal(NULL, x, y);
+}
+
+static void
+OS4_WarpMouse(SDL_Window * window, int x, int y)
+{
     SDL_WindowData *winData    = window->driverdata;
     struct Window *syswin      = winData->syswin;
 
@@ -329,64 +392,55 @@ OS4_WarpMouse(SDL_Window * window, int x, int y)
     // TODO: "inside window" logic needed/wanted?
     warpHostPointer = !SDL_GetRelativeMouseMode() && (window == SDL_GetMouseFocus());
 
-    if (warpHostPointer && (videoData->inputReq != NULL)) {
-        struct InputEvent     *FakeEvent;
-        struct IEPointerPixel *NeoPix;
+    if (warpHostPointer) {
 
-        /* We move the Workbench pointer by stuffing mouse
-         * movement events in input.device's queue.
-         *
-         * This in turn will cause mouse movement events to be
-         * sent back to us
-         */
+        struct Screen *screen = (window->flags & SDL_WINDOW_FULLSCREEN) ?
+            syswin->WScreen : NULL;
 
-        /* Allocate the event from our pool */
-        FakeEvent = (struct InputEvent *)OS4_SaveAllocPooled(
-            device, sizeof(struct InputEvent) + sizeof(struct IEPointerPixel));
+        OS4_WarpMouseInternal(screen,
+            x + syswin->BorderTop + syswin->TopEdge,
+            y + syswin->BorderLeft + syswin->LeftEdge);
 
-        if (FakeEvent) {
-            dprintf("Building event structure\n");
-
-            NeoPix = (struct IEPointerPixel *) (FakeEvent + 1);
-
-            if (window->flags & SDL_WINDOW_FULLSCREEN)
-                NeoPix->iepp_Screen = syswin->WScreen;
-            else
-                NeoPix->iepp_Screen = videoData->publicScreen;
-
-            NeoPix->iepp_Position.Y = y + syswin->BorderTop  + syswin->TopEdge;
-            NeoPix->iepp_Position.X = x + syswin->BorderLeft + syswin->LeftEdge;
-
-            FakeEvent->ie_EventAddress = (APTR)NeoPix;
-            FakeEvent->ie_NextEvent    = NULL;
-            FakeEvent->ie_Class        = IECLASS_NEWPOINTERPOS;
-            FakeEvent->ie_SubClass     = IESUBCLASS_PIXEL;
-            FakeEvent->ie_Code         = IECODE_NOBUTTON;
-            FakeEvent->ie_Qualifier    = 0;
-
-            videoData->inputReq->io_Data    = (APTR)FakeEvent;
-            videoData->inputReq->io_Length  = sizeof(struct InputEvent);
-            videoData->inputReq->io_Command = IND_WRITEEVENT;
-
-            dprintf("Fire!\n");
-
-            IExec->DoIO((struct IORequest *)videoData->inputReq);
-
-            OS4_SaveFreePooled(device, (void *)FakeEvent,
-                sizeof(struct InputEvent) + sizeof(struct IEPointerPixel));
-        }
     } else {
         /* Just warp SDL's notion of the pointer position */
         SDL_SendMouseMotion(0, 0, SDL_GetRelativeMouseMode(), x, y);
     }
-
-    dprintf("Done\n");
 }
 
 static int
 OS4_SetRelativeMouseMode(SDL_bool enabled)
 {
     return 0;
+}
+
+static Uint32
+OS4_GetGlobalMouseState(int * x, int * y)
+{
+    uint32 buttons = 0;
+
+    if (x) {
+        *x = globalMouseState.x;
+    }
+
+    if (y) {
+        *y = globalMouseState.y;
+    }
+
+    //dprintf("%d, %d\n", *x, *y);
+
+    if (globalMouseState.buttonPressed[SDL_BUTTON_LEFT]) {
+        buttons |= SDL_BUTTON_LMASK;
+    }
+
+    if (globalMouseState.buttonPressed[SDL_BUTTON_MIDDLE]) {
+        buttons |= SDL_BUTTON_MMASK;
+    }
+
+    if (globalMouseState.buttonPressed[SDL_BUTTON_RIGHT]) {
+        buttons |= SDL_BUTTON_RMASK;
+    }
+
+    return buttons;
 }
 
 void
@@ -401,7 +455,10 @@ OS4_InitMouse(_THIS)
     mouse->ShowCursor = OS4_ShowCursor;
     mouse->FreeCursor = OS4_FreeCursor;
     mouse->WarpMouse = OS4_WarpMouse;
+    mouse->WarpMouseGlobal = OS4_WarpMouseGlobal;
     mouse->SetRelativeMouseMode = OS4_SetRelativeMouseMode;
+    //mouse->CaptureMouse = OS4_CaptureMouse;
+    mouse->GetGlobalMouseState = OS4_GetGlobalMouseState;
 
     SDL_SetDefaultCursor( OS4_CreateDefaultCursor() );
 

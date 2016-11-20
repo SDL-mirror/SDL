@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2014 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2016 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -19,9 +19,18 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 #include "../../SDL_internal.h"
+#include "SDL_os4video.h"
+#include "SDL_mouse.h"
 
 #ifndef _SDL_os4mouse_h
 #define _SDL_os4mouse_h
+
+typedef struct OS4_GlobalMouseState
+{
+	int x;
+	int y;
+	int buttonPressed[SDL_BUTTON_RIGHT];
+} OS4_GlobalMouseState;
 
 extern void OS4_InitMouse(_THIS);
 extern void OS4_QuitMouse(_THIS);
