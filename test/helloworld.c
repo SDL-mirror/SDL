@@ -11,10 +11,8 @@ static SDL_bool eventLoopInner(void)
 	SDL_bool running = SDL_TRUE;
     SDL_Event e;
 
-	while(SDL_PollEvent(&e))
-	{
-		switch (e.type)
-		{
+	while(SDL_PollEvent(&e)) {
+		switch (e.type) {
 			case SDL_QUIT:
 				printf("Quit\n");
 				running = SDL_FALSE;
@@ -56,12 +54,9 @@ static SDL_bool eventLoopInner(void)
 					SDL_TextEditingEvent * te = (SDL_TextEditingEvent *)&e;
 					printf("Text input '%s'\n", te->text);
 						
-					if (strcmp("q", te->text) == 0)
-					{
+					if (strcmp("q", te->text) == 0) {
 						running = SDL_FALSE;
-					}
-					else if (strcmp("w", te->text) == 0)
-					{
+					} else if (strcmp("w", te->text) == 0) {
 						SDL_WarpMouseInWindow( SDL_GetWindowFromID(te->windowID), 50, 50);
 					}
 				}
@@ -106,8 +101,7 @@ static SDL_bool eventLoopInner(void)
 
 static void eventLoop()
 {
-	while (eventLoopInner())
-	{
+	while (eventLoopInner()) {
 		SDL_Delay(1);
 	}
 }
@@ -124,8 +118,7 @@ static void testManyWindows()
 	SDL_Window * w = SDL_CreateWindow("blah", 100, 100, 100, 100, 0);
 	SDL_Window * w2 = SDL_CreateWindow("blah2", 200, 100, 100, 100, 0/*SDL_WINDOW_FULLSCREEN*/);
 
-	if (w && w2)
-	{
+	if (w && w2) {
 		SDL_SetWindowGrab(w, SDL_TRUE);
 
 		eventLoop();
@@ -138,8 +131,7 @@ static void testManyWindows()
 static void testFullscreen()
 {
 	SDL_Window * w = SDL_CreateWindow("Fullscreen", 0, 0, 640, 480, SDL_WINDOW_FULLSCREEN);
-	if (w)
-	{
+	if (w) {
 		eventLoop();
 
 		SDL_DestroyWindow(w);
@@ -154,8 +146,7 @@ static void testFullscreenDesktop()
 		640, 480,
 		SDL_WINDOW_FULLSCREEN_DESKTOP);
 	
-	if (w)
-	{
+	if (w) {
 		eventLoop();
 
 		SDL_DestroyWindow(w);
@@ -165,16 +156,14 @@ static void testFullscreenDesktop()
 
 static void openGL(SDL_Window *w)
 {
-	if (w)
-	{
+	if (w) {
 		SDL_GLContext c = SDL_GL_CreateContext(w);
 
 		if (c) {
 
 			SDL_GL_SetSwapInterval(1);
 
-			while (eventLoopInner())
-			{
+			while (eventLoopInner()) {
 				glMatrixMode(GL_PROJECTION);
 				glLoadIdentity();
 
@@ -242,8 +231,7 @@ static void testRenderer()
 	SDL_Renderer * gr = SDL_CreateRenderer(g, -1, SDL_RENDERER_SOFTWARE);
 	SDL_Renderer * br = SDL_CreateRenderer(b, -1, SDL_RENDERER_ACCELERATED);
 
-	if (r && g && b && rr && gr && br)
-	{
+	if (r && g && b && rr && gr && br) {
 		while (eventLoopInner()) {
 			SDL_SetRenderDrawColor(rr, 255, 0, 0, 255);
 			SDL_RenderClear(rr);
@@ -265,9 +253,7 @@ static void testRenderer()
 		SDL_DestroyWindow(r);
 		SDL_DestroyWindow(g);
 		SDL_DestroyWindow(b);
-	}
-	else
-	{
+	} else {
 		printf("%s\n", SDL_GetError());
 	}
 }
@@ -278,10 +264,8 @@ static void testDraw()
 
 	SDL_Renderer * r = SDL_CreateRenderer(w, -1, /*SDL_RENDERER_SOFTWARE*/ SDL_RENDERER_ACCELERATED);
 
-	if (w && r)
-	{
-		while (eventLoopInner())
-		{
+	if (w && r) {
+		while (eventLoopInner()) {
 			SDL_Rect rect;
 
 			SDL_SetRenderDrawColor(r, 100, 100, 100, 255);
@@ -312,10 +296,8 @@ static void testRenderVsync()
 
 	SDL_Renderer * r = SDL_CreateRenderer(w, -1, /*SDL_RENDERER_SOFTWARE*/ SDL_RENDERER_ACCELERATED);
 
-	if (w && r)
-	{
-		while (eventLoopInner())
-		{
+	if (w && r) {
+		while (eventLoopInner()) {
 			SDL_Rect rect;
 
 			SDL_SetRenderDrawColor(r, 100, 100, 100, 255);
@@ -342,12 +324,9 @@ static void testBmp()
 {
 	SDL_Surface *s = SDL_LoadBMP("sample.bmp");
 
-	if (s)
-	{
+	if (s) {
 		SDL_FreeSurface(s);
-	}
-	else
-	{
+	} else {
 		printf("%s\n", SDL_GetError());
 	}
 }
@@ -401,8 +380,7 @@ static void testSystemCursors()
 {
 	SDL_Window * w = SDL_CreateWindow("blah", 100, 100, 100, 100, 0);
 
-	if (w)
-	{
+	if (w) {
 		int c = 0;
 
 		while (eventLoopInner()) {
@@ -508,10 +486,49 @@ static void testHint()
 	printf("%s, %s\n", result1, result2);
 }
 
+static void testGlobalMouseState()
+{
+	SDL_Window * w = SDL_CreateWindow("Global Mouse State", 100, 100, 100, 100, 0);
+
+	if (w) {
+
+		while (eventLoopInner()) {
+
+			int x = 0;
+			int y = 0;
+
+			printf("State 0x%x (%d, %d)\n", SDL_GetGlobalMouseState(&x, &y), x, y);
+			SDL_Delay(1000);
+		}
+
+		SDL_DestroyWindow(w);
+	 }
+}
+
+static void testGlobalMouseWarp()
+{
+	SDL_Window * w = SDL_CreateWindow("Global Mouse Warp", 100, 100, 100, 100, 0);
+
+	if (w) {
+
+		while (eventLoopInner()) {
+
+			int x = rand() % 800;
+			int y = rand() % 600;
+
+			printf("Warping to %d, %d\n", x, y);
+			SDL_WarpMouseGlobal(x, y);
+
+			SDL_Delay(1000);
+		}
+
+		SDL_DestroyWindow(w);
+	 }
+}
+
 int main(void)
 {
-	if (SDL_Init(SDL_INIT_VIDEO|SDL_INIT_TIMER) == 0)
-	{
+	if (SDL_Init(SDL_INIT_VIDEO|SDL_INIT_TIMER) == 0) {
 		//testPath();
 		//testManyWindows();
 		//testFullscreenOpenGL();
@@ -528,7 +545,9 @@ int main(void)
 		//testSystemCursors();
 		//testCustomCursor();
 		//testClipboard();
-		testHint();
+		//testHint();
+		//testGlobalMouseState();
+		testGlobalMouseWarp();
 
 		SDL_Quit();
 	}

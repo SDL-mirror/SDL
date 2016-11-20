@@ -62,6 +62,8 @@ TARGETS = \
 	testmessage$(EXE) \
 	testdisplayinfo$(EXE) \
 	controllermap$(EXE) \
+	helloworld$(EXE) \
+	sdl2benchmark$(EXE)
 	
 all: Makefile $(TARGETS)
 
@@ -280,6 +282,11 @@ testdisplayinfo$(EXE): $(srcdir)/testdisplayinfo.c
 controllermap$(EXE): $(srcdir)/controllermap.c
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
 
+helloworld$(EXE): $(srcdir)/helloworld.c
+	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
+
+sdl2benchmark$(EXE): $(srcdir)/sdl2benchmark.c
+	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
 
 clean:
 	rm -f $(TARGETS)
