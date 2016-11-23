@@ -161,6 +161,20 @@ static struct Hook OS4_BackFillHook = {
 	0             /* h_Data */
 };
 
+static void
+OS4_CenterWindow(struct Screen * screen, SDL_Window * window)
+{
+	if (SDL_WINDOWPOS_ISCENTERED(window->x) || SDL_WINDOWPOS_ISUNDEFINED(window->x)) {
+		window->x = (screen->Width - window->w) / 2;
+		dprintf("X centered\n");
+	}
+
+	if (SDL_WINDOWPOS_ISCENTERED(window->y) || SDL_WINDOWPOS_ISUNDEFINED(window->y)) {
+		window->y = (screen->Height - window->h) / 2;
+		dprintf("Y centered\n");
+	}
+}
+
 static struct Window *
 OS4_CreateWindowInternal(_THIS, SDL_Window * window, SDL_VideoDisplay * display)
 {
@@ -175,6 +189,8 @@ OS4_CreateWindowInternal(_THIS, SDL_Window * window, SDL_VideoDisplay * display)
 	struct Screen *screen = OS4_GetScreenForWindow(_this, display);
 
 	OS4_BackFillHook.h_Data = IGraphics; /* Smuggle interface ptr for the hook */
+
+	OS4_CenterWindow(screen, window);
 
 	dprintf("Trying to open window '%s' at (%d,%d) of size (%dx%d)\n",
 		window->title, window->x, window->y, window->w, window->h);

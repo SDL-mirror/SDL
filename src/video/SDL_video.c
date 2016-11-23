@@ -636,6 +636,7 @@ SDL_GetNumVideoDisplays(void)
     return _this->num_displays;
 }
 
+#ifndef __AMIGAOS4__
 static int
 SDL_GetIndexOfDisplay(SDL_VideoDisplay *display)
 {
@@ -650,6 +651,7 @@ SDL_GetIndexOfDisplay(SDL_VideoDisplay *display)
     /* Couldn't find the display, just use index 0 */
     return 0;
 }
+#endif
 
 void *
 SDL_GetDisplayDriverData(int displayIndex)
@@ -1389,6 +1391,10 @@ SDL_CreateWindow(const char *title, int x, int y, int w, int h, Uint32 flags)
     window->y = y;
     window->w = w;
     window->h = h;
+#ifndef __AMIGAOS4__
+/* On AmigaOS4 we have to open the screen first, therefore this centering
+logic fails if screen is of different size. We center the window later
+on the backend side, after we know the screen size. */
     if (SDL_WINDOWPOS_ISUNDEFINED(x) || SDL_WINDOWPOS_ISUNDEFINED(y) ||
         SDL_WINDOWPOS_ISCENTERED(x) || SDL_WINDOWPOS_ISCENTERED(y)) {
         SDL_VideoDisplay *display = SDL_GetDisplayForWindow(window);
@@ -1404,6 +1410,7 @@ SDL_CreateWindow(const char *title, int x, int y, int w, int h, Uint32 flags)
             window->y = bounds.y + (bounds.h - h) / 2;
         }
     }
+#endif
     window->flags = ((flags & CREATE_FLAGS) | SDL_WINDOW_HIDDEN);
     window->last_fullscreen_flags = window->flags;
     window->brightness = 1.0f;
