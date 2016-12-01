@@ -130,8 +130,13 @@ OS4_HasClipboardText(_THIS)
 	char *to = OS4_GetClipboardText(_this);
 
 	if (to) {
+		size_t len = SDL_strlen(to);
+		
 		SDL_free(to);
-		return SDL_TRUE;
+		
+		if (len > 0) {
+		    return SDL_TRUE;
+		}
 	}
 
 	return SDL_FALSE;
