@@ -316,6 +316,15 @@ static Sint64 SDLCALL
 stdio_seek(SDL_RWops * context, Sint64 offset, int whence)
 {
 #ifdef HAVE_FSEEKO64
+#ifdef __amigaos4__
+    /* fseeko64 fails if file was opened with fopen() instead of fopen64(). So
+    let's try to find out the file state and fallback to fseek() on demand. */
+    if ((context->hidden.stdio.fp->_flags & __SL64) == 0) {
+        if (fseek(context->hidden.stdio.fp, offset, whence) == 0) {
+            return ftell(context->hidden.stdio.fp);
+        }
+    }
+#endif
     if (fseeko64(context->hidden.stdio.fp, (off64_t)offset, whence) == 0) {
         return ftello64(context->hidden.stdio.fp);
     }
@@ -537,14 +546,14 @@ SDL_RWFromFile(const char *file, const char *mode)
         FILE *fp = NULL;
         fopen_s(&fp, file, mode);
         #else
-        
+
         #ifdef HAVE_FSEEKO64
         /* fseeko64 fails on AmigaOS4 if file wasn't opened with fopen64! */
         FILE *fp = fopen64(file, mode);
         #else
         FILE *fp = fopen(file, mode);
         #endif
-        
+
         #endif
         if (fp == NULL) {
             SDL_SetError("Couldn't open %s", file);
