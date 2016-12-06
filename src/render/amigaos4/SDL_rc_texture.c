@@ -120,7 +120,7 @@ OS4_ModulateRGB(SDL_Renderer * renderer, SDL_Texture * texture, Uint8 * src, int
 
                     Uint32 oldcolor = readaddress[x];
                     Uint32 newcolor = (oldcolor & 0xFF000000);
-                    
+
                     Uint8 r = (oldcolor & 0x00FF0000) >> 16;
                     Uint8 g = (oldcolor & 0x0000FF00) >> 8;
                     Uint8 b = (oldcolor & 0x000000FF);
@@ -151,7 +151,8 @@ OS4_NeedRemodulation(SDL_Texture * texture)
 
     if (texture->r != texturedata->r ||
         texture->g != texturedata->g ||
-        texture->b != texturedata->b) {
+        texture->b != texturedata->b ||
+        texturedata->finalbitmap == NULL) {
 
         return SDL_TRUE;
     }

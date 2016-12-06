@@ -547,10 +547,10 @@ SDL_Surface *SDLTest_ImageBlit()
         SDLTest_imageBlit.bytes_per_pixel * 8,
         SDLTest_imageBlit.width * SDLTest_imageBlit.bytes_per_pixel,
 #if (SDL_BYTEORDER == SDL_BIG_ENDIAN)
-         0xff000000, /* Red bit mask. */
-         0x00ff0000, /* Green bit mask. */
-         0x0000ff00, /* Blue bit mask. */
-         0x000000ff  /* Alpha bit mask. */
+         0x00ff0000, /* Red bit mask. */
+         0x0000ff00, /* Green bit mask. */
+         0x000000ff, /* Blue bit mask. */
+         0x00000000  /* Alpha bit mask. Our surface is 24-bit, so don't define */
 #else
          0x000000ff, /* Red bit mask. */
          0x0000ff00, /* Green bit mask. */
@@ -559,6 +559,16 @@ SDL_Surface *SDLTest_ImageBlit()
 #endif
          );
    return surface;
+}
+
+SDL_Surface *SDLTest_ImageBlit32()
+{
+    SDL_Surface *s = SDLTest_ImageBlit();
+    SDL_Surface *c = SDL_ConvertSurfaceFormat(s, SDL_PIXELFORMAT_ARGB8888, 0);
+
+    SDL_FreeSurface(s);
+
+    return c;
 }
 
 const SDLTest_SurfaceImage_t SDLTest_imageBlitColor = {
@@ -1030,10 +1040,10 @@ SDL_Surface *SDLTest_ImageBlitColor()
         SDLTest_imageBlitColor.bytes_per_pixel * 8,
         SDLTest_imageBlitColor.width * SDLTest_imageBlitColor.bytes_per_pixel,
 #if (SDL_BYTEORDER == SDL_BIG_ENDIAN)
-         0xff000000, /* Red bit mask. */
-         0x00ff0000, /* Green bit mask. */
-         0x0000ff00, /* Blue bit mask. */
-         0x000000ff  /* Alpha bit mask. */
+         0x00ff0000, /* Red bit mask. */
+         0x0000ff00, /* Green bit mask. */
+         0x000000ff, /* Blue bit mask. */
+         0x00000000  /* Alpha bit mask. Our surface is 24-bit, so don't define */
 #else
          0x000000ff, /* Red bit mask. */
          0x0000ff00, /* Green bit mask. */
@@ -1042,6 +1052,16 @@ SDL_Surface *SDLTest_ImageBlitColor()
 #endif
          );
    return surface;
+}
+
+SDL_Surface *SDLTest_ImageBlitColor32()
+{
+    SDL_Surface *s = SDLTest_ImageBlitColor();
+    SDL_Surface *c = SDL_ConvertSurfaceFormat(s, SDL_PIXELFORMAT_ARGB8888, 0);
+    
+    SDL_FreeSurface(s);
+
+    return c;
 }
 
 const SDLTest_SurfaceImage_t SDLTest_imageBlitAlpha = {
@@ -1542,10 +1562,10 @@ SDL_Surface *SDLTest_ImageBlitAlpha()
         SDLTest_imageBlitAlpha.bytes_per_pixel * 8,
         SDLTest_imageBlitAlpha.width * SDLTest_imageBlitAlpha.bytes_per_pixel,
 #if (SDL_BYTEORDER == SDL_BIG_ENDIAN)
-         0xff000000, /* Red bit mask. */
-         0x00ff0000, /* Green bit mask. */
-         0x0000ff00, /* Blue bit mask. */
-         0x000000ff  /* Alpha bit mask. */
+         0x00ff0000, /* Red bit mask. */
+         0x0000ff00, /* Green bit mask. */
+         0x000000ff, /* Blue bit mask. */
+         0x00000000  /* Alpha bit mask. Our surface is 24-bit, so don't define */
 #else
          0x000000ff, /* Red bit mask. */
          0x0000ff00, /* Green bit mask. */
@@ -1554,4 +1574,14 @@ SDL_Surface *SDLTest_ImageBlitAlpha()
 #endif
          );
    return surface;
+}
+
+SDL_Surface *SDLTest_ImageBlitAlpha32()
+{
+    SDL_Surface *s = SDLTest_ImageBlitAlpha();
+    SDL_Surface *c = SDL_ConvertSurfaceFormat(s, SDL_PIXELFORMAT_ARGB8888, 0);
+
+    SDL_FreeSurface(s);
+
+    return c;
 }
