@@ -27,6 +27,7 @@
 #include "SDL_os4shape.h"
 
 #include "SDL_syswm.h"
+#include "../../events/SDL_keyboard_c.h"
 
 #define DEBUG
 #include "../../main/amigaos4/SDL_os4debug.h"
@@ -238,6 +239,10 @@ OS4_CreateWindowInternal(_THIS, SDL_Window * window, SDL_VideoDisplay * display)
 
 	IIntuition->ActivateWindow(syswin);
 
+	window->flags |= SDL_WINDOW_INPUT_FOCUS;
+
+	SDL_SetKeyboardFocus(window);
+
 	return syswin;
 }
 
@@ -402,7 +407,7 @@ OS4_ShowWindow(_THIS, SDL_Window * window)
 {
 	SDL_WindowData *data = window->driverdata;
 
-	dprintf("Called\n");
+	dprintf("Showing window '%s'\n", window->title);
 
 	if (data && data->syswin) {
 
@@ -422,11 +427,15 @@ OS4_HideWindow(_THIS, SDL_Window * window)
 {
 	SDL_WindowData *data = window->driverdata;
 
-	dprintf("Called\n");
+	dprintf("Hiding window '%s'\n", window->title);
 
 	if (data && data->syswin) {
 
-		IIntuition->HideWindow(data->syswin);
+		BOOL result = IIntuition->HideWindow(data->syswin);
+
+		if (!result) {
+			dprintf("HideWindow() failed\n");
+		}
 	}
 }
 
@@ -435,7 +444,7 @@ OS4_RaiseWindow(_THIS, SDL_Window * window)
 {
 	SDL_WindowData *data = window->driverdata;
 
-	dprintf("Called\n");
+	dprintf("Raising window '%s'\n", window->title);
 
 	if (data && data->syswin) {
 		IIntuition->WindowToFront(data->syswin);
@@ -505,10 +514,23 @@ OS4_SetWindowGrabInternal(_THIS, struct Window * w, SDL_bool activate)
 			w->Height - w->BorderTop  - w->BorderBottom
 		};
 
-		LONG ret = IIntuition->SetWindowAttrs(w,
-			WA_MouseLimits, activate ? &grabBox : NULL,
-			WA_GrabFocus, activate ? POINTER_GRAB_TIMEOUT : 0,
-			TAG_DONE);
+		LONG ret;
+
+		if (activate) {
+			/* It seems to be that grabbed window should be active, otherwise some other
+			window (like shell) may be grabbed? */
+		    IIntuition->ActivateWindow(w);
+
+		    ret = IIntuition->SetWindowAttrs(w,
+				WA_MouseLimits, &grabBox,
+				WA_GrabFocus, POINTER_GRAB_TIMEOUT,
+				TAG_DONE);
+		} else {
+			ret = IIntuition->SetWindowAttrs(w,
+				WA_MouseLimits, NULL,
+				WA_GrabFocus, 0,
+				TAG_DONE);
+	    }
 
 		if (ret) {
 			dprintf("SetWindowAttrs() returned %d\n", ret);
