@@ -25,6 +25,7 @@
 #include "SDL_video.h"
 #include "SDL_mouse.h"
 #include "SDL_hints.h"
+#include "SDL_version.h"
 
 #include "../SDL_sysvideo.h"
 #include "../SDL_pixels_c.h"
@@ -35,8 +36,11 @@
 #include "SDL_os4framebuffer.h"
 #include "SDL_os4mouse.h"
 #include "SDL_os4opengl.h"
+#include "SDL_os4opengles.h"
 #include "SDL_os4shape.h"
 #include "SDL_os4messagebox.h"
+#include "SDL_os4modes.h"
+#include "SDL_os4keyboard.h"
 
 #define DEBUG
 #include "../../main/amigaos4/SDL_os4debug.h"
@@ -46,6 +50,8 @@
 /* Initialization/Query functions */
 static int OS4_VideoInit(_THIS);
 static void OS4_VideoQuit(_THIS);
+
+SDL_bool (*OS4_ResizeGlContext)(_THIS, SDL_Window * window) = NULL;
 
 /* OS4 driver bootstrap functions */
 
@@ -69,43 +75,28 @@ OS4_OpenLibraries(_THIS)
 
 	GfxBase       = IExec->OpenLibrary("graphics.library", 54);
 	LayersBase    = IExec->OpenLibrary("layers.library", 53);
-	//P96Base       = IExec->OpenLibrary("Picasso96API.library", 0);
 	IntuitionBase = IExec->OpenLibrary("intuition.library", MIN_LIB_VERSION);
 	IconBase      = IExec->OpenLibrary("icon.library", MIN_LIB_VERSION);
 	WorkbenchBase = IExec->OpenLibrary("workbench.library", MIN_LIB_VERSION);
 	KeymapBase    = IExec->OpenLibrary("keymap.library", MIN_LIB_VERSION);
-	MiniGLBase    = IExec->OpenLibrary("minigl.library", 2);
 	TextClipBase  = IExec->OpenLibrary("textclip.library", 0);
 
-	if (!GfxBase || !LayersBase || /*!P96Base ||*/ !IntuitionBase || !IconBase || !WorkbenchBase || !KeymapBase || !TextClipBase) {
+	if (!GfxBase || !LayersBase || !IntuitionBase || !IconBase || !WorkbenchBase || !KeymapBase || !TextClipBase) {
 		dprintf("Failed to open system library\n");
 		return SDL_FALSE;
 	}
 
-	if (!MiniGLBase) {
-		/* We should still be able to use SDL2 library so don't fail */
-		dprintf("Failed to open minigl.library\n");
-	}
-
 	IGraphics  = (struct GraphicsIFace *)  IExec->GetInterface(GfxBase, "main", 1, NULL);
 	ILayers    = (struct LayersIFace *)    IExec->GetInterface(LayersBase, "main", 1, NULL);
-	//IP96       = (struct P96IFace *)       IExec->GetInterface(P96Base, "main", 1, NULL);
 	IIntuition = (struct IntuitionIFace *) IExec->GetInterface(IntuitionBase, "main", 1, NULL);
 	IIcon      = (struct IconIFace *)      IExec->GetInterface(IconBase, "main", 1, NULL);
 	IWorkbench = (struct WorkbenchIFace *) IExec->GetInterface(WorkbenchBase, "main", 1, NULL);
 	IKeymap    = (struct KeymapIFace *)    IExec->GetInterface(KeymapBase, "main", 1, NULL);
-	IMiniGL	   = (struct MiniGLIFace *)    IExec->GetInterface(MiniGLBase, "main", 1, NULL);
 	ITextClip  = (struct TextClipIFace *)  IExec->GetInterface(TextClipBase, "main", 1, NULL);
 
-	if (!IGraphics || !ILayers || /*!IP96 ||*/ !IIntuition || !IIcon || !IWorkbench || !IKeymap || !ITextClip) {
+	if (!IGraphics || !ILayers || !IIntuition || !IIcon || !IWorkbench || !IKeymap || !ITextClip) {
 		dprintf("Failed to get library interface\n");
 		return SDL_FALSE;
-	}
-
-	if (!IMiniGL) {
-		dprintf("Failed to open MiniGL interace\n");
-	} else {
-		dprintf("MiniGL opened\n");
 	}
 
 	return SDL_TRUE;
@@ -121,37 +112,31 @@ OS4_CloseLibraries(_THIS)
 		ITextClip = NULL;
 	}
 
-	if (IMiniGL) {
-		IExec->DropInterface((struct Interface *) IMiniGL);
-		IMiniGL = NULL;
-	}
-
 	if (IKeymap) {
 		IExec->DropInterface((struct Interface *) IKeymap);
 		IKeymap = NULL;
 	}
+
 	if (IWorkbench) {
 		IExec->DropInterface((struct Interface *) IWorkbench);
 		IWorkbench = NULL;
 	}
+
 	if (IIcon) {
 		IExec->DropInterface((struct Interface *) IIcon);
 		IIcon = NULL;
 	}
+
 	if (IIntuition) {
 		IExec->DropInterface((struct Interface *) IIntuition);
 		IIntuition = NULL;
 	}
-/*
-	if (IP96) {
-		IExec->DropInterface((struct Interface *) IP96);
-		IP96 = NULL;
-	}
-*/
+
 	if (ILayers) {
 		IExec->DropInterface((struct Interface *) ILayers);
 		ILayers = NULL;
 	}
+
 	if (IGraphics) {
 		IExec->DropInterface((struct Interface *) IGraphics);
 		IGraphics = NULL;
@@ -160,39 +145,33 @@ OS4_CloseLibraries(_THIS)
 	if (TextClipBase) {
 		IExec->CloseLibrary(TextClipBase);
 		TextClipBase = NULL;
-	}
-
-	if (MiniGLBase) {
-		IExec->CloseLibrary(MiniGLBase);
-		MiniGLBase = NULL;
-	}
+    }
 
 	if (KeymapBase) {
 		IExec->CloseLibrary(KeymapBase);
 		KeymapBase = NULL;
 	}
+
 	if (WorkbenchBase) {
 		IExec->CloseLibrary(WorkbenchBase);
 		WorkbenchBase = NULL;
 	}
+
 	if (IconBase) {
 		IExec->CloseLibrary(IconBase);
 		IconBase = NULL;
 	}
+
 	if (IntuitionBase) {
 		IExec->CloseLibrary(IntuitionBase);
 		IntuitionBase = NULL;
 	}
-/*
-	if (P96Base) {
-		IExec->CloseLibrary(P96Base);
-		P96Base = NULL;
-	}
-*/
+
 	if (LayersBase) {
 		IExec->CloseLibrary(LayersBase);
 		LayersBase = NULL;
 	}
+
 	if (GfxBase) {
 		IExec->CloseLibrary(GfxBase);
 		GfxBase = NULL;
@@ -297,13 +276,87 @@ OS4_DeleteDevice(SDL_VideoDevice * device)
 	SDL_free(device);
 }
 
+static void
+OS4_SetMiniGLFunctions(SDL_VideoDevice * device)
+{
+	device->GL_LoadLibrary = OS4_GL_LoadLibrary;
+	device->GL_GetProcAddress = OS4_GL_GetProcAddress;
+	device->GL_UnloadLibrary = OS4_GL_UnloadLibrary;
+	device->GL_MakeCurrent = OS4_GL_MakeCurrent;
+	device->GL_GetDrawableSize = OS4_GL_GetDrawableSize;
+	device->GL_SetSwapInterval = OS4_GL_SetSwapInterval;
+	device->GL_GetSwapInterval = OS4_GL_GetSwapInterval;
+	device->GL_SwapWindow = OS4_GL_SwapWindow;
+	device->GL_DeleteContext = OS4_GL_DeleteContext;
+
+	OS4_ResizeGlContext = OS4_GL_ResizeContext;
+}
+
+#if SDL_VIDEO_OPENGL_ES2
+static void
+OS4_SetGLESFunctions(SDL_VideoDevice * device)
+{
+	/* Some functions are recycled from SDL_os4opengl.c 100% ... */
+	device->GL_LoadLibrary = OS4_GLES_LoadLibrary;
+	device->GL_GetProcAddress = OS4_GLES_GetProcAddress;
+	device->GL_UnloadLibrary = OS4_GLES_UnloadLibrary;
+	device->GL_MakeCurrent = OS4_GLES_MakeCurrent;
+	device->GL_GetDrawableSize = OS4_GL_GetDrawableSize;
+	device->GL_SetSwapInterval = OS4_GL_SetSwapInterval;
+	device->GL_GetSwapInterval = OS4_GL_GetSwapInterval;
+	device->GL_SwapWindow = OS4_GLES_SwapWindow;
+	device->GL_DeleteContext = OS4_GLES_DeleteContext;
+
+	OS4_ResizeGlContext = OS4_GLES_ResizeContext;
+}
+#endif
+
+#if SDL_VIDEO_OPENGL_ES2
+static SDL_bool
+OS4_IsOpenGLES2(_THIS)
+{
+	if ((_this->gl_config.profile_mask == SDL_GL_CONTEXT_PROFILE_ES) &&
+		(_this->gl_config.major_version == 2) &&
+		(_this->gl_config.minor_version == 0)) {
+			dprintf("OpenGL ES 2.0 requested\n");
+		    return SDL_TRUE;
+	}
+
+	return SDL_FALSE;
+}
+#endif
+
+static SDL_GLContext
+OS4_CreateGlContext(_THIS, SDL_Window * window)
+{
+	dprintf("Profile_mask %d, major ver %d, minor ver %d\n",
+		_this->gl_config.profile_mask,
+		_this->gl_config.major_version,
+		_this->gl_config.minor_version);
+
+#if SDL_VIDEO_OPENGL_ES2
+	if (OS4_IsOpenGLES2(_this)) {
+		OS4_SetGLESFunctions(_this);
+		return OS4_GLES_CreateContext(_this, window);
+	} else {
+		OS4_SetMiniGLFunctions(_this);
+	}
+#endif
+
+	return OS4_GL_CreateContext(_this, window);
+}
+
 static SDL_VideoDevice *
 OS4_CreateDevice(int devindex)
 {
 	SDL_VideoDevice *device;
 	SDL_VideoData *data;
+	SDL_version version;
 
-	dprintf("*** SDL2 video initialization starts ***\n");
+	SDL_GetVersion(&version);
+
+	dprintf("*** SDL %d.%d.%d video initialization starts ***\n",
+	    version.major, version.minor, version.patch);
 
 	/* Initialize all variables that we clean on shutdown */
 	device = (SDL_VideoDevice *) SDL_calloc(1, sizeof(SDL_VideoDevice));
@@ -374,16 +427,8 @@ OS4_CreateDevice(int devindex)
 
 	device->GetWindowWMInfo = OS4_GetWindowWMInfo;
 
-	device->GL_LoadLibrary = OS4_GL_LoadLibrary;
-	device->GL_GetProcAddress = OS4_GL_GetProcAddress;
-	device->GL_UnloadLibrary = OS4_GL_UnloadLibrary;
-	device->GL_CreateContext = OS4_GL_CreateContext;
-	device->GL_MakeCurrent = OS4_GL_MakeCurrent;
-	device->GL_GetDrawableSize = OS4_GL_GetDrawableSize;
-	device->GL_SetSwapInterval = OS4_GL_SetSwapInterval;
-	device->GL_GetSwapInterval = OS4_GL_GetSwapInterval;
-	device->GL_SwapWindow = OS4_GL_SwapWindow;
-	device->GL_DeleteContext = OS4_GL_DeleteContext;
+	device->GL_CreateContext = OS4_CreateGlContext;
+	OS4_SetMiniGLFunctions(device);
 
 	device->PumpEvents = OS4_PumpEvents;
 	//device->SuspendScreenSaver = OS4_SuspendScreenSaver;
@@ -401,7 +446,6 @@ VideoBootStrap OS4_bootstrap = {
 	OS4VID_DRIVER_NAME, "SDL AmigaOS 4 video driver",
 	OS4_Available, OS4_CreateDevice
 };
-
 
 int
 OS4_VideoInit(_THIS)

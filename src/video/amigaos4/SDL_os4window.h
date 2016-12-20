@@ -23,6 +23,8 @@
 #ifndef _SDL_os4window_h
 #define _SDL_os4window_h
 
+#include "../SDL_sysvideo.h"
+
 #define POINTER_GRAB_TIMEOUT		20	/* Number of ticks before pointer grab needs to be reactivated */
 
 typedef struct
@@ -33,12 +35,11 @@ typedef struct
 	struct MsgPort  * userport;
 	Uint32            pointerGrabTicks;
 
-	struct GLContextIFace *IGL;
+	void*           * glContext;
 	struct BitMap   * glFrontBuffer;
 	struct BitMap   * glBackBuffer;
 
 } SDL_WindowData;
-
 
 extern int OS4_CreateWindow(_THIS, SDL_Window * window);
 extern int OS4_CreateWindowFrom(_THIS, SDL_Window * window, const void *data);

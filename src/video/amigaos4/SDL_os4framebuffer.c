@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2014 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2016 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -23,6 +23,7 @@
 #if SDL_VIDEO_DRIVER_AMIGAOS4
 
 #include "SDL_os4video.h"
+#include "SDL_os4window.h"
 
 #define DEBUG
 #include "../../main/amigaos4/SDL_os4debug.h"
@@ -41,8 +42,7 @@ OS4_DepthToPixf(int depth)
 static Uint32
 OS4_PixfToSdlPixelFormat(PIX_FMT from)
 {
-	switch (from)
-	{
+	switch (from) {
 		case PIXF_A8R8G8B8: return SDL_PIXELFORMAT_ARGB8888;
 		case PIXF_R5G6B5: return SDL_PIXELFORMAT_RGB565;
 		case PIXF_CLUT: return SDL_PIXELFORMAT_INDEX8;
@@ -51,9 +51,9 @@ OS4_PixfToSdlPixelFormat(PIX_FMT from)
 }
 
 int
-OS4_CreateWindowFramebuffer(_THIS, SDL_Window * window, Uint32 * format, void ** pixels, int *pitch)
+OS4_CreateWindowFramebuffer(_THIS, SDL_Window * window, Uint32 * format, void ** pixels, int * pitch)
 {
-	SDL_WindowData * data = window->driverdata;
+	SDL_WindowData *data = window->driverdata;
 
 	if (data) {
 		APTR lock;
@@ -118,11 +118,11 @@ OS4_CreateWindowFramebuffer(_THIS, SDL_Window * window, Uint32 * format, void **
 
 			IGraphics->FreeBitMap(data->bitmap);
 			data->bitmap = NULL;
-			
+
 			return -1;
 		}
 	}
-	
+
 	return 0;
 }
 
@@ -142,7 +142,7 @@ OS4_UpdateWindowFramebuffer(_THIS, SDL_Window * window, const SDL_Rect * rects, 
 
 			int i;
 
-			struct Window * syswin = data->syswin;
+			struct Window *syswin = data->syswin;
 
 			const struct IBox windowBox = {
 				syswin->BorderLeft,
@@ -169,7 +169,7 @@ OS4_UpdateWindowFramebuffer(_THIS, SDL_Window * window, const SDL_Rect * rects, 
 					BLITA_Width, MIN(r->w, windowBox.Width),
 					BLITA_Height, MIN(r->h, windowBox.Height),
 					TAG_DONE);
-			
+
 				if (ret != -1) {
 					dprintf("BltBitMapTags() returned %d\n", ret);
 				}
@@ -185,7 +185,7 @@ OS4_UpdateWindowFramebuffer(_THIS, SDL_Window * window, const SDL_Rect * rects, 
 void
 OS4_DestroyWindowFramebuffer(_THIS, SDL_Window * window)
 {
-	SDL_WindowData * data = window->driverdata;
+	SDL_WindowData *data = window->driverdata;
 
 	if (data && data->bitmap) {
 

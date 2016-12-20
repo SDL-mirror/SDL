@@ -20,27 +20,19 @@
 */
 #include "../../SDL_internal.h"
 
-#ifndef _SDL_os4opengl_h
-#define _SDL_os4opengl_h
+#ifndef _SDL_os4opengles_h
+#define _SDL_os4opengles_h
 
-#include "SDL_os4window.h"
+extern int OS4_GLES_LoadLibrary(_THIS, const char *path);
+extern void *OS4_GLES_GetProcAddress(_THIS, const char *proc);
+extern void OS4_GLES_UnloadLibrary(_THIS);
+extern SDL_GLContext OS4_GLES_CreateContext(_THIS, SDL_Window * window);
+extern int OS4_GLES_MakeCurrent(_THIS, SDL_Window * window, SDL_GLContext context);
+extern void OS4_GLES_SwapWindow(_THIS, SDL_Window * window);
+extern void OS4_GLES_DeleteContext(_THIS, SDL_GLContext context);
 
-extern int OS4_GL_LoadLibrary(_THIS, const char *path);
-extern void *OS4_GL_GetProcAddress(_THIS, const char *proc);
-extern void OS4_GL_UnloadLibrary(_THIS);
-extern SDL_GLContext OS4_GL_CreateContext(_THIS, SDL_Window * window);
-extern int OS4_GL_MakeCurrent(_THIS, SDL_Window * window, SDL_GLContext context);
-extern void OS4_GL_GetDrawableSize(_THIS, SDL_Window * window, int *w, int *h);
-extern int OS4_GL_SetSwapInterval(_THIS, int interval);
-extern int OS4_GL_GetSwapInterval(_THIS);
-extern void OS4_GL_SwapWindow(_THIS, SDL_Window * window);
-extern void OS4_GL_DeleteContext(_THIS, SDL_GLContext context);
+extern SDL_bool OS4_GLES_ResizeContext(_THIS, SDL_Window * window);
 
-/* Non-SDL functions */
-extern SDL_bool OS4_GL_AllocateBuffers(_THIS, int width, int height, int depth, SDL_WindowData * data);
-extern void OS4_GL_FreeBuffers(_THIS, SDL_WindowData * data);
-extern SDL_bool OS4_GL_ResizeContext(_THIS, SDL_Window * window);
-
-#endif /* _SDL_os4opengl_h */
+#endif /* _SDL_os4opengles_h */
 
 /* vi: set ts=4 sw=4 expandtab: */

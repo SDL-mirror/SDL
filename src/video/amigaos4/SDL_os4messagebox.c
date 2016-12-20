@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2014 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2016 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -25,7 +25,7 @@
 #include <proto/exec.h>
 #include <proto/intuition.h>
 
-#include "SDL_os4video.h"
+#include "SDL_os4window.h"
 
 #define DEBUG
 #include "../../main/amigaos4/SDL_os4debug.h"
@@ -44,7 +44,7 @@ OS4_OpenIntuition()
 	dprintf("Called\n");
 
 	MB_IntuitionBase = IExec->OpenLibrary("intuition.library", 51);
-	
+
 	if (MB_IntuitionBase) {
 
 		MB_IIntuition = (struct IntuitionIFace *)
@@ -130,7 +130,7 @@ OS4_ShowMessageBox(const SDL_MessageBoxData * messageboxdata, int * buttonid)
 			/* Amiga button order is 1, 2, ..., N, 0! */
 
 			int amigaButton = MB_IIntuition->EasyRequest(syswin, &es, 0, NULL);
-			
+
 			dprintf("Button %d chosen\n", amigaButton);
 
 			if (amigaButton >= 0 && amigaButton < LAST_BUTTON) {

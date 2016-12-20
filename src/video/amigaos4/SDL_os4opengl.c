@@ -25,6 +25,8 @@
 #include "SDL_os4video.h"
 #include "SDL_os4window.h"
 
+#include <proto/minigl.h>
+
 #include <GL/gl.h>
 //#include <mgl/gl.h>
 
@@ -32,6 +34,9 @@
 
 #define DEBUG
 #include "../../main/amigaos4/SDL_os4debug.h"
+
+struct Library *MiniGLBase;
+struct MiniGLIFace *IMiniGL;
 
 /* The client program needs access to this context pointer
  * to be able to make GL calls. This presents no problems when
@@ -41,21 +46,47 @@
  */
 struct GLContextIFace *mini_CurrentContext = 0;
 
-
 void *AmiGetGLProc(const char *proc);
 
+static void
+OS4_GL_LogLibraryError()
+{
+    dprintf("No MiniGL library available\n");
+    SDL_SetError("No MiniGL library available");
+}
+
 int
-OS4_GL_LoadLibrary(_THIS, const char *path)
+OS4_GL_LoadLibrary(_THIS, const char * path)
 {
     dprintf("Called %d\n", _this->gl_config.driver_loaded);
 
-    // MiniGL was loaded during CreateDevice(), so we don't have to anything here
+    if (!MiniGLBase) {
+        MiniGLBase = IExec->OpenLibrary("minigl.library", 2);
 
-    return IMiniGL ? 0 : -1;
+        if (!MiniGLBase) {
+            dprintf("Failed to open minigl.library\n");
+            SDL_SetError("Failed to open minigl.library");
+            return -1;
+        }
+    }
+
+    if (!IMiniGL) {
+        IMiniGL = (struct MiniGLIFace *) IExec->GetInterface(MiniGLBase, "main", 1, NULL);
+
+        if (!IMiniGL) {
+            dprintf("Failed to open MiniGL interace\n");
+            SDL_SetError("Failed to open MiniGL interface");
+            return -1;
+        }
+
+        dprintf("MiniGL library opened\n");
+    }
+
+    return 0;
 }
 
 void *
-OS4_GL_GetProcAddress(_THIS, const char *proc)
+OS4_GL_GetProcAddress(_THIS, const char * proc)
 {
     void *func = NULL;
 
@@ -75,12 +106,20 @@ OS4_GL_GetProcAddress(_THIS, const char *proc)
 void
 OS4_GL_UnloadLibrary(_THIS)
 {
-    dprintf("Called\n");
+    dprintf("Called %d\n", _this->gl_config.driver_loaded);
 
-    // Do nothing
+    if (IMiniGL) {
+        IExec->DropInterface((struct Interface *) IMiniGL);
+        IMiniGL = NULL;
+    }
+
+    if (MiniGLBase) {
+        IExec->CloseLibrary(MiniGLBase);
+        MiniGLBase = NULL;
+    }
 }
 
-static SDL_bool
+SDL_bool
 OS4_GL_AllocateBuffers(_THIS, int width, int height, int depth, SDL_WindowData * data)
 {
     dprintf("Allocate double buffer bitmaps %d*%d*%d\n", width, height, depth);
@@ -144,11 +183,11 @@ OS4_GL_CreateContext(_THIS, SDL_Window * window)
 
         SDL_WindowData * data = window->driverdata;
 
-        if (data->IGL) {
-            dprintf("Old context %p found\n", data->IGL);
+        if (data->glContext) {
+            dprintf("Old context %p found\n", data->glContext);
 
-            data->IGL->DeleteContext();
-            data->IGL = NULL;
+            ((struct GLContextIFace *)data->glContext)->DeleteContext();
+            data->glContext = NULL;
 
             OS4_GL_FreeBuffers(_this, data);
         }
@@ -166,7 +205,7 @@ OS4_GL_CreateContext(_THIS, SDL_Window * window)
             return NULL;
         }
 
-        data->IGL = IMiniGL->CreateContextTags(
+        data->glContext = IMiniGL->CreateContextTags(
                         MGLCC_PrivateBuffers,   2,
                         MGLCC_FrontBuffer,      data->glFrontBuffer,
                         MGLCC_BackBuffer,       data->glBackBuffer,
@@ -176,15 +215,15 @@ OS4_GL_CreateContext(_THIS, SDL_Window * window)
                         MGLCC_VertexBufferSize, 1 << 17,
                         TAG_DONE);
 
-        if (data->IGL) {
+        if (data->glContext) {
 
             dprintf("GL context created for window '%s'\n", window->title);
 
-            data->IGL->GLViewport(0, 0, width, height);
-            mglMakeCurrent(data->IGL);
+            ((struct GLContextIFace *)data->glContext)->GLViewport(0, 0, width, height);
+            mglMakeCurrent(data->glContext);
             mglLockMode(MGL_LOCK_SMART);
 
-            return data->IGL;
+            return data->glContext;
 
         } else {
             dprintf("Failed to create OpenGL context for window '%s'\n", window->title);
@@ -197,8 +236,7 @@ OS4_GL_CreateContext(_THIS, SDL_Window * window)
         }
 
     } else {
-        dprintf("No OpenGL\n");
-        SDL_SetError("OpenGL not available");
+        OS4_GL_LogLibraryError();
         return NULL;
     }
 }
@@ -213,8 +251,8 @@ OS4_GL_MakeCurrent(_THIS, SDL_Window * window, SDL_GLContext context)
         if (window) {
             SDL_WindowData * data = window->driverdata;
 
-            if (context != data->IGL) {
-                dprintf("Context pointer mismatch: %p<>%p\n", context, data->IGL);
+            if (context != data->glContext) {
+                dprintf("Context pointer mismatch: %p<>%p\n", context, data->glContext);
                 SDL_SetError("Context pointer mismatch");
                 return -1;
             }
@@ -224,79 +262,61 @@ OS4_GL_MakeCurrent(_THIS, SDL_Window * window, SDL_GLContext context)
         // TODO: is there anything to clear in MiniGL in case of NULL context?
 
     } else {
-        dprintf("No OpenGL\n");
-        SDL_SetError("OpenGL not available");
+        OS4_GL_LogLibraryError();
     }
 
     return 0;
 }
 
 void
-OS4_GL_GetDrawableSize(_THIS, SDL_Window * window, int *w, int *h)
+OS4_GL_GetDrawableSize(_THIS, SDL_Window * window, int * w, int * h)
 {
-    if (IMiniGL) {
-        SDL_WindowData * data = window->driverdata;
+    SDL_WindowData * data = window->driverdata;
 
-        int width = 0;
-        int height = 0;
-        int counter = 0;
+    int width = 0;
+    int height = 0;
+    int counter = 0;
 
-        while (counter++ < 100) {
-            LONG result = IIntuition->GetWindowAttrs(
-                        data->syswin,
-                        WA_InnerWidth, &width,
-                        WA_InnerHeight, &height,
-                        TAG_DONE);
+    while (counter++ < 100) {
+        LONG result = IIntuition->GetWindowAttrs(
+                    data->syswin,
+                    WA_InnerWidth, &width,
+                    WA_InnerHeight, &height,
+                    TAG_DONE);
 
-            if (result) {
-                dprintf("GetWindowAttrs returned %d\n", result);
-            }
-
-            if (width != window->w || height != window->h) {
-                dprintf("Waiting for Intuition %d\n", counter);
-                usleep(1000);
-            } else {
-                break;
-            }
+        if (result) {
+            dprintf("GetWindowAttrs() returned %d\n", result);
         }
 
-        *w = width;
-        *h = height;
-
-        //dprintf("w=%d, h=%d\n", *w, *h);
-    } else {
-        *w = 0;
-        *h = 0;
-
-        dprintf("No OpenGL\n");
-        SDL_SetError("OpenGL not available");
+        if (width != window->w || height != window->h) {
+            dprintf("Waiting for Intuition %d\n", counter);
+            usleep(1000);
+        } else {
+            break;
+        }
     }
 
+    *w = width;
+    *h = height;
+
+    //dprintf("w=%d, h=%d\n", *w, *h);
 }
 
 int
 OS4_GL_SetSwapInterval(_THIS, int interval)
 {
-    if (IMiniGL) {
-        SDL_VideoData *data = _this->driverdata;
+    SDL_VideoData *data = _this->driverdata;
 
-        switch (interval) {
-            case 0:
-            case 1:
-                data->vsyncEnabled = interval ? TRUE : FALSE;
-                dprintf("VSYNC %d\n", interval);
-                return 0;
-            default:
-                dprintf("Unsupported interval %d\n", interval);
-                break;
-        }
-
-    } else {
-        dprintf("No OpenGL\n");
-        SDL_SetError("OpenGL not available");
+    switch (interval) {
+        case 0:
+        case 1:
+            data->vsyncEnabled = interval ? TRUE : FALSE;
+            dprintf("VSYNC %d\n", interval);
+            return 0;
+        default:
+            dprintf("Unsupported interval %d\n", interval);
+            return -1;
     }
-
-    return -1;
 }
 
 int
@@ -304,15 +324,9 @@ OS4_GL_GetSwapInterval(_THIS)
 {
     //dprintf("Called\n");
 
-    if (IMiniGL) {
-        SDL_VideoData *data = _this->driverdata;
+    SDL_VideoData *data = _this->driverdata;
 
-        return data->vsyncEnabled ? 1 : 0;
-    } else {
-        dprintf("No OpenGL\n");
-        SDL_SetError("OpenGL not available");
-        return -1;
-    }
+    return data->vsyncEnabled ? 1 : 0;
 }
 
 void
@@ -322,66 +336,72 @@ OS4_GL_SwapWindow(_THIS, SDL_Window * window)
 
     if (IMiniGL) {
 
-        int w, h;
-        GLint buf;
-        struct BitMap *temp;
         SDL_WindowData *data = window->driverdata;
 
-        if (data->IGL) {
+        if (data->glContext) {
             SDL_VideoData *videodata = _this->driverdata;
+
+            struct BitMap *temp;
+            int w, h;
+            GLint buf;
+
+            LONG ret;
 
             mglUnlockDisplay();
 
-            IIntuition->GetWindowAttrs(data->syswin, WA_InnerWidth, &w, WA_InnerHeight, &h, TAG_DONE);
-
             /* besure all has finished before we start blitting (testing to find lockup cause) */
-            data->IGL->MGLWaitGL(); // TODO: still needed?
+            ((struct GLContextIFace *)data->glContext)->MGLWaitGL(); // TODO: still needed?
 
-            glGetIntegerv(GL_DRAW_BUFFER, &buf);
+            ret = IIntuition->GetWindowAttrs(data->syswin,
+                WA_InnerWidth, &w,
+                WA_InnerHeight, &h,
+                TAG_DONE);
 
-            if (buf == GL_BACK)
-            {
-                IGraphics->BltBitMapRastPort(data->glBackBuffer, 0, 0, data->syswin->RPort,
-                    data->syswin->BorderLeft, data->syswin->BorderTop, w, h, 0xC0);
-            }
-            else if (buf == GL_FRONT)
-            {
-                IGraphics->BltBitMapRastPort(data->glFrontBuffer, 0, 0, data->syswin->RPort,
-                    data->syswin->BorderLeft, data->syswin->BorderTop, w, h, 0xC0);
+            if (ret) {
+                dprintf("GetWindowAttrs() returned %d\n", ret);
             }
 
             if (videodata->vsyncEnabled) {
                 IGraphics->WaitTOF();
             }
 
+            glGetIntegerv(GL_DRAW_BUFFER, &buf);
+
+            if (buf == GL_BACK) {
+                IGraphics->BltBitMapRastPort(data->glBackBuffer, 0, 0, data->syswin->RPort,
+                    data->syswin->BorderLeft, data->syswin->BorderTop, w, h, 0xC0);
+            } else if (buf == GL_FRONT) {
+                IGraphics->BltBitMapRastPort(data->glFrontBuffer, 0, 0, data->syswin->RPort,
+                    data->syswin->BorderLeft, data->syswin->BorderTop, w, h, 0xC0);
+            }
+
             /* copy back into front */
             IGraphics->BltBitMapTags(BLITA_Source,  data->glBackBuffer,
-                                         BLITA_SrcType, BLITT_BITMAP,
-                                         BLITA_SrcX,    0,
-                                         BLITA_SrcY,    0,
-                                         BLITA_Dest,    data->glFrontBuffer,
-                                         BLITA_DestType,BLITT_BITMAP,
-                                         BLITA_DestX,   0,
-                                         BLITA_DestY,   0,
-                                         BLITA_Width,   w,
-                                         BLITA_Height,  h,
-                                         BLITA_Minterm, 0xC0,
-                                         TAG_DONE);
+                                     BLITA_SrcType, BLITT_BITMAP,
+                                     BLITA_SrcX,    0,
+                                     BLITA_SrcY,    0,
+                                     BLITA_Dest,    data->glFrontBuffer,
+                                     BLITA_DestType,BLITT_BITMAP,
+                                     BLITA_DestX,   0,
+                                     BLITA_DestY,   0,
+                                     BLITA_Width,   w,
+                                     BLITA_Height,  h,
+                                     BLITA_Minterm, 0xC0,
+                                     TAG_DONE);
 
             temp = data->glFrontBuffer;
             data->glFrontBuffer = data->glBackBuffer;
             data->glBackBuffer = temp;
 
-            data->IGL->MGLUpdateContextTags(
+            ((struct GLContextIFace *)data->glContext)->MGLUpdateContextTags(
                                 MGLCC_FrontBuffer,data->glFrontBuffer,
                                 MGLCC_BackBuffer, data->glBackBuffer,
                                 TAG_DONE);
         } else {
-            dprintf("No context\n");
+            dprintf("No MiniGL context\n");
         }
     } else {
-        dprintf("No OpenGL\n");
-        SDL_SetError("OpenGL not available");
+        OS4_GL_LogLibraryError();
     }
 }
 
@@ -393,13 +413,12 @@ OS4_GL_DeleteContext(_THIS, SDL_GLContext context)
     if (IMiniGL) {
 
         if (context) {
-            struct GLContextIFace * IGL = context;
+            struct GLContextIFace *IGL = context;
             IGL->DeleteContext();
         }
 
     } else {
-        dprintf("No OpenGL\n");
-        SDL_SetError("OpenGL not available");
+        OS4_GL_LogLibraryError();
     }
 }
 
@@ -420,12 +439,12 @@ OS4_GL_ResizeContext(_THIS, SDL_Window * window)
 
                 dprintf("Resizing context to %d*%d\n", window->w, window->h);
 
-                data->IGL->MGLUpdateContextTags(
+                ((struct GLContextIFace *)data->glContext)->MGLUpdateContextTags(
                                 MGLCC_FrontBuffer, data->glFrontBuffer,
                                 MGLCC_BackBuffer, data->glBackBuffer,
                                 TAG_DONE);
 
-                data->IGL->GLViewport(0, 0, window->w, window->h);
+                ((struct GLContextIFace *)data->glContext)->GLViewport(0, 0, window->w, window->h);
 
                 return SDL_TRUE;
 
@@ -435,7 +454,7 @@ OS4_GL_ResizeContext(_THIS, SDL_Window * window)
             }
         }
     } else {
-        dprintf("No OpenGL\n");
+        OS4_GL_LogLibraryError();
     }
 
     return SDL_FALSE;

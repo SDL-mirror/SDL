@@ -23,14 +23,18 @@
 #if SDL_VIDEO_DRIVER_AMIGAOS4
 
 #include "SDL_os4video.h"
-#include "SDL_os4opengl.h"
 #include "SDL_os4shape.h"
+#include "SDL_os4window.h"
+#include "SDL_os4modes.h"
+#include "SDL_os4opengl.h"
 
 #include "SDL_syswm.h"
 #include "../../events/SDL_keyboard_c.h"
 
 #define DEBUG
 #include "../../main/amigaos4/SDL_os4debug.h"
+
+extern SDL_bool (*OS4_ResizeGlContext)(_THIS, SDL_Window * window);
 
 static void OS4_CloseWindowInternal(_THIS, struct Window * window);
 
@@ -329,8 +333,8 @@ OS4_SetWindowBoxInternal(_THIS, SDL_Window * window)
 			dprintf("SetWindowAttrs() returned %d\n", ret);
 		}
 
-		if (data->IGL) {
-			OS4_GL_ResizeContext(_this, window);
+		if (data->glContext) {
+			OS4_ResizeGlContext(_this, window);
 		}
 	}
 }
@@ -392,15 +396,14 @@ OS4_SetWindowSize(_THIS, SDL_Window * window)
 				dprintf("SetWindowAttrs() returned %d\n", ret);
 			}
 
-			if (data->IGL /*window->flags & SDL_WINDOW_OPENGL*/) {
-				OS4_GL_ResizeContext(_this, window);
+			if (data->glContext /*window->flags & SDL_WINDOW_OPENGL*/) {
+			    OS4_ResizeGlContext(_this, window);
 			}
 		} else {
 			dprintf("Ignored size request %d*%d\n", width, height);
 		}
 	}
 }
-
 
 void
 OS4_ShowWindow(_THIS, SDL_Window * window)
@@ -584,8 +587,7 @@ OS4_DestroyWindow(_THIS, SDL_Window * window)
 		}
 
 		if (window->flags & SDL_WINDOW_OPENGL) {
-	    	OS4_GL_FreeBuffers(_this, data);
-			// TODO: should context be free'd automatically?
+			OS4_GL_FreeBuffers(_this, data);
 		}
 
 		SDL_free(data);

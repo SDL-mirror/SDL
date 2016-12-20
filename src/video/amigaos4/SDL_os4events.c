@@ -23,9 +23,9 @@
 #if SDL_VIDEO_DRIVER_AMIGAOS4
 
 #include "SDL_os4video.h"
-#include "SDL_os4opengl.h"
 #include "SDL_os4shape.h"
 #include "SDL_os4mouse.h"
+#include "SDL_os4window.h"
 
 #include "../../events/SDL_keyboard_c.h"
 #include "../../events/SDL_mouse_c.h"
@@ -34,6 +34,8 @@
 
 //#define DEBUG
 #include "../../main/amigaos4/SDL_os4debug.h"
+
+extern SDL_bool (*OS4_ResizeGlContext)(_THIS, SDL_Window * window);
 
 struct MyIntuiMessage
 {
@@ -394,8 +396,8 @@ OS4_HandleResize(_THIS, struct MyIntuiMessage * imsg)
 					OS4_ResizeWindowShape(sdlwin);
 	        	}
 
-				if (data->IGL /*sdlwin->flags & SDL_WINDOW_OPENGL*/ ) {
-					OS4_GL_ResizeContext(_this, sdlwin);
+				if (data->glContext /*sdlwin->flags & SDL_WINDOW_OPENGL*/ ) {
+					OS4_ResizeGlContext(_this, sdlwin);
 				}
 			}
 		}

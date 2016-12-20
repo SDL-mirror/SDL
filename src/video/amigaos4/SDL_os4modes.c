@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2014 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2016 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -23,6 +23,7 @@
 #if SDL_VIDEO_DRIVER_AMIGAOS4
 
 #include "SDL_os4video.h"
+#include "SDL_os4modes.h"
 
 #define DEBUG
 #include "../../main/amigaos4/SDL_os4debug.h"
@@ -159,7 +160,7 @@ OS4_GetDisplayModes(_THIS, SDL_VideoDisplay * display)
 	dprintf("Called\n");
 
 	while ((id = IGraphics->NextDisplayInfo(id)) != INVALID_ID) {
-		
+
 		if (OS4_GetDisplayMode(_this, id, &mode)) {
 			if (mode.format != SDL_PIXELFORMAT_UNKNOWN) {
 				if (!SDL_AddDisplayMode(display, &mode)) {
@@ -201,7 +202,7 @@ OS4_SetDisplayMode(_THIS, SDL_VideoDisplay * display, SDL_DisplayMode * mode)
 	{
 		// Don't create another "Workbench"
 		dprintf("Desktop mode passed\n");
-		
+
 		//TODO: should we check the current display ID and reopen the screen when needed?
 		return 0;
 	}
@@ -259,7 +260,7 @@ OS4_QuitModes(_THIS)
 	SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
 
 	dprintf("Called\n");
-	
+
 	IIntuition->UnlockPubScreen(NULL, data->publicScreen);
 }
 
