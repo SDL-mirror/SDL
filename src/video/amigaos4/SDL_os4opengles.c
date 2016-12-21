@@ -129,7 +129,7 @@ OS4_GLES_CreateContext(_THIS, SDL_Window * window)
             aglDestroyContext(data->glContext);
             data->glContext = NULL;
 
-#if 0
+#if MANAGE_BITMAP
             OS4_GL_FreeBuffers(_this, data);
 #endif
         }
@@ -141,7 +141,7 @@ OS4_GLES_CreateContext(_THIS, SDL_Window * window)
                         WA_InnerWidth, &width,
                         WA_InnerHeight, &height,
                         TAG_DONE);
-#if 0
+#if MANAGE_BITMAP
         if (!OS4_GL_AllocateBuffers(_this, width, height, depth, data)) {
             SDL_SetError("Failed to allocate OpenGL ES 2 buffers");
             return NULL;
@@ -153,7 +153,7 @@ OS4_GLES_CreateContext(_THIS, SDL_Window * window)
         data->glContext = aglCreateContextTags(
             &errCode,
             OGLES2_CCT_WINDOW, data->syswin,
-#if 0
+#if MANAGE_BITMAP
             OGLES2_CCT_BITMAP, data->glBackBuffer,
 #endif
             OGLES2_CCT_DEPTH, _this->gl_config.depth_size,
@@ -173,7 +173,7 @@ OS4_GLES_CreateContext(_THIS, SDL_Window * window)
                 window->title, errCode);
 
             SDL_SetError("Failed to create OpenGL ES 2 context");
-#if 0
+#if MANAGE_BITMAP
             OS4_GL_FreeBuffers(_this, data);
 #endif
             return NULL;
@@ -223,7 +223,7 @@ OS4_GLES_SwapWindow(_THIS, SDL_Window * window)
 
         if (data->glContext) {
             SDL_VideoData *videodata = _this->driverdata;
-#if 0
+#if MANAGE_BITMAP
             struct BitMap *temp;
 #endif
             int w, h;
@@ -243,7 +243,7 @@ OS4_GLES_SwapWindow(_THIS, SDL_Window * window)
 
             aglSwapBuffers();
 
-#if 0
+#if MANAGE_BITMAP
             IGraphics->BltBitMapRastPort(data->glBackBuffer, 0, 0, data->syswin->RPort,
                 data->syswin->BorderLeft, data->syswin->BorderTop, w, h, 0xC0);
 
@@ -295,7 +295,7 @@ SDL_bool
 OS4_GLES_ResizeContext(_THIS, SDL_Window * window)
 {
     if (IOGLES2) {
-#if 0
+#if MANAGE_BITMAP
         SDL_WindowData *data = window->driverdata;
 
         if (data) {

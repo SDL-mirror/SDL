@@ -279,7 +279,6 @@ OS4_DeleteDevice(SDL_VideoDevice * device)
 static void
 OS4_SetMiniGLFunctions(SDL_VideoDevice * device)
 {
-	device->GL_LoadLibrary = OS4_GL_LoadLibrary;
 	device->GL_GetProcAddress = OS4_GL_GetProcAddress;
 	device->GL_UnloadLibrary = OS4_GL_UnloadLibrary;
 	device->GL_MakeCurrent = OS4_GL_MakeCurrent;
@@ -287,6 +286,7 @@ OS4_SetMiniGLFunctions(SDL_VideoDevice * device)
 	device->GL_SetSwapInterval = OS4_GL_SetSwapInterval;
 	device->GL_GetSwapInterval = OS4_GL_GetSwapInterval;
 	device->GL_SwapWindow = OS4_GL_SwapWindow;
+	device->GL_CreateContext = OS4_GL_CreateContext;
 	device->GL_DeleteContext = OS4_GL_DeleteContext;
 
 	OS4_ResizeGlContext = OS4_GL_ResizeContext;
@@ -297,7 +297,6 @@ static void
 OS4_SetGLESFunctions(SDL_VideoDevice * device)
 {
 	/* Some functions are recycled from SDL_os4opengl.c 100% ... */
-	device->GL_LoadLibrary = OS4_GLES_LoadLibrary;
 	device->GL_GetProcAddress = OS4_GLES_GetProcAddress;
 	device->GL_UnloadLibrary = OS4_GLES_UnloadLibrary;
 	device->GL_MakeCurrent = OS4_GLES_MakeCurrent;
@@ -305,6 +304,7 @@ OS4_SetGLESFunctions(SDL_VideoDevice * device)
 	device->GL_SetSwapInterval = OS4_GL_SetSwapInterval;
 	device->GL_GetSwapInterval = OS4_GL_GetSwapInterval;
 	device->GL_SwapWindow = OS4_GLES_SwapWindow;
+	device->GL_CreateContext = OS4_GLES_CreateContext;
 	device->GL_DeleteContext = OS4_GLES_DeleteContext;
 
 	OS4_ResizeGlContext = OS4_GLES_ResizeContext;
@@ -326,8 +326,8 @@ OS4_IsOpenGLES2(_THIS)
 }
 #endif
 
-static SDL_GLContext
-OS4_CreateGlContext(_THIS, SDL_Window * window)
+static int
+OS4_LoadGlLibrary(_THIS, const char * path)
 {
 	dprintf("Profile_mask %d, major ver %d, minor ver %d\n",
 		_this->gl_config.profile_mask,
@@ -337,13 +337,13 @@ OS4_CreateGlContext(_THIS, SDL_Window * window)
 #if SDL_VIDEO_OPENGL_ES2
 	if (OS4_IsOpenGLES2(_this)) {
 		OS4_SetGLESFunctions(_this);
-		return OS4_GLES_CreateContext(_this, window);
+		return OS4_GLES_LoadLibrary(_this, path);
 	} else {
 		OS4_SetMiniGLFunctions(_this);
 	}
 #endif
 
-	return OS4_GL_CreateContext(_this, window);
+	return OS4_GL_LoadLibrary(_this, path);
 }
 
 static SDL_VideoDevice *
@@ -427,7 +427,7 @@ OS4_CreateDevice(int devindex)
 
 	device->GetWindowWMInfo = OS4_GetWindowWMInfo;
 
-	device->GL_CreateContext = OS4_CreateGlContext;
+	device->GL_LoadLibrary = OS4_LoadGlLibrary;
 	OS4_SetMiniGLFunctions(device);
 
 	device->PumpEvents = OS4_PumpEvents;
