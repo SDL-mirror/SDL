@@ -711,8 +711,8 @@ SDLTest_CommonInit(SDLTest_CommonState * state)
             int bpp;
             Uint32 Rmask, Gmask, Bmask, Amask;
 #if SDL_VIDEO_DRIVER_WINDOWS
-			int adapterIndex = 0;
-			int outputIndex = 0;
+            int adapterIndex = 0;
+            int outputIndex = 0;
 #endif
             n = SDL_GetNumVideoDisplays();
             fprintf(stderr, "Number of displays: %d\n", n);
@@ -768,13 +768,13 @@ SDLTest_CommonInit(SDLTest_CommonState * state)
                 }
 
 #if SDL_VIDEO_DRIVER_WINDOWS
-				/* Print the D3D9 adapter index */
-				adapterIndex = SDL_Direct3D9GetAdapterIndex( i );
-				fprintf( stderr, "D3D9 Adapter Index: %d", adapterIndex );
+                /* Print the D3D9 adapter index */
+                adapterIndex = SDL_Direct3D9GetAdapterIndex( i );
+                fprintf( stderr, "D3D9 Adapter Index: %d", adapterIndex );
 
-				/* Print the DXGI adapter and output indices */
-				SDL_DXGIGetOutputInfo(i, &adapterIndex, &outputIndex);
-				fprintf( stderr, "DXGI Adapter Index: %d  Output Index: %d", adapterIndex, outputIndex );
+                /* Print the DXGI adapter and output indices */
+                SDL_DXGIGetOutputInfo(i, &adapterIndex, &outputIndex);
+                fprintf( stderr, "DXGI Adapter Index: %d  Output Index: %d", adapterIndex, outputIndex );
 #endif
             }
         }
@@ -815,13 +815,13 @@ SDLTest_CommonInit(SDLTest_CommonState * state)
         fullscreen_mode.refresh_rate = state->refresh_rate;
 
         state->windows =
-            (SDL_Window **) SDL_malloc(state->num_windows *
+            (SDL_Window **) SDL_calloc(1, state->num_windows *
                                         sizeof(*state->windows));
         state->renderers =
-            (SDL_Renderer **) SDL_malloc(state->num_windows *
+            (SDL_Renderer **) SDL_calloc(1, state->num_windows *
                                         sizeof(*state->renderers));
         state->targets =
-            (SDL_Texture **) SDL_malloc(state->num_windows *
+            (SDL_Texture **) SDL_calloc(1, state->num_windows *
                                         sizeof(*state->targets));
         if (!state->windows || !state->renderers) {
             fprintf(stderr, "Out of memory!\n");
