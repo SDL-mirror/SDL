@@ -52,11 +52,11 @@ OS4_GLES_LoadLibrary(_THIS, const char * path)
     dprintf("Called %d\n", _this->gl_config.driver_loaded);
 
     if (!OGLES2base) {
-        OGLES2base = IExec->OpenLibrary("opengles2.library", 0);
+        OGLES2base = IExec->OpenLibrary("ogles2.library", 0);
 
         if (!OGLES2base) {
-            dprintf("Failed to open opengles2.library\n");
-            SDL_SetError("Failed to open opengles2.library");
+            dprintf("Failed to open ogles2.library\n");
+            SDL_SetError("Failed to open ogles2.library");
             return -1;
         }
     }
