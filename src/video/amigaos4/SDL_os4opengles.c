@@ -37,7 +37,7 @@
 static struct Library *OGLES2base;
 struct OGLES2IFace *IOGLES2;
 
-void *AmiGetGLProc(const char *proc);
+void *AmiGetGLESProc(const char *proc);
 
 static void
 OS4_GLES_LogLibraryError()
@@ -82,15 +82,15 @@ OS4_GLES_GetProcAddress(_THIS, const char * proc)
     void *func = NULL;
 
     dprintf("Called for '%s'\n", proc);
-#if 0 // TODO: need own function table
+
     if (IOGLES2) {
-        func = (void *)AmiGetGLProc(proc);
+        func = (void *)AmiGetGLESProc(proc);
     }
 
     if (func == NULL) {
         dprintf("Failed to load '%s'\n", proc);
     }
-#endif
+
     return func;
 }
 
@@ -236,6 +236,8 @@ OS4_GLES_SwapWindow(_THIS, SDL_Window * window)
             if (ret) {
                 dprintf("GetWindowAttrs() returned %d\n", ret);
             }
+
+            glFinish();
 
             if (videodata->vsyncEnabled) {
                 IGraphics->WaitTOF();
