@@ -84,7 +84,7 @@ OS4_GLES_GetProcAddress(_THIS, const char * proc)
     dprintf("Called for '%s'\n", proc);
 
     if (IOGLES2) {
-        func = (void *)AmiGetGLESProc(proc);
+        func = AmiGetGLESProc(proc);
     }
 
     if (func == NULL) {
@@ -118,7 +118,11 @@ OS4_GLES_CreateContext(_THIS, SDL_Window * window)
     if (IOGLES2) {
 
         int width, height;
+
+#if MANAGE_BITMAP
         uint32 depth;
+#endif
+
         ULONG errCode = 0;
 
         SDL_WindowData *data = window->driverdata;
@@ -134,14 +138,15 @@ OS4_GLES_CreateContext(_THIS, SDL_Window * window)
 #endif
         }
 
-        depth = IGraphics->GetBitMapAttr(data->syswin->RPort->BitMap, BMA_BITSPERPIXEL);
-
         IIntuition->GetWindowAttrs(
                         data->syswin,
                         WA_InnerWidth, &width,
                         WA_InnerHeight, &height,
                         TAG_DONE);
+
 #if MANAGE_BITMAP
+        depth = IGraphics->GetBitMapAttr(data->syswin->RPort->BitMap, BMA_BITSPERPIXEL);
+
         if (!OS4_GL_AllocateBuffers(_this, width, height, depth, data)) {
             SDL_SetError("Failed to allocate OpenGL ES 2 buffers");
             return NULL;
@@ -223,9 +228,9 @@ OS4_GLES_SwapWindow(_THIS, SDL_Window * window)
 
         if (data->glContext) {
             SDL_VideoData *videodata = _this->driverdata;
+
 #if MANAGE_BITMAP
             struct BitMap *temp;
-#endif
             int w, h;
 
             LONG ret = IIntuition->GetWindowAttrs(data->syswin,
@@ -236,6 +241,7 @@ OS4_GLES_SwapWindow(_THIS, SDL_Window * window)
             if (ret) {
                 dprintf("GetWindowAttrs() returned %d\n", ret);
             }
+#endif
 
             glFinish();
 
