@@ -93,7 +93,7 @@ OS4_GL_GetProcAddress(_THIS, const char * proc)
     dprintf("Called for '%s'\n", proc);
 
     if (IMiniGL) {
-        func = (void *)AmiGetGLProc(proc);
+        func = AmiGetGLProc(proc);
     }
 
     if (func == NULL) {
@@ -244,7 +244,11 @@ OS4_GL_CreateContext(_THIS, SDL_Window * window)
 int
 OS4_GL_MakeCurrent(_THIS, SDL_Window * window, SDL_GLContext context)
 {
-    dprintf("Called w=%p c=%p\n", window, context);
+    int result = -1;
+
+    if (!window || !context) {
+        dprintf("Called w=%p c=%p\n", window, context);
+    }
 
     if (IMiniGL) {
 
@@ -254,18 +258,16 @@ OS4_GL_MakeCurrent(_THIS, SDL_Window * window, SDL_GLContext context)
             if (context != data->glContext) {
                 dprintf("Context pointer mismatch: %p<>%p\n", context, data->glContext);
                 SDL_SetError("Context pointer mismatch");
-                return -1;
+            } else {
+                mglMakeCurrent(context);
+                result = 0;
             }
-
-            mglMakeCurrent(context);
         }
-        // TODO: is there anything to clear in MiniGL in case of NULL context?
-
     } else {
         OS4_GL_LogLibraryError();
     }
-
-    return 0;
+    
+    return result;
 }
 
 void

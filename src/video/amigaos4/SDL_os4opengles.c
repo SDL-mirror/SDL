@@ -157,9 +157,10 @@ OS4_GLES_CreateContext(_THIS, SDL_Window * window)
 
         data->glContext = aglCreateContextTags(
             &errCode,
-            OGLES2_CCT_WINDOW, data->syswin,
+            OGLES2_CCT_WINDOW, (ULONG)data->syswin,
+            OGLES2_CCT_VSYNC, 0,
 #if MANAGE_BITMAP
-            OGLES2_CCT_BITMAP, data->glBackBuffer,
+            OGLES2_CCT_BITMAP, (ULONG)data->glBackBuffer,
 #endif
             OGLES2_CCT_DEPTH, _this->gl_config.depth_size,
             OGLES2_CCT_STENCIL, _this->gl_config.stencil_size,
@@ -195,7 +196,11 @@ OS4_GLES_CreateContext(_THIS, SDL_Window * window)
 int
 OS4_GLES_MakeCurrent(_THIS, SDL_Window * window, SDL_GLContext context)
 {
-    dprintf("Called w=%p c=%p\n", window, context);
+    int result = -1;
+
+    if (!window || !context) {
+        dprintf("Called w=%p c=%p\n", window, context);
+    }
 
     if (IOGLES2) {
 
@@ -205,16 +210,16 @@ OS4_GLES_MakeCurrent(_THIS, SDL_Window * window, SDL_GLContext context)
             if (context != data->glContext) {
                 dprintf("Context pointer mismatch: %p<>%p\n", context, data->glContext);
                 SDL_SetError("Context pointer mismatch");
-                return -1;
+            } else {
+                aglMakeCurrent(context);
+                result = 0;
             }
-
-            aglMakeCurrent(context);
         }
     } else {
         OS4_GLES_LogLibraryError();
     }
 
-    return 0;
+    return result;
 }
 
 void
