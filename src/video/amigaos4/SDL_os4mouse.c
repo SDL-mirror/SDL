@@ -249,7 +249,6 @@ OS4_SetPointerForEachWindow(ULONG type, Object * object)
     }
 }
 
-
 static int
 OS4_ShowCursor(SDL_Cursor * cursor)
 {
@@ -372,8 +371,8 @@ OS4_WarpMouseGlobal(int x, int y)
 static void
 OS4_WarpMouse(SDL_Window * window, int x, int y)
 {
-    SDL_WindowData *winData    = window->driverdata;
-    struct Window *syswin      = winData->syswin;
+    SDL_WindowData *winData = window->driverdata;
+    struct Window *syswin = winData->syswin;
 
     BOOL warpHostPointer;
 
@@ -403,7 +402,7 @@ OS4_WarpMouse(SDL_Window * window, int x, int y)
 
     } else {
         /* Just warp SDL's notion of the pointer position */
-        SDL_SendMouseMotion(0, 0, SDL_GetRelativeMouseMode(), x, y);
+        SDL_SendMouseMotion(window, 0, SDL_GetRelativeMouseMode(), x, y);
     }
 }
 
