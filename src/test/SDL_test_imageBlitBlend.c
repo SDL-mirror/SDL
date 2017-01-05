@@ -1547,10 +1547,10 @@ SDL_Surface *SDLTest_ImageBlitBlendMod()
         SDLTest_imageBlitBlendMod.bytes_per_pixel * 8,
         SDLTest_imageBlitBlendMod.width * SDLTest_imageBlitBlendMod.bytes_per_pixel,
 #if (SDL_BYTEORDER == SDL_BIG_ENDIAN)
-         0xff000000, /* Red bit mask. */
-         0x00ff0000, /* Green bit mask. */
-         0x0000ff00, /* Blue bit mask. */
-         0x000000ff  /* Alpha bit mask. */
+         0x00ff0000, /* Red bit mask. */
+         0x0000ff00, /* Green bit mask. */
+         0x000000ff, /* Blue bit mask. */
+         0x00000000  /* Alpha bit mask. Our surface is 24-bit, so don't define */
 #else
          0x000000ff, /* Red bit mask. */
          0x0000ff00, /* Green bit mask. */
@@ -1559,6 +1559,16 @@ SDL_Surface *SDLTest_ImageBlitBlendMod()
 #endif
          );
    return surface;
+}
+
+SDL_Surface *SDLTest_ImageBlitBlendMod32()
+{
+    SDL_Surface *s = SDLTest_ImageBlitBlendMod();
+    SDL_Surface *c = SDL_ConvertSurfaceFormat(s, SDL_PIXELFORMAT_ARGB8888, 0);
+
+    SDL_FreeSurface(s);
+
+    return c;
 }
 
 const SDLTest_SurfaceImage_t SDLTest_imageBlitBlendNone = {
@@ -2360,10 +2370,10 @@ SDL_Surface *SDLTest_ImageBlitBlendNone()
         SDLTest_imageBlitBlendNone.bytes_per_pixel * 8,
         SDLTest_imageBlitBlendNone.width * SDLTest_imageBlitBlendNone.bytes_per_pixel,
 #if (SDL_BYTEORDER == SDL_BIG_ENDIAN)
-         0xff000000, /* Red bit mask. */
-         0x00ff0000, /* Green bit mask. */
-         0x0000ff00, /* Blue bit mask. */
-         0x000000ff  /* Alpha bit mask. */
+         0x00ff0000, /* Red bit mask. */
+         0x0000ff00, /* Green bit mask. */
+         0x000000ff, /* Blue bit mask. */
+         0x00000000  /* Alpha bit mask. Our surface is 24-bit, so don't define */
 #else
          0x000000ff, /* Red bit mask. */
          0x0000ff00, /* Green bit mask. */
@@ -2372,6 +2382,16 @@ SDL_Surface *SDLTest_ImageBlitBlendNone()
 #endif
          );
    return surface;
+}
+
+SDL_Surface *SDLTest_ImageBlitBlendNone32()
+{
+    SDL_Surface *s = SDLTest_ImageBlitBlendNone();
+    SDL_Surface *c = SDL_ConvertSurfaceFormat(s, SDL_PIXELFORMAT_ARGB8888, 0);
+
+    SDL_FreeSurface(s);
+
+    return c;
 }
 
 const SDLTest_SurfaceImage_t SDLTest_imageBlitBlendAll = {

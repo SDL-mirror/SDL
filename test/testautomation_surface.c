@@ -22,6 +22,12 @@
 
 /* ================= Test Case Implementation ================== */
 
+SDL_Surface* SDLTest_ImageBlit32();
+SDL_Surface* SDLTest_ImageBlitColor32();
+SDL_Surface* SDLTest_ImageBlitAlpha32();
+SDL_Surface* SDLTest_ImageBlitBlendNone32();
+SDL_Surface* SDLTest_ImageBlitBlendMod32();
+
 /* Shared test surface */
 
 static SDL_Surface *referenceSurface = NULL;
@@ -415,13 +421,12 @@ surface_testBlit(void *arg)
    _testBlitBlendMode(-1);
 
    /* Verify result by comparing surfaces */
-   compareSurface = SDLTest_ImageBlit();
+   compareSurface = SDLTest_ImageBlit32();
    ret = SDLTest_CompareSurfaces( testSurface, compareSurface, 0 );
    SDLTest_AssertCheck(ret == 0, "Validate result from SDLTest_CompareSurfaces, expected: 0, got: %i", ret);
 
    /* Clean up. */
    SDL_FreeSurface(compareSurface);
-
    return TEST_COMPLETED;
 }
 
@@ -438,7 +443,7 @@ surface_testBlitColorMod(void *arg)
    _testBlitBlendMode(-2);
 
    /* Verify result by comparing surfaces */
-   compareSurface = SDLTest_ImageBlitColor();
+   compareSurface = SDLTest_ImageBlitColor32();
    ret = SDLTest_CompareSurfaces( testSurface, compareSurface, 0 );
    SDLTest_AssertCheck(ret == 0, "Validate result from SDLTest_CompareSurfaces, expected: 0, got: %i", ret);
 
@@ -461,7 +466,7 @@ surface_testBlitAlphaMod(void *arg)
    _testBlitBlendMode(-3);
 
    /* Verify result by comparing surfaces */
-   compareSurface = SDLTest_ImageBlitAlpha();
+   compareSurface = SDLTest_ImageBlitAlpha32();
    ret = SDLTest_CompareSurfaces( testSurface, compareSurface, 0 );
    SDLTest_AssertCheck(ret == 0, "Validate result from SDLTest_CompareSurfaces, expected: 0, got: %i", ret);
 
@@ -485,7 +490,7 @@ surface_testBlitBlendNone(void *arg)
    _testBlitBlendMode(SDL_BLENDMODE_NONE);
 
    /* Verify result by comparing surfaces */
-   compareSurface = SDLTest_ImageBlitBlendNone();
+   compareSurface = SDLTest_ImageBlitBlendNone32();
    ret = SDLTest_CompareSurfaces( testSurface, compareSurface, 0 );
    SDLTest_AssertCheck(ret == 0, "Validate result from SDLTest_CompareSurfaces, expected: 0, got: %i", ret);
 
@@ -554,7 +559,7 @@ surface_testBlitBlendMod(void *arg)
    _testBlitBlendMode(SDL_BLENDMODE_MOD);
 
    /* Verify result by comparing surfaces */
-   compareSurface = SDLTest_ImageBlitBlendMod();
+   compareSurface = SDLTest_ImageBlitBlendMod32();
    ret = SDLTest_CompareSurfaces( testSurface, compareSurface, 0 );
    SDLTest_AssertCheck(ret == 0, "Validate result from SDLTest_CompareSurfaces, expected: 0, got: %i", ret);
 
