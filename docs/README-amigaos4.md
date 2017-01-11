@@ -1,14 +1,14 @@
 ================================================================================
-SDL2 requirements
+SDL 2.0 requirements
 ================================================================================
 
 AmigaOS 4.1 Final Edition
 MiniGL (optional from SDL2 point of view, but OpenGL context might still be
         required by the SDL2 application)
-
+OpenGL ES 2.0 (optional)
 
 ================================================================================
-Building SDL2 library
+Building SDL 2.0 library
 ================================================================================
 
 sh configure --disable-altivec --prefix=/SDK/local/newlib/
@@ -21,7 +21,7 @@ sh configure
 make
 
 ================================================================================
-Using SDL2 in your projects
+Using SDL 2.0 in your projects
 ================================================================================
 
 #include "SDL2/SDL.h"
@@ -32,7 +32,7 @@ gcc helloworld.c -use-dynld -lSDL2 -lpthread
 
 
 ================================================================================
-About renderers
+About SDL_Renderers
 ================================================================================
 
 A renderer is a subsystem that can do 2D drawing. We have three renderers:
@@ -63,15 +63,29 @@ SDL_SetHint(SDL_HINT_RENDER_VSYNC, "1");
 There is a benchmark tool called sdl2benchmark which was written to test
 available renderers.
 
+================================================================================
+About OpenGL
+================================================================================
+
 If you want to draw accelerated 3D graphics or use explicitly OpenGL functions,
 you have to create an OpenGL context, instead of SDL_Renderer.
+
+If you would like to create an OpenGL ES 2.0 context, you need to specify the
+version before window creation, for example:
+
+SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
+SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
+SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+
+If context version is not specified, or OpenGL ES 2.0 is not supported by the
+system, MiniGL context is created instead of.
 
 ================================================================================
 Tips
 ================================================================================
 
-If you are already familiar with SDL1, or porting SDL1 code, it's worth checking
-the migration guide at:
+If you are already familiar with SDL 1.2, or porting SDL 1.2 code, it's worth
+checking the migration guide at:
 
 https://wiki.libsdl.org/MigrationGuide
 
@@ -79,7 +93,7 @@ https://wiki.libsdl.org/MigrationGuide
 Bugs
 ================================================================================
 
-It's best to report bugs on the project page:
+It's best to report bugs (as tickets) on the project page:
 
 https://sourceforge.net/projects/sdl2-amigaos4/
 
