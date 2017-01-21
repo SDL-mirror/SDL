@@ -2123,6 +2123,27 @@ CheckAmigaOS4GL()
     fi
 }
 
+CheckAmigaOS4GLES()
+{
+    if test x$enable_video = xyes -a x$enable_video_opengles = xyes; then
+        AC_MSG_CHECKING(for OpenGL ES v2 headers)
+        video_opengles_v2=no
+        AC_TRY_COMPILE([
+         #include <GLES2/gl2.h>
+         #include <GLES2/gl2ext.h>
+        ],[
+        ],[
+        video_opengles_v2=yes
+        ])
+        AC_MSG_RESULT($video_opengles_v2)
+        if test x$video_opengles_v2 = xyes; then
+            AC_DEFINE(SDL_VIDEO_OPENGL_ES2, 1, [ ])
+            AC_DEFINE(SDL_VIDEO_RENDER_OGL_ES2, 1, [ ])
+            SUMMARY_video="${SUMMARY_video} opengl_es2"
+        fi
+    fi
+}
+
 dnl Check for MacOS OpenGL
 CheckMacGL()
 {
@@ -3221,6 +3242,7 @@ AC_HELP_STRING([--enable-render-d3d], [enable the Direct3D render driver [[defau
         CheckDummyAudio
         CheckAmigaOS4Video
         CheckAmigaOS4GL
+        CheckAmigaOS4GLES
         #CheckDLOPEN
         CheckPTHREAD
 
