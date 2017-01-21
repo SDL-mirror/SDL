@@ -263,6 +263,7 @@ main(int argc, char *argv[])
         i += consumed;
     }
     if (!SDLTest_CommonInit(state)) {
+        SDLTest_CommonQuit(state);
         return 2;
     }
 
