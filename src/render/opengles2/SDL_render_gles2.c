@@ -181,7 +181,7 @@ typedef struct GLES2_DriverContext
         SDL_bool tex_coords;
     } current;
 
-#define SDL_PROC(ret,func,params) ret (APIENTRY *func) params;
+#define SDL_PROC(ret,func,params) ret (APIENTRY *my##func) params;
 #include "SDL_gles2funcs.h"
 #undef SDL_PROC
     GLES2_FBOList *framebuffers;
@@ -227,7 +227,7 @@ GL_ClearErrors(SDL_Renderer *renderer)
     if (!data->debug_enabled) {
         return;
     }
-    while (data->glGetError() != GL_NO_ERROR) {
+    while (data->myglGetError() != GL_NO_ERROR) {
         continue;
     }
 }
@@ -243,7 +243,7 @@ GL_CheckAllErrors (const char *prefix, SDL_Renderer *renderer, const char *file,
     }
     /* check gl errors (can return multiple errors) */
     for (;;) {
-        GLenum error = data->glGetError();
+        GLenum error = data->myglGetError();
         if (error != GL_NO_ERROR) {
             if (prefix == NULL || prefix[0] == '\0') {
                 prefix = "generic";
@@ -291,12 +291,12 @@ static int GLES2_LoadFunctions(GLES2_DriverContext * data)
 #endif
 
 #if defined __SDL_NOGETPROCADDR__
-#define SDL_PROC(ret,func,params) data->func=func;
+#define SDL_PROC(ret,func,params) data->myfunc=my##func;
 #else
 #define SDL_PROC(ret,func,params) \
     do { \
-        data->func = SDL_GL_GetProcAddress(#func); \
-        if ( ! data->func ) { \
+        data->my##func = SDL_GL_GetProcAddress(#func); \
+        if ( ! data->my##func ) { \
             return SDL_SetError("Couldn't load GLES2 function %s: %s\n", #func, SDL_GetError()); \
         } \
     } while ( 0 );
@@ -318,7 +318,7 @@ GLES2_GetFBO(GLES2_DriverContext *data, Uint32 w, Uint32 h)
        result = SDL_malloc(sizeof(GLES2_FBOList));
        result->w = w;
        result->h = h;
-       data->glGenFramebuffers(1, &result->FBO);
+       data->myglGenFramebuffers(1, &result->FBO);
        result->next = data->framebuffers;
        data->framebuffers = result;
    }
@@ -361,7 +361,7 @@ GLES2_WindowEvent(SDL_Renderer * renderer, const SDL_WindowEvent *event)
 
     if (event->event == SDL_WINDOWEVENT_MINIMIZED) {
         /* According to Apple documentation, we need to finish drawing NOW! */
-        data->glFinish();
+        data->myglFinish();
     }
 }
 
@@ -383,13 +383,13 @@ GLES2_UpdateViewport(SDL_Renderer * renderer)
     }
 
     if (renderer->target) {
-        data->glViewport(renderer->viewport.x, renderer->viewport.y,
+        data->myglViewport(renderer->viewport.x, renderer->viewport.y,
                          renderer->viewport.w, renderer->viewport.h);
     } else {
         int w, h;
 
         SDL_GetRendererOutputSize(renderer, &w, &h);
-        data->glViewport(renderer->viewport.x, (h - renderer->viewport.y - renderer->viewport.h),
+        data->myglViewport(renderer->viewport.x, (h - renderer->viewport.y - renderer->viewport.h),
                          renderer->viewport.w, renderer->viewport.h);
     }
 
@@ -411,17 +411,17 @@ GLES2_UpdateClipRect(SDL_Renderer * renderer)
 
     if (renderer->clipping_enabled) {
         const SDL_Rect *rect = &renderer->clip_rect;
-        data->glEnable(GL_SCISSOR_TEST);
+        data->myglEnable(GL_SCISSOR_TEST);
         if (renderer->target) {
-            data->glScissor(renderer->viewport.x + rect->x, renderer->viewport.y + rect->y, rect->w, rect->h);
+            data->myglScissor(renderer->viewport.x + rect->x, renderer->viewport.y + rect->y, rect->w, rect->h);
         } else {
             int w, h;
 
             SDL_GetRendererOutputSize(renderer, &w, &h);
-            data->glScissor(renderer->viewport.x + rect->x, h - renderer->viewport.y - rect->y - rect->h, rect->w, rect->h);
+            data->myglScissor(renderer->viewport.x + rect->x, h - renderer->viewport.y - rect->y - rect->h, rect->w, rect->h);
         }
     } else {
-        data->glDisable(GL_SCISSOR_TEST);
+        data->myglDisable(GL_SCISSOR_TEST);
     }
     return 0;
 }
@@ -440,7 +440,7 @@ GLES2_DestroyRenderer(SDL_Renderer *renderer)
             GLES2_ShaderCacheEntry *next;
             entry = data->shader_cache.head;
             while (entry) {
-                data->glDeleteShader(entry->id);
+                data->myglDeleteShader(entry->id);
                 next = entry->next;
                 SDL_free(entry);
                 entry = next;
@@ -451,7 +451,7 @@ GLES2_DestroyRenderer(SDL_Renderer *renderer)
             GLES2_ProgramCacheEntry *next;
             entry = data->program_cache.head;
             while (entry) {
-                data->glDeleteProgram(entry->id);
+                data->myglDeleteProgram(entry->id);
                 next = entry->next;
                 SDL_free(entry);
                 entry = next;
@@ -460,7 +460,7 @@ GLES2_DestroyRenderer(SDL_Renderer *renderer)
         if (data->context) {
             while (data->framebuffers) {
                 GLES2_FBOList *nextnode = data->framebuffers->next;
-                data->glDeleteFramebuffers(1, &data->framebuffers->FBO);
+                data->myglDeleteFramebuffers(1, &data->framebuffers->FBO);
                 GL_CheckError("", renderer);
                 SDL_free(data->framebuffers);
                 data->framebuffers = nextnode;
@@ -574,63 +574,63 @@ GLES2_CreateTexture(SDL_Renderer *renderer, SDL_Texture *texture)
     GL_CheckError("", renderer);
 
     if (data->yuv) {
-        renderdata->glGenTextures(1, &data->texture_v);
+        renderdata->myglGenTextures(1, &data->texture_v);
         if (GL_CheckError("glGenTexures()", renderer) < 0) {
             return -1;
         }
-        renderdata->glActiveTexture(GL_TEXTURE2);
-        renderdata->glBindTexture(data->texture_type, data->texture_v);
-        renderdata->glTexParameteri(data->texture_type, GL_TEXTURE_MIN_FILTER, scaleMode);
-        renderdata->glTexParameteri(data->texture_type, GL_TEXTURE_MAG_FILTER, scaleMode);
-        renderdata->glTexParameteri(data->texture_type, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        renderdata->glTexParameteri(data->texture_type, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        renderdata->glTexImage2D(data->texture_type, 0, format, texture->w / 2, texture->h / 2, 0, format, type, NULL);
+        renderdata->myglActiveTexture(GL_TEXTURE2);
+        renderdata->myglBindTexture(data->texture_type, data->texture_v);
+        renderdata->myglTexParameteri(data->texture_type, GL_TEXTURE_MIN_FILTER, scaleMode);
+        renderdata->myglTexParameteri(data->texture_type, GL_TEXTURE_MAG_FILTER, scaleMode);
+        renderdata->myglTexParameteri(data->texture_type, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        renderdata->myglTexParameteri(data->texture_type, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        renderdata->myglTexImage2D(data->texture_type, 0, format, texture->w / 2, texture->h / 2, 0, format, type, NULL);
 
-        renderdata->glGenTextures(1, &data->texture_u);
+        renderdata->myglGenTextures(1, &data->texture_u);
         if (GL_CheckError("glGenTexures()", renderer) < 0) {
             return -1;
         }
-        renderdata->glActiveTexture(GL_TEXTURE1);
-        renderdata->glBindTexture(data->texture_type, data->texture_u);
-        renderdata->glTexParameteri(data->texture_type, GL_TEXTURE_MIN_FILTER, scaleMode);
-        renderdata->glTexParameteri(data->texture_type, GL_TEXTURE_MAG_FILTER, scaleMode);
-        renderdata->glTexParameteri(data->texture_type, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        renderdata->glTexParameteri(data->texture_type, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        renderdata->glTexImage2D(data->texture_type, 0, format, texture->w / 2, texture->h / 2, 0, format, type, NULL);
+        renderdata->myglActiveTexture(GL_TEXTURE1);
+        renderdata->myglBindTexture(data->texture_type, data->texture_u);
+        renderdata->myglTexParameteri(data->texture_type, GL_TEXTURE_MIN_FILTER, scaleMode);
+        renderdata->myglTexParameteri(data->texture_type, GL_TEXTURE_MAG_FILTER, scaleMode);
+        renderdata->myglTexParameteri(data->texture_type, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        renderdata->myglTexParameteri(data->texture_type, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        renderdata->myglTexImage2D(data->texture_type, 0, format, texture->w / 2, texture->h / 2, 0, format, type, NULL);
         if (GL_CheckError("glTexImage2D()", renderer) < 0) {
             return -1;
         }
     }
 
     if (data->nv12) {
-        renderdata->glGenTextures(1, &data->texture_u);
+        renderdata->myglGenTextures(1, &data->texture_u);
         if (GL_CheckError("glGenTexures()", renderer) < 0) {
             return -1;
         }
-        renderdata->glActiveTexture(GL_TEXTURE1);
-        renderdata->glBindTexture(data->texture_type, data->texture_u);
-        renderdata->glTexParameteri(data->texture_type, GL_TEXTURE_MIN_FILTER, scaleMode);
-        renderdata->glTexParameteri(data->texture_type, GL_TEXTURE_MAG_FILTER, scaleMode);
-        renderdata->glTexParameteri(data->texture_type, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-        renderdata->glTexParameteri(data->texture_type, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-        renderdata->glTexImage2D(data->texture_type, 0, GL_LUMINANCE_ALPHA, texture->w / 2, texture->h / 2, 0, GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE, NULL);
+        renderdata->myglActiveTexture(GL_TEXTURE1);
+        renderdata->myglBindTexture(data->texture_type, data->texture_u);
+        renderdata->myglTexParameteri(data->texture_type, GL_TEXTURE_MIN_FILTER, scaleMode);
+        renderdata->myglTexParameteri(data->texture_type, GL_TEXTURE_MAG_FILTER, scaleMode);
+        renderdata->myglTexParameteri(data->texture_type, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+        renderdata->myglTexParameteri(data->texture_type, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+        renderdata->myglTexImage2D(data->texture_type, 0, GL_LUMINANCE_ALPHA, texture->w / 2, texture->h / 2, 0, GL_LUMINANCE_ALPHA, GL_UNSIGNED_BYTE, NULL);
         if (GL_CheckError("glTexImage2D()", renderer) < 0) {
             return -1;
         }
     }
 
-    renderdata->glGenTextures(1, &data->texture);
+    renderdata->myglGenTextures(1, &data->texture);
     if (GL_CheckError("glGenTexures()", renderer) < 0) {
         return -1;
     }
     texture->driverdata = data;
-    renderdata->glActiveTexture(GL_TEXTURE0);
-    renderdata->glBindTexture(data->texture_type, data->texture);
-    renderdata->glTexParameteri(data->texture_type, GL_TEXTURE_MIN_FILTER, scaleMode);
-    renderdata->glTexParameteri(data->texture_type, GL_TEXTURE_MAG_FILTER, scaleMode);
-    renderdata->glTexParameteri(data->texture_type, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-    renderdata->glTexParameteri(data->texture_type, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-    renderdata->glTexImage2D(data->texture_type, 0, format, texture->w, texture->h, 0, format, type, NULL);
+    renderdata->myglActiveTexture(GL_TEXTURE0);
+    renderdata->myglBindTexture(data->texture_type, data->texture);
+    renderdata->myglTexParameteri(data->texture_type, GL_TEXTURE_MIN_FILTER, scaleMode);
+    renderdata->myglTexParameteri(data->texture_type, GL_TEXTURE_MAG_FILTER, scaleMode);
+    renderdata->myglTexParameteri(data->texture_type, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    renderdata->myglTexParameteri(data->texture_type, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+    renderdata->myglTexImage2D(data->texture_type, 0, format, texture->w, texture->h, 0, format, type, NULL);
     if (GL_CheckError("glTexImage2D()", renderer) < 0) {
         return -1;
     }
@@ -670,7 +670,7 @@ GLES2_TexSubImage2D(GLES2_DriverContext *data, GLenum target, GLint xoffset, GLi
         src = blob;
     }
 
-    data->glTexSubImage2D(target, 0, xoffset, yoffset, width, height, format, type, src);
+    data->myglTexSubImage2D(target, 0, xoffset, yoffset, width, height, format, type, src);
     if (blob) {
         SDL_free(blob);
     }
@@ -692,7 +692,7 @@ GLES2_UpdateTexture(SDL_Renderer *renderer, SDL_Texture *texture, const SDL_Rect
     }
 
     /* Create a texture subimage with the supplied data */
-    data->glBindTexture(tdata->texture_type, tdata->texture);
+    data->myglBindTexture(tdata->texture_type, tdata->texture);
     GLES2_TexSubImage2D(data, tdata->texture_type,
                     rect->x,
                     rect->y,
@@ -706,9 +706,9 @@ GLES2_UpdateTexture(SDL_Renderer *renderer, SDL_Texture *texture, const SDL_Rect
         /* Skip to the correct offset into the next texture */
         pixels = (const void*)((const Uint8*)pixels + rect->h * pitch);
         if (texture->format == SDL_PIXELFORMAT_YV12) {
-            data->glBindTexture(tdata->texture_type, tdata->texture_v);
+            data->myglBindTexture(tdata->texture_type, tdata->texture_v);
         } else {
-            data->glBindTexture(tdata->texture_type, tdata->texture_u);
+            data->myglBindTexture(tdata->texture_type, tdata->texture_u);
         }
         GLES2_TexSubImage2D(data, tdata->texture_type,
                 rect->x / 2,
@@ -722,9 +722,9 @@ GLES2_UpdateTexture(SDL_Renderer *renderer, SDL_Texture *texture, const SDL_Rect
         /* Skip to the correct offset into the next texture */
         pixels = (const void*)((const Uint8*)pixels + (rect->h * pitch)/4);
         if (texture->format == SDL_PIXELFORMAT_YV12) {
-            data->glBindTexture(tdata->texture_type, tdata->texture_u);
+            data->myglBindTexture(tdata->texture_type, tdata->texture_u);
         } else {
-            data->glBindTexture(tdata->texture_type, tdata->texture_v);
+            data->myglBindTexture(tdata->texture_type, tdata->texture_v);
         }
         GLES2_TexSubImage2D(data, tdata->texture_type,
                 rect->x / 2,
@@ -739,7 +739,7 @@ GLES2_UpdateTexture(SDL_Renderer *renderer, SDL_Texture *texture, const SDL_Rect
     if (tdata->nv12) {
         /* Skip to the correct offset into the next texture */
         pixels = (const void*)((const Uint8*)pixels + rect->h * pitch);
-        data->glBindTexture(tdata->texture_type, tdata->texture_u);
+        data->myglBindTexture(tdata->texture_type, tdata->texture_u);
         GLES2_TexSubImage2D(data, tdata->texture_type,
                 rect->x / 2,
                 rect->y / 2,
@@ -770,7 +770,7 @@ GLES2_UpdateTextureYUV(SDL_Renderer * renderer, SDL_Texture * texture,
         return 0;
     }
 
-    data->glBindTexture(tdata->texture_type, tdata->texture_v);
+    data->myglBindTexture(tdata->texture_type, tdata->texture_v);
     GLES2_TexSubImage2D(data, tdata->texture_type,
                     rect->x / 2,
                     rect->y / 2,
@@ -780,7 +780,7 @@ GLES2_UpdateTextureYUV(SDL_Renderer * renderer, SDL_Texture * texture,
                     tdata->pixel_type,
                     Vplane, Vpitch, 1);
 
-    data->glBindTexture(tdata->texture_type, tdata->texture_u);
+    data->myglBindTexture(tdata->texture_type, tdata->texture_u);
     GLES2_TexSubImage2D(data, tdata->texture_type,
                     rect->x / 2,
                     rect->y / 2,
@@ -790,7 +790,7 @@ GLES2_UpdateTextureYUV(SDL_Renderer * renderer, SDL_Texture * texture,
                     tdata->pixel_type,
                     Uplane, Upitch, 1);
 
-    data->glBindTexture(tdata->texture_type, tdata->texture);
+    data->myglBindTexture(tdata->texture_type, tdata->texture);
     GLES2_TexSubImage2D(data, tdata->texture_type,
                     rect->x,
                     rect->y,
@@ -840,14 +840,14 @@ GLES2_SetRenderTarget(SDL_Renderer * renderer, SDL_Texture * texture)
     GLenum status;
 
     if (texture == NULL) {
-        data->glBindFramebuffer(GL_FRAMEBUFFER, data->window_framebuffer);
+        data->myglBindFramebuffer(GL_FRAMEBUFFER, data->window_framebuffer);
     } else {
         texturedata = (GLES2_TextureData *) texture->driverdata;
-        data->glBindFramebuffer(GL_FRAMEBUFFER, texturedata->fbo->FBO);
+        data->myglBindFramebuffer(GL_FRAMEBUFFER, texturedata->fbo->FBO);
         /* TODO: check if texture pixel format allows this operation */
-        data->glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, texturedata->texture_type, texturedata->texture, 0);
+        data->myglFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, texturedata->texture_type, texturedata->texture, 0);
         /* Check FBO status */
-        status = data->glCheckFramebufferStatus(GL_FRAMEBUFFER);
+        status = data->myglCheckFramebufferStatus(GL_FRAMEBUFFER);
         if (status != GL_FRAMEBUFFER_COMPLETE) {
             return SDL_SetError("glFramebufferTexture2D() failed");
         }
@@ -865,12 +865,12 @@ GLES2_DestroyTexture(SDL_Renderer *renderer, SDL_Texture *texture)
 
     /* Destroy the texture */
     if (tdata) {
-        data->glDeleteTextures(1, &tdata->texture);
+        data->myglDeleteTextures(1, &tdata->texture);
         if (tdata->texture_v) {
-            data->glDeleteTextures(1, &tdata->texture_v);
+            data->myglDeleteTextures(1, &tdata->texture_v);
         }
         if (tdata->texture_u) {
-            data->glDeleteTextures(1, &tdata->texture_u);
+            data->myglDeleteTextures(1, &tdata->texture_u);
         }
         SDL_free(tdata->pixel_data);
         SDL_free(tdata);
@@ -936,17 +936,17 @@ GLES2_CacheProgram(SDL_Renderer *renderer, GLES2_ShaderCacheEntry *vertex,
     entry->blend_mode = blendMode;
 
     /* Create the program and link it */
-    entry->id = data->glCreateProgram();
-    data->glAttachShader(entry->id, vertex->id);
-    data->glAttachShader(entry->id, fragment->id);
-    data->glBindAttribLocation(entry->id, GLES2_ATTRIBUTE_POSITION, "a_position");
-    data->glBindAttribLocation(entry->id, GLES2_ATTRIBUTE_TEXCOORD, "a_texCoord");
-    data->glBindAttribLocation(entry->id, GLES2_ATTRIBUTE_ANGLE, "a_angle");
-    data->glBindAttribLocation(entry->id, GLES2_ATTRIBUTE_CENTER, "a_center");
-    data->glLinkProgram(entry->id);
-    data->glGetProgramiv(entry->id, GL_LINK_STATUS, &linkSuccessful);
+    entry->id = data->myglCreateProgram();
+    data->myglAttachShader(entry->id, vertex->id);
+    data->myglAttachShader(entry->id, fragment->id);
+    data->myglBindAttribLocation(entry->id, GLES2_ATTRIBUTE_POSITION, "a_position");
+    data->myglBindAttribLocation(entry->id, GLES2_ATTRIBUTE_TEXCOORD, "a_texCoord");
+    data->myglBindAttribLocation(entry->id, GLES2_ATTRIBUTE_ANGLE, "a_angle");
+    data->myglBindAttribLocation(entry->id, GLES2_ATTRIBUTE_CENTER, "a_center");
+    data->myglLinkProgram(entry->id);
+    data->myglGetProgramiv(entry->id, GL_LINK_STATUS, &linkSuccessful);
     if (!linkSuccessful) {
-        data->glDeleteProgram(entry->id);
+        data->myglDeleteProgram(entry->id);
         SDL_free(entry);
         SDL_SetError("Failed to link shader program");
         return NULL;
@@ -954,28 +954,28 @@ GLES2_CacheProgram(SDL_Renderer *renderer, GLES2_ShaderCacheEntry *vertex,
 
     /* Predetermine locations of uniform variables */
     entry->uniform_locations[GLES2_UNIFORM_PROJECTION] =
-        data->glGetUniformLocation(entry->id, "u_projection");
+        data->myglGetUniformLocation(entry->id, "u_projection");
     entry->uniform_locations[GLES2_UNIFORM_TEXTURE_V] =
-        data->glGetUniformLocation(entry->id, "u_texture_v");
+        data->myglGetUniformLocation(entry->id, "u_texture_v");
     entry->uniform_locations[GLES2_UNIFORM_TEXTURE_U] =
-        data->glGetUniformLocation(entry->id, "u_texture_u");
+        data->myglGetUniformLocation(entry->id, "u_texture_u");
     entry->uniform_locations[GLES2_UNIFORM_TEXTURE] =
-        data->glGetUniformLocation(entry->id, "u_texture");
+        data->myglGetUniformLocation(entry->id, "u_texture");
     entry->uniform_locations[GLES2_UNIFORM_MODULATION] =
-        data->glGetUniformLocation(entry->id, "u_modulation");
+        data->myglGetUniformLocation(entry->id, "u_modulation");
     entry->uniform_locations[GLES2_UNIFORM_COLOR] =
-        data->glGetUniformLocation(entry->id, "u_color");
+        data->myglGetUniformLocation(entry->id, "u_color");
 
     entry->modulation_r = entry->modulation_g = entry->modulation_b = entry->modulation_a = 255;
     entry->color_r = entry->color_g = entry->color_b = entry->color_a = 255;
 
-    data->glUseProgram(entry->id);
-    data->glUniform1i(entry->uniform_locations[GLES2_UNIFORM_TEXTURE_V], 2);  /* always texture unit 2. */
-    data->glUniform1i(entry->uniform_locations[GLES2_UNIFORM_TEXTURE_U], 1);  /* always texture unit 1. */
-    data->glUniform1i(entry->uniform_locations[GLES2_UNIFORM_TEXTURE], 0);  /* always texture unit 0. */
-    data->glUniformMatrix4fv(entry->uniform_locations[GLES2_UNIFORM_PROJECTION], 1, GL_FALSE, (GLfloat *)entry->projection);
-    data->glUniform4f(entry->uniform_locations[GLES2_UNIFORM_MODULATION], 1.0f, 1.0f, 1.0f, 1.0f);
-    data->glUniform4f(entry->uniform_locations[GLES2_UNIFORM_COLOR], 1.0f, 1.0f, 1.0f, 1.0f);
+    data->myglUseProgram(entry->id);
+    data->myglUniform1i(entry->uniform_locations[GLES2_UNIFORM_TEXTURE_V], 2);  /* always texture unit 2. */
+    data->myglUniform1i(entry->uniform_locations[GLES2_UNIFORM_TEXTURE_U], 1);  /* always texture unit 1. */
+    data->myglUniform1i(entry->uniform_locations[GLES2_UNIFORM_TEXTURE], 0);  /* always texture unit 0. */
+    data->myglUniformMatrix4fv(entry->uniform_locations[GLES2_UNIFORM_PROJECTION], 1, GL_FALSE, (GLfloat *)entry->projection);
+    data->myglUniform4f(entry->uniform_locations[GLES2_UNIFORM_MODULATION], 1.0f, 1.0f, 1.0f, 1.0f);
+    data->myglUniform4f(entry->uniform_locations[GLES2_UNIFORM_COLOR], 1.0f, 1.0f, 1.0f, 1.0f);
 
     /* Cache the linked program */
     if (data->program_cache.head) {
@@ -1001,7 +1001,7 @@ GLES2_CacheProgram(SDL_Renderer *renderer, GLES2_ShaderCacheEntry *vertex,
         if (--shaderEntry->references <= 0) {
             GLES2_EvictShader(renderer, shaderEntry);
         }
-        data->glDeleteProgram(data->program_cache.tail->id);
+        data->myglDeleteProgram(data->program_cache.tail->id);
         data->program_cache.tail = data->program_cache.tail->prev;
         SDL_free(data->program_cache.tail->next);
         data->program_cache.tail->next = NULL;
@@ -1066,24 +1066,24 @@ GLES2_CacheShader(SDL_Renderer *renderer, GLES2_ShaderType type, SDL_BlendMode b
     entry->instance = instance;
 
     /* Compile or load the selected shader instance */
-    entry->id = data->glCreateShader(instance->type);
+    entry->id = data->myglCreateShader(instance->type);
     if (instance->format == (GLenum)-1) {
-        data->glShaderSource(entry->id, 1, (const char **)&instance->data, NULL);
-        data->glCompileShader(entry->id);
-        data->glGetShaderiv(entry->id, GL_COMPILE_STATUS, &compileSuccessful);
+        data->myglShaderSource(entry->id, 1, (const char **)&instance->data, NULL);
+        data->myglCompileShader(entry->id);
+        data->myglGetShaderiv(entry->id, GL_COMPILE_STATUS, &compileSuccessful);
     } else {
-        data->glShaderBinary(1, &entry->id, instance->format, instance->data, instance->length);
+        data->myglShaderBinary(1, &entry->id, instance->format, instance->data, instance->length);
         compileSuccessful = GL_TRUE;
     }
     if (!compileSuccessful) {
         char *info = NULL;
         int length = 0;
 
-        data->glGetShaderiv(entry->id, GL_INFO_LOG_LENGTH, &length);
+        data->myglGetShaderiv(entry->id, GL_INFO_LOG_LENGTH, &length);
         if (length > 0) {
             info = SDL_stack_alloc(char, length);
             if (info) {
-                data->glGetShaderInfoLog(entry->id, length, &length, info);
+                data->myglGetShaderInfoLog(entry->id, length, &length, info);
             }
         }
         if (info) {
@@ -1092,7 +1092,7 @@ GLES2_CacheShader(SDL_Renderer *renderer, GLES2_ShaderType type, SDL_BlendMode b
         } else {
             SDL_SetError("Failed to load the shader");
         }
-        data->glDeleteShader(entry->id);
+        data->myglDeleteShader(entry->id);
         SDL_free(entry);
         return NULL;
     }
@@ -1125,7 +1125,7 @@ GLES2_EvictShader(SDL_Renderer *renderer, GLES2_ShaderCacheEntry *entry)
     --data->shader_cache.count;
 
     /* Deallocate the shader */
-    data->glDeleteShader(entry->id);
+    data->myglDeleteShader(entry->id);
     SDL_free(entry);
 }
 
@@ -1193,7 +1193,7 @@ GLES2_SelectProgram(SDL_Renderer *renderer, GLES2_ImageSource source, SDL_BlendM
     }
 
     /* Select that program in OpenGL */
-    data->glUseProgram(program->id);
+    data->myglUseProgram(program->id);
 
     /* Set the current program */
     data->current_program = program;
@@ -1255,7 +1255,7 @@ GLES2_SetOrthographicProjection(SDL_Renderer *renderer)
     /* Set the projection matrix */
     if (SDL_memcmp(data->current_program->projection, projection, sizeof (projection)) != 0) {
         const GLuint locProjection = data->current_program->uniform_locations[GLES2_UNIFORM_PROJECTION];
-        data->glUniformMatrix4fv(locProjection, 1, GL_FALSE, (GLfloat *)projection);
+        data->myglUniformMatrix4fv(locProjection, 1, GL_FALSE, (GLfloat *)projection);
         SDL_memcpy(data->current_program->projection, projection, sizeof (projection));
     }
 
@@ -1317,7 +1317,7 @@ GLES2_RenderClear(SDL_Renderer * renderer)
            b = renderer->b;
         }
 
-        data->glClearColor((GLfloat) r * inv255f,
+        data->myglClearColor((GLfloat) r * inv255f,
                      (GLfloat) g * inv255f,
                      (GLfloat) b * inv255f,
                      (GLfloat) a * inv255f);
@@ -1327,7 +1327,7 @@ GLES2_RenderClear(SDL_Renderer * renderer)
         data->clear_a = renderer->a;
     }
 
-    data->glClear(GL_COLOR_BUFFER_BIT);
+    data->myglClear(GL_COLOR_BUFFER_BIT);
 
     return 0;
 }
@@ -1339,19 +1339,19 @@ GLES2_SetBlendMode(GLES2_DriverContext *data, int blendMode)
         switch (blendMode) {
         default:
         case SDL_BLENDMODE_NONE:
-            data->glDisable(GL_BLEND);
+            data->myglDisable(GL_BLEND);
             break;
         case SDL_BLENDMODE_BLEND:
-            data->glEnable(GL_BLEND);
-            data->glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+            data->myglEnable(GL_BLEND);
+            data->myglBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
             break;
         case SDL_BLENDMODE_ADD:
-            data->glEnable(GL_BLEND);
-            data->glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE, GL_ZERO, GL_ONE);
+            data->myglEnable(GL_BLEND);
+            data->myglBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE, GL_ZERO, GL_ONE);
             break;
         case SDL_BLENDMODE_MOD:
-            data->glEnable(GL_BLEND);
-            data->glBlendFuncSeparate(GL_ZERO, GL_SRC_COLOR, GL_ZERO, GL_ONE);
+            data->myglEnable(GL_BLEND);
+            data->myglBlendFuncSeparate(GL_ZERO, GL_SRC_COLOR, GL_ZERO, GL_ONE);
             break;
         }
         data->current.blendMode = blendMode;
@@ -1363,9 +1363,9 @@ GLES2_SetTexCoords(GLES2_DriverContext * data, SDL_bool enabled)
 {
     if (enabled != data->current.tex_coords) {
         if (enabled) {
-            data->glEnableVertexAttribArray(GLES2_ATTRIBUTE_TEXCOORD);
+            data->myglEnableVertexAttribArray(GLES2_ATTRIBUTE_TEXCOORD);
         } else {
-            data->glDisableVertexAttribArray(GLES2_ATTRIBUTE_TEXCOORD);
+            data->myglDisableVertexAttribArray(GLES2_ATTRIBUTE_TEXCOORD);
         }
         data->current.tex_coords = enabled;
     }
@@ -1407,7 +1407,7 @@ GLES2_SetDrawingState(SDL_Renderer * renderer)
     program = data->current_program;
     if (!CompareColors(program->color_r, program->color_g, program->color_b, program->color_a, r, g, b, a)) {
         /* Select the color to draw with */
-        data->glUniform4f(program->uniform_locations[GLES2_UNIFORM_COLOR], r * inv255f, g * inv255f, b * inv255f, a * inv255f);
+        data->myglUniform4f(program->uniform_locations[GLES2_UNIFORM_COLOR], r * inv255f, g * inv255f, b * inv255f, a * inv255f);
         program->color_r = r;
         program->color_g = g;
         program->color_b = b;
@@ -1424,22 +1424,22 @@ GLES2_UpdateVertexBuffer(SDL_Renderer *renderer, GLES2_Attribute attr,
     GLES2_DriverContext *data = (GLES2_DriverContext *)renderer->driverdata;
 
 #if !SDL_GLES2_USE_VBOS
-    data->glVertexAttribPointer(attr, attr == GLES2_ATTRIBUTE_ANGLE ? 1 : 2, GL_FLOAT, GL_FALSE, 0, vertexData);
+    data->myglVertexAttribPointer(attr, attr == GLES2_ATTRIBUTE_ANGLE ? 1 : 2, GL_FLOAT, GL_FALSE, 0, vertexData);
 #else
     if (!data->vertex_buffers[attr]) {
-        data->glGenBuffers(1, &data->vertex_buffers[attr]);
+        data->myglGenBuffers(1, &data->vertex_buffers[attr]);
     }
 
-    data->glBindBuffer(GL_ARRAY_BUFFER, data->vertex_buffers[attr]);
+    data->myglBindBuffer(GL_ARRAY_BUFFER, data->vertex_buffers[attr]);
 
     if (data->vertex_buffer_size[attr] < dataSizeInBytes) {
-        data->glBufferData(GL_ARRAY_BUFFER, dataSizeInBytes, vertexData, GL_STREAM_DRAW);
+        data->myglBufferData(GL_ARRAY_BUFFER, dataSizeInBytes, vertexData, GL_STREAM_DRAW);
         data->vertex_buffer_size[attr] = dataSizeInBytes;
     } else {
-        data->glBufferSubData(GL_ARRAY_BUFFER, 0, dataSizeInBytes, vertexData);
+        data->myglBufferSubData(GL_ARRAY_BUFFER, 0, dataSizeInBytes, vertexData);
     }
 
-    data->glVertexAttribPointer(attr, attr == GLES2_ATTRIBUTE_ANGLE ? 1 : 2, GL_FLOAT, GL_FALSE, 0, 0);
+    data->myglVertexAttribPointer(attr, attr == GLES2_ATTRIBUTE_ANGLE ? 1 : 2, GL_FLOAT, GL_FALSE, 0, 0);
 #endif
 
     return 0;
@@ -1465,9 +1465,9 @@ GLES2_RenderDrawPoints(SDL_Renderer *renderer, const SDL_FPoint *points, int cou
         vertices[idx * 2] = x;
         vertices[(idx * 2) + 1] = y;
     }
-    /*data->glVertexAttribPointer(GLES2_ATTRIBUTE_POSITION, 2, GL_FLOAT, GL_FALSE, 0, vertices);*/
+    /*data->myglVertexAttribPointer(GLES2_ATTRIBUTE_POSITION, 2, GL_FLOAT, GL_FALSE, 0, vertices);*/
     GLES2_UpdateVertexBuffer(renderer, GLES2_ATTRIBUTE_POSITION, vertices, count * 2 * sizeof(GLfloat));
-    data->glDrawArrays(GL_POINTS, 0, count);
+    data->myglDrawArrays(GL_POINTS, 0, count);
     SDL_stack_free(vertices);
     return 0;
 }
@@ -1492,14 +1492,14 @@ GLES2_RenderDrawLines(SDL_Renderer *renderer, const SDL_FPoint *points, int coun
         vertices[idx * 2] = x;
         vertices[(idx * 2) + 1] = y;
     }
-    /*data->glVertexAttribPointer(GLES2_ATTRIBUTE_POSITION, 2, GL_FLOAT, GL_FALSE, 0, vertices);*/
+    /*data->myglVertexAttribPointer(GLES2_ATTRIBUTE_POSITION, 2, GL_FLOAT, GL_FALSE, 0, vertices);*/
     GLES2_UpdateVertexBuffer(renderer, GLES2_ATTRIBUTE_POSITION, vertices, count * 2 * sizeof(GLfloat));
-    data->glDrawArrays(GL_LINE_STRIP, 0, count);
+    data->myglDrawArrays(GL_LINE_STRIP, 0, count);
 
     /* We need to close the endpoint of the line */
     if (count == 2 ||
         points[0].x != points[count-1].x || points[0].y != points[count-1].y) {
-        data->glDrawArrays(GL_POINTS, count-1, 1);
+        data->myglDrawArrays(GL_POINTS, count-1, 1);
     }
     SDL_stack_free(vertices);
 
@@ -1534,9 +1534,9 @@ GLES2_RenderFillRects(SDL_Renderer *renderer, const SDL_FRect *rects, int count)
         vertices[5] = yMax;
         vertices[6] = xMax;
         vertices[7] = yMax;
-        /*data->glVertexAttribPointer(GLES2_ATTRIBUTE_POSITION, 2, GL_FLOAT, GL_FALSE, 0, vertices);*/
+        /*data->myglVertexAttribPointer(GLES2_ATTRIBUTE_POSITION, 2, GL_FLOAT, GL_FALSE, 0, vertices);*/
         GLES2_UpdateVertexBuffer(renderer, GLES2_ATTRIBUTE_POSITION, vertices, 8 * sizeof(GLfloat));
-        data->glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+        data->myglDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
     }
     return GL_CheckError("", renderer);
 }
@@ -1656,21 +1656,21 @@ GLES2_SetupCopy(SDL_Renderer *renderer, SDL_Texture *texture)
 
     /* Select the target texture */
     if (tdata->yuv) {
-        data->glActiveTexture(GL_TEXTURE2);
-        data->glBindTexture(tdata->texture_type, tdata->texture_v);
+        data->myglActiveTexture(GL_TEXTURE2);
+        data->myglBindTexture(tdata->texture_type, tdata->texture_v);
 
-        data->glActiveTexture(GL_TEXTURE1);
-        data->glBindTexture(tdata->texture_type, tdata->texture_u);
+        data->myglActiveTexture(GL_TEXTURE1);
+        data->myglBindTexture(tdata->texture_type, tdata->texture_u);
 
-        data->glActiveTexture(GL_TEXTURE0);
+        data->myglActiveTexture(GL_TEXTURE0);
     }
     if (tdata->nv12) {
-        data->glActiveTexture(GL_TEXTURE1);
-        data->glBindTexture(tdata->texture_type, tdata->texture_u);
+        data->myglActiveTexture(GL_TEXTURE1);
+        data->myglBindTexture(tdata->texture_type, tdata->texture_u);
 
-        data->glActiveTexture(GL_TEXTURE0);
+        data->myglActiveTexture(GL_TEXTURE0);
     }
-    data->glBindTexture(tdata->texture_type, tdata->texture);
+    data->myglBindTexture(tdata->texture_type, tdata->texture);
 
     /* Configure color modulation */
     g = texture->g;
@@ -1689,7 +1689,7 @@ GLES2_SetupCopy(SDL_Renderer *renderer, SDL_Texture *texture)
     program = data->current_program;
 
     if (!CompareColors(program->modulation_r, program->modulation_g, program->modulation_b, program->modulation_a, r, g, b, a)) {
-        data->glUniform4f(program->uniform_locations[GLES2_UNIFORM_MODULATION], r * inv255f, g * inv255f, b * inv255f, a * inv255f);
+        data->myglUniform4f(program->uniform_locations[GLES2_UNIFORM_MODULATION], r * inv255f, g * inv255f, b * inv255f, a * inv255f);
         program->modulation_r = r;
         program->modulation_g = g;
         program->modulation_b = b;
@@ -1726,7 +1726,7 @@ GLES2_RenderCopy(SDL_Renderer *renderer, SDL_Texture *texture, const SDL_Rect *s
     vertices[5] = (dstrect->y + dstrect->h);
     vertices[6] = (dstrect->x + dstrect->w);
     vertices[7] = (dstrect->y + dstrect->h);
-    /*data->glVertexAttribPointer(GLES2_ATTRIBUTE_POSITION, 2, GL_FLOAT, GL_FALSE, 0, vertices);*/
+    /*data->myglVertexAttribPointer(GLES2_ATTRIBUTE_POSITION, 2, GL_FLOAT, GL_FALSE, 0, vertices);*/
     GLES2_UpdateVertexBuffer(renderer, GLES2_ATTRIBUTE_POSITION, vertices, 8 * sizeof(GLfloat));
     texCoords[0] = srcrect->x / (GLfloat)texture->w;
     texCoords[1] = srcrect->y / (GLfloat)texture->h;
@@ -1736,9 +1736,9 @@ GLES2_RenderCopy(SDL_Renderer *renderer, SDL_Texture *texture, const SDL_Rect *s
     texCoords[5] = (srcrect->y + srcrect->h) / (GLfloat)texture->h;
     texCoords[6] = (srcrect->x + srcrect->w) / (GLfloat)texture->w;
     texCoords[7] = (srcrect->y + srcrect->h) / (GLfloat)texture->h;
-    /*data->glVertexAttribPointer(GLES2_ATTRIBUTE_TEXCOORD, 2, GL_FLOAT, GL_FALSE, 0, texCoords);*/
+    /*data->myglVertexAttribPointer(GLES2_ATTRIBUTE_TEXCOORD, 2, GL_FLOAT, GL_FALSE, 0, texCoords);*/
     GLES2_UpdateVertexBuffer(renderer, GLES2_ATTRIBUTE_TEXCOORD, texCoords, 8 * sizeof(GLfloat));
-    data->glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    data->myglDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
 
     return GL_CheckError("", renderer);
 }
@@ -1760,8 +1760,8 @@ GLES2_RenderCopyEx(SDL_Renderer *renderer, SDL_Texture *texture, const SDL_Rect 
         return -1;
     }
 
-    data->glEnableVertexAttribArray(GLES2_ATTRIBUTE_CENTER);
-    data->glEnableVertexAttribArray(GLES2_ATTRIBUTE_ANGLE);
+    data->myglEnableVertexAttribArray(GLES2_ATTRIBUTE_CENTER);
+    data->myglEnableVertexAttribArray(GLES2_ATTRIBUTE_ANGLE);
     fAngle[0] = fAngle[1] = fAngle[2] = fAngle[3] = (GLfloat)(360.0f - angle);
     /* Calculate the center of rotation */
     translate[0] = translate[2] = translate[4] = translate[6] = (center->x + dstrect->x);
@@ -1787,9 +1787,9 @@ GLES2_RenderCopyEx(SDL_Renderer *renderer, SDL_Texture *texture, const SDL_Rect 
         vertices[5] = vertices[7] = tmp;
     }
 
-    /*data->glVertexAttribPointer(GLES2_ATTRIBUTE_ANGLE, 1, GL_FLOAT, GL_FALSE, 0, &fAngle);
-    data->glVertexAttribPointer(GLES2_ATTRIBUTE_CENTER, 2, GL_FLOAT, GL_FALSE, 0, translate);
-    data->glVertexAttribPointer(GLES2_ATTRIBUTE_POSITION, 2, GL_FLOAT, GL_FALSE, 0, vertices);*/
+    /*data->myglVertexAttribPointer(GLES2_ATTRIBUTE_ANGLE, 1, GL_FLOAT, GL_FALSE, 0, &fAngle);
+    data->myglVertexAttribPointer(GLES2_ATTRIBUTE_CENTER, 2, GL_FLOAT, GL_FALSE, 0, translate);
+    data->myglVertexAttribPointer(GLES2_ATTRIBUTE_POSITION, 2, GL_FLOAT, GL_FALSE, 0, vertices);*/
 
     GLES2_UpdateVertexBuffer(renderer, GLES2_ATTRIBUTE_ANGLE, fAngle, 4 * sizeof(GLfloat));
     GLES2_UpdateVertexBuffer(renderer, GLES2_ATTRIBUTE_CENTER, translate, 8 * sizeof(GLfloat));
@@ -1803,11 +1803,11 @@ GLES2_RenderCopyEx(SDL_Renderer *renderer, SDL_Texture *texture, const SDL_Rect 
     texCoords[5] = (srcrect->y + srcrect->h) / (GLfloat)texture->h;
     texCoords[6] = (srcrect->x + srcrect->w) / (GLfloat)texture->w;
     texCoords[7] = (srcrect->y + srcrect->h) / (GLfloat)texture->h;
-    /*data->glVertexAttribPointer(GLES2_ATTRIBUTE_TEXCOORD, 2, GL_FLOAT, GL_FALSE, 0, texCoords);*/
+    /*data->myglVertexAttribPointer(GLES2_ATTRIBUTE_TEXCOORD, 2, GL_FLOAT, GL_FALSE, 0, texCoords);*/
     GLES2_UpdateVertexBuffer(renderer, GLES2_ATTRIBUTE_TEXCOORD, texCoords, 8 * sizeof(GLfloat));
-    data->glDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
-    data->glDisableVertexAttribArray(GLES2_ATTRIBUTE_CENTER);
-    data->glDisableVertexAttribArray(GLES2_ATTRIBUTE_ANGLE);
+    data->myglDrawArrays(GL_TRIANGLE_STRIP, 0, 4);
+    data->myglDisableVertexAttribArray(GLES2_ATTRIBUTE_CENTER);
+    data->myglDisableVertexAttribArray(GLES2_ATTRIBUTE_ANGLE);
 
     return GL_CheckError("", renderer);
 }
@@ -1834,7 +1834,7 @@ GLES2_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
 
     SDL_GetRendererOutputSize(renderer, &w, &h);
 
-    data->glReadPixels(rect->x, (h-rect->y)-rect->h, rect->w, rect->h,
+    data->myglReadPixels(rect->x, (h-rect->y)-rect->h, rect->w, rect->h,
                        GL_RGBA, GL_UNSIGNED_BYTE, temp_pixels);
     if (GL_CheckError("glReadPixels()", renderer) < 0) {
         return -1;
@@ -1885,7 +1885,7 @@ static int GLES2_BindTexture (SDL_Renderer * renderer, SDL_Texture *texture, flo
     GLES2_TextureData *texturedata = (GLES2_TextureData *)texture->driverdata;
     GLES2_ActivateRenderer(renderer);
 
-    data->glBindTexture(texturedata->texture_type, texturedata->texture);
+    data->myglBindTexture(texturedata->texture_type, texturedata->texture);
 
     if (texw) {
         *texw = 1.0;
@@ -1903,7 +1903,7 @@ static int GLES2_UnbindTexture (SDL_Renderer * renderer, SDL_Texture *texture)
     GLES2_TextureData *texturedata = (GLES2_TextureData *)texture->driverdata;
     GLES2_ActivateRenderer(renderer);
 
-    data->glBindTexture(texturedata->texture_type, 0);
+    data->myglBindTexture(texturedata->texture_type, 0);
 
     return 0;
 }
@@ -1929,17 +1929,17 @@ GLES2_ResetState(SDL_Renderer *renderer)
     data->current.blendMode = -1;
     data->current.tex_coords = SDL_FALSE;
 
-    data->glActiveTexture(GL_TEXTURE0);
-    data->glPixelStorei(GL_PACK_ALIGNMENT, 1);
-    data->glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+    data->myglActiveTexture(GL_TEXTURE0);
+    data->myglPixelStorei(GL_PACK_ALIGNMENT, 1);
+    data->myglPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-    data->glClearColor((GLfloat) data->clear_r * inv255f,
+    data->myglClearColor((GLfloat) data->clear_r * inv255f,
                         (GLfloat) data->clear_g * inv255f,
                         (GLfloat) data->clear_b * inv255f,
                         (GLfloat) data->clear_a * inv255f);
 
-    data->glEnableVertexAttribArray(GLES2_ATTRIBUTE_POSITION);
-    data->glDisableVertexAttribArray(GLES2_ATTRIBUTE_TEXCOORD);
+    data->myglEnableVertexAttribArray(GLES2_ATTRIBUTE_POSITION);
+    data->myglDisableVertexAttribArray(GLES2_ATTRIBUTE_TEXCOORD);
 
     GL_CheckError("", renderer);
 }
@@ -2035,10 +2035,10 @@ GLES2_CreateRenderer(SDL_Window *window, Uint32 flags)
     }
 
     value = 0;
-    data->glGetIntegerv(GL_MAX_TEXTURE_SIZE, &value);
+    data->myglGetIntegerv(GL_MAX_TEXTURE_SIZE, &value);
     renderer->info.max_texture_width = value;
     value = 0;
-    data->glGetIntegerv(GL_MAX_TEXTURE_SIZE, &value);
+    data->myglGetIntegerv(GL_MAX_TEXTURE_SIZE, &value);
     renderer->info.max_texture_height = value;
 
     /* Determine supported shader formats */
@@ -2046,8 +2046,8 @@ GLES2_CreateRenderer(SDL_Window *window, Uint32 flags)
 #ifdef ZUNE_HD
     nFormats = 1;
 #else /* !ZUNE_HD */
-    data->glGetIntegerv(GL_NUM_SHADER_BINARY_FORMATS, &nFormats);
-    data->glGetBooleanv(GL_SHADER_COMPILER, &hasCompiler);
+    data->myglGetIntegerv(GL_NUM_SHADER_BINARY_FORMATS, &nFormats);
+    data->myglGetBooleanv(GL_SHADER_COMPILER, &hasCompiler);
     if (hasCompiler) {
         ++nFormats;
     }
@@ -2062,14 +2062,14 @@ GLES2_CreateRenderer(SDL_Window *window, Uint32 flags)
 #ifdef ZUNE_HD
     data->shader_formats[0] = GL_NVIDIA_PLATFORM_BINARY_NV;
 #else /* !ZUNE_HD */
-    data->glGetIntegerv(GL_SHADER_BINARY_FORMATS, (GLint *)data->shader_formats);
+    data->myglGetIntegerv(GL_SHADER_BINARY_FORMATS, (GLint *)data->shader_formats);
     if (hasCompiler) {
         data->shader_formats[nFormats - 1] = (GLenum)-1;
     }
 #endif /* ZUNE_HD */
 
     data->framebuffers = NULL;
-    data->glGetIntegerv(GL_FRAMEBUFFER_BINDING, &window_framebuffer);
+    data->myglGetIntegerv(GL_FRAMEBUFFER_BINDING, &window_framebuffer);
     data->window_framebuffer = (GLuint)window_framebuffer;
 
     /* Populate the function pointers for the module */
