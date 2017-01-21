@@ -203,12 +203,54 @@ static void openGL(SDL_Window *w)
 
 static void testOpenGL()
 {
-    SDL_Window * w = SDL_CreateWindow("Centered & Resizable window",
+    SDL_Window * w = SDL_CreateWindow("Centered & Resizable OpenGL window",
         SDL_WINDOWPOS_CENTERED,
         SDL_WINDOWPOS_CENTERED,
         400,
         300,
         SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL);
+
+    openGL(w);
+}
+
+static void testOpenGLES2()
+{
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+
+    SDL_Window * w = SDL_CreateWindow("Centered & Resizable OGLES2 window",
+        SDL_WINDOWPOS_CENTERED,
+        SDL_WINDOWPOS_CENTERED,
+        400,
+        300,
+        SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL);
+
+    openGL(w);
+}
+
+static void testOpenGLSwitching()
+{
+    SDL_Window * w = SDL_CreateWindow("Centered & Resizable OpenGL window",
+        SDL_WINDOWPOS_CENTERED,
+        SDL_WINDOWPOS_CENTERED,
+        400,
+        300,
+        SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL);
+
+    // Switch to OGLES2
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+
+    SDL_RecreateWindow(w, SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL);
+
+    // Switch back to "any" OpenGL
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, 0);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 1);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+
+    SDL_RecreateWindow(w, SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL);
 
     openGL(w);
 }
@@ -536,8 +578,10 @@ int main(void)
         //testPath();
         //testManyWindows();
         //testFullscreen();
-        testFullscreenOpenGL();
+        //testFullscreenOpenGL();
         //testOpenGL();
+        //testOpenGLES2();
+        testOpenGLSwitching();
         //testRenderer();
         //testDraw();
         //testMessageBox();
