@@ -1610,6 +1610,7 @@ if(SDL_SHARED)
   endif()
   set(_INSTALL_LIBS "SDL2" ${_INSTALL_LIBS})
   target_link_libraries(SDL2 ${EXTRA_LIBS} ${EXTRA_LDFLAGS})
+  target_include_directories(SDL2 PUBLIC $<INSTALL_INTERFACE:include/SDL2>)
 endif()
 
 if(SDL_STATIC)
@@ -1626,13 +1627,42 @@ if(SDL_STATIC)
   # libraries - do we need to consider this?
   set(_INSTALL_LIBS "SDL2-static" ${_INSTALL_LIBS})
   target_link_libraries(SDL2-static ${EXTRA_LIBS} ${EXTRA_LDFLAGS})
+  target_include_directories(SDL2-static PUBLIC $<INSTALL_INTERFACE:include/SDL2>)
 endif()
 
 ##### Installation targets #####
-install(TARGETS ${_INSTALL_LIBS}
+install(TARGETS ${_INSTALL_LIBS} EXPORT SDL2Targets
   LIBRARY DESTINATION "lib${LIB_SUFFIX}"
   ARCHIVE DESTINATION "lib${LIB_SUFFIX}"
   RUNTIME DESTINATION bin)
+
+##### Export files #####
+if (APPLE)
+  set(PKG_PREFIX "SDL2.framework/Resources")
+elseif (WINDOWS)
+  set(PKG_PREFIX "cmake/SDL2")
+else ()
+  set(PKG_PREFIX "lib/cmake/SDL2")
+endif ()
+
+include(CMakePackageConfigHelpers)
+write_basic_package_version_file("${CMAKE_BINARY_DIR}/SDL2ConfigVersion.cmake"
+  VERSION ${SDL_VERSION}
+  COMPATIBILITY AnyNewerVersion
+)
+
+install(EXPORT SDL2Targets
+  FILE SDL2Targets.cmake
+  NAMESPACE SDL2::
+  DESTINATION ${PKG_PREFIX}
+)
+install(
+  FILES
+    ${CMAKE_SOURCE_DIR}/SDL2Config.cmake
+    ${CMAKE_BINARY_DIR}/SDL2ConfigVersion.cmake
+  DESTINATION ${PKG_PREFIX}
+  COMPONENT Devel
+)
 
 file(GLOB INCLUDE_FILES ${SDL2_SOURCE_DIR}/include/*.h)
 file(GLOB BIN_INCLUDE_FILES ${SDL2_BINARY_DIR}/include/*.h)
