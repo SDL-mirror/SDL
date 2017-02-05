@@ -46,6 +46,7 @@ _SDL_AtariXbios_Install:
 
 	/* Stop interrupts */
 
+	movew	sr,d1
 	movew	#0x2700,sr
 
 	/* Save old mouse vector, set our routine */
@@ -54,8 +55,8 @@ _SDL_AtariXbios_Install:
 	movel	sp@(8),d0
 	beqs	no_new_mouse_vector
 #if defined(__mcoldfire__)
-	movel	a0@(16),d1
-	movel	d1,oldmousevector
+	movel	a0@(16),a1
+	movel	a1,oldmousevector
 #else
 	movel	a0@(16),oldmousevector
 #endif
@@ -68,8 +69,8 @@ no_new_mouse_vector:
 	movel	sp@(12),d0
 	beqs	no_new_joystick_vector
 #if defined(__mcoldfire__)
-	movel	a0@(24),d1
-	movel	d1,oldjoystickvector
+	movel	a0@(24),a1
+	movel	a1,oldjoystickvector
 #else
 	movel	a0@(24),oldjoystickvector
 #endif
@@ -78,7 +79,7 @@ no_new_joystick_vector:
 
 	/* Restart interrupts */
 
-	movew	#0x2300,sr
+	movew	d1,sr
 
 	rts
 
@@ -89,6 +90,7 @@ _SDL_AtariXbios_Restore:
 
 	/* Stop interrupts */
 
+	movew	sr,d1
 	movew	#0x2700,sr
 
 	/* Restore mouse vector */
@@ -107,7 +109,7 @@ no_restore_joystick:
 
 	/* Restart interrupts */
 
-	movew	#0x2300,sr
+	movew	d1,sr
 
 	rts
 
