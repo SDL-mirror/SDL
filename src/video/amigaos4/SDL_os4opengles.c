@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2016 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2017 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -65,7 +65,7 @@ OS4_GLES_LoadLibrary(_THIS, const char * path)
         IOGLES2 = (struct OGLES2IFace *) IExec->GetInterface(OGLES2base, "main", 1, NULL);
 
         if (!IOGLES2) {
-            dprintf("Failed to open OpenGL ES 2 interace\n");
+            dprintf("Failed to open OpenGL ES 2 interface\n");
             SDL_SetError("Failed to open OpenGL ES 2 interface");
             return -1;
         }
@@ -89,6 +89,7 @@ OS4_GLES_GetProcAddress(_THIS, const char * proc)
 
     if (func == NULL) {
         dprintf("Failed to load '%s'\n", proc);
+        SDL_SetError("Failed to load function");
     }
 
     return func;
