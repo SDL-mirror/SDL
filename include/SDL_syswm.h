@@ -106,6 +106,10 @@ typedef struct ANativeWindow ANativeWindow;
 typedef void *EGLSurface;
 #endif
 
+#if defined(SDL_VIDEO_DRIVER_VIVANTE)
+#include "SDL_egl.h"
+#endif
+
 /**
  *  These are the various supported windowing subsystems
  */
@@ -121,7 +125,8 @@ typedef enum
     SDL_SYSWM_MIR,
     SDL_SYSWM_WINRT,
 	SDL_SYSWM_OS4,
-    SDL_SYSWM_ANDROID
+    SDL_SYSWM_ANDROID,
+    SDL_SYSWM_VIVANTE
 } SDL_SYSWM_TYPE;
 
 /**
@@ -167,6 +172,13 @@ struct SDL_SysWMmsg
             int dummy;
             /* No UIKit window events yet */
         } uikit;
+#endif
+#if defined(SDL_VIDEO_DRIVER_VIVANTE)
+        struct
+        {
+            int dummy;
+            /* No Vivante window events yet */
+        } vivante;
 #endif
         /* Can't have an empty union */
         int dummy;
@@ -263,6 +275,14 @@ struct SDL_SysWMinfo
         {
             struct Window *window;      /**< The AmigaOS 4 window */
         } os4;
+#endif
+
+#if defined(SDL_VIDEO_DRIVER_VIVANTE)
+        struct
+        {
+            EGLNativeDisplayType display;
+            EGLNativeWindowType window;
+        } vivante;
 #endif
 
         /* Can't have an empty union */

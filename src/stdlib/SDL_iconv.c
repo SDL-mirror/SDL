@@ -36,7 +36,8 @@ As a workaround, fallback to custom implementation. */
 #undef HAVE_ICONV
 #endif
 
-#ifdef HAVE_ICONV
+#if defined(HAVE_ICONV) && defined(HAVE_ICONV_H)
+#include <iconv.h>
 
 /* Depending on which standard the iconv() was implemented with,
    iconv() may or may not use const char ** for the inbuf param.

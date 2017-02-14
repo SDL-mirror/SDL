@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2016 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2017 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -53,6 +53,10 @@
 /* On Windows, windows.h defines CreateWindow */
 #ifdef CreateWindow
 #undef CreateWindow
+#endif
+
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
 #endif
 
 /* Available video drivers */
@@ -185,7 +189,7 @@ ShouldUseTextureFramebuffer()
     /* See if the user or application wants a specific behavior */
     hint = SDL_GetHint(SDL_HINT_FRAMEBUFFER_ACCELERATION);
     if (hint) {
-        if (*hint == '0') {
+        if (*hint == '0' || SDL_strcasecmp(hint, "false") == 0) {
             return SDL_FALSE;
         } else {
             return SDL_TRUE;
@@ -262,6 +266,8 @@ SDL_CreateWindowTexture(SDL_VideoDevice *unused, SDL_Window * window, Uint32 * f
 
         /* Check to see if there's a specific driver requested */
         if (hint && *hint != '0' && *hint != '1' &&
+            SDL_strcasecmp(hint, "true") != 0 &&
+            SDL_strcasecmp(hint, "false") != 0 &&
             SDL_strcasecmp(hint, "software") != 0) {
             for (i = 0; i < SDL_GetNumRenderDrivers(); ++i) {
                 SDL_RendererInfo info;
@@ -451,10 +457,8 @@ int
 SDL_VideoInit(const char *driver_name)
 {
     SDL_VideoDevice *video;
-    const char *hint;
     int index;
     int i;
-    SDL_bool allow_screensaver;
 
     /* Check to make sure we don't overwrite '_this' */
     if (_this != NULL) {
@@ -542,13 +546,7 @@ SDL_VideoInit(const char *driver_name)
        joystick, or passively watching a movie. Things that use SDL but
        function more like a normal desktop app should explicitly reenable the
        screensaver. */
-    hint = SDL_GetHint(SDL_HINT_VIDEO_ALLOW_SCREENSAVER);
-    if (hint) {
-        allow_screensaver = SDL_atoi(hint) ? SDL_TRUE : SDL_FALSE;
-    } else {
-        allow_screensaver = SDL_FALSE;
-    }
-    if (!allow_screensaver) {
+    if (!SDL_GetHintBoolean(SDL_HINT_VIDEO_ALLOW_SCREENSAVER, SDL_FALSE)) {
         SDL_DisableScreenSaver();
     }
 
@@ -636,7 +634,6 @@ SDL_GetNumVideoDisplays(void)
     return _this->num_displays;
 }
 
-#ifndef __AMIGAOS4__
 static int
 SDL_GetIndexOfDisplay(SDL_VideoDisplay *display)
 {
@@ -651,7 +648,6 @@ SDL_GetIndexOfDisplay(SDL_VideoDisplay *display)
     /* Couldn't find the display, just use index 0 */
     return 0;
 }
-#endif
 
 void *
 SDL_GetDisplayDriverData(int displayIndex)
@@ -694,7 +690,26 @@ SDL_GetDisplayBounds(int displayIndex, SDL_Rect * rect)
         rect->w = display->current_mode.w;
         rect->h = display->current_mode.h;
     }
-    return 0;
+    return 0;  /* !!! FIXME: should this be an error if (rect==NULL) ? */
+}
+
+int SDL_GetDisplayUsableBounds(int displayIndex, SDL_Rect * rect)
+{
+    CHECK_DISPLAY_INDEX(displayIndex, -1);
+
+    if (rect) {
+        SDL_VideoDisplay *display = &_this->displays[displayIndex];
+
+        if (_this->GetDisplayUsableBounds) {
+            if (_this->GetDisplayUsableBounds(_this, display, rect) == 0) {
+                return 0;
+            }
+        }
+
+        /* Oh well, just give the entire display bounds. */
+        return SDL_GetDisplayBounds(displayIndex, rect);
+    }
+    return 0;  /* !!! FIXME: should this be an error if (rect==NULL) ? */
 }
 
 int
@@ -710,7 +725,9 @@ SDL_GetDisplayDPI(int displayIndex, float * ddpi, float * hdpi, float * vdpi)
 		if (_this->GetDisplayDPI(_this, display, ddpi, hdpi, vdpi) == 0) {
 			return 0;
 		}
-	}
+    } else {
+        return SDL_Unsupported();
+    }
 
 	return -1;
 }
@@ -1298,20 +1315,15 @@ SDL_UpdateFullscreenMode(SDL_Window * window, SDL_bool fullscreen)
     /* Without this hack, SDL would trigger us to open a window before screen which causes unnecessary
     work, because then we would have to close the window first and re-open it on the custom screen */
     #define CREATE_FLAGS \
-        (SDL_WINDOW_OPENGL | SDL_WINDOW_BORDERLESS | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_FULLSCREEN)
+        (SDL_WINDOW_OPENGL | SDL_WINDOW_BORDERLESS | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_ALWAYS_ON_TOP | SDL_WINDOW_SKIP_TASKBAR | SDL_WINDOW_POPUP_MENU | SDL_WINDOW_UTILITY | SDL_WINDOW_TOOLTIP | SDL_WINDOW_FULLSCREEN)
 #else
     #define CREATE_FLAGS \
-        (SDL_WINDOW_OPENGL | SDL_WINDOW_BORDERLESS | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI)
+        (SDL_WINDOW_OPENGL | SDL_WINDOW_BORDERLESS | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_ALWAYS_ON_TOP | SDL_WINDOW_SKIP_TASKBAR | SDL_WINDOW_POPUP_MENU | SDL_WINDOW_UTILITY | SDL_WINDOW_TOOLTIP)
 #endif
 
 static void
 SDL_FinishWindowCreation(SDL_Window *window, Uint32 flags)
 {
-    window->windowed.x = window->x;
-    window->windowed.y = window->y;
-    window->windowed.w = window->w;
-    window->windowed.h = window->h;
-
     if (flags & SDL_WINDOW_MAXIMIZED) {
         SDL_MaximizeWindow(window);
     }
@@ -1333,13 +1345,17 @@ SDL_Window *
 SDL_CreateWindow(const char *title, int x, int y, int w, int h, Uint32 flags)
 {
     SDL_Window *window;
-    const char *hint;
 
     if (!_this) {
         /* Initialize the video system if needed */
         if (SDL_VideoInit(NULL) < 0) {
             return NULL;
         }
+    }
+
+    if ( (((flags & SDL_WINDOW_UTILITY) != 0) + ((flags & SDL_WINDOW_TOOLTIP) != 0) + ((flags & SDL_WINDOW_POPUP_MENU) != 0)) > 1 ) {
+        SDL_SetError("Conflicting window flags specified");
+        return NULL;
     }
 
     /* Some platforms can't create zero-sized windows */
@@ -1357,8 +1373,10 @@ SDL_CreateWindow(const char *title, int x, int y, int w, int h, Uint32 flags)
     }
 
     /* Some platforms have OpenGL enabled by default */
-#if (SDL_VIDEO_OPENGL && __MACOSX__) || __IPHONEOS__ || __ANDROID__ || __NACL__ || __AMIGAOS$__
-    flags |= SDL_WINDOW_OPENGL;
+#if (SDL_VIDEO_OPENGL && __MACOSX__) || __IPHONEOS__ || __ANDROID__ || __NACL__
+    if (SDL_strcmp(_this->name, "dummy") != 0) {
+        flags |= SDL_WINDOW_OPENGL;
+    }
 #endif
     if (flags & SDL_WINDOW_OPENGL) {
         if (!_this->GL_CreateContext) {
@@ -1374,8 +1392,7 @@ SDL_CreateWindow(const char *title, int x, int y, int w, int h, Uint32 flags)
      * SDL_WINDOW_ALLOW_HIGHDPI flag.
      */
     if (flags & SDL_WINDOW_ALLOW_HIGHDPI) {
-        hint = SDL_GetHint(SDL_HINT_VIDEO_HIGHDPI_DISABLED);
-        if (hint && SDL_atoi(hint) > 0) {
+        if (SDL_GetHintBoolean(SDL_HINT_VIDEO_HIGHDPI_DISABLED, SDL_FALSE)) {
             flags &= ~SDL_WINDOW_ALLOW_HIGHDPI;
         }
     }
@@ -1391,6 +1408,7 @@ SDL_CreateWindow(const char *title, int x, int y, int w, int h, Uint32 flags)
     window->y = y;
     window->w = w;
     window->h = h;
+
 #ifndef __AMIGAOS4__
 /* On AmigaOS4 we have to open the screen first, therefore this centering
 logic fails if screen is of different size. We center the window later
@@ -1411,8 +1429,29 @@ on the backend side, after we know the screen size. */
         }
     }
 #endif
+
+    window->windowed.x = window->x;
+    window->windowed.y = window->y;
+    window->windowed.w = window->w;
+    window->windowed.h = window->h;
+
+    if (flags & SDL_WINDOW_FULLSCREEN) {
+        SDL_VideoDisplay *display = SDL_GetDisplayForWindow(window);
+        int displayIndex;
+        SDL_Rect bounds;
+
+        displayIndex = SDL_GetIndexOfDisplay(display);
+        SDL_GetDisplayBounds(displayIndex, &bounds);
+
+        window->x = bounds.x;
+        window->y = bounds.y;
+        window->w = bounds.w;
+        window->h = bounds.h;
+    }
+
     window->flags = ((flags & CREATE_FLAGS) | SDL_WINDOW_HIDDEN);
     window->last_fullscreen_flags = window->flags;
+    window->opacity = 1.0f;
     window->brightness = 1.0f;
     window->next = _this->windows;
     window->is_destroying = SDL_FALSE;
@@ -1473,6 +1512,7 @@ SDL_CreateWindowFrom(const void *data)
     window->flags = SDL_WINDOW_FOREIGN;
     window->last_fullscreen_flags = window->flags;
     window->is_destroying = SDL_FALSE;
+    window->opacity = 1.0f;
     window->brightness = 1.0f;
     window->next = _this->windows;
     if (_this->windows) {
@@ -1827,6 +1867,24 @@ SDL_SetWindowBordered(SDL_Window * window, SDL_bool bordered)
 }
 
 void
+SDL_SetWindowResizable(SDL_Window * window, SDL_bool resizable)
+{
+    CHECK_WINDOW_MAGIC(window,);
+    if (!(window->flags & SDL_WINDOW_FULLSCREEN)) {
+        const int want = (resizable != SDL_FALSE);  /* normalize the flag. */
+        const int have = ((window->flags & SDL_WINDOW_RESIZABLE) != 0);
+        if ((want != have) && (_this->SetWindowResizable)) {
+            if (want) {
+                window->flags |= SDL_WINDOW_RESIZABLE;
+            } else {
+                window->flags &= ~SDL_WINDOW_RESIZABLE;
+            }
+            _this->SetWindowResizable(_this, window, (SDL_bool) want);
+        }
+    }
+}
+
+void
 SDL_SetWindowSize(SDL_Window * window, int w, int h)
 {
     CHECK_WINDOW_MAGIC(window,);
@@ -1912,6 +1970,28 @@ SDL_SetWindowMinimumSize(SDL_Window * window, int min_w, int min_h)
         /* Ensure that window is not smaller than minimal size */
         SDL_SetWindowSize(window, SDL_max(window->w, window->min_w), SDL_max(window->h, window->min_h));
     }
+}
+
+int
+SDL_GetWindowBordersSize(SDL_Window * window, int *top, int *left, int *bottom, int *right)
+{
+    int dummy = 0;
+
+    if (!top) { top = &dummy; }
+    if (!left) { left = &dummy; }
+    if (!right) { right = &dummy; }
+    if (!bottom) { bottom = &dummy; }
+
+    /* Always initialize, so applications don't have to care */
+    *top = *left = *bottom = *right = 0;
+
+    CHECK_WINDOW_MAGIC(window, -1);
+
+    if (!_this->GetWindowBordersSize) {
+        return SDL_Unsupported();
+    }
+
+    return _this->GetWindowBordersSize(_this, window, top, left, bottom, right);
 }
 
 void
@@ -2176,6 +2256,68 @@ SDL_GetWindowBrightness(SDL_Window * window)
 }
 
 int
+SDL_SetWindowOpacity(SDL_Window * window, float opacity)
+{
+    int retval;
+    CHECK_WINDOW_MAGIC(window, -1);
+
+    if (!_this->SetWindowOpacity) {
+        return SDL_Unsupported();
+    }
+
+    if (opacity < 0.0f) {
+        opacity = 0.0f;
+    } else if (opacity > 1.0f) {
+        opacity = 1.0f;
+    }
+
+    retval = _this->SetWindowOpacity(_this, window, opacity);
+    if (retval == 0) {
+        window->opacity = opacity;
+    }
+
+    return retval;
+}
+
+int
+SDL_GetWindowOpacity(SDL_Window * window, float * out_opacity)
+{
+    CHECK_WINDOW_MAGIC(window, -1);
+
+    if (out_opacity) {
+        *out_opacity = window->opacity;
+    }
+
+    return 0;
+}
+
+int
+SDL_SetWindowModalFor(SDL_Window * modal_window, SDL_Window * parent_window)
+{
+    CHECK_WINDOW_MAGIC(modal_window, -1);
+    CHECK_WINDOW_MAGIC(parent_window, -1);
+
+    if (!_this->SetWindowModalFor) {
+        return SDL_Unsupported();
+    }
+    
+    return _this->SetWindowModalFor(_this, modal_window, parent_window);
+}
+
+int 
+SDL_SetWindowInputFocus(SDL_Window * window)
+{
+    CHECK_WINDOW_MAGIC(window, -1);
+
+    if (!_this->SetWindowInputFocus) {
+        return SDL_Unsupported();
+    }
+    
+    return _this->SetWindowInputFocus(_this, window);
+}
+
+
+int
 SDL_SetWindowGammaRamp(SDL_Window * window, const Uint16 * red,
                                             const Uint16 * green,
                                             const Uint16 * blue)
@@ -2390,8 +2532,6 @@ SDL_OnWindowFocusGained(SDL_Window * window)
 static SDL_bool
 ShouldMinimizeOnFocusLoss(SDL_Window * window)
 {
-    const char *hint;
-
     if (!(window->flags & SDL_WINDOW_FULLSCREEN) || window->is_destroying) {
         return SDL_FALSE;
     }
@@ -2402,16 +2542,7 @@ ShouldMinimizeOnFocusLoss(SDL_Window * window)
     }
 #endif
 
-    hint = SDL_GetHint(SDL_HINT_VIDEO_MINIMIZE_ON_FOCUS_LOSS);
-    if (hint) {
-        if (*hint == '0') {
-            return SDL_FALSE;
-        } else {
-            return SDL_TRUE;
-        }
-    }
-
-    return SDL_TRUE;
+    return SDL_GetHintBoolean(SDL_HINT_VIDEO_MINIMIZE_ON_FOCUS_LOSS, SDL_TRUE);
 }
 
 void
@@ -3639,6 +3770,16 @@ SDL_ShowMessageBox(const SDL_MessageBoxData *messageboxdata, int *buttonid)
 int
 SDL_ShowSimpleMessageBox(Uint32 flags, const char *title, const char *message, SDL_Window *window)
 {
+#ifdef __EMSCRIPTEN__
+    /* !!! FIXME: propose a browser API for this, get this #ifdef out of here? */
+    /* Web browsers don't (currently) have an API for a custom message box
+       that can block, but for the most common case (SDL_ShowSimpleMessageBox),
+       we can use the standard Javascript alert() function. */
+    EM_ASM_({
+        alert(UTF8ToString($0) + "\n\n" + UTF8ToString($1));
+    }, title, message);
+    return 0;
+#else
     SDL_MessageBoxData data;
     SDL_MessageBoxButtonData button;
 
@@ -3656,20 +3797,13 @@ SDL_ShowSimpleMessageBox(Uint32 flags, const char *title, const char *message, S
     button.text = "OK";
 
     return SDL_ShowMessageBox(&data, NULL);
+#endif
 }
 
 SDL_bool
 SDL_ShouldAllowTopmost(void)
 {
-    const char *hint = SDL_GetHint(SDL_HINT_ALLOW_TOPMOST);
-    if (hint) {
-        if (*hint == '0') {
-            return SDL_FALSE;
-        } else {
-            return SDL_TRUE;
-        }
-    }
-    return SDL_TRUE;
+    return SDL_GetHintBoolean(SDL_HINT_ALLOW_TOPMOST, SDL_TRUE);
 }
 
 int

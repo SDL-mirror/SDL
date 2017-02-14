@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2014 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2017 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -138,12 +138,12 @@ static void OS4_CloseAudio(_THIS)
     dprintf("Called\n");
 
     if (os4data->audio_MixBuffer[0]) {
-        SDL_FreeAudioMem(os4data->audio_MixBuffer[0]);
+        SDL_free(os4data->audio_MixBuffer[0]);
         os4data->audio_MixBuffer[0] = NULL;
     }
 
     if (os4data->audio_MixBuffer[1]) {
-        SDL_FreeAudioMem(os4data->audio_MixBuffer[1]);
+        SDL_free(os4data->audio_MixBuffer[1]);
         os4data->audio_MixBuffer[1] = NULL;
     }
 
@@ -152,7 +152,7 @@ static void OS4_CloseAudio(_THIS)
     os4data->audio_IsOpen = 0;
 }
 
-static int OS4_OpenAudio(_THIS, const char *devname, int iscapture)
+static int OS4_OpenAudio(_THIS, void *handle, const char *devname, int iscapture)
 {
     int result = 0;
     OS4AudioData * os4data = NULL;
@@ -178,8 +178,8 @@ static int OS4_OpenAudio(_THIS, const char *devname, int iscapture)
 
     /* Allocate mixing buffer */
     os4data->audio_MixBufferSize = _this->spec.size;
-    os4data->audio_MixBuffer[0] = (Uint8 *)SDL_AllocAudioMem(_this->spec.size);
-    os4data->audio_MixBuffer[1] = (Uint8 *)SDL_AllocAudioMem(_this->spec.size);
+    os4data->audio_MixBuffer[0] = (Uint8 *)SDL_malloc(_this->spec.size);
+    os4data->audio_MixBuffer[1] = (Uint8 *)SDL_malloc(_this->spec.size);
     
     if ( os4data->audio_MixBuffer[0] == NULL || os4data->audio_MixBuffer[1] == NULL ) {
         OS4_CloseAudio(_this);
@@ -208,7 +208,7 @@ static int OS4_OpenAudio(_THIS, const char *devname, int iscapture)
 
 static void OS4_ThreadInit(_THIS)
 {
-    OS4AudioData       *os4data = _this->hidden;
+    OS4AudioData *os4data = _this->hidden;
 
     dprintf("Called\n");
 
@@ -222,13 +222,6 @@ static void OS4_ThreadInit(_THIS)
     One possibility: create a configuration GUI or ENV variable that allows
     user to select priority, if there is no silver bullet value */
     IExec->SetTaskPri(IExec->FindTask(0), 5);
-}
-
-static void OS4_WaitDone(_THIS)
-{
-    dprintf("Called\n");
-
-    OS4_CloseAhiDevice(_this->hidden);
 }
 
 static void OS4_WaitAudio(_THIS)
@@ -306,13 +299,22 @@ OS4_Init(SDL_AudioDriverImpl * impl)
         return 0;
     }
 
+    // TODO: DetectDevices?
     impl->OpenDevice = OS4_OpenAudio;
-    impl->WaitDevice = OS4_WaitAudio;
-    impl->WaitDone = OS4_WaitDone;
-    impl->GetDeviceBuf = OS4_GetAudioBuf;
-    impl->PlayDevice = OS4_PlayAudio;
-    impl->CloseDevice = OS4_CloseAudio;
     impl->ThreadInit = OS4_ThreadInit;
+    impl->WaitDevice = OS4_WaitAudio;
+    impl->PlayDevice = OS4_PlayAudio;
+    // TODO: GetPendingBytes?
+    impl->GetDeviceBuf = OS4_GetAudioBuf;
+    // TODO: CaptureFromDevice
+    // TODO: FlushCapture
+    // TODO: PrepareToClose()
+    impl->CloseDevice = OS4_CloseAudio;
+    // TODO: Lock+UnlockDevice
+    // TODO: FreeDeviceHandle
+    // TODO: Deinitialize
+
+    //impl->WaitDone = OS4_WaitDone;
 
     impl->OnlyHasDefaultOutputDevice = 1;
 
