@@ -264,6 +264,12 @@ OS4_FreeSystemResources(_THIS)
     }
 
     if (data->appMsgPort) {
+        struct AppMessage *amsg;
+
+        while ((amsg = (struct AppMessage *)IExec->GetMsg(data->appMsgPort))) {
+            IExec->ReplyMsg((struct Message *) amsg);
+        }
+
         IExec->FreeSysObject(ASOT_PORT, data->appMsgPort);
     }
 
@@ -416,7 +422,7 @@ OS4_CreateDevice(int devindex)
     //device->MaximizeWindow = OS4_MaximizeWindow;
     //device->MinimizeWindow = OS4_MinimizeWindow;
     //device->RestoreWindow = OS4_RestoreWindow;
-    //device->SetWindowBordered = OS4_SetWindowBordered;
+    //device->SetWindowBordered = OS4_SetWindowBordered; // Not supported by SetWindowAttrs()?
     device->SetWindowFullscreen = OS4_SetWindowFullscreen;
     //device->SetWindowGammaRamp = OS4_SetWindowGammaRamp;
     //device->GetWindowGammaRamp = OS4_GetWindowGammaRamp;
@@ -429,6 +435,9 @@ OS4_CreateDevice(int devindex)
 
     //device->OnWindowEnter = OS4_OnWindowEnter;
     device->SetWindowHitTest = OS4_SetWindowHitTest;
+
+    device->SetWindowOpacity = OS4_SetWindowOpacity;
+    device->GetWindowBordersSize = OS4_GetWindowBordersSize;
 
     device->shape_driver.CreateShaper = OS4_CreateShaper;
     device->shape_driver.SetWindowShape = OS4_SetWindowShape;

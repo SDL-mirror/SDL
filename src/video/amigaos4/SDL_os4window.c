@@ -648,6 +648,53 @@ OS4_SetWindowHitTest(SDL_Window * window, SDL_bool enabled)
     return 0;  /* just succeed, the real work is done elsewhere. */
 }
 
+int
+OS4_SetWindowOpacity(_THIS, SDL_Window * window, float opacity)
+{
+    struct Window *syswin = ((SDL_WindowData *) window->driverdata)->syswin;
+    LONG ret;
+
+    UBYTE value = opacity * 255;
+
+    dprintf("Setting window '%s' opaqueness to %d\n", window->title, value);
+
+    ret = IIntuition->SetWindowAttrs(
+        syswin,
+        WA_Opaqueness, value,
+        TAG_DONE);
+
+    if (ret) {
+        dprintf("Failed to set window opaqueness to %d\n", value);
+        return -1;
+    }
+
+    return 0;
+}
+
+int
+OS4_GetWindowBordersSize(_THIS, SDL_Window * window, int * top, int * left, int * bottom, int * right)
+{
+    struct Window *syswin = ((SDL_WindowData *) window->driverdata)->syswin;
+
+    if (top) {
+        *top = syswin->BorderTop;
+    }
+
+    if (left) {
+        *left = syswin->BorderLeft;
+    }
+
+    if (bottom) {
+        *bottom = syswin->BorderBottom;
+    }
+
+    if (right) {
+        *right = syswin->BorderRight;
+    }
+
+    return 0;
+}
+
 #endif /* SDL_VIDEO_DRIVER_AMIGAOS4 */
 
 /* vi: set ts=4 sw=4 expandtab: */

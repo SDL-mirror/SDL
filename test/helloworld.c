@@ -572,6 +572,49 @@ static void testGlobalMouseWarp()
      }
 }
 
+static void testOpaqueWindow()
+{
+    SDL_Window * w = SDL_CreateWindow("Opaque window", 100, 100, 100, 100, 0);
+
+    if (w) {
+
+        while (eventLoopInner()) {
+            float opacity = 0.0f;
+
+            while (opacity <= 1.1f) {
+                printf("Opacity %f\n", opacity);
+                SDL_SetWindowOpacity(w, opacity);
+                opacity += 0.1f;
+                SDL_Delay(100);
+            }
+        }
+
+        SDL_DestroyWindow(w);
+     }
+}
+
+static void testWindowBordersSize()
+{
+    SDL_Window * w = SDL_CreateWindow("BorderSizes window", 100, 100, 100, 100, SDL_WINDOW_RESIZABLE);
+
+    if (w) {
+
+        int top, left, bottom, right;
+
+        SDL_GetWindowBordersSize(w, &top, &left, &bottom, &right);
+
+        printf("top %d, left %d, bottom %d, right %d\n", top, left, bottom, right);
+
+        while (eventLoopInner()) {
+            SDL_Delay(1000);
+        }
+
+        SDL_DestroyWindow(w);
+     }
+}
+
+
+
 int main(void)
 {
     if (SDL_Init(SDL_INIT_VIDEO|SDL_INIT_TIMER) == 0) {
@@ -581,7 +624,7 @@ int main(void)
         //testFullscreenOpenGL();
         //testOpenGL();
         //testOpenGLES2();
-        testOpenGLSwitching();
+        //testOpenGLSwitching();
         //testRenderer();
         //testDraw();
         //testMessageBox();
@@ -597,6 +640,8 @@ int main(void)
         //testHint();
         //testGlobalMouseState();
         //testGlobalMouseWarp();
+        //testOpaqueWindow();
+        testWindowBordersSize();
 
         SDL_Quit();
     }

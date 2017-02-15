@@ -69,6 +69,9 @@ extern SDL_bool OS4_GetWindowWMInfo(_THIS, SDL_Window * window, struct SDL_SysWM
 
 extern int OS4_SetWindowHitTest(SDL_Window * window, SDL_bool enabled);
 
+extern int OS4_SetWindowOpacity(_THIS, SDL_Window * window, float opacity);
+extern int OS4_GetWindowBordersSize(_THIS, SDL_Window * window, int * top, int * left, int * bottom, int * right);
+
 #endif /* _SDL_os4window_h */
 
 /* vi: set ts=4 sw=4 expandtab: */
