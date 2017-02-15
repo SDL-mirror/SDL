@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2016 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2017 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -39,32 +39,33 @@
 
 typedef struct
 {
-	struct Screen          *publicScreen;
+    struct Screen          *publicScreen;
 
-	struct MsgPort         *userport;
+    struct MsgPort         *userport;
+    struct MsgPort         *appMsgPort;
 
-	struct MsgPort         *inputPort;
-	struct IOStdReq        *inputReq;
+    struct MsgPort         *inputPort;
+    struct IOStdReq        *inputReq;
 
-	APTR 					pool;
+    APTR                    pool;
 
-	struct Library			*gfxbase;
-	struct Library			*layersbase;
-	struct Library			*intuitionbase;
-	struct Library			*iconbase;
-	struct Library			*workbenchbase;
-	struct Library			*keymapbase;
-	struct Library 	        *textclipbase;
+    struct Library          *gfxbase;
+    struct Library          *layersbase;
+    struct Library          *intuitionbase;
+    struct Library          *iconbase;
+    struct Library          *workbenchbase;
+    struct Library          *keymapbase;
+    struct Library          *textclipbase;
 
-	struct GraphicsIFace	*iGraphics;
-	struct LayersIFace		*iLayers;
-	struct IntuitionIFace	*iIntuition;
-	struct IconIFace		*iIcon;
-	struct WorkbenchIFace	*iWorkbench;
-	struct KeymapIFace		*iKeymap;
-	struct TextClipIFace    *iTextClip;
+    struct GraphicsIFace    *iGraphics;
+    struct LayersIFace      *iLayers;
+    struct IntuitionIFace   *iIntuition;
+    struct IconIFace        *iIcon;
+    struct WorkbenchIFace   *iWorkbench;
+    struct KeymapIFace      *iKeymap;
+    struct TextClipIFace    *iTextClip;
 
-	BOOL                    vsyncEnabled;
+    BOOL                    vsyncEnabled;
 } SDL_VideoData;
 
 #define GfxBase ((SDL_VideoData *) _this->driverdata)->gfxbase

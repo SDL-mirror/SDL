@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2016 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2017 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -11,11 +11,11 @@
   freely, subject to the following restrictions:
 
   1. The origin of this software must not be misrepresented; you must not
-	 claim that you wrote the original software. If you use this software
-	 in a product, an acknowledgment in the product documentation would be
-	 appreciated but is not required.
+     claim that you wrote the original software. If you use this software
+     in a product, an acknowledgment in the product documentation would be
+     appreciated but is not required.
   2. Altered source versions must be plainly marked as such, and must not be
-	 misrepresented as being the original software.
+     misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
 #include "../../SDL_internal.h"
@@ -58,7 +58,7 @@ SDL_bool (*OS4_ResizeGlContext)(_THIS, SDL_Window * window) = NULL;
 static int
 OS4_Available(void)
 {
-	return (1);
+    return (1);
 }
 
 /*
@@ -71,243 +71,252 @@ OS4_Available(void)
 static SDL_bool
 OS4_OpenLibraries(_THIS)
 {
-	dprintf("Called\n");
+    dprintf("Called\n");
 
-	GfxBase       = IExec->OpenLibrary("graphics.library", 54);
-	LayersBase    = IExec->OpenLibrary("layers.library", 53);
-	IntuitionBase = IExec->OpenLibrary("intuition.library", MIN_LIB_VERSION);
-	IconBase      = IExec->OpenLibrary("icon.library", MIN_LIB_VERSION);
-	WorkbenchBase = IExec->OpenLibrary("workbench.library", MIN_LIB_VERSION);
-	KeymapBase    = IExec->OpenLibrary("keymap.library", MIN_LIB_VERSION);
-	TextClipBase  = IExec->OpenLibrary("textclip.library", 0);
+    GfxBase       = IExec->OpenLibrary("graphics.library", 54);
+    LayersBase    = IExec->OpenLibrary("layers.library", 53);
+    IntuitionBase = IExec->OpenLibrary("intuition.library", MIN_LIB_VERSION);
+    IconBase      = IExec->OpenLibrary("icon.library", MIN_LIB_VERSION);
+    WorkbenchBase = IExec->OpenLibrary("workbench.library", MIN_LIB_VERSION);
+    KeymapBase    = IExec->OpenLibrary("keymap.library", MIN_LIB_VERSION);
+    TextClipBase  = IExec->OpenLibrary("textclip.library", 0);
 
-	if (!GfxBase || !LayersBase || !IntuitionBase || !IconBase || !WorkbenchBase || !KeymapBase || !TextClipBase) {
-		dprintf("Failed to open system library\n");
-		return SDL_FALSE;
-	}
+    if (!GfxBase || !LayersBase || !IntuitionBase || !IconBase || !WorkbenchBase || !KeymapBase || !TextClipBase) {
+        dprintf("Failed to open system library\n");
+        return SDL_FALSE;
+    }
 
-	IGraphics  = (struct GraphicsIFace *)  IExec->GetInterface(GfxBase, "main", 1, NULL);
-	ILayers    = (struct LayersIFace *)    IExec->GetInterface(LayersBase, "main", 1, NULL);
-	IIntuition = (struct IntuitionIFace *) IExec->GetInterface(IntuitionBase, "main", 1, NULL);
-	IIcon      = (struct IconIFace *)      IExec->GetInterface(IconBase, "main", 1, NULL);
-	IWorkbench = (struct WorkbenchIFace *) IExec->GetInterface(WorkbenchBase, "main", 1, NULL);
-	IKeymap    = (struct KeymapIFace *)    IExec->GetInterface(KeymapBase, "main", 1, NULL);
-	ITextClip  = (struct TextClipIFace *)  IExec->GetInterface(TextClipBase, "main", 1, NULL);
+    IGraphics  = (struct GraphicsIFace *)  IExec->GetInterface(GfxBase, "main", 1, NULL);
+    ILayers    = (struct LayersIFace *)    IExec->GetInterface(LayersBase, "main", 1, NULL);
+    IIntuition = (struct IntuitionIFace *) IExec->GetInterface(IntuitionBase, "main", 1, NULL);
+    IIcon      = (struct IconIFace *)      IExec->GetInterface(IconBase, "main", 1, NULL);
+    IWorkbench = (struct WorkbenchIFace *) IExec->GetInterface(WorkbenchBase, "main", 1, NULL);
+    IKeymap    = (struct KeymapIFace *)    IExec->GetInterface(KeymapBase, "main", 1, NULL);
+    ITextClip  = (struct TextClipIFace *)  IExec->GetInterface(TextClipBase, "main", 1, NULL);
 
-	if (!IGraphics || !ILayers || !IIntuition || !IIcon || !IWorkbench || !IKeymap || !ITextClip) {
-		dprintf("Failed to get library interface\n");
-		return SDL_FALSE;
-	}
+    if (!IGraphics || !ILayers || !IIntuition || !IIcon || !IWorkbench || !IKeymap || !ITextClip) {
+        dprintf("Failed to get library interface\n");
+        return SDL_FALSE;
+    }
 
-	return SDL_TRUE;
+    return SDL_TRUE;
 }
 
 static void
 OS4_CloseLibraries(_THIS)
 {
-	dprintf("Called\n");
+    dprintf("Called\n");
 
-	if (ITextClip) {
-		IExec->DropInterface((struct Interface *) ITextClip);
-		ITextClip = NULL;
-	}
-
-	if (IKeymap) {
-		IExec->DropInterface((struct Interface *) IKeymap);
-		IKeymap = NULL;
-	}
-
-	if (IWorkbench) {
-		IExec->DropInterface((struct Interface *) IWorkbench);
-		IWorkbench = NULL;
-	}
-
-	if (IIcon) {
-		IExec->DropInterface((struct Interface *) IIcon);
-		IIcon = NULL;
-	}
-
-	if (IIntuition) {
-		IExec->DropInterface((struct Interface *) IIntuition);
-		IIntuition = NULL;
-	}
-
-	if (ILayers) {
-		IExec->DropInterface((struct Interface *) ILayers);
-		ILayers = NULL;
-	}
-
-	if (IGraphics) {
-		IExec->DropInterface((struct Interface *) IGraphics);
-		IGraphics = NULL;
-	}
-
-	if (TextClipBase) {
-		IExec->CloseLibrary(TextClipBase);
-		TextClipBase = NULL;
+    if (ITextClip) {
+        IExec->DropInterface((struct Interface *) ITextClip);
+        ITextClip = NULL;
     }
 
-	if (KeymapBase) {
-		IExec->CloseLibrary(KeymapBase);
-		KeymapBase = NULL;
-	}
+    if (IKeymap) {
+        IExec->DropInterface((struct Interface *) IKeymap);
+        IKeymap = NULL;
+    }
 
-	if (WorkbenchBase) {
-		IExec->CloseLibrary(WorkbenchBase);
-		WorkbenchBase = NULL;
-	}
+    if (IWorkbench) {
+        IExec->DropInterface((struct Interface *) IWorkbench);
+        IWorkbench = NULL;
+    }
 
-	if (IconBase) {
-		IExec->CloseLibrary(IconBase);
-		IconBase = NULL;
-	}
+    if (IIcon) {
+        IExec->DropInterface((struct Interface *) IIcon);
+        IIcon = NULL;
+    }
 
-	if (IntuitionBase) {
-		IExec->CloseLibrary(IntuitionBase);
-		IntuitionBase = NULL;
-	}
+    if (IIntuition) {
+        IExec->DropInterface((struct Interface *) IIntuition);
+        IIntuition = NULL;
+    }
 
-	if (LayersBase) {
-		IExec->CloseLibrary(LayersBase);
-		LayersBase = NULL;
-	}
+    if (ILayers) {
+        IExec->DropInterface((struct Interface *) ILayers);
+        ILayers = NULL;
+    }
 
-	if (GfxBase) {
-		IExec->CloseLibrary(GfxBase);
-		GfxBase = NULL;
-	}
+    if (IGraphics) {
+        IExec->DropInterface((struct Interface *) IGraphics);
+        IGraphics = NULL;
+    }
+
+    if (TextClipBase) {
+        IExec->CloseLibrary(TextClipBase);
+        TextClipBase = NULL;
+    }
+
+    if (KeymapBase) {
+        IExec->CloseLibrary(KeymapBase);
+        KeymapBase = NULL;
+    }
+
+    if (WorkbenchBase) {
+        IExec->CloseLibrary(WorkbenchBase);
+        WorkbenchBase = NULL;
+    }
+
+    if (IconBase) {
+        IExec->CloseLibrary(IconBase);
+        IconBase = NULL;
+    }
+
+    if (IntuitionBase) {
+        IExec->CloseLibrary(IntuitionBase);
+        IntuitionBase = NULL;
+    }
+
+    if (LayersBase) {
+        IExec->CloseLibrary(LayersBase);
+        LayersBase = NULL;
+    }
+
+    if (GfxBase) {
+        IExec->CloseLibrary(GfxBase);
+        GfxBase = NULL;
+    }
 }
 
 static SDL_bool
 OS4_AllocSystemResources(_THIS)
 {
-	SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
+    SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
 
-	dprintf("Called\n");
+    dprintf("Called\n");
 
-	if (!OS4_OpenLibraries(_this)) {
-		return SDL_FALSE;
-	}
+    if (!OS4_OpenLibraries(_this)) {
+        return SDL_FALSE;
+    }
 
-	if (!(data->userport = IExec->AllocSysObject(ASOT_PORT, 0))) {
-		SDL_SetError("Couldn't allocate message port");
-		return SDL_FALSE;
-	}
+    if (!(data->userport = IExec->AllocSysObjectTags(ASOT_PORT, TAG_DONE))) {
+        SDL_SetError("Couldn't allocate message port");
+        return SDL_FALSE;
+    }
 
-	/* Create the pool we'll be using (Shared, might be used from threads) */
-	if (!(data->pool = IExec->AllocSysObjectTags(ASOT_MEMPOOL,
-		ASOPOOL_MFlags,    MEMF_SHARED,
-		ASOPOOL_Threshold, 16384,
-		ASOPOOL_Puddle,    16384,
-		ASOPOOL_Protected, TRUE,
-		TAG_DONE))) {
+    if (!(data->appMsgPort = IExec->AllocSysObjectTags(ASOT_PORT, TAG_DONE))) {
+        SDL_SetError("Couldn't allocate AppMsg port");
+        return SDL_FALSE;
+    }
 
-		SDL_SetError("Couldn't allocate pool");
-		return SDL_FALSE;
-	}
+    /* Create the pool we'll be using (Shared, might be used from threads) */
+    if (!(data->pool = IExec->AllocSysObjectTags(ASOT_MEMPOOL,
+        ASOPOOL_MFlags,    MEMF_SHARED,
+        ASOPOOL_Threshold, 16384,
+        ASOPOOL_Puddle,    16384,
+        ASOPOOL_Protected, TRUE,
+        TAG_DONE))) {
 
-	/* inputPort, inputReq and and input.device are created for WarpMouse functionality. (In SDL1
-	they were created in library constructor for an unknown reason) */
-	if (!(data->inputPort = IExec->AllocSysObjectTags(ASOT_PORT, TAG_DONE))) {
+        SDL_SetError("Couldn't allocate pool");
+        return SDL_FALSE;
+    }
 
-		SDL_SetError("Couldn't allocate input port");
-		return SDL_FALSE;
-	}
+    /* inputPort, inputReq and and input.device are created for WarpMouse functionality. (In SDL1
+    they were created in library constructor for an unknown reason) */
+    if (!(data->inputPort = IExec->AllocSysObjectTags(ASOT_PORT, TAG_DONE))) {
 
-	if (!(data->inputReq = IExec->AllocSysObjectTags(ASOT_IOREQUEST,
-											 ASOIOR_Size, 		sizeof(struct IOStdReq),
-											 ASOIOR_ReplyPort,	data->inputPort,
-											 TAG_DONE))) {
+        SDL_SetError("Couldn't allocate input port");
+        return SDL_FALSE;
+    }
 
-		SDL_SetError("Couldn't allocate input request");
-		return SDL_FALSE;
-	}
+    if (!(data->inputReq = IExec->AllocSysObjectTags(ASOT_IOREQUEST,
+                                             ASOIOR_Size,       sizeof(struct IOStdReq),
+                                             ASOIOR_ReplyPort,  data->inputPort,
+                                             TAG_DONE))) {
 
-	if (IExec->OpenDevice("input.device", 0, (struct IORequest *)data->inputReq, 0))
-	{
-		SDL_SetError("Couldn't open input.device");
-		return SDL_FALSE;
-	}
+        SDL_SetError("Couldn't allocate input request");
+        return SDL_FALSE;
+    }
 
-	return SDL_TRUE;
+    if (IExec->OpenDevice("input.device", 0, (struct IORequest *)data->inputReq, 0))
+    {
+        SDL_SetError("Couldn't open input.device");
+        return SDL_FALSE;
+    }
+
+    return SDL_TRUE;
 }
 
 static void
 OS4_FreeSystemResources(_THIS)
 {
-	SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
+    SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
 
-	dprintf("Called\n");
+    dprintf("Called\n");
 
-	if (data->inputReq) {
-		dprintf("Deleting input.device\n");
-		//IExec->AbortIO((struct IORequest *)data->inputReq);
-		//IExec->WaitIO((struct IORequest *)data->inputReq);
-		IExec->CloseDevice((struct IORequest *)data->inputReq);
+    if (data->inputReq) {
+        dprintf("Deleting input.device\n");
+        //IExec->AbortIO((struct IORequest *)data->inputReq);
+        //IExec->WaitIO((struct IORequest *)data->inputReq);
+        IExec->CloseDevice((struct IORequest *)data->inputReq);
 
-		dprintf("Deleting IORequest\n");
-		IExec->FreeSysObject(ASOT_IOREQUEST, (void *)data->inputReq);
-	}
+        dprintf("Deleting IORequest\n");
+        IExec->FreeSysObject(ASOT_IOREQUEST, (void *)data->inputReq);
+    }
 
-	if (data->inputPort) {
-		dprintf("Deleting MsgPort\n");
-		IExec->FreeSysObject(ASOT_PORT, (void *)data->inputPort);
-	}
+    if (data->inputPort) {
+        dprintf("Deleting MsgPort\n");
+        IExec->FreeSysObject(ASOT_PORT, (void *)data->inputPort);
+    }
 
-	if (data->pool) {
-		IExec->FreeSysObject(ASOT_MEMPOOL, data->pool);
-	}
+    if (data->pool) {
+        IExec->FreeSysObject(ASOT_MEMPOOL, data->pool);
+    }
 
-	if (data->userport) {
-	   	IExec->FreeSysObject(ASOT_PORT, data->userport);
-	}
+    if (data->appMsgPort) {
+        IExec->FreeSysObject(ASOT_PORT, data->appMsgPort);
+    }
 
-	OS4_CloseLibraries(_this);
+    if (data->userport) {
+        IExec->FreeSysObject(ASOT_PORT, data->userport);
+    }
+
+    OS4_CloseLibraries(_this);
 }
 
 static void
 OS4_DeleteDevice(SDL_VideoDevice * device)
 {
-	dprintf("Called\n");
+    dprintf("Called\n");
 
-	OS4_FreeSystemResources(device);
+    OS4_FreeSystemResources(device);
 
-	SDL_free(device->driverdata);
-	SDL_free(device);
+    SDL_free(device->driverdata);
+    SDL_free(device);
 }
 
 static void
 OS4_SetMiniGLFunctions(SDL_VideoDevice * device)
 {
-	device->GL_GetProcAddress = OS4_GL_GetProcAddress;
-	device->GL_UnloadLibrary = OS4_GL_UnloadLibrary;
-	device->GL_MakeCurrent = OS4_GL_MakeCurrent;
-	device->GL_GetDrawableSize = OS4_GL_GetDrawableSize;
-	device->GL_SetSwapInterval = OS4_GL_SetSwapInterval;
-	device->GL_GetSwapInterval = OS4_GL_GetSwapInterval;
-	device->GL_SwapWindow = OS4_GL_SwapWindow;
-	device->GL_CreateContext = OS4_GL_CreateContext;
-	device->GL_DeleteContext = OS4_GL_DeleteContext;
+    device->GL_GetProcAddress = OS4_GL_GetProcAddress;
+    device->GL_UnloadLibrary = OS4_GL_UnloadLibrary;
+    device->GL_MakeCurrent = OS4_GL_MakeCurrent;
+    device->GL_GetDrawableSize = OS4_GL_GetDrawableSize;
+    device->GL_SetSwapInterval = OS4_GL_SetSwapInterval;
+    device->GL_GetSwapInterval = OS4_GL_GetSwapInterval;
+    device->GL_SwapWindow = OS4_GL_SwapWindow;
+    device->GL_CreateContext = OS4_GL_CreateContext;
+    device->GL_DeleteContext = OS4_GL_DeleteContext;
 
-	OS4_ResizeGlContext = OS4_GL_ResizeContext;
+    OS4_ResizeGlContext = OS4_GL_ResizeContext;
 }
 
 #if SDL_VIDEO_OPENGL_ES2
 static void
 OS4_SetGLESFunctions(SDL_VideoDevice * device)
 {
-	/* Some functions are recycled from SDL_os4opengl.c 100% ... */
-	device->GL_GetProcAddress = OS4_GLES_GetProcAddress;
-	device->GL_UnloadLibrary = OS4_GLES_UnloadLibrary;
-	device->GL_MakeCurrent = OS4_GLES_MakeCurrent;
-	device->GL_GetDrawableSize = OS4_GL_GetDrawableSize;
-	device->GL_SetSwapInterval = OS4_GL_SetSwapInterval;
-	device->GL_GetSwapInterval = OS4_GL_GetSwapInterval;
-	device->GL_SwapWindow = OS4_GLES_SwapWindow;
-	device->GL_CreateContext = OS4_GLES_CreateContext;
-	device->GL_DeleteContext = OS4_GLES_DeleteContext;
+    /* Some functions are recycled from SDL_os4opengl.c 100% ... */
+    device->GL_GetProcAddress = OS4_GLES_GetProcAddress;
+    device->GL_UnloadLibrary = OS4_GLES_UnloadLibrary;
+    device->GL_MakeCurrent = OS4_GLES_MakeCurrent;
+    device->GL_GetDrawableSize = OS4_GL_GetDrawableSize;
+    device->GL_SetSwapInterval = OS4_GL_SetSwapInterval;
+    device->GL_GetSwapInterval = OS4_GL_GetSwapInterval;
+    device->GL_SwapWindow = OS4_GLES_SwapWindow;
+    device->GL_CreateContext = OS4_GLES_CreateContext;
+    device->GL_DeleteContext = OS4_GLES_DeleteContext;
 
-	OS4_ResizeGlContext = OS4_GLES_ResizeContext;
+    OS4_ResizeGlContext = OS4_GLES_ResizeContext;
 }
 #endif
 
@@ -315,196 +324,196 @@ OS4_SetGLESFunctions(SDL_VideoDevice * device)
 static SDL_bool
 OS4_IsOpenGLES2(_THIS)
 {
-	if ((_this->gl_config.profile_mask == SDL_GL_CONTEXT_PROFILE_ES) &&
-		(_this->gl_config.major_version == 2) &&
-		(_this->gl_config.minor_version == 0)) {
-			dprintf("OpenGL ES 2.0 requested\n");
-		    return SDL_TRUE;
-	}
+    if ((_this->gl_config.profile_mask == SDL_GL_CONTEXT_PROFILE_ES) &&
+        (_this->gl_config.major_version == 2) &&
+        (_this->gl_config.minor_version == 0)) {
+            dprintf("OpenGL ES 2.0 requested\n");
+            return SDL_TRUE;
+    }
 
-	return SDL_FALSE;
+    return SDL_FALSE;
 }
 #endif
 
 static int
 OS4_LoadGlLibrary(_THIS, const char * path)
 {
-	dprintf("Profile_mask %d, major ver %d, minor ver %d\n",
-		_this->gl_config.profile_mask,
-		_this->gl_config.major_version,
-		_this->gl_config.minor_version);
+    dprintf("Profile_mask %d, major ver %d, minor ver %d\n",
+        _this->gl_config.profile_mask,
+        _this->gl_config.major_version,
+        _this->gl_config.minor_version);
 
 #if SDL_VIDEO_OPENGL_ES2
-	if (OS4_IsOpenGLES2(_this)) {
-		OS4_SetGLESFunctions(_this);
-		return OS4_GLES_LoadLibrary(_this, path);
-	} else {
-		OS4_SetMiniGLFunctions(_this);
-	}
+    if (OS4_IsOpenGLES2(_this)) {
+        OS4_SetGLESFunctions(_this);
+        return OS4_GLES_LoadLibrary(_this, path);
+    } else {
+        OS4_SetMiniGLFunctions(_this);
+    }
 #endif
 
-	return OS4_GL_LoadLibrary(_this, path);
+    return OS4_GL_LoadLibrary(_this, path);
 }
 
 static SDL_VideoDevice *
 OS4_CreateDevice(int devindex)
 {
-	SDL_VideoDevice *device;
-	SDL_VideoData *data;
-	SDL_version version;
+    SDL_VideoDevice *device;
+    SDL_VideoData *data;
+    SDL_version version;
 
-	SDL_GetVersion(&version);
+    SDL_GetVersion(&version);
 
-	dprintf("*** SDL %d.%d.%d video initialization starts ***\n",
-	    version.major, version.minor, version.patch);
+    dprintf("*** SDL %d.%d.%d video initialization starts ***\n",
+        version.major, version.minor, version.patch);
 
-	/* Initialize all variables that we clean on shutdown */
-	device = (SDL_VideoDevice *) SDL_calloc(1, sizeof(SDL_VideoDevice));
+    /* Initialize all variables that we clean on shutdown */
+    device = (SDL_VideoDevice *) SDL_calloc(1, sizeof(SDL_VideoDevice));
 
-	if (device) {
-		data = (SDL_VideoData *) SDL_calloc(1, sizeof(SDL_VideoData));
-	} else {
-		data = NULL;
-	}
+    if (device) {
+        data = (SDL_VideoData *) SDL_calloc(1, sizeof(SDL_VideoData));
+    } else {
+        data = NULL;
+    }
 
-	if (!data) {
-		SDL_free(device);
-		SDL_OutOfMemory();
-		return NULL;
-	}
+    if (!data) {
+        SDL_free(device);
+        SDL_OutOfMemory();
+        return NULL;
+    }
 
-	device->driverdata = data;
+    device->driverdata = data;
 
-	if (!OS4_AllocSystemResources(device)) {
-		SDL_free(device);
-		SDL_free(data);
+    if (!OS4_AllocSystemResources(device)) {
+        SDL_free(device);
+        SDL_free(data);
 
-		/* If we return with NULL, SDL_VideoQuit() can't clean up OS4 stuff. So let's do it now. */
-		OS4_FreeSystemResources(device);
+        /* If we return with NULL, SDL_VideoQuit() can't clean up OS4 stuff. So let's do it now. */
+        OS4_FreeSystemResources(device);
 
-		SDL_Unsupported();
+        SDL_Unsupported();
 
-		return NULL;
-	}
+        return NULL;
+    }
 
-	/* Set the function pointers */
-	device->VideoInit = OS4_VideoInit;
-	device->VideoQuit = OS4_VideoQuit;
+    /* Set the function pointers */
+    device->VideoInit = OS4_VideoInit;
+    device->VideoQuit = OS4_VideoQuit;
 
-	device->GetDisplayBounds = OS4_GetDisplayBounds;
-	device->GetDisplayModes = OS4_GetDisplayModes;
-	device->SetDisplayMode = OS4_SetDisplayMode;
+    device->GetDisplayBounds = OS4_GetDisplayBounds;
+    device->GetDisplayModes = OS4_GetDisplayModes;
+    device->SetDisplayMode = OS4_SetDisplayMode;
 
-	device->CreateWindow = OS4_CreateWindow;
-	device->CreateWindowFrom = OS4_CreateWindowFrom;
-	device->SetWindowTitle = OS4_SetWindowTitle;
-	//device->SetWindowIcon = OS4_SetWindowIcon;
-	device->SetWindowPosition = OS4_SetWindowPosition;
-	device->SetWindowSize = OS4_SetWindowSize;
-	device->ShowWindow = OS4_ShowWindow;
-	device->HideWindow = OS4_HideWindow;
-	device->RaiseWindow = OS4_RaiseWindow;
-	//device->MaximizeWindow = OS4_MaximizeWindow;
-	//device->MinimizeWindow = OS4_MinimizeWindow;
-	//device->RestoreWindow = OS4_RestoreWindow;
-	//device->SetWindowBordered = OS4_SetWindowBordered;
-	device->SetWindowFullscreen = OS4_SetWindowFullscreen;
-	//device->SetWindowGammaRamp = OS4_SetWindowGammaRamp;
-	//device->GetWindowGammaRamp = OS4_GetWindowGammaRamp;
-	device->SetWindowGrab = OS4_SetWindowGrab;
-	device->DestroyWindow = OS4_DestroyWindow;
+    device->CreateWindow = OS4_CreateWindow;
+    device->CreateWindowFrom = OS4_CreateWindowFrom;
+    device->SetWindowTitle = OS4_SetWindowTitle;
+    //device->SetWindowIcon = OS4_SetWindowIcon;
+    device->SetWindowPosition = OS4_SetWindowPosition;
+    device->SetWindowSize = OS4_SetWindowSize;
+    device->ShowWindow = OS4_ShowWindow;
+    device->HideWindow = OS4_HideWindow;
+    device->RaiseWindow = OS4_RaiseWindow;
+    //device->MaximizeWindow = OS4_MaximizeWindow;
+    //device->MinimizeWindow = OS4_MinimizeWindow;
+    //device->RestoreWindow = OS4_RestoreWindow;
+    //device->SetWindowBordered = OS4_SetWindowBordered;
+    device->SetWindowFullscreen = OS4_SetWindowFullscreen;
+    //device->SetWindowGammaRamp = OS4_SetWindowGammaRamp;
+    //device->GetWindowGammaRamp = OS4_GetWindowGammaRamp;
+    device->SetWindowGrab = OS4_SetWindowGrab;
+    device->DestroyWindow = OS4_DestroyWindow;
 
-	device->CreateWindowFramebuffer = OS4_CreateWindowFramebuffer;
-	device->UpdateWindowFramebuffer = OS4_UpdateWindowFramebuffer;
-	device->DestroyWindowFramebuffer = OS4_DestroyWindowFramebuffer;
+    device->CreateWindowFramebuffer = OS4_CreateWindowFramebuffer;
+    device->UpdateWindowFramebuffer = OS4_UpdateWindowFramebuffer;
+    device->DestroyWindowFramebuffer = OS4_DestroyWindowFramebuffer;
 
-	//device->OnWindowEnter = OS4_OnWindowEnter;
-	device->SetWindowHitTest = OS4_SetWindowHitTest;
+    //device->OnWindowEnter = OS4_OnWindowEnter;
+    device->SetWindowHitTest = OS4_SetWindowHitTest;
 
-	device->shape_driver.CreateShaper = OS4_CreateShaper;
-	device->shape_driver.SetWindowShape = OS4_SetWindowShape;
-	device->shape_driver.ResizeWindowShape = OS4_ResizeWindowShape;
+    device->shape_driver.CreateShaper = OS4_CreateShaper;
+    device->shape_driver.SetWindowShape = OS4_SetWindowShape;
+    device->shape_driver.ResizeWindowShape = OS4_ResizeWindowShape;
 
-	device->GetWindowWMInfo = OS4_GetWindowWMInfo;
+    device->GetWindowWMInfo = OS4_GetWindowWMInfo;
 
-	device->GL_LoadLibrary = OS4_LoadGlLibrary;
-	OS4_SetMiniGLFunctions(device);
+    device->GL_LoadLibrary = OS4_LoadGlLibrary;
+    OS4_SetMiniGLFunctions(device);
 
-	device->PumpEvents = OS4_PumpEvents;
-	//device->SuspendScreenSaver = OS4_SuspendScreenSaver;
-	device->SetClipboardText = OS4_SetClipboardText;
-	device->GetClipboardText = OS4_GetClipboardText;
-	device->HasClipboardText = OS4_HasClipboardText;
-	//device->ShowMessageBox = OS4_ShowMessageBox; Can be called without video initialization
+    device->PumpEvents = OS4_PumpEvents;
+    //device->SuspendScreenSaver = OS4_SuspendScreenSaver;
+    device->SetClipboardText = OS4_SetClipboardText;
+    device->GetClipboardText = OS4_GetClipboardText;
+    device->HasClipboardText = OS4_HasClipboardText;
+    //device->ShowMessageBox = OS4_ShowMessageBox; Can be called without video initialization
 
-	device->free = OS4_DeleteDevice;
+    device->free = OS4_DeleteDevice;
 
-	return device;
+    return device;
 }
 
 VideoBootStrap OS4_bootstrap = {
-	OS4VID_DRIVER_NAME, "SDL AmigaOS 4 video driver",
-	OS4_Available, OS4_CreateDevice
+    OS4VID_DRIVER_NAME, "SDL AmigaOS 4 video driver",
+    OS4_Available, OS4_CreateDevice
 };
 
 int
 OS4_VideoInit(_THIS)
 {
-	dprintf("Called\n");
+    dprintf("Called\n");
 
-	if (OS4_InitModes(_this) < 0) {
-		return -1;
-	}
+    if (OS4_InitModes(_this) < 0) {
+        return -1;
+    }
 
-	OS4_InitKeyboard(_this);
-	OS4_InitMouse(_this);
+    OS4_InitKeyboard(_this);
+    OS4_InitMouse(_this);
 
-	// We don't want SDL to change  window setup in SDL_OnWindowFocusLost()
-	SDL_SetHint(SDL_HINT_VIDEO_MINIMIZE_ON_FOCUS_LOSS, "0");
+    // We don't want SDL to change  window setup in SDL_OnWindowFocusLost()
+    SDL_SetHint(SDL_HINT_VIDEO_MINIMIZE_ON_FOCUS_LOSS, "0");
 
-	return 0;
+    return 0;
 }
 
 void
 OS4_VideoQuit(_THIS)
 {
-	dprintf("Called\n");
+    dprintf("Called\n");
 
-	OS4_QuitModes(_this);
-	OS4_QuitKeyboard(_this);
-	OS4_QuitMouse(_this);
+    OS4_QuitModes(_this);
+    OS4_QuitKeyboard(_this);
+    OS4_QuitMouse(_this);
 }
 
 void *
 OS4_SaveAllocPooled(_THIS, uint32 size)
 {
-	SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
+    SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
 
-	return IExec->AllocPooled(data->pool, size);
+    return IExec->AllocPooled(data->pool, size);
 }
 
 void *
 OS4_SaveAllocVecPooled(_THIS, uint32 size)
 {
-	SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
+    SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
 
-	return IExec->AllocVecPooled(data->pool, size);
+    return IExec->AllocVecPooled(data->pool, size);
 }
 
 void
 OS4_SaveFreePooled(_THIS, void * mem, uint32 size)
 {
-	SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
+    SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
 
-	IExec->FreePooled(data->pool, mem, size);
+    IExec->FreePooled(data->pool, mem, size);
 }
 
 void
 OS4_SaveFreeVecPooled(_THIS, void * mem)
 {
-	SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
+    SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
 
-	IExec->FreeVecPooled(data->pool, mem);
+    IExec->FreeVecPooled(data->pool, mem);
 }
 
 #endif /* SDL_VIDEO_DRIVER_AMIGAOS4 */

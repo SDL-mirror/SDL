@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2016 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2017 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -25,19 +25,19 @@
 
 #include "../SDL_sysvideo.h"
 
-#define POINTER_GRAB_TIMEOUT		20	/* Number of ticks before pointer grab needs to be reactivated */
+#define POINTER_GRAB_TIMEOUT        20  /* Number of ticks before pointer grab needs to be reactivated */
 
 typedef struct
 {
-	SDL_Window      * sdlwin;
-	struct Window   * syswin;
-	struct BitMap   * bitmap;
-	struct MsgPort  * userport;
-	Uint32            pointerGrabTicks;
+    SDL_Window      * sdlwin;
+    struct Window   * syswin;
+    struct BitMap   * bitmap;
+    struct AppWindow * appWin;
+    Uint32            pointerGrabTicks;
 
-	void*           * glContext;
-	struct BitMap   * glFrontBuffer;
-	struct BitMap   * glBackBuffer;
+    void*           * glContext;
+    struct BitMap   * glFrontBuffer;
+    struct BitMap   * glBackBuffer;
 
 } SDL_WindowData;
 
