@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2014 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2017 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -34,19 +34,18 @@
 
 struct SDL_PrivateAudioData
 {
-    struct MsgPort       *ahi_ReplyPort;
-    struct AHIRequest    *ahi_IORequest[2];
-    //struct AHIIFace      *ahi_IFace;
-    //struct AHIAudioCtrl  *ahi_AudioCtrl;
-    uint32                ahi_Type;
+    struct MsgPort       *ahiReplyPort;
+    struct AHIRequest    *ahiRequest[2];
+    uint32                ahiType;
     int                   currentBuffer; // buffer number to fill
     struct AHIRequest    *link;          // point to previous I/O request sent
 
-    int                   audio_IsOpen;
-    Uint32                audio_MixBufferSize;
-    Uint8                *audio_MixBuffer[2];
-    
-    //APTR                  audio_Mutex;
+    SDL_bool              deviceOpen;
+    Uint32                audioBufferSize;
+    Uint8                *audioBuffer[2];
+
+    Uint32                lastCaptureTicks;
+    SDL_bool              requestSent; // Keeps book of IO done with SendIO(), to avoid issues with WaitIO()
 };
 
 typedef struct SDL_PrivateAudioData OS4AudioData;
