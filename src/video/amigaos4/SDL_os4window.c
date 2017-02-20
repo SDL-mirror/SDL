@@ -40,12 +40,14 @@ extern SDL_bool (*OS4_ResizeGlContext)(_THIS, SDL_Window * window);
 
 static void OS4_CloseWindowInternal(_THIS, struct Window * window);
 
-static SDL_bool OS4_IsFullscreen(SDL_Window * window)
+static SDL_bool
+OS4_IsFullscreen(SDL_Window * window)
 {
     return (window->flags & (SDL_WINDOW_FULLSCREEN | SDL_WINDOW_FULLSCREEN_DESKTOP));
 }
 
-static void OS4_RemoveAppWindow(_THIS, SDL_WindowData *data)
+static void
+OS4_RemoveAppWindow(_THIS, SDL_WindowData *data)
 {
     if (data->appWin) {
         if (IWorkbench->RemoveAppWindow(data->appWin) == FALSE) {
@@ -101,9 +103,10 @@ OS4_SetupWindowData(_THIS, SDL_Window * sdlwin, struct Window * syswin)
     return 0;
 }
 
-static uint32 OS4_GetIDCMPFlags(SDL_Window * window, SDL_bool fullscreen)
+static uint32
+OS4_GetIDCMPFlags(SDL_Window * window, SDL_bool fullscreen)
 {
-    uint32 IDCMPFlags  = IDCMP_NEWSIZE | IDCMP_MOUSEBUTTONS | IDCMP_MOUSEMOVE
+    uint32 IDCMPFlags  = IDCMP_MOUSEBUTTONS | IDCMP_MOUSEMOVE
                        | IDCMP_DELTAMOVE | IDCMP_RAWKEY | IDCMP_ACTIVEWINDOW
                        | IDCMP_INACTIVEWINDOW | IDCMP_INTUITICKS
                        | IDCMP_EXTENDEDMOUSE;
@@ -117,13 +120,15 @@ static uint32 OS4_GetIDCMPFlags(SDL_Window * window, SDL_bool fullscreen)
 
         if (window->flags & SDL_WINDOW_RESIZABLE) {
             //IDCMPFlags  |= IDCMP_SIZEVERIFY; no handling so far
+            IDCMPFlags |= IDCMP_NEWSIZE;
         }
     }
 
     return IDCMPFlags;
 }
 
-static uint32 OS4_GetWindowFlags(SDL_Window * window, SDL_bool fullscreen)
+static uint32
+OS4_GetWindowFlags(SDL_Window * window, SDL_bool fullscreen)
 {
     uint32 windowFlags = WFLG_REPORTMOUSE | WFLG_RMBTRAP;
 
@@ -233,7 +238,7 @@ OS4_CreateWindowInternal(_THIS, SDL_Window * window, SDL_VideoDisplay * display)
         WA_InnerHeight, window->h,
         WA_Flags, windowFlags,
         WA_IDCMP, IDCMPFlags,
-        WA_Hidden, (window->flags & SDL_WINDOW_SHOWN) ? FALSE : TRUE,
+        WA_Hidden, (window->flags & SDL_WINDOW_HIDDEN) ? TRUE : FALSE,
         WA_GrabFocus, (window->flags & SDL_WINDOW_INPUT_GRABBED) ? POINTER_GRAB_TIMEOUT : 0,
         WA_UserPort, videodata->userport,
         WA_BackFill, &OS4_BackFillHook,
@@ -252,22 +257,16 @@ OS4_CreateWindowInternal(_THIS, SDL_Window * window, SDL_VideoDisplay * display)
          * What's a useful minimum size, anyway?
          */
 
-        IIntuition->WindowLimits(syswin,
+        BOOL ret = IIntuition->WindowLimits(syswin,
             syswin->BorderLeft + syswin->BorderRight + 100,
             syswin->BorderTop + syswin->BorderBottom + 100,
             -1,
             -1);
+
+        if (!ret) {
+            dprintf("Failed to set window limits\n");
+        }
     }
-
-    if (OS4_IsFullscreen(window)) {
-        IIntuition->ScreenToFront(screen);
-    }
-
-    IIntuition->ActivateWindow(syswin);
-
-    window->flags |= SDL_WINDOW_INPUT_FOCUS;
-
-    SDL_SetKeyboardFocus(window);
 
     return syswin;
 }
@@ -447,6 +446,16 @@ OS4_ShowWindow(_THIS, SDL_Window * window)
         if (ret) {
             dprintf("SetWindowAttrs() returned %d\n", ret);
         }
+
+        if (OS4_IsFullscreen(window)) {
+            IIntuition->ScreenToFront(data->syswin->WScreen);
+        }
+
+        IIntuition->ActivateWindow(data->syswin);
+
+        window->flags |= SDL_WINDOW_INPUT_FOCUS;
+
+        SDL_SetKeyboardFocus(window);
     }
 }
 
@@ -459,6 +468,7 @@ OS4_HideWindow(_THIS, SDL_Window * window)
 
     if (data && data->syswin) {
 
+        /* TODO: how to hide a fullscreen window? Close the screen? */
         BOOL result = IIntuition->HideWindow(data->syswin);
 
         if (!result) {
@@ -491,7 +501,8 @@ OS4_CloseWindowInternal(_THIS, struct Window * window)
     }
 }
 
-void OS4_SetWindowFullscreen(_THIS, SDL_Window * window, SDL_VideoDisplay * display, SDL_bool fullscreen)
+void
+OS4_SetWindowFullscreen(_THIS, SDL_Window * window, SDL_VideoDisplay * display, SDL_bool fullscreen)
 {
     dprintf("Trying to set '%s' into %s mode\n", window->title, fullscreen ? "fullscreen" : "window");
 

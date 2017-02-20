@@ -27,6 +27,12 @@
 
 #define POINTER_GRAB_TIMEOUT        20  /* Number of ticks before pointer grab needs to be reactivated */
 
+typedef struct HitTestInfo
+{
+    SDL_HitTestResult htr;
+    SDL_Point point;
+} HitTestInfo;
+
 typedef struct
 {
     SDL_Window      * sdlwin;
@@ -39,6 +45,7 @@ typedef struct
     struct BitMap   * glFrontBuffer;
     struct BitMap   * glBackBuffer;
 
+    HitTestInfo hti;
 } SDL_WindowData;
 
 extern int OS4_CreateWindow(_THIS, SDL_Window * window);

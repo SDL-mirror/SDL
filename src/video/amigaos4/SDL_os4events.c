@@ -60,14 +60,6 @@ struct MyIntuiMessage
     int16  Height;
 };
 
-typedef struct HitTestInfo
-{
-    SDL_HitTestResult htr;
-    SDL_Point point;
-} HitTestInfo;
-
-static HitTestInfo hti; // TODO: move to window data?
-
 extern OS4_GlobalMouseState globalMouseState;
 
 /* We could possibly use also Window.userdata field to contain SDL_Window,
@@ -145,11 +137,13 @@ OS4_HandleKeyboard(_THIS, struct MyIntuiMessage * imsg)
 static void
 OS4_HandleHitTestMotion(_THIS, SDL_Window * sdlwin, struct MyIntuiMessage * imsg)
 {
+    HitTestInfo *hti = &((SDL_WindowData *)sdlwin->driverdata)->hti;
+
     int16 newx = imsg->ScreenPointerX;
     int16 newy = imsg->ScreenPointerY;
 
-    int16 deltax = newx - hti.point.x;
-    int16 deltay = newy - hti.point.y;
+    int16 deltax = newx - hti->point.x;
+    int16 deltay = newy - hti->point.y;
 
     int16 x, y, w, h;
 
@@ -162,10 +156,10 @@ OS4_HandleHitTestMotion(_THIS, SDL_Window * sdlwin, struct MyIntuiMessage * imsg
     w = sdlwin->w;
     h = sdlwin->h;
 
-    hti.point.x = newx;
-    hti.point.y = newy;
+    hti->point.x = newx;
+    hti->point.y = newy;
 
-    switch (hti.htr) {
+    switch (hti->htr) {
         case SDL_HITTEST_DRAGGABLE:
             x += deltax;
             y += deltay;
@@ -229,9 +223,9 @@ OS4_HandleHitTestMotion(_THIS, SDL_Window * sdlwin, struct MyIntuiMessage * imsg
 }
 
 static SDL_bool
-OS4_IsHitTestResize()
+OS4_IsHitTestResize(HitTestInfo * hti)
 {
-    switch (hti.htr) {
+    switch (hti->htr) {
         case SDL_HITTEST_RESIZE_TOPLEFT:
         case SDL_HITTEST_RESIZE_TOP:
         case SDL_HITTEST_RESIZE_TOPRIGHT:
@@ -253,6 +247,8 @@ OS4_HandleMouseMotion(_THIS, struct MyIntuiMessage * imsg)
     SDL_Window *sdlwin = OS4_FindWindow(_this, imsg->IDCMPWindow);
 
     if (sdlwin) {
+        HitTestInfo *hti = &((SDL_WindowData *)sdlwin->driverdata)->hti;
+
         dprintf("X:%d Y:%d, ScreenX: %d ScreenY: %d\n",
             imsg->PointerX, imsg->PointerY, imsg->ScreenPointerX, imsg->ScreenPointerY);
 
@@ -261,7 +257,7 @@ OS4_HandleMouseMotion(_THIS, struct MyIntuiMessage * imsg)
 
         SDL_SendMouseMotion(sdlwin, 0 /*mouse->mouseID*/, 0, imsg->PointerX, imsg->PointerY);
 
-        if (hti.htr != SDL_HITTEST_NORMAL) {
+        if (hti->htr != SDL_HITTEST_NORMAL) {
             OS4_HandleHitTestMotion(_this, sdlwin, imsg);
         }
     }
@@ -273,6 +269,8 @@ static SDL_bool OS4_HandleHitTest(_THIS, SDL_Window * sdlwin, struct MyIntuiMess
         const SDL_Point point = { imsg->PointerX, imsg->PointerY };
         const SDL_HitTestResult rc = sdlwin->hit_test(sdlwin, &point, sdlwin->hit_test_data);
 
+        HitTestInfo *hti = &((SDL_WindowData *)sdlwin->driverdata)->hti;
+
         switch (rc) {
             case SDL_HITTEST_DRAGGABLE:
             case SDL_HITTEST_RESIZE_TOPLEFT:
@@ -283,15 +281,15 @@ static SDL_bool OS4_HandleHitTest(_THIS, SDL_Window * sdlwin, struct MyIntuiMess
             case SDL_HITTEST_RESIZE_BOTTOM:
             case SDL_HITTEST_RESIZE_BOTTOMLEFT:
             case SDL_HITTEST_RESIZE_LEFT:
-
                 // Store the action and mouse coordinates for later use
-                hti.htr = rc;
-                hti.point.x = imsg->ScreenPointerX;
-                hti.point.y = imsg->ScreenPointerY;
+                hti->htr = rc;
+                hti->point.x = imsg->ScreenPointerX;
+                hti->point.y = imsg->ScreenPointerY;
 
                 return SDL_TRUE;
 
-            default: return SDL_FALSE;
+            default:
+                return SDL_FALSE;
         }
     }
 
@@ -340,7 +338,9 @@ OS4_HandleMouseButtons(_THIS, struct MyIntuiMessage * imsg)
                     return;
                 }
             } else {
-                hti.htr = SDL_HITTEST_NORMAL;
+                HitTestInfo *hti = &((SDL_WindowData *)sdlwin->driverdata)->hti;
+
+                hti->htr = SDL_HITTEST_NORMAL;
                 // TODO: shape resize? OpenGL resize?
                 SDL_SendWindowEvent(sdlwin, SDL_WINDOWEVENT_RESIZED,
                     imsg->Width, imsg->Height);
@@ -379,16 +379,18 @@ OS4_HandleMouseWheel(_THIS, struct MyIntuiMessage * imsg)
 static void
 OS4_HandleResize(_THIS, struct MyIntuiMessage * imsg)
 {
-    if (OS4_IsHitTestResize()) {
-        /* Intuition notifies about resize during hit test action, but it will confuse hit test logic.
-        That is why we ignore these for now. */
-        dprintf("Resize notification ignored because resize is still in progress\n");
-    } else {
-        SDL_Window *sdlwin = OS4_FindWindow(_this, imsg->IDCMPWindow);
+    SDL_Window *sdlwin = OS4_FindWindow(_this, imsg->IDCMPWindow);
 
-        dprintf("Window resized to %d*%d\n", imsg->Width, imsg->Height);
+    if (sdlwin) {
+        HitTestInfo *hti = &((SDL_WindowData *)sdlwin->driverdata)->hti;
 
-        if (sdlwin) {
+        if (OS4_IsHitTestResize(hti)) {
+            /* Intuition notifies about resize during hit test action, but it will confuse hit test logic.
+            That is why we ignore these for now. */
+            dprintf("Resize notification ignored because resize is still in progress\n");
+        } else {
+            dprintf("Window resized to %d*%d\n", imsg->Width, imsg->Height);
+
             if (imsg->Width != sdlwin->w || imsg->Height != sdlwin->h) {
                 SDL_WindowData *data = (SDL_WindowData *)sdlwin->driverdata;
 
