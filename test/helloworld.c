@@ -613,7 +613,24 @@ static void testWindowBordersSize()
      }
 }
 
+static void testHiddenWindow()
+{
+    SDL_Window * w = SDL_CreateWindow("Hidden window", 100, 100, 100, 100, SDL_WINDOW_HIDDEN);
 
+    if (w) {
+        int i = 0;
+
+        while (eventLoopInner()) {
+
+            SDL_Delay(1000);
+
+            ((i++ % 2) == 0) ? SDL_ShowWindow(w) : SDL_HideWindow(w);
+        }
+
+        SDL_DestroyWindow(w);
+     }
+
+}
 
 int main(void)
 {
@@ -641,7 +658,8 @@ int main(void)
         //testGlobalMouseState();
         //testGlobalMouseWarp();
         //testOpaqueWindow();
-        testWindowBordersSize();
+        //testWindowBordersSize();
+        testHiddenWindow();
 
         SDL_Quit();
     }
