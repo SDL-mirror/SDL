@@ -796,6 +796,24 @@ endmacro()
 
 # Requires:
 # - nada
+macro(CheckOpenGLES2)
+  if(VIDEO_OPENGLES)
+
+    check_c_source_compiles("
+      #include <GLES2/gl2.h>
+      #include <GLES2/gl2ext.h>
+      int main (int argc, char** argv) {}" HAVE_VIDEO_OPENGLES_V2)
+    if(HAVE_VIDEO_OPENGLES_V2)
+        set(HAVE_VIDEO_OPENGLES TRUE)
+        set(SDL_VIDEO_OPENGL_ES2 1)
+        set(SDL_VIDEO_RENDER_OGL_ES2 1)
+    endif()
+
+  endif()
+endmacro()
+
+# Requires:
+# - nada
 # Optional:
 # - THREADS opt
 # Sets:
