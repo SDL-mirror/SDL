@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2016 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2017 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -41,119 +41,120 @@ so let's fetch Intuition interface */
 static BOOL
 OS4_OpenIntuition()
 {
-	dprintf("Called\n");
+    dprintf("Called\n");
 
-	MB_IntuitionBase = IExec->OpenLibrary("intuition.library", 51);
+    MB_IntuitionBase = IExec->OpenLibrary("intuition.library", 51);
 
-	if (MB_IntuitionBase) {
+    if (MB_IntuitionBase) {
 
-		MB_IIntuition = (struct IntuitionIFace *)
-		    IExec->GetInterface(MB_IntuitionBase, "main", 1, NULL);
+        MB_IIntuition = (struct IntuitionIFace *)
+            IExec->GetInterface(MB_IntuitionBase, "main", 1, NULL);
 
-		if (MB_IIntuition) {
-			return TRUE;
-		}
-	}
+        if (MB_IIntuition) {
+            return TRUE;
+        }
+    }
 
-	return FALSE;
+    return FALSE;
 }
 
 static void
 OS4_CloseIntuition()
 {
-	dprintf("Called\n");
+    dprintf("Called\n");
 
-	if (MB_IIntuition) {
-		IExec->DropInterface((struct Interface *) MB_IIntuition);
-		MB_IIntuition = NULL;
-	}
+    if (MB_IIntuition) {
+        IExec->DropInterface((struct Interface *) MB_IIntuition);
+        MB_IIntuition = NULL;
+    }
 
-	if (MB_IntuitionBase) {
-		IExec->CloseLibrary(MB_IntuitionBase);
-		MB_IntuitionBase = NULL;
-	}
+    if (MB_IntuitionBase) {
+        IExec->CloseLibrary(MB_IntuitionBase);
+        MB_IntuitionBase = NULL;
+    }
 }
 
 static char *
 OS4_MakeButtonString(const SDL_MessageBoxData * messageboxdata)
 {
-	char *buttonBuffer = SDL_malloc(BUTTON_BUF_SIZE);
+    char *buttonBuffer = SDL_malloc(BUTTON_BUF_SIZE);
 
-	if (buttonBuffer) {
-		int b;
+    if (buttonBuffer) {
+        int b;
 
-		SDL_memset(buttonBuffer, 0, BUTTON_BUF_SIZE);
+        SDL_memset(buttonBuffer, 0, BUTTON_BUF_SIZE);
 
-		/* Generate "Button 1|Button2... "*/
-		for (b = 0; b < messageboxdata->numbuttons; b++) {
-			strncat(buttonBuffer, messageboxdata->buttons[b].text, BUTTON_BUF_SIZE - strlen(buttonBuffer) - 1);
+        /* Generate "Button 1|Button2... "*/
+        for (b = 0; b < messageboxdata->numbuttons; b++) {
+            strncat(buttonBuffer, messageboxdata->buttons[b].text, BUTTON_BUF_SIZE - strlen(buttonBuffer) - 1);
 
-			if (b != (messageboxdata->numbuttons - 1)) {
-				strncat(buttonBuffer, "|", BUTTON_BUF_SIZE - strlen(buttonBuffer) - 1);
-			}
-		}
+            if (b != (messageboxdata->numbuttons - 1)) {
+                strncat(buttonBuffer, "|", BUTTON_BUF_SIZE - strlen(buttonBuffer) - 1);
+            }
+        }
 
-		dprintf("String '%s'\n", buttonBuffer);
-	}
+        dprintf("String '%s'\n", buttonBuffer);
+    }
 
-	return buttonBuffer;
+    return buttonBuffer;
 }
 
 int
 OS4_ShowMessageBox(const SDL_MessageBoxData * messageboxdata, int * buttonid)
 {
-	char *buttonString;
-	int result = -1;
+    int result = -1;
 
-	if (OS4_OpenIntuition()) {
+    if (OS4_OpenIntuition()) {
 
-		if ((buttonString = OS4_MakeButtonString(messageboxdata))) {
-			struct Window * syswin = NULL;
+        char *buttonString;
 
-			if (messageboxdata->window) {
-				SDL_WindowData *data = messageboxdata->window->driverdata;
-				syswin = data->syswin;
-			}
+        if ((buttonString = OS4_MakeButtonString(messageboxdata))) {
+            struct Window * syswin = NULL;
 
-			struct EasyStruct es = {
-				sizeof(struct EasyStruct),
-				0, // Flags
-				messageboxdata->title,
-				messageboxdata->message,
-				buttonString,
-				NULL, // Screen
-				NULL  // TagList
-			};
+            if (messageboxdata->window) {
+                SDL_WindowData *data = messageboxdata->window->driverdata;
+                syswin = data->syswin;
+            }
 
-			const int LAST_BUTTON = messageboxdata->numbuttons;
+            struct EasyStruct es = {
+                sizeof(struct EasyStruct),
+                0, // Flags
+                messageboxdata->title,
+                messageboxdata->message,
+                buttonString,
+                NULL, // Screen
+                NULL  // TagList
+            };
 
-			/* Amiga button order is 1, 2, ..., N, 0! */
+            const int LAST_BUTTON = messageboxdata->numbuttons;
 
-			int amigaButton = MB_IIntuition->EasyRequest(syswin, &es, 0, NULL);
+            /* Amiga button order is 1, 2, ..., N, 0! */
 
-			dprintf("Button %d chosen\n", amigaButton);
+            int amigaButton = MB_IIntuition->EasyRequest(syswin, &es, 0, NULL);
 
-			if (amigaButton >= 0 && amigaButton < LAST_BUTTON) {
-				if (amigaButton == 0) {
-					/* Last */
-					*buttonid = messageboxdata->buttons[LAST_BUTTON - 1].buttonid;
-				} else {
-					*buttonid = messageboxdata->buttons[amigaButton - 1].buttonid;
-				}
+            dprintf("Button %d chosen\n", amigaButton);
 
-				dprintf("Mapped button %d\n", *buttonid);
-			}
+            if (amigaButton >= 0 && amigaButton < LAST_BUTTON) {
+                if (amigaButton == 0) {
+                    /* Last */
+                    *buttonid = messageboxdata->buttons[LAST_BUTTON - 1].buttonid;
+                } else {
+                    *buttonid = messageboxdata->buttons[amigaButton - 1].buttonid;
+                }
 
-			SDL_free(buttonString);
-			result = 0;
-		}
-	} else {
-		dprintf("Failed to open IIntuition\n");
-	}
+                dprintf("Mapped button %d\n", *buttonid);
+            }
 
-	OS4_CloseIntuition();
+            SDL_free(buttonString);
+            result = 0;
+        }
+    } else {
+        dprintf("Failed to open IIntuition\n");
+    }
 
-	return result;
+    OS4_CloseIntuition();
+
+    return result;
 }
 
 #endif /* SDL_VIDEO_DRIVER_AMIGAOS4 */

@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2016 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2017 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -330,7 +330,7 @@ OS4_HLine(OS4_LineData * data)
 
     for (x = minx; x <= maxx; ++x) {
         Uint32 oldcolor, newcolor;
-        
+
         oldcolor = *memory;
         newcolor = data->blendfp(oldcolor, data->sr, data->sg, data->sb, data->sa);
         *memory++ = newcolor;
@@ -450,14 +450,14 @@ OS4_Line(OS4_LineData *data)
     memory = OS4_GetMemoryAddress(data->baseaddress, data->width, startx, starty);
 
     if (ystep > 0.5f || ystep < -0.5f) {
-    
+
         float xstep = 1.0f / ystep;
         float fx = startx;
 
         int lastx = startx;
 
         for (y = starty ; y <= endy; fx += xstep, ++y) {
-        
+
             Uint32 oldcolor, newcolor;
 
             x = ROUNDF(fx);
@@ -475,10 +475,10 @@ OS4_Line(OS4_LineData *data)
         float fy = starty;
 
         int lasty = starty;
-        int diff;
 
         for (x = startx ; x <= endx; ++x, fy += ystep ) {
             Uint32 oldcolor, newcolor;
+            int diff;
 
             y = ROUNDF(fy);
 

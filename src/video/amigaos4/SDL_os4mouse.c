@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2016 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2017 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -316,7 +316,6 @@ OS4_WarpMouseInternal(struct Screen *screen, int x, int y)
 
     if (videoData->inputReq != NULL) {
         struct InputEvent     *fakeEvent;
-        struct IEPointerPixel *neoPix;
 
         /* We move the Workbench pointer by stuffing mouse
          * movement events in input.device's queue.
@@ -329,7 +328,7 @@ OS4_WarpMouseInternal(struct Screen *screen, int x, int y)
             device, sizeof(struct InputEvent) + sizeof(struct IEPointerPixel));
 
         if (fakeEvent) {
-            neoPix = (struct IEPointerPixel *) (fakeEvent + 1);
+            struct IEPointerPixel *neoPix = (struct IEPointerPixel *) (fakeEvent + 1);
 
             neoPix->iepp_Screen = screen ? screen : videoData->publicScreen;
             neoPix->iepp_Position.Y = y;

@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2016 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2017 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -277,12 +277,12 @@ OS4_GetOutputSize(SDL_Renderer * renderer, int *w, int *h)
     if (bitmap) {
         if (w) {
             *w = data->iGraphics->GetBitMapAttr(bitmap, BMA_WIDTH);
+	        dprintf("w=%d\n", *w);
         }
         if (h) {
             *h = data->iGraphics->GetBitMapAttr(bitmap, BMA_HEIGHT);
+			dprintf("h=%d\n", *h);
         }
-
-        dprintf("w=%d, h=%d\n", *w, *h);
 
         return 0;
     } else {
@@ -299,7 +299,7 @@ OS4_SetSolidColor(SDL_Renderer * renderer, Uint32 color)
 
     if (data->solidcolor) {
         APTR baseaddress;
-        
+
         APTR lock = data->iGraphics->LockBitMapTags(
             data->solidcolor,
             LBM_BaseAddress, &baseaddress,
@@ -309,11 +309,11 @@ OS4_SetSolidColor(SDL_Renderer * renderer, Uint32 color)
             *(Uint32 *)baseaddress = color;
 
             data->iGraphics->UnlockBitMap(data->solidcolor);
-            
+
             return SDL_TRUE;
         } else {
             dprintf("Lock failed\n");
-        }    
+        }
     }
 
     return SDL_FALSE;
@@ -326,7 +326,7 @@ OS4_RectChanged(const SDL_Rect * first, const SDL_Rect * second)
         first->y != second->y ||
         first->w != second->w ||
         first->h != second->h) {
-        
+
         return SDL_TRUE;
     }
 
@@ -368,7 +368,7 @@ OS4_UpdateClipRect(SDL_Renderer * renderer)
 {
     OS4_RenderData *data = (OS4_RenderData *) renderer->driverdata;
 
-    if (data->bitmap) {        
+    if (data->bitmap) {
         const SDL_Rect *rect = &renderer->clip_rect;
 
         SDL_Rect old = data->cliprect;
@@ -410,7 +410,7 @@ OS4_RenderClear(SDL_Renderer * renderer)
             renderer->r << 16 |
             renderer->g << 8 |
             renderer->b;
-    
+
     data->iGraphics->RectFillColor(
         &data->rastport,
         0,
@@ -574,7 +574,7 @@ OS4_RenderFillRects(SDL_Renderer * renderer, const SDL_FRect * rects, int count)
 
     //dprintf("Called for %d rects\n", count);
     //Sint32 s = SDL_GetTicks();
-    
+
     if (!bitmap) {
         return -1;
     }
@@ -603,7 +603,7 @@ OS4_RenderFillRects(SDL_Renderer * renderer, const SDL_FRect * rects, int count)
     }
 
     if (renderer->blendMode == SDL_BLENDMODE_NONE) {
-        
+
         Uint32 color =
             renderer->a << 24 |
             renderer->r << 16 |
@@ -611,7 +611,7 @@ OS4_RenderFillRects(SDL_Renderer * renderer, const SDL_FRect * rects, int count)
             renderer->b;
 
         for (i = 0; i < count; ++i) {
-            
+
             SDL_Rect clipped;
             //dprintf("%d, %d - %d, %d\n", final_rects[i].x, final_rects[i].y, final_rects[i].w, final_rects[i].h);
 
@@ -692,14 +692,14 @@ OS4_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
 {
     OS4_RenderData *data = (OS4_RenderData *) renderer->driverdata;
     OS4_TextureData *texturedata = (OS4_TextureData *) texture->driverdata;
-    
+
     struct BitMap *dst = OS4_ActivateRenderer(renderer);
     struct BitMap *src = OS4_IsColorModEnabled(texture) ?
         texturedata->finalbitmap : texturedata->bitmap;
 
     SDL_Rect final_rect;
 
-    float scalex, scaley, alpha;
+    float scalex, scaley;
     uint32 ret_code;
 
     //dprintf("Called\n");
@@ -717,12 +717,6 @@ OS4_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
     }
     final_rect.w = (int)dstrect->w;
     final_rect.h = (int)dstrect->h;
-    
-    if (texture->blendMode == SDL_BLENDMODE_NONE) {
-        alpha = 1.0f;
-    } else {
-        alpha = (float)texture->a / 255.0f;
-    }
 
     scalex = srcrect->w ? (float)final_rect.w / srcrect->w : 1.0f;
     scaley = srcrect->h ? (float)final_rect.h / srcrect->h : 1.0f;
@@ -825,7 +819,7 @@ OS4_RenderReadPixels(SDL_Renderer * renderer, const SDL_Rect * rect,
 {
     OS4_RenderData *data = (OS4_RenderData *) renderer->driverdata;
     SDL_Rect final_rect;
-    
+
     struct BitMap *bitmap = OS4_ActivateRenderer(renderer);
 
     //dprintf("Called\n");
@@ -874,7 +868,7 @@ OS4_RenderPresent(SDL_Renderer * renderer)
 
     //dprintf("Called\n");
     //Uint32 s = SDL_GetTicks();
-    
+
     if (window && source) {
         OS4_RenderData *data = (OS4_RenderData *)renderer->driverdata;
 
