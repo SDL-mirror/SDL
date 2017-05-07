@@ -298,10 +298,15 @@ OS4_GL_GetDrawableSize(_THIS, SDL_Window * window, int * w, int * h)
         }
     }
 
-    *w = width;
-    *h = height;
+    if (w) {
+        *w = width;
+        //dprintf("w=%d\n", *w);
+    }
 
-    //dprintf("w=%d, h=%d\n", *w, *h);
+    if (h) {
+        *h = height;
+        //dprintf("h=%d\n", *h);
+    }
 }
 
 int
