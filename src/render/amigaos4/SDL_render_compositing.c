@@ -456,12 +456,16 @@ OS4_ConvertBlendMode(SDL_BlendMode mode)
 }
 
 static uint32
-OS4_GetCompositeFlags(Uint8 r, Uint8 g, Uint8 b)
+OS4_GetCompositeFlags(SDL_BlendMode mode)
 {
     uint32 flags = COMPFLAG_IgnoreDestAlpha | COMPFLAG_HardwareOnly;
 
     if (OS4_GetScaleQuality()) {
         flags |= COMPFLAG_SrcFilter;
+    }
+
+    if (mode == SDL_BLENDMODE_NONE) {
+        flags |= COMPFLAG_SrcAlphaOverride;
     }
 
     return flags;
@@ -666,7 +670,7 @@ OS4_RenderFillRects(SDL_Renderer * renderer, const SDL_FRect * rects, int count)
                 COMPTAG_DestY,      data->cliprect.y,
                 COMPTAG_DestWidth,  data->cliprect.w,
                 COMPTAG_DestHeight, data->cliprect.h,
-                COMPTAG_Flags,      OS4_GetCompositeFlags(renderer->r, renderer->g, renderer->b),
+                COMPTAG_Flags,      OS4_GetCompositeFlags(renderer->blendMode),
                 COMPTAG_VertexArray, vertices,
                 COMPTAG_VertexFormat, COMPVF_STW0_Present,
                 COMPTAG_NumTriangles, 2,
@@ -738,7 +742,7 @@ OS4_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
         COMPTAG_DestY,      data->cliprect.y,
         COMPTAG_DestWidth,  data->cliprect.w,
         COMPTAG_DestHeight, data->cliprect.h,
-        COMPTAG_Flags,      OS4_GetCompositeFlags(texture->r, texture->g, texture->b),
+        COMPTAG_Flags,      OS4_GetCompositeFlags(texture->blendMode),
         TAG_END);
 
     if (ret_code) {
@@ -798,7 +802,7 @@ OS4_RenderCopyEx(SDL_Renderer * renderer, SDL_Texture * texture,
         COMPTAG_DestY,      data->cliprect.y,
         COMPTAG_DestWidth,  data->cliprect.w,
         COMPTAG_DestHeight, data->cliprect.h,
-        COMPTAG_Flags,      OS4_GetCompositeFlags(texture->r, texture->g, texture->b),
+        COMPTAG_Flags,      OS4_GetCompositeFlags(texture->blendMode),
         COMPTAG_VertexArray, vertices,
         COMPTAG_VertexFormat, COMPVF_STW0_Present,
         COMPTAG_NumTriangles, 2,
