@@ -46,6 +46,24 @@ set(SDL_INTERFACE_AGE 1)
 set(SDL_BINARY_AGE 5)
 set(SDL_VERSION "${SDL_MAJOR_VERSION}.${SDL_MINOR_VERSION}.${SDL_MICRO_VERSION}")
 
+# Set defaults preventing destination file conflicts
+set(CMAKE_IMPORT_LIBRARY_SUFFIX
+    ".import-shared${CMAKE_STATIC_LIBRARY_SUFFIX}"
+    CACHE STRING "Library name suffix for import libraries")
+
+set(CMAKE_DEBUG_POSTFIX "d"
+    CACHE STRING "Name suffix for debug builds")
+
+if (NOT CMAKE_MINIMUM_REQUIRED_VERSION VERSION_GREATER_EQUAL "2.8.9")
+  # !!! REVISIT: remove this code block when the minmum version gets increased
+
+  # Remove non-cached variables that hide the cached values
+  unset(CMAKE_IMPORT_LIBRARY_SUFFIX)
+  unset(CMAKE_DEBUG_POSTFIX)
+endif()
+
+mark_as_advanced(CMAKE_IMPORT_LIBRARY_SUFFIX CMAKE_DEBUG_POSTFIX)
+
 # Calculate a libtool-like version number
 math(EXPR LT_CURRENT "${SDL_MICRO_VERSION} - ${SDL_INTERFACE_AGE}")
 math(EXPR LT_AGE "${SDL_BINARY_AGE} - ${SDL_INTERFACE_AGE}")
