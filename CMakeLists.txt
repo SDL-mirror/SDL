@@ -1587,6 +1587,7 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${EXTRA_CFLAGS}")
 
 # Always build SDLmain
 add_library(SDL2main STATIC ${SDLMAIN_SOURCES})
+target_include_directories(SDL2main PUBLIC $<INSTALL_INTERFACE:include>)
 set(_INSTALL_LIBS "SDL2main")
 
 if(SDL_SHARED)
