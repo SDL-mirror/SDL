@@ -54,14 +54,6 @@ set(CMAKE_IMPORT_LIBRARY_SUFFIX
 set(CMAKE_DEBUG_POSTFIX "d"
     CACHE STRING "Name suffix for debug builds")
 
-if (NOT CMAKE_MINIMUM_REQUIRED_VERSION VERSION_GREATER_EQUAL "2.8.9")
-  # !!! REVISIT: remove this code block when the minmum version gets increased
-
-  # Remove non-cached variables that hide the cached values
-  unset(CMAKE_IMPORT_LIBRARY_SUFFIX)
-  unset(CMAKE_DEBUG_POSTFIX)
-endif()
-
 mark_as_advanced(CMAKE_IMPORT_LIBRARY_SUFFIX CMAKE_DEBUG_POSTFIX)
 
 # Calculate a libtool-like version number
