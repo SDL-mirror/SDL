@@ -1041,9 +1041,9 @@ elseif(WINDOWS)
 
   if(MSVC)
     # Prevent codegen that would use the VC runtime libraries.
-    add_definitions(/GS-)
+    set_property(DIRECTORY . APPEND PROPERTY COMPILE_OPTIONS "/GS-")
     if(NOT ARCH_64)
-      add_definitions(/arch:SSE)
+      set_property(DIRECTORY . APPEND PROPERTY COMPILE_OPTIONS "/arch:SSE")
     endif()
   endif()
 
