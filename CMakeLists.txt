@@ -1640,7 +1640,7 @@ install(TARGETS ${_INSTALL_LIBS} EXPORT SDL2Targets
 if (APPLE)
   set(PKG_PREFIX "SDL2.framework/Resources")
 elseif (WINDOWS)
-  set(PKG_PREFIX "cmake/SDL2")
+  set(PKG_PREFIX "cmake")
 else ()
   set(PKG_PREFIX "lib/cmake/SDL2")
 endif ()
