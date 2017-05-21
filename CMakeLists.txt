@@ -47,10 +47,6 @@ set(SDL_BINARY_AGE 5)
 set(SDL_VERSION "${SDL_MAJOR_VERSION}.${SDL_MINOR_VERSION}.${SDL_MICRO_VERSION}")
 
 # Set defaults preventing destination file conflicts
-set(CMAKE_IMPORT_LIBRARY_SUFFIX
-    ".import-shared${CMAKE_STATIC_LIBRARY_SUFFIX}"
-    CACHE STRING "Library name suffix for import libraries")
-
 set(CMAKE_DEBUG_POSTFIX "d"
     CACHE STRING "Name suffix for debug builds")
 
@@ -1609,7 +1605,13 @@ endif()
 if(SDL_STATIC)
   set (BUILD_SHARED_LIBS FALSE)
   add_library(SDL2-static STATIC ${SOURCE_FILES})
-  set_target_properties(SDL2-static PROPERTIES OUTPUT_NAME "SDL2")
+  if (NOT SDL_SHARED OR NOT WIN32)
+    set_target_properties(SDL2-static PROPERTIES OUTPUT_NAME "SDL2")
+    # Note: Apparently, OUTPUT_NAME must really be unique; even when
+    # CMAKE_IMPORT_LIBRARY_SUFFIX or the like are given. Otherwise
+    # the static build may race with the import lib and one will get
+    # clobbered, when the suffix is realized via subsequent rename.
+  endif()
   set_target_properties(SDL2-static PROPERTIES POSITION_INDEPENDENT_CODE ${SDL_STATIC_PIC})
   if(MSVC)
     set_target_properties(SDL2-static PROPERTIES LINK_FLAGS_RELEASE "/NODEFAULTLIB")
