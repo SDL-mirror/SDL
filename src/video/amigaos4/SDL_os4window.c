@@ -539,6 +539,11 @@ OS4_SetWindowFullscreen(_THIS, SDL_Window * window, SDL_VideoDisplay * display, 
             }
 
             data->syswin = OS4_CreateWindowInternal(_this, window, display);
+
+            if (fullscreen) {
+                /* Workaround: make the new fullscreen window active */
+                OS4_ShowWindow(_this, window);
+            }
         }
     }
 }
