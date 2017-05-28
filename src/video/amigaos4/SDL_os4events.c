@@ -50,11 +50,14 @@ struct MyIntuiMessage
 
     struct Window *IDCMPWindow;
 
-    int16  PointerX;    /* Absolute pointer position, relative to */
-    int16  PointerY;    /* top-left corner of inner window */
+    int16  RelativeMouseX;
+    int16  RelativeMouseY;
 
-    int16  ScreenPointerX;
-    int16  ScreenPointerY;
+    int16  WindowMouseX;    /* Absolute pointer position, relative to */
+    int16  WindowMouseY;    /* top-left corner of inner window */
+
+    int16  ScreenMouseX;
+    int16  ScreenMouseY;
 
     int16  Width;       /* Inner window dimensions */
     int16  Height;
@@ -139,8 +142,8 @@ OS4_HandleHitTestMotion(_THIS, SDL_Window * sdlwin, struct MyIntuiMessage * imsg
 {
     HitTestInfo *hti = &((SDL_WindowData *)sdlwin->driverdata)->hti;
 
-    int16 newx = imsg->ScreenPointerX;
-    int16 newy = imsg->ScreenPointerY;
+    int16 newx = imsg->ScreenMouseX;
+    int16 newy = imsg->ScreenMouseY;
 
     int16 deltax = newx - hti->point.x;
     int16 deltay = newy - hti->point.y;
@@ -250,12 +253,20 @@ OS4_HandleMouseMotion(_THIS, struct MyIntuiMessage * imsg)
         HitTestInfo *hti = &((SDL_WindowData *)sdlwin->driverdata)->hti;
 
         dprintf("X:%d Y:%d, ScreenX: %d ScreenY: %d\n",
-            imsg->PointerX, imsg->PointerY, imsg->ScreenPointerX, imsg->ScreenPointerY);
+            imsg->WindowMouseX, imsg->WindowMouseY, imsg->ScreenMouseX, imsg->ScreenMouseY);
 
-        globalMouseState.x = imsg->ScreenPointerX;
-        globalMouseState.y = imsg->ScreenPointerY;
+        globalMouseState.x = imsg->ScreenMouseX;
+        globalMouseState.y = imsg->ScreenMouseY;
 
-        SDL_SendMouseMotion(sdlwin, 0 /*mouse->mouseID*/, 0, imsg->PointerX, imsg->PointerY);
+        if (SDL_GetRelativeMouseMode()) {
+            SDL_SendMouseMotion(sdlwin, 0 /*mouse->mouseID*/, 1,
+                imsg->RelativeMouseX,
+                imsg->RelativeMouseY);
+        } else {
+            SDL_SendMouseMotion(sdlwin, 0 /*mouse->mouseID*/, 0,
+                imsg->WindowMouseX,
+                imsg->WindowMouseY);
+        }
 
         if (hti->htr != SDL_HITTEST_NORMAL) {
             OS4_HandleHitTestMotion(_this, sdlwin, imsg);
@@ -266,7 +277,7 @@ OS4_HandleMouseMotion(_THIS, struct MyIntuiMessage * imsg)
 static SDL_bool OS4_HandleHitTest(_THIS, SDL_Window * sdlwin, struct MyIntuiMessage * imsg)
 {
     if (sdlwin->hit_test) {
-        const SDL_Point point = { imsg->PointerX, imsg->PointerY };
+        const SDL_Point point = { imsg->WindowMouseX, imsg->WindowMouseY };
         const SDL_HitTestResult rc = sdlwin->hit_test(sdlwin, &point, sdlwin->hit_test_data);
 
         HitTestInfo *hti = &((SDL_WindowData *)sdlwin->driverdata)->hti;
@@ -283,8 +294,8 @@ static SDL_bool OS4_HandleHitTest(_THIS, SDL_Window * sdlwin, struct MyIntuiMess
             case SDL_HITTEST_RESIZE_LEFT:
                 // Store the action and mouse coordinates for later use
                 hti->htr = rc;
-                hti->point.x = imsg->ScreenPointerX;
-                hti->point.y = imsg->ScreenPointerY;
+                hti->point.x = imsg->ScreenMouseX;
+                hti->point.y = imsg->ScreenMouseY;
 
                 return SDL_TRUE;
 
@@ -329,7 +340,7 @@ OS4_HandleMouseButtons(_THIS, struct MyIntuiMessage * imsg)
         globalMouseState.buttonPressed[button] = state;
 
         dprintf("X:%d Y:%d button:%d state:%d\n",
-            imsg->PointerX, imsg->PointerY, button, state);
+            imsg->WindowMouseX, imsg->WindowMouseY, button, state);
 
         if (button == SDL_BUTTON_LEFT) {
             if (state == SDL_PRESSED) {
@@ -492,13 +503,14 @@ OS4_CopyRelevantFields(struct IntuiMessage * src, struct MyIntuiMessage * dst)
 
     dst->IDCMPWindow     = src->IDCMPWindow;
 
-    /* The window's MouseX/Y fields, however, always contain the absolute pointer
-    * position (relative to the window's upper-left corner). */
-    dst->PointerX        = src->IDCMPWindow->MouseX - src->IDCMPWindow->BorderLeft;
-    dst->PointerY        = src->IDCMPWindow->MouseY - src->IDCMPWindow->BorderTop;
+    dst->RelativeMouseX  = src->MouseX;
+    dst->RelativeMouseY  = src->MouseY;
 
-    dst->ScreenPointerX  = src->IDCMPWindow->WScreen->MouseX;
-    dst->ScreenPointerY  = src->IDCMPWindow->WScreen->MouseY;
+    dst->WindowMouseX  = src->IDCMPWindow->MouseX - src->IDCMPWindow->BorderLeft;
+    dst->WindowMouseY  = src->IDCMPWindow->MouseY - src->IDCMPWindow->BorderTop;
+
+    dst->ScreenMouseX  = src->IDCMPWindow->WScreen->MouseX;
+    dst->ScreenMouseY  = src->IDCMPWindow->WScreen->MouseY;
 
     dst->Width           = src->IDCMPWindow->Width  - src->IDCMPWindow->BorderLeft - src->IDCMPWindow->BorderRight;
     dst->Height          = src->IDCMPWindow->Height - src->IDCMPWindow->BorderTop  - src->IDCMPWindow->BorderBottom;
