@@ -22,6 +22,7 @@
 
 #if SDL_VIDEO_DRIVER_AMIGAOS4
 
+#include <proto/exec.h>
 #include <workbench/startup.h>
 
 #include "SDL_os4video.h"

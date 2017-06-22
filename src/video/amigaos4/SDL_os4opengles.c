@@ -27,6 +27,7 @@
 #include "SDL_os4video.h"
 #include "SDL_os4window.h"
 #include "SDL_os4opengl.h"
+#include "SDL_os4library.h"
 
 #include <proto/ogles2.h>
 #include <GLES2/gl2.h>
@@ -52,7 +53,7 @@ OS4_GLES_LoadLibrary(_THIS, const char * path)
     dprintf("Called %d\n", _this->gl_config.driver_loaded);
 
     if (!OGLES2base) {
-        OGLES2base = IExec->OpenLibrary("ogles2.library", 0);
+        OGLES2base = OS4_OpenLibrary("ogles2.library", 0);
 
         if (!OGLES2base) {
             dprintf("Failed to open ogles2.library\n");
@@ -62,7 +63,7 @@ OS4_GLES_LoadLibrary(_THIS, const char * path)
     }
 
     if (!IOGLES2) {
-        IOGLES2 = (struct OGLES2IFace *) IExec->GetInterface(OGLES2base, "main", 1, NULL);
+        IOGLES2 = (struct OGLES2IFace *) OS4_GetInterface(OGLES2base);
 
         if (!IOGLES2) {
             dprintf("Failed to open OpenGL ES 2 interface\n");
@@ -100,15 +101,8 @@ OS4_GLES_UnloadLibrary(_THIS)
 {
     dprintf("Called %d\n", _this->gl_config.driver_loaded);
 
-    if (IOGLES2) {
-        IExec->DropInterface((struct Interface *) IOGLES2);
-        IOGLES2 = NULL;
-    }
-
-    if (OGLES2base) {
-        IExec->CloseLibrary(OGLES2base);
-        OGLES2base = NULL;
-    }
+    OS4_DropInterface((void *) &IOGLES2);
+    OS4_CloseLibrary(&OGLES2base);
 }
 
 SDL_GLContext

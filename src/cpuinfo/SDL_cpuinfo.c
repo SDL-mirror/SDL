@@ -50,7 +50,7 @@
 #include <setjmp.h>
 #endif
 
-#ifdef __amigaos4__
+#ifdef __AMIGAOS4__
 #include <proto/exec.h>
 #include <exec/exectags.h>
 #endif

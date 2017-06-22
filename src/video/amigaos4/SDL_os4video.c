@@ -22,6 +22,8 @@
 
 #if SDL_VIDEO_DRIVER_AMIGAOS4
 
+#include <proto/exec.h>
+
 #include "SDL_video.h"
 #include "SDL_mouse.h"
 #include "SDL_hints.h"
@@ -41,6 +43,7 @@
 #include "SDL_os4messagebox.h"
 #include "SDL_os4modes.h"
 #include "SDL_os4keyboard.h"
+#include "SDL_os4library.h"
 
 #define DEBUG
 #include "../../main/amigaos4/SDL_os4debug.h"
@@ -67,39 +70,45 @@ OS4_Available(void)
 
 #define MIN_LIB_VERSION 51
 
-//TODO: add proper error messages, wrap OpenLibrary?
 static SDL_bool
 OS4_OpenLibraries(_THIS)
 {
     dprintf("Called\n");
 
-    GfxBase       = IExec->OpenLibrary("graphics.library", 54);
-    LayersBase    = IExec->OpenLibrary("layers.library", 53);
-    IntuitionBase = IExec->OpenLibrary("intuition.library", MIN_LIB_VERSION);
-    IconBase      = IExec->OpenLibrary("icon.library", MIN_LIB_VERSION);
-    WorkbenchBase = IExec->OpenLibrary("workbench.library", MIN_LIB_VERSION);
-    KeymapBase    = IExec->OpenLibrary("keymap.library", MIN_LIB_VERSION);
-    TextClipBase  = IExec->OpenLibrary("textclip.library", 0);
+    GfxBase       = OS4_OpenLibrary("graphics.library", 54);
+    LayersBase    = OS4_OpenLibrary("layers.library", 53);
+    IntuitionBase = OS4_OpenLibrary("intuition.library", MIN_LIB_VERSION);
+    IconBase      = OS4_OpenLibrary("icon.library", MIN_LIB_VERSION);
+    WorkbenchBase = OS4_OpenLibrary("workbench.library", MIN_LIB_VERSION);
+    KeymapBase    = OS4_OpenLibrary("keymap.library", MIN_LIB_VERSION);
+    TextClipBase  = OS4_OpenLibrary("textclip.library", MIN_LIB_VERSION);
 
-    if (!GfxBase || !LayersBase || !IntuitionBase || !IconBase || !WorkbenchBase || !KeymapBase || !TextClipBase) {
-        dprintf("Failed to open system library\n");
-        return SDL_FALSE;
+    if (GfxBase && LayersBase && IntuitionBase && IconBase &&
+        WorkbenchBase && KeymapBase && TextClipBase) {
+
+        IGraphics  = (struct GraphicsIFace *)  OS4_GetInterface(GfxBase);
+        ILayers    = (struct LayersIFace *)    OS4_GetInterface(LayersBase);
+        IIntuition = (struct IntuitionIFace *) OS4_GetInterface(IntuitionBase);
+        IIcon      = (struct IconIFace *)      OS4_GetInterface(IconBase);
+        IWorkbench = (struct WorkbenchIFace *) OS4_GetInterface(WorkbenchBase);
+        IKeymap    = (struct KeymapIFace *)    OS4_GetInterface(KeymapBase);
+        ITextClip  = (struct TextClipIFace *)  OS4_GetInterface(TextClipBase);
+
+        if (IGraphics && ILayers && IIntuition && IIcon &&
+            IWorkbench && IKeymap && ITextClip) {
+
+            dprintf("All libraries OK\n");
+
+            return SDL_TRUE;
+
+        } else {
+            dprintf("Failed to get library interfaces\n");
+        }
+    } else {
+        dprintf("Failed to open system libraries\n");
     }
 
-    IGraphics  = (struct GraphicsIFace *)  IExec->GetInterface(GfxBase, "main", 1, NULL);
-    ILayers    = (struct LayersIFace *)    IExec->GetInterface(LayersBase, "main", 1, NULL);
-    IIntuition = (struct IntuitionIFace *) IExec->GetInterface(IntuitionBase, "main", 1, NULL);
-    IIcon      = (struct IconIFace *)      IExec->GetInterface(IconBase, "main", 1, NULL);
-    IWorkbench = (struct WorkbenchIFace *) IExec->GetInterface(WorkbenchBase, "main", 1, NULL);
-    IKeymap    = (struct KeymapIFace *)    IExec->GetInterface(KeymapBase, "main", 1, NULL);
-    ITextClip  = (struct TextClipIFace *)  IExec->GetInterface(TextClipBase, "main", 1, NULL);
-
-    if (!IGraphics || !ILayers || !IIntuition || !IIcon || !IWorkbench || !IKeymap || !ITextClip) {
-        dprintf("Failed to get library interface\n");
-        return SDL_FALSE;
-    }
-
-    return SDL_TRUE;
+    return SDL_FALSE;
 }
 
 static void
@@ -107,75 +116,21 @@ OS4_CloseLibraries(_THIS)
 {
     dprintf("Called\n");
 
-    if (ITextClip) {
-        IExec->DropInterface((struct Interface *) ITextClip);
-        ITextClip = NULL;
-    }
+    OS4_DropInterface((void *)&ITextClip);
+    OS4_DropInterface((void *)&IKeymap);
+    OS4_DropInterface((void *)&IWorkbench);
+    OS4_DropInterface((void *)&IIcon);
+    OS4_DropInterface((void *)&IIntuition);
+    OS4_DropInterface((void *)&ILayers);
+    OS4_DropInterface((void *)&IGraphics);
 
-    if (IKeymap) {
-        IExec->DropInterface((struct Interface *) IKeymap);
-        IKeymap = NULL;
-    }
-
-    if (IWorkbench) {
-        IExec->DropInterface((struct Interface *) IWorkbench);
-        IWorkbench = NULL;
-    }
-
-    if (IIcon) {
-        IExec->DropInterface((struct Interface *) IIcon);
-        IIcon = NULL;
-    }
-
-    if (IIntuition) {
-        IExec->DropInterface((struct Interface *) IIntuition);
-        IIntuition = NULL;
-    }
-
-    if (ILayers) {
-        IExec->DropInterface((struct Interface *) ILayers);
-        ILayers = NULL;
-    }
-
-    if (IGraphics) {
-        IExec->DropInterface((struct Interface *) IGraphics);
-        IGraphics = NULL;
-    }
-
-    if (TextClipBase) {
-        IExec->CloseLibrary(TextClipBase);
-        TextClipBase = NULL;
-    }
-
-    if (KeymapBase) {
-        IExec->CloseLibrary(KeymapBase);
-        KeymapBase = NULL;
-    }
-
-    if (WorkbenchBase) {
-        IExec->CloseLibrary(WorkbenchBase);
-        WorkbenchBase = NULL;
-    }
-
-    if (IconBase) {
-        IExec->CloseLibrary(IconBase);
-        IconBase = NULL;
-    }
-
-    if (IntuitionBase) {
-        IExec->CloseLibrary(IntuitionBase);
-        IntuitionBase = NULL;
-    }
-
-    if (LayersBase) {
-        IExec->CloseLibrary(LayersBase);
-        LayersBase = NULL;
-    }
-
-    if (GfxBase) {
-        IExec->CloseLibrary(GfxBase);
-        GfxBase = NULL;
-    }
+    OS4_CloseLibrary(&TextClipBase);
+    OS4_CloseLibrary(&KeymapBase);
+    OS4_CloseLibrary(&WorkbenchBase);
+    OS4_CloseLibrary(&IconBase);
+    OS4_CloseLibrary(&IntuitionBase);
+    OS4_CloseLibrary(&LayersBase);
+    OS4_CloseLibrary(&GfxBase);
 }
 
 static SDL_bool

@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2014 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2017 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -29,11 +29,11 @@
 #include "SDL_joystick.h"
 #include "../SDL_sysjoystick.h"
 #include "../SDL_joystick_c.h"
+#include "../../video/amigaos4/SDL_os4library.h"
 
 #include "SDL_events.h"
 
 #include <amigainput/amigainput.h>
-#include <proto/exec.h>
 #include <proto/amigainput.h>
 
 #define DEBUG
@@ -93,34 +93,11 @@ struct enumPacket
 struct Library   *SDL_AIN_Base;
 struct AIN_IFace *SDL_IAIN;
 
-/**
- ** Some utility functions
- **/
-
-static char *dupString(const char *string)
-{
-	char *newString = NULL;
-
-	if (string)
-	{
-		uint32 len = SDL_strlen(string);
-
-		if((newString = IExec->AllocVecTags(len + 1, TAG_DONE)))
-			SDL_memcpy(newString, string, len + 1);
-	}
-	return newString;
-}
-
-static void freeString(char *string)
-{
-	if (string)
-		IExec->FreeVec(string);
-}
-
 /*
  * Convert AmigaInput hat data to SDL hat data.
  */
-static inline Uint8 map_hat_data(int hat_data)
+static inline Uint8
+map_hat_data(int hat_data)
 {
 	switch (hat_data)
 	{
@@ -138,7 +115,8 @@ static inline Uint8 map_hat_data(int hat_data)
 /*
  * Callback to enumerate joysticks
  */
-static BOOL enumerateJoysticks (AIN_Device *device, void *UserData)
+static BOOL
+enumerateJoysticks (AIN_Device *device, void *UserData)
 {
 	APTR             context =  ((struct enumPacket *)UserData)->context;
 	uint32          *count   =  ((struct enumPacket *)UserData)->count;
@@ -176,7 +154,7 @@ static BOOL enumerateJoysticks (AIN_Device *device, void *UserData)
 					/* Okay. This appears to be a valid device. We'll report it to SDL.
 					 */
 					joy->id   = device->DeviceID;
-					joy->name = dupString (device->DeviceName);
+					joy->name = SDL_strdup(device->DeviceName);
 
 					dprintf("Found joystick #%d (AI ID=%d) '%s'\n", *count, joy->id, joy->name);
 
@@ -204,18 +182,18 @@ static BOOL enumerateJoysticks (AIN_Device *device, void *UserData)
  ** Initialization
  **/
 
-static BOOL openAmigaInput (void)
+static BOOL
+openAmigaInput (void)
 {
-	SDL_AIN_Base = IExec->OpenLibrary("AmigaInput.library", 51);
+	SDL_AIN_Base = OS4_OpenLibrary("AmigaInput.library", 51);
 
 	if (SDL_AIN_Base)
 	{
-		SDL_IAIN = (struct AIN_IFace *) IExec->GetInterface(SDL_AIN_Base, "main", 1, NULL);
+		SDL_IAIN = (struct AIN_IFace *) OS4_GetInterface(SDL_AIN_Base);
 
 		if (!SDL_IAIN)
 		{
-			IExec->CloseLibrary(SDL_AIN_Base);
-			SDL_AIN_Base = NULL;
+			OS4_CloseLibrary(&SDL_AIN_Base);
 		}
 	}
 	else
@@ -226,19 +204,11 @@ static BOOL openAmigaInput (void)
 	return SDL_AIN_Base != NULL;
 }
 
-static void closeAmigaInput(void)
+static void
+closeAmigaInput(void)
 {
-	if (SDL_IAIN)
-	{
-		IExec->DropInterface((struct Interface *)SDL_IAIN);
-		SDL_IAIN = NULL;
-	}
-
-	if (SDL_AIN_Base)
-	{
-		IExec->CloseLibrary(SDL_AIN_Base);
-		SDL_AIN_Base = NULL;
-	}
+    OS4_DropInterface((void *) &SDL_IAIN);
+    OS4_CloseLibrary(&SDL_AIN_Base);
 }
 
 /* Function to scan the system for joysticks.
@@ -276,16 +246,19 @@ SDL_SYS_JoystickInit(void)
 	return joystickCount;
 }
 
-int SDL_SYS_NumJoysticks()
+int
+SDL_SYS_NumJoysticks()
 {
     return joystickCount;
 }
 
-void SDL_SYS_JoystickDetect()
+void
+SDL_SYS_JoystickDetect()
 {
 }
 
-SDL_bool SDL_SYS_JoystickNeedsPolling()
+SDL_bool
+SDL_SYS_JoystickNeedsPolling()
 {
     return SDL_FALSE;
 }
@@ -298,7 +271,8 @@ SDL_SYS_JoystickNameForDeviceIndex(int device_index)
 }
 
 /* Function to perform the mapping from device index to the instance id for this index */
-SDL_JoystickID SDL_SYS_GetInstanceIdOfDeviceIndex(int device_index)
+SDL_JoystickID
+SDL_SYS_GetInstanceIdOfDeviceIndex(int device_index)
 {
     return device_index;
 }
@@ -325,7 +299,7 @@ SDL_SYS_JoystickOpen(SDL_Joystick * joystick, int device_index)
 
 	if (handle)
 	{
-		joystick->hwdata = IExec->AllocVecTags(sizeof (struct joystick_hwdata), AVT_ClearWithValue, 0, TAG_DONE );
+		joystick->hwdata = SDL_calloc(1, sizeof(struct joystick_hwdata));
 
 		if (joystick->hwdata)
 		{
@@ -459,7 +433,8 @@ SDL_SYS_JoystickOpen(SDL_Joystick * joystick, int device_index)
 }
 
 /* Function to determine is this joystick is attached to the system right now */
-SDL_bool SDL_SYS_JoystickAttached(SDL_Joystick *joystick)
+SDL_bool
+SDL_SYS_JoystickAttached(SDL_Joystick *joystick)
 {
     return SDL_TRUE;
 }
@@ -544,7 +519,7 @@ SDL_SYS_JoystickClose(SDL_Joystick * joystick)
 #else
 	SDL_IAIN->ReleaseDevice(joystick->hwdata->context, joystick->hwdata->handle);
 #endif
-	IExec->FreeVec (joystick->hwdata);
+	SDL_free(joystick->hwdata);
 	joystick->hwdata = NULL;
 }
 
@@ -590,7 +565,7 @@ SDL_SYS_JoystickQuit(void)
 #endif
 
 	for (i = 0; i < joystickCount; i++)
-		freeString((char *)joystickList[i].name);
+		SDL_free((char *)joystickList[i].name);
 
 	joystickCount = 0;
 
@@ -606,7 +581,8 @@ SDL_SYS_JoystickQuit(void)
 	closeAmigaInput();
 }
 
-SDL_JoystickGUID SDL_SYS_JoystickGetDeviceGUID( int device_index )
+SDL_JoystickGUID
+SDL_SYS_JoystickGetDeviceGUID( int device_index )
 {
     SDL_JoystickGUID guid;
     /* the GUID is just the first 16 chars of the name for now */
@@ -617,7 +593,8 @@ SDL_JoystickGUID SDL_SYS_JoystickGetDeviceGUID( int device_index )
 }
 
 
-SDL_JoystickGUID SDL_SYS_JoystickGetGUID(SDL_Joystick * joystick)
+SDL_JoystickGUID
+SDL_SYS_JoystickGetGUID(SDL_Joystick * joystick)
 {
     SDL_JoystickGUID guid;
     /* the GUID is just the first 16 chars of the name for now */

@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2014 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2017 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -25,11 +25,17 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 /* System dependent library loading routines                           */
 
-#include <proto/exec.h>
 #include <proto/elf.h>
 #include <proto/dos.h>
 
+static struct Library *ElfBase;
+struct Library *DOSBase;
+
+struct ElfIFace *IElf;
+struct DOSIFace *IDOS;
+
 #include "SDL_loadso.h"
+#include "../../video/amigaos4/SDL_os4library.h"
 
 #define DEBUG
 #include "../../main/amigaos4/SDL_os4debug.h"
@@ -39,58 +45,51 @@ typedef struct {
     APTR shared_object;
 } OS4_ObjectHandle;
 
-static struct Library *ElfBase;
-struct ElfIFace *IElf;
-
-static SDL_bool
-OS4_OpenElf()
+static void
+OS4_CloseLibs()
 {
-    SDL_bool result = SDL_FALSE;
+    OS4_DropInterface((void *)&IElf);
+    OS4_DropInterface((void *)&IDOS);
 
-    if (IElf) {
-        result = SDL_TRUE;
-    } else {
-        ElfBase = IExec->OpenLibrary("elf.library", 52);
+    OS4_CloseLibrary(&ElfBase);
+    OS4_CloseLibrary(&DOSBase);
+}
+
+static BOOL
+OS4_OpenLibs()
+{
+    BOOL result = FALSE;
+
+    if (!ElfBase) {
+        ElfBase = OS4_OpenLibrary("elf.library", 52);
 
         if (ElfBase) {
-
-            IElf = (struct ElfIFace *)IExec->GetInterface(ElfBase, "main", 1, NULL);
-
-            if (IElf) {
-                dprintf("Got elf interface\n");
-                result = SDL_TRUE;
-            } else {
-                dprintf("Failed to get elf interface\n");
-            }
-        } else {
-            dprintf("Failed to get elf base\n");
+            IElf = (struct ElfIFace *) OS4_GetInterface(ElfBase);
         }
+    }
+
+    if (!DOSBase) {
+        DOSBase = OS4_OpenLibrary("dos.library", 51);
+
+        if (DOSBase) {
+            IDOS = (struct DOSIFace *) OS4_GetInterface(DOSBase);
+        }
+    }
+
+    if (IElf && IDOS)
+    {
+        result = TRUE;
+    } else {
+        OS4_CloseLibs();
     }
 
     return result;
 }
 
-static void
-OS4_CloseElf()
-{
-    dprintf("Dropping elf interface\n");
-
-    if (IElf) {
-        IExec->DropInterface((struct Interface *) IElf);
-        IElf = NULL;
-    }
-
-    if (ElfBase) {
-        IExec->CloseLibrary(ElfBase);
-        ElfBase = NULL;
-    }
-}
-
 void *
 SDL_LoadObject(const char *sofile)
-{
-    if (OS4_OpenElf()) {
-        
+{        
+    if (OS4_OpenLibs()) {
         OS4_ObjectHandle *handle = SDL_malloc(sizeof(OS4_ObjectHandle));
 
         if (handle) {
@@ -104,13 +103,13 @@ SDL_LoadObject(const char *sofile)
 
                 if (eh) {
                     APTR so = IElf->DLOpen(eh, sofile, 0);
-                    
+                        
                     if (so) {
                         dprintf("'%s' loaded\n", sofile);
 
                         handle->elf_handle = eh;
                         handle->shared_object = so;
-                        
+                            
                         return handle;
                     } else {
                         dprintf("DLOpen failed for '%s'\n", sofile);
@@ -124,7 +123,7 @@ SDL_LoadObject(const char *sofile)
                 dprintf("Failed to get seglist\n");
                 SDL_SetError("Failed to get seglist");
             }
-            
+                
             SDL_free(handle);
         }
     }
@@ -137,7 +136,7 @@ SDL_LoadFunction(void *handle, const char *name)
 {
     void *symbol = NULL;
 
-    if (OS4_OpenElf() && handle) {
+    if (OS4_OpenLibs() && handle) {
         APTR address;
         OS4_ObjectHandle *oh = handle;
 
@@ -158,7 +157,7 @@ SDL_LoadFunction(void *handle, const char *name)
 void
 SDL_UnloadObject(void *handle)
 {
-    if (OS4_OpenElf() && handle) {
+    if (OS4_OpenLibs() && handle) {
 
         Elf32_Error result;
         OS4_ObjectHandle *oh = handle;
@@ -175,7 +174,7 @@ SDL_UnloadObject(void *handle)
         SDL_free(handle);
     }
 
-    OS4_CloseElf();
+    OS4_CloseLibs();
 }
 
 #endif /* SDL_LOADSO_AMIGAOS4 */

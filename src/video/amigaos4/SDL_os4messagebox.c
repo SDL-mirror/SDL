@@ -22,10 +22,10 @@
 
 #if SDL_VIDEO_DRIVER_AMIGAOS4
 
-#include <proto/exec.h>
 #include <proto/intuition.h>
 
 #include "SDL_os4window.h"
+#include "SDL_os4library.h"
 
 #define DEBUG
 #include "../../main/amigaos4/SDL_os4debug.h"
@@ -43,12 +43,10 @@ OS4_OpenIntuition()
 {
     dprintf("Called\n");
 
-    MB_IntuitionBase = IExec->OpenLibrary("intuition.library", 51);
+    MB_IntuitionBase = OS4_OpenLibrary("intuition.library", 51);
 
     if (MB_IntuitionBase) {
-
-        MB_IIntuition = (struct IntuitionIFace *)
-            IExec->GetInterface(MB_IntuitionBase, "main", 1, NULL);
+        MB_IIntuition = (struct IntuitionIFace *) OS4_GetInterface(MB_IntuitionBase);
 
         if (MB_IIntuition) {
             return TRUE;
@@ -63,15 +61,8 @@ OS4_CloseIntuition()
 {
     dprintf("Called\n");
 
-    if (MB_IIntuition) {
-        IExec->DropInterface((struct Interface *) MB_IIntuition);
-        MB_IIntuition = NULL;
-    }
-
-    if (MB_IntuitionBase) {
-        IExec->CloseLibrary(MB_IntuitionBase);
-        MB_IntuitionBase = NULL;
-    }
+    OS4_DropInterface((void *) &MB_IIntuition);
+    OS4_CloseLibrary(&MB_IntuitionBase);
 }
 
 static char *
@@ -99,6 +90,19 @@ OS4_MakeButtonString(const SDL_MessageBoxData * messageboxdata)
     return buttonBuffer;
 }
 
+static struct Window *
+OS4_GetWindow(const SDL_MessageBoxData * messageboxdata)
+{
+    struct Window * syswin = NULL;
+
+    if (messageboxdata->window) {
+        SDL_WindowData *data = messageboxdata->window->driverdata;
+        syswin = data->syswin;
+    }
+
+    return syswin;
+}
+
 int
 OS4_ShowMessageBox(const SDL_MessageBoxData * messageboxdata, int * buttonid)
 {
@@ -109,12 +113,6 @@ OS4_ShowMessageBox(const SDL_MessageBoxData * messageboxdata, int * buttonid)
         char *buttonString;
 
         if ((buttonString = OS4_MakeButtonString(messageboxdata))) {
-            struct Window * syswin = NULL;
-
-            if (messageboxdata->window) {
-                SDL_WindowData *data = messageboxdata->window->driverdata;
-                syswin = data->syswin;
-            }
 
             struct EasyStruct es = {
                 sizeof(struct EasyStruct),
@@ -129,8 +127,7 @@ OS4_ShowMessageBox(const SDL_MessageBoxData * messageboxdata, int * buttonid)
             const int LAST_BUTTON = messageboxdata->numbuttons;
 
             /* Amiga button order is 1, 2, ..., N, 0! */
-
-            int amigaButton = MB_IIntuition->EasyRequest(syswin, &es, 0, NULL);
+            int amigaButton = MB_IIntuition->EasyRequest(OS4_GetWindow(messageboxdata), &es, 0, NULL);
 
             dprintf("Button %d chosen\n", amigaButton);
 

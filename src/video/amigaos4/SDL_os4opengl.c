@@ -24,6 +24,7 @@
 
 #include "SDL_os4video.h"
 #include "SDL_os4window.h"
+#include "SDL_os4library.h"
 
 #include <proto/minigl.h>
 
@@ -61,7 +62,7 @@ OS4_GL_LoadLibrary(_THIS, const char * path)
     dprintf("Called %d\n", _this->gl_config.driver_loaded);
 
     if (!MiniGLBase) {
-        MiniGLBase = IExec->OpenLibrary("minigl.library", 2);
+        MiniGLBase = OS4_OpenLibrary("minigl.library", 2);
 
         if (!MiniGLBase) {
             dprintf("Failed to open minigl.library\n");
@@ -71,7 +72,7 @@ OS4_GL_LoadLibrary(_THIS, const char * path)
     }
 
     if (!IMiniGL) {
-        IMiniGL = (struct MiniGLIFace *) IExec->GetInterface(MiniGLBase, "main", 1, NULL);
+        IMiniGL = (struct MiniGLIFace *) OS4_GetInterface(MiniGLBase);
 
         if (!IMiniGL) {
             dprintf("Failed to open MiniGL interace\n");
@@ -108,15 +109,8 @@ OS4_GL_UnloadLibrary(_THIS)
 {
     dprintf("Called %d\n", _this->gl_config.driver_loaded);
 
-    if (IMiniGL) {
-        IExec->DropInterface((struct Interface *) IMiniGL);
-        IMiniGL = NULL;
-    }
-
-    if (MiniGLBase) {
-        IExec->CloseLibrary(MiniGLBase);
-        MiniGLBase = NULL;
-    }
+    OS4_DropInterface((void *) &IMiniGL);
+    OS4_CloseLibrary(&MiniGLBase);
 }
 
 SDL_bool
@@ -292,6 +286,7 @@ OS4_GL_GetDrawableSize(_THIS, SDL_Window * window, int * w, int * h)
 
         if (width != window->w || height != window->h) {
             dprintf("Waiting for Intuition %d\n", counter);
+            dprintf("w %d (ww %d), h %d (wh %d)\n", width, window->w, height, window->h);
             usleep(1000);
         } else {
             break;

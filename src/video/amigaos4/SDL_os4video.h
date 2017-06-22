@@ -25,7 +25,6 @@
 
 #include <exec/types.h>
 #include <intuition/intuition.h>
-#include <proto/exec.h>
 #include <proto/intuition.h>
 #include <proto/graphics.h>
 #include <proto/keymap.h>
