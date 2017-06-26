@@ -45,7 +45,7 @@ struct MiniGLIFace *IMiniGL;
  * against a shared library version this will require some
  * trickery.
  */
-struct GLContextIFace *mini_CurrentContext = 0;
+__attribute__((visibility ("default"))) struct GLContextIFace *mini_CurrentContext = 0;
 
 void *AmiGetGLProc(const char *proc);
 
