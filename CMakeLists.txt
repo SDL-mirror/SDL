@@ -1426,7 +1426,7 @@ elseif(AMIGA)
 
   if(SDL_FILESYSTEM)
     set(SDL_FILESYSTEM_AMIGAOS4 1)
-    file(GLOB FILESYSTEM_SOURCES ${SDL2_SOURCE_DIR}/src/filesystem/amigas4/*.c)
+    file(GLOB FILESYSTEM_SOURCES ${SDL2_SOURCE_DIR}/src/filesystem/amigaos4/*.c)
     set(SOURCE_FILES ${SOURCE_FILES} ${FILESYSTEM_SOURCES})
     set(HAVE_SDL_FILESYSTEM TRUE)
   endif()
