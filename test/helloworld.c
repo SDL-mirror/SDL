@@ -64,8 +64,8 @@ static SDL_bool eventLoopInner(void)
 
             case SDL_MOUSEMOTION:
                 {
-                    //SDL_MouseMotionEvent * me = (SDL_MouseMotionEvent *)&e;
-                    //printf("Mouse motion x=%d, y=%d, xrel=%d, yrel=%d\n", me->x, me->y, me->xrel, me->yrel);
+                    SDL_MouseMotionEvent * me = (SDL_MouseMotionEvent *)&e;
+                    printf("Mouse motion x=%d, y=%d, xrel=%d, yrel=%d\n", me->x, me->y, me->xrel, me->yrel);
                 }
                 break;
 
@@ -125,6 +125,20 @@ static void testManyWindows()
 
         SDL_DestroyWindow(w);
         SDL_DestroyWindow(w2);
+    }
+}
+
+static void testRelativeMouse()
+{
+    SDL_Window * w = SDL_CreateWindow("relative", 100, 100, 100, 100, 0);
+
+    if (w) {
+	//SDL_SetRelativeMouseMode(SDL_FALSE);
+	//SDL_SetRelativeMouseMode(SDL_TRUE);
+
+        eventLoop();
+
+        SDL_DestroyWindow(w);
     }
 }
 
@@ -243,14 +257,14 @@ static void testOpenGLSwitching()
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
 
-    SDL_RecreateWindow(w, SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL);
+    //SDL_RecreateWindow(w, SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL);
 
     // Switch back to "any" OpenGL
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, 0);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 1);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
 
-    SDL_RecreateWindow(w, SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL);
+    //SDL_RecreateWindow(w, SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL);
 
     openGL(w);
 }
@@ -659,7 +673,8 @@ int main(void)
         //testGlobalMouseWarp();
         //testOpaqueWindow();
         //testWindowBordersSize();
-        testHiddenWindow();
+        //testHiddenWindow();
+	testRelativeMouse();
 
         SDL_Quit();
     }
