@@ -623,6 +623,12 @@ void Redraw() {
     }
 }
 
+static void my_exit(void)
+{
+     SDLTest_CommonQuit(state);
+     SDL_Quit();
+}
+
 int main(int argc, char *argv[]) {
     int i, done;
     SDL_Event event;
@@ -664,6 +670,7 @@ int main(int argc, char *argv[]) {
         return 2;
     }
 
+    atexit(my_exit);
 
 #ifdef HAVE_SDL_TTF
     /* Initialize fonts */
@@ -680,7 +687,6 @@ int main(int argc, char *argv[]) {
 #endif
 
     SDL_Log("Using font: %s\n", fontname);
-    atexit(SDL_Quit);
 
     InitInput();
     /* Create the windows and initialize the renderers */
