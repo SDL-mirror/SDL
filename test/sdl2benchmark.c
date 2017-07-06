@@ -681,13 +681,19 @@ static void checkPixelFormat(Context *ctx)
 int main(int argc, char **argv)
 {
     Context ctx;
+    SDL_version linked;
 
     if (SDL_Init(SDL_INIT_VIDEO)) {
         SDL_Log("Init failed\n");
         return -1;
     }
 
-    SDL_Log("SDL2 renderer benchmark v. 0.2\n");
+    SDL_GetVersion(&linked);
+
+    SDL_Log("SDL2 renderer benchmark v. 0.2 (SDL version %d.%d.%d)\n",
+        linked.major, linked.minor, linked.patch);
+
+    SDL_Log("This tool measures the speed of various 2D drawing features\n");
 
     initContext(&ctx, argc, argv);
 
