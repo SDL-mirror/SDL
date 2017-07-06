@@ -88,6 +88,8 @@ extern void * OS4_SaveAllocVecPooled(_THIS, uint32 size);
 extern void OS4_SaveFreePooled(_THIS, void *mem, uint32 size);
 extern void OS4_SaveFreeVecPooled(_THIS, void *mem);
 
+extern DECLSPEC struct MsgPort * OS4_GetSharedMessagePort();
+
 #endif /* _SDL_os4video_h */
 
 /* vi: set ts=4 sw=4 expandtab: */

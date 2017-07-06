@@ -480,6 +480,22 @@ OS4_SaveFreeVecPooled(_THIS, void * mem)
     IExec->FreeVecPooled(data->pool, mem);
 }
 
+/* Native window apps may be interested in calling this */
+struct MsgPort *
+OS4_GetSharedMessagePort()
+{
+    SDL_VideoDevice *vd = SDL_GetVideoDevice();
+
+    if (vd) {
+        SDL_VideoData *data = (SDL_VideoData *) vd->driverdata;
+        if (data) {
+            return data->userport;
+        }
+    }
+
+    return NULL;
+}
+
 #endif /* SDL_VIDEO_DRIVER_AMIGAOS4 */
 
 /* vi: set ts=4 sw=4 expandtab: */
