@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2016 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2017 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -29,7 +29,7 @@ typedef struct OS4_GlobalMouseState
 {
 	int x;
 	int y;
-	int buttonPressed[SDL_BUTTON_RIGHT];
+	int buttonPressed[SDL_BUTTON_RIGHT+1];
 } OS4_GlobalMouseState;
 
 extern void OS4_InitMouse(_THIS);
