@@ -157,13 +157,13 @@ static int allocVbuffers(_THIS, int num_buffers, int bufsize)
 	int i;
 
 	for (i=0; i<num_buffers; i++) {
-		XBIOS_screensmem[i] = Atari_SysMalloc(bufsize, MX_STRAM);
+		XBIOS_screensmem[i] = Atari_SysMalloc(bufsize+256, MX_STRAM);
 
 		if (XBIOS_screensmem[i]==NULL) {
 			SDL_SetError("Can not allocate %d KB for buffer %d", bufsize>>10, i);
 			return (0);
 		}
-		SDL_memset(XBIOS_screensmem[i], 0, bufsize);
+		SDL_memset(XBIOS_screensmem[i], 0, bufsize+256);
 
 		XBIOS_screens[i]=(void *) (( (long) XBIOS_screensmem[i]+256) & 0xFFFFFF00UL);
 	}
