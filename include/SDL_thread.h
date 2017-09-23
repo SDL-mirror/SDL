@@ -64,6 +64,9 @@ typedef struct SDL_Thread SDL_Thread;
 #ifndef _WIN32_WCE
 #include <process.h> /* This has _beginthread() and _endthread() defined! */
 #endif
+#ifdef __EMX__
+#include <stdlib.h>
+#endif
 
 #ifdef __OS2__
 typedef int (*pfnSDL_CurrentBeginThread)(void (*func)(void *), void *, unsigned, void *arg); 
