@@ -23,7 +23,7 @@
 
 /*
  * Xbios SDL video driver
- * 
+ *
  * Patrice Mandin
  */
 
@@ -442,7 +442,7 @@ static SDL_Surface *XBIOS_SetVideoMode(_THIS, SDL_Surface *current,
 	lineWidth = (*XBIOS_getLineWidth)(this, new_video_mode, width, new_depth);
 
 	new_screen_size = lineWidth * height;
-	new_screen_size += 256; /* To align on a 256 byte adress */	
+	new_screen_size += 256; /* To align on a 256 byte adress */
 
 	if (new_video_mode->flags & XBIOSMODE_C2P) {
 		XBIOS_shadowscreen = Atari_SysMalloc(new_screen_size, MX_PREFTTRAM);
@@ -591,13 +591,13 @@ static void XBIOS_UpdateRects(_THIS, int numrects, SDL_Rect *rects)
 		}
 	}
 
+	if ((surface->flags & SDL_DOUBLEBUF) == SDL_DOUBLEBUF) {
 #ifndef DEBUG_VIDEO_XBIOS
-	(*XBIOS_swapVbuffers)(this);
+		(*XBIOS_swapVbuffers)(this);
 
-	Vsync();
+		Vsync();
 #endif
 
-	if ((surface->flags & SDL_DOUBLEBUF) == SDL_DOUBLEBUF) {
 		XBIOS_fbnum ^= 1;
 		if (!XBIOS_shadowscreen) {
 			int src_offset = (surface->locked ? surface->offset : 0);
@@ -630,13 +630,13 @@ static int XBIOS_FlipHWSurface(_THIS, SDL_Surface *surface)
 		);
 	}
 
+	if ((surface->flags & SDL_DOUBLEBUF) == SDL_DOUBLEBUF) {
 #ifndef DEBUG_VIDEO_XBIOS
-	(*XBIOS_swapVbuffers)(this);
+		(*XBIOS_swapVbuffers)(this);
 
-	Vsync();
+		Vsync();
 #endif
 
-	if ((surface->flags & SDL_DOUBLEBUF) == SDL_DOUBLEBUF) {
 		XBIOS_fbnum ^= 1;
 		if (!XBIOS_shadowscreen) {
 			src_offset = (surface->locked ? surface->offset : 0);
@@ -691,7 +691,7 @@ static void XBIOS_VideoQuit(_THIS)
 		}
 	}
 
-	this->screen->pixels = NULL;	
+	this->screen->pixels = NULL;
 
 	/* Restore screensavers */
 	if (SDL_XBIOS_TveillePresent(this)) {

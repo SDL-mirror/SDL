@@ -77,7 +77,7 @@ static void listModes(_THIS, int actually_add)
 		curmode.mode = curmode.physx = curmode.physy = curmode.plan =
 			curmode.logx = curmode.logy = -1;
 		result = Vnext(&curmode, &listedmode);
-	}		
+	}
 }
 
 static void saveMode(_THIS, SDL_PixelFormat *vformat)

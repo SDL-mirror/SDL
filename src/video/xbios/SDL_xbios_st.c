@@ -78,7 +78,7 @@ static void saveMode(_THIS, SDL_PixelFormat *vformat)
 {
 	short *oldpalette;
 	int i;
-		
+
 	XBIOS_oldvbase=Physbase();
 	XBIOS_oldvmode=Getrez();
 
@@ -188,7 +188,7 @@ static int setColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors)
 	int	i, r,g,b;
 
  	for (i=0;i<ncolors;i++) {
-		r = colors[i].r;	
+		r = colors[i].r;
 		g = colors[i].g;
 		b = colors[i].b;
 

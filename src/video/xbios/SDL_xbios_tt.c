@@ -113,10 +113,10 @@ static int setColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors)
 	int	i, r,g,b;
 
 	for(i = 0; i < ncolors; i++) {
-		r = colors[i].r;	
+		r = colors[i].r;
 		g = colors[i].g;
 		b = colors[i].b;
-					
+
 		TT_palette[i]=((r>>4)<<8)|((g>>4)<<4)|(b>>4);
 	}
 	EsetPalette(firstcolor,ncolors,TT_palette);

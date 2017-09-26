@@ -55,7 +55,7 @@ static const predefined_mode_t mode_list[]={
 	{0x4188,1024,768},
 	{0x42c8,1280,800},
 	{0x41e0,1280,1024},
-	{0x4210,1600,1200}	
+	{0x4210,1600,1200}
 };
 
 static const Uint8 mode_bpp[]={
@@ -105,8 +105,8 @@ static unsigned long /*cdecl*/ enumfunc(SCREENINFO *inf, unsigned long flag)
 
 	SDL_XBIOS_AddMode(enum_this, enum_actually_add, &modeinfo);
 
-	return ENUMMODE_CONT; 
-} 
+	return ENUMMODE_CONT;
+}
 
 static void listModes(_THIS, int actually_add)
 {
@@ -121,7 +121,7 @@ static void listModes(_THIS, int actually_add)
 		for (j=3; j<5; j++) {
 			if (Validmode(deviceid + j)) {
 				xbiosmode_t modeinfo;
-				
+
 				modeinfo.number = deviceid + j;
 				modeinfo.width = mode_list[i].width;
 				modeinfo.height = mode_list[i].height;
@@ -144,7 +144,7 @@ static void saveMode(_THIS, SDL_PixelFormat *vformat)
 {
 	SCREENINFO si;
 
-	/* Read infos about current mode */ 
+	/* Read infos about current mode */
 	VsetScreen(-1, &XBIOS_oldvmode, VN_MAGIC, CMD_GETMODE);
 
 	si.size = sizeof(SCREENINFO);
@@ -268,13 +268,13 @@ static void updateRects(_THIS, int numrects, SDL_Rect *rects)
 {
 	SDL_Surface *surface;
 	int i;
-	  
+
 	surface = this->screen;
 
 	for (i=0;i<numrects;i++) {
 		Uint8 *blockSrcStart, *blockDstStart;
 		int y;
-		
+
 		blockSrcStart = (Uint8 *) surface->pixels;
 		blockSrcStart += surface->pitch*rects[i].y;
 		blockSrcStart += surface->format->BytesPerPixel*rects[i].x;
@@ -291,10 +291,10 @@ static void updateRects(_THIS, int numrects, SDL_Rect *rects)
 		}
 	}
 
-	VsetScreen(-1L, -1L, VN_MAGIC, CMD_FLIPPAGE);
-	Vsync();
-
 	if ((surface->flags & SDL_DOUBLEBUF) == SDL_DOUBLEBUF) {
+		VsetScreen(-1L, -1L, VN_MAGIC, CMD_FLIPPAGE);
+		Vsync();
+
 		XBIOS_fbnum ^= 1;
 	}
 }
@@ -311,13 +311,13 @@ static int flipHWSurface(_THIS, SDL_Surface *surface)
 		SDL_memcpy(dst, src, surface->w * surface->format->BytesPerPixel);
 		src += surface->pitch;
 		dst += XBIOS_pitch;
-		
+
 	}
 
-	VsetScreen(-1L, -1L, VN_MAGIC, CMD_FLIPPAGE);
-	Vsync();
-
 	if ((surface->flags & SDL_DOUBLEBUF) == SDL_DOUBLEBUF) {
+		VsetScreen(-1L, -1L, VN_MAGIC, CMD_FLIPPAGE);
+		Vsync();
+
 		XBIOS_fbnum ^= 1;
 	}
 

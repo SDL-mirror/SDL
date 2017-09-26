@@ -265,7 +265,7 @@ static int setColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors)
 	int i, r,g,b;
 
 	for(i = 0; i < ncolors; i++) {
-		r = colors[i].r;	
+		r = colors[i].r;
 		g = colors[i].g;
 		b = colors[i].b;
 
@@ -321,13 +321,13 @@ static void updateRects_SV(_THIS, int numrects, SDL_Rect *rects)
 {
 	SDL_Surface *surface;
 	int i;
-	  
+
 	surface = this->screen;
 
 	for (i=0;i<numrects;i++) {
 		Uint8 *blockSrcStart, *blockDstStart;
 		int y;
-		
+
 		blockSrcStart = (Uint8 *) surface->pixels;
 		blockSrcStart += surface->pitch*rects[i].y;
 		blockSrcStart += surface->format->BytesPerPixel*rects[i].x;
@@ -344,10 +344,10 @@ static void updateRects_SV(_THIS, int numrects, SDL_Rect *rects)
 		}
 	}
 
-	Setscreen(-1,XBIOS_screens[XBIOS_fbnum],-1);
-	Vsync();
-
 	if ((surface->flags & SDL_DOUBLEBUF) == SDL_DOUBLEBUF) {
+		Setscreen(-1,XBIOS_screens[XBIOS_fbnum],-1);
+		Vsync();
+
 		XBIOS_fbnum ^= 1;
 	}
 }
@@ -364,13 +364,13 @@ static int flipHWSurface_SV(_THIS, SDL_Surface *surface)
 		SDL_memcpy(dst, src, surface->w * surface->format->BytesPerPixel);
 		src += surface->pitch;
 		dst += XBIOS_pitch;
-		
+
 	}
 
-	Setscreen(-1,XBIOS_screens[XBIOS_fbnum],-1);
-	Vsync();
-  
-	if ((surface->flags & SDL_DOUBLEBUF) == SDL_DOUBLEBUF) {
+ 	if ((surface->flags & SDL_DOUBLEBUF) == SDL_DOUBLEBUF) {
+		Setscreen(-1,XBIOS_screens[XBIOS_fbnum],-1);
+		Vsync();
+
 		XBIOS_fbnum ^= 1;
 	}
 

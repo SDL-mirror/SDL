@@ -46,7 +46,7 @@ static const predefined_mode_t mode_list[NUM_PREDEFINED_MODES]={
 	{1024,768},
 	{1152,864},
 	{1280,1024},
-	{1600,1200}	
+	{1600,1200}
 };
 
 static const Uint8 mode_bpp[4]={
@@ -96,8 +96,8 @@ static unsigned long /*cdecl*/ enumfunc(SCREENINFO *inf, unsigned long flag)
 
 	SDL_XBIOS_AddMode(enum_this, enum_actually_add, &modeinfo);
 
-	return ENUMMODE_CONT; 
-} 
+	return ENUMMODE_CONT;
+}
 
 static void listModes(_THIS, int actually_add)
 {
@@ -111,7 +111,7 @@ static void listModes(_THIS, int actually_add)
 		for (j=1; j<4; j++) {
 			if (Validmode(deviceid + j)) {
 				xbiosmode_t modeinfo;
-				
+
 				modeinfo.number = deviceid + j;
 				modeinfo.width = mode_list[i].width;
 				modeinfo.height = mode_list[i].height;
@@ -133,7 +133,7 @@ static void saveMode(_THIS, SDL_PixelFormat *vformat)
 {
 	SCREENINFO si;
 
-	/* Read infos about current mode */ 
+	/* Read infos about current mode */
 	VsetScreen(-1, &XBIOS_oldvmode, MI_MAGIC, CMD_GETMODE);
 
 	si.size = sizeof(SCREENINFO);
@@ -244,7 +244,7 @@ static int setColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors)
 	int i, r,g,b;
 
 	for(i = 0; i < ncolors; i++) {
-		r = colors[i].r;	
+		r = colors[i].r;
 		g = colors[i].g;
 		b = colors[i].b;
 
