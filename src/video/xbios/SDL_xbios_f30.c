@@ -282,13 +282,13 @@ static int allocVbuffers_SV(_THIS, int num_buffers, int bufsize)
 	Uint32 tmp;
 
 	for (i=0; i<num_buffers; i++) {
-		XBIOS_screensmem[i] = Atari_SysMalloc(bufsize+256, MX_STRAM);
+		XBIOS_screensmem[i] = Atari_SysMalloc(bufsize, MX_STRAM);
 
 		if (XBIOS_screensmem[i]==NULL) {
 			SDL_SetError("Can not allocate %d KB for buffer %d", bufsize>>10, i);
 			return (0);
 		}
-		SDL_memset(XBIOS_screensmem[i], 0, bufsize+256);
+		SDL_memset(XBIOS_screensmem[i], 0, bufsize);
 
 		/* Align on 256byte boundary and map to Supervidel memory */
 		tmp = ( (Uint32) XBIOS_screensmem[i]+256) & 0xFFFFFF00UL;
