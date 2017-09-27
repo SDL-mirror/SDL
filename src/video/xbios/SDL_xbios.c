@@ -524,7 +524,6 @@ static SDL_Surface *XBIOS_SetVideoMode(_THIS, SDL_Surface *current,
 #endif
 
 	this->UpdateRects = XBIOS_updRects;
-	XBIOS_recoffset = 2;
 
 	return (current);
 }

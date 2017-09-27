@@ -36,7 +36,7 @@
 typedef struct
 {
 	Uint16 number;		/* Video mode number */
-	Uint16 width;		/* Size */	
+	Uint16 width;		/* Size */
 	Uint16 height;
 	Uint16 depth;		/* bits per plane */
 	Uint16 flags;
@@ -56,7 +56,6 @@ struct SDL_PrivateVideoData {
 	void *shadowscreen;		/* Shadow screen for c2p conversion */
 	int frame_number;		/* Number of frame for double buffer */
 	int pitch;				/* Destination line width for C2P */
-	int recalc_offset;		/* Recalculate SDL_Surface offset for C2P */
 
 	xbiosmode_t *current;	/* Current set mode */
 	int SDL_nummodes[NUM_MODELISTS];
