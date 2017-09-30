@@ -93,6 +93,7 @@ static void GEM_UpdateRects(_THIS, int numrects, SDL_Rect *rects);
 /* Internal functions */
 static void GEM_FreeBuffers(_THIS);
 static void GEM_ClearScreen(_THIS);
+static void GEM_ClearRect(_THIS, short *rect);
 static void GEM_SetNewPalette(_THIS, Uint16 newpal[256][3]);
 static void GEM_LockScreen(_THIS);
 static void GEM_UnlockScreen(_THIS);
@@ -499,7 +500,7 @@ static void GEM_FreeBuffers(_THIS)
 	}
 }
 
-void GEM_clear_rect(_THIS, short *rect)
+void GEM_ClearRect(_THIS, short *rect)
 {
 	short oldrgb[3], rgb[3]={0,0,0};
 
@@ -523,7 +524,7 @@ static void GEM_ClearScreen(_THIS)
 	pxy[0] = pxy[1] = 0;
 	pxy[2] = VDI_w - 1;
 	pxy[3] = VDI_h - 1;
-	GEM_clear_rect(this, pxy);
+	GEM_ClearRect(this, pxy);
 
 	v_show_c(VDI_handle, 1);
 }
@@ -760,6 +761,8 @@ SDL_Surface *GEM_SetVideoMode(_THIS, SDL_Surface *current,
 			/* Align work area on 16 pixels boundary (faster for bitplanes modes) */
 			wind_calc(WC_WORK, GEM_win_type, x2,y2,w2,h2, &x2,&y2,&w2,&h2);
 			x2 &= -16;
+			x2 -= 8;
+			w2 += 16;
 			wind_calc(WC_BORDER, GEM_win_type, x2,y2,w2,h2, &x2,&y2,&w2,&h2);
 
 			/* Destroy existing window */
@@ -797,7 +800,7 @@ SDL_Surface *GEM_SetVideoMode(_THIS, SDL_Surface *current,
 			}
 		}
 
-		wind_get (GEM_handle, WF_WORKXYWH, &GEM_work_x,&GEM_work_y,&GEM_work_w,&GEM_work_h);
+		GEM_align_work_area(this, GEM_handle, 0);
 		GEM_fullscreen = SDL_FALSE;
 	}
 
@@ -835,6 +838,46 @@ SDL_Surface *GEM_SetVideoMode(_THIS, SDL_Surface *current,
 
 	/* We're done */
 	return(current);
+}
+
+void GEM_align_work_area(_THIS, short windowid, int clear_pads)
+{
+	int new_x, new_w;
+
+	wind_get(windowid, WF_WORKXYWH, &GEM_work_x,&GEM_work_y,&GEM_work_w,&GEM_work_h);
+
+	/* Align work area on 16 pixels boundary (faster for bitplanes modes) */
+	new_x = GEM_work_x;
+	if (new_x & 15) {
+		new_x = (new_x|15)+1;
+	}
+	new_w = GEM_work_w;
+	new_w -= (new_x - GEM_work_x);
+	new_w &= -16;
+
+	if (clear_pads) {
+		short pxy[4];
+
+		pxy[1] = GEM_work_y;
+		pxy[3] = pxy[1] + GEM_work_h - 1;
+
+		/* Left padding */
+		pxy[0] = GEM_work_x;
+		pxy[2] = new_x - 1;
+		if (pxy[0]<=pxy[2]) {
+			GEM_ClearRect(this, pxy);
+		}
+
+		/* Right padding */
+		pxy[0] = new_x + new_w;
+		pxy[2] = GEM_work_x + GEM_work_w - 1;
+		if (pxy[0]<=pxy[2]) {
+			GEM_ClearRect(this, pxy);
+		}
+	}
+
+	GEM_work_w = new_w;
+	GEM_work_x = new_x;
 }
 
 static int GEM_AllocHWSurface(_THIS, SDL_Surface *surface)
@@ -1203,7 +1246,7 @@ static void refresh_window(_THIS, int winhandle, short *rect)
 
 		surface = GEM_icon;
 
-		GEM_clear_rect(this, rect);
+		GEM_ClearRect(this, rect);
 
 		/* Calculate centered icon(x,y,w,h) relative to window */
 		iconx = (wind_pxy[2]-surface->w)>>1;

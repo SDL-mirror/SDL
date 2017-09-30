@@ -37,7 +37,7 @@ struct WMcursor {
 
 /* Functions prototypes */
 void GEM_wind_redraw(_THIS, int winhandle, short *inside);
-void GEM_clear_rect(_THIS, short *rect);
+void GEM_align_work_area(_THIS, short windowid, int clear_pads);
 
 /* Private display data */
 

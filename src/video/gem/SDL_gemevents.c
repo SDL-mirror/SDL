@@ -288,26 +288,7 @@ static int do_messages(_THIS, short *message, short latest_msg_id)
 	}
 
 	if (update_work_area) {
-		wind_get (message[3], WF_WORKXYWH, &GEM_work_x, &GEM_work_y, &GEM_work_w, &GEM_work_h);
-
-		/* Align work area on 16 pixels boundary (faster for bitplanes modes) */
-		if (align_work_area) {
-			int aligned_x;
-			short pxy[4];
-
-			aligned_x = GEM_work_x;
-			if (aligned_x & 15) {
-				aligned_x = (aligned_x|15)+1;
-
-				pxy[0] = GEM_work_x;
-				pxy[1] = GEM_work_y;
-				pxy[2] = aligned_x - 1;
-				pxy[3] = pxy[1] + GEM_work_h - 1;
-				GEM_clear_rect(this, pxy);
-			}
-			GEM_work_w -= (aligned_x - GEM_work_x);
-			GEM_work_x = aligned_x;
-		}
+		GEM_align_work_area(this, message[3], 1);
 
 		if (sdl_resize) {
 			SDL_PrivateResize(GEM_work_w, GEM_work_h);
