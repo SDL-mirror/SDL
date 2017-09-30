@@ -233,6 +233,7 @@ static int do_messages(_THIS, short *message, short latest_msg_id)
 					0,0);
 				GEM_refresh_name = SDL_FALSE;
 			}
+			wind_get (message[3], WF_WORKXYWH, &GEM_work_x, &GEM_work_y, &GEM_work_w, &GEM_work_h);
 			break;
 		case WM_UNICONIFY:
 			wind_set (message[3],WF_UNICONIFY,message[4],message[5],message[6],message[7]);
@@ -248,6 +249,7 @@ static int do_messages(_THIS, short *message, short latest_msg_id)
 					0,0);
 				GEM_refresh_name = SDL_FALSE;
 			}
+			wind_get (message[3], WF_WORKXYWH, &GEM_work_x, &GEM_work_y, &GEM_work_w, &GEM_work_h);
 			break;
 		case WM_SIZED:
 			wind_set (message[3], WF_CURRXYWH, message[4], message[5], message[6], message[7]);
