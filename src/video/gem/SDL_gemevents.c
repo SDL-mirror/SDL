@@ -362,7 +362,10 @@ static void do_mouse_motion(_THIS, short mx, short my)
 	w2 = VDI_w;
 	h2 = VDI_h;
 	if ((!GEM_fullscreen) && (GEM_handle>=0)) {
-		wind_get (GEM_handle, WF_WORKXYWH, &x2, &y2, &w2, &h2);
+		x2 = GEM_work_x;
+		y2 = GEM_work_y;
+		w2 = GEM_work_w;
+		h2 = GEM_work_h;
 	}
 
 	if ((prevmx!=mx) || (prevmy!=my)) {
