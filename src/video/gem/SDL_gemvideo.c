@@ -800,7 +800,7 @@ SDL_Surface *GEM_SetVideoMode(_THIS, SDL_Surface *current,
 			}
 		}
 
-		GEM_align_work_area(this, GEM_handle, 0);
+		GEM_align_work_area(this, GEM_handle, 0, 0);
 		GEM_fullscreen = SDL_FALSE;
 	}
 
@@ -840,11 +840,14 @@ SDL_Surface *GEM_SetVideoMode(_THIS, SDL_Surface *current,
 	return(current);
 }
 
-void GEM_align_work_area(_THIS, short windowid, int clear_pads)
+void GEM_align_work_area(_THIS, short windowid, int clear_pads, int iconified)
 {
 	int new_x, new_w;
 
 	wind_get(windowid, WF_WORKXYWH, &GEM_work_x,&GEM_work_y,&GEM_work_w,&GEM_work_h);
+	if (iconified) {
+		return;
+	}
 
 	/* Align work area on 16 pixels boundary (faster for bitplanes modes) */
 	new_x = GEM_work_x;

@@ -187,9 +187,9 @@ void GEM_PumpEvents(_THIS)
 
 static int do_messages(_THIS, short *message, short latest_msg_id)
 {
-	int quit, update_work_area, align_work_area, sdl_resize;
+	int quit, update_work_area, iconified, sdl_resize;
 
-	quit = update_work_area = align_work_area = sdl_resize = 0;
+	quit = update_work_area = iconified = sdl_resize = 0;
 	switch (message[0]) {
 		case MSG_SDL_ID:
 			quit=(message[1] == latest_msg_id);
@@ -201,7 +201,7 @@ static int do_messages(_THIS, short *message, short latest_msg_id)
 			break;
 		case WM_MOVED:
 			wind_set(message[3],WF_CURRXYWH,message[4],message[5],message[6],message[7]);
-			update_work_area = align_work_area = 1;
+			update_work_area = 1;
 			break;
 		case WM_TOPPED:
 			wind_set(message[3],WF_TOP,message[4],0,0,0);
@@ -233,7 +233,7 @@ static int do_messages(_THIS, short *message, short latest_msg_id)
 					0,0);
 				GEM_refresh_name = SDL_FALSE;
 			}
-			update_work_area = 1;
+			update_work_area = iconified = 1;
 			break;
 		case WM_UNICONIFY:
 			wind_set (message[3],WF_UNICONIFY,message[4],message[5],message[6],message[7]);
@@ -249,11 +249,11 @@ static int do_messages(_THIS, short *message, short latest_msg_id)
 					0,0);
 				GEM_refresh_name = SDL_FALSE;
 			}
-			update_work_area = align_work_area = 1;
+			update_work_area = 1;
 			break;
 		case WM_SIZED:
 			wind_set (message[3], WF_CURRXYWH, message[4], message[5], message[6], message[7]);
-			update_work_area = align_work_area = sdl_resize = 1;
+			update_work_area = sdl_resize = 1;
 			GEM_win_fulled = SDL_FALSE;		/* Cancel maximized flag */
 			GEM_lock_redraw = SDL_TRUE;		/* Prevent redraw till buffers resized */
 			break;
@@ -272,7 +272,7 @@ static int do_messages(_THIS, short *message, short latest_msg_id)
 					GEM_win_fulled = SDL_TRUE;
 				}
 				wind_set (message[3], WF_CURRXYWH, x, y, w, h);
-				update_work_area = align_work_area = sdl_resize = 1;
+				update_work_area = sdl_resize = 1;
 				GEM_lock_redraw = SDL_TRUE;		/* Prevent redraw till buffers resized */
 			}
 			break;
@@ -288,7 +288,7 @@ static int do_messages(_THIS, short *message, short latest_msg_id)
 	}
 
 	if (update_work_area) {
-		GEM_align_work_area(this, message[3], 1);
+		GEM_align_work_area(this, message[3], 1, iconified);
 
 		if (sdl_resize) {
 			SDL_PrivateResize(GEM_work_w, GEM_work_h);
