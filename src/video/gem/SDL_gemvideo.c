@@ -89,9 +89,6 @@ static int GEM_FlipHWSurface(_THIS, SDL_Surface *surface);
 static void GEM_UnlockHWSurface(_THIS, SDL_Surface *surface);
 static void GEM_FreeHWSurface(_THIS, SDL_Surface *surface);
 static void GEM_UpdateRects(_THIS, int numrects, SDL_Rect *rects);
-#if 0
-static int GEM_ToggleFullScreen(_THIS, int on);
-#endif
 
 /* Internal functions */
 static void GEM_FreeBuffers(_THIS);
@@ -162,7 +159,7 @@ static SDL_VideoDevice *GEM_CreateDevice(int devindex)
 	device->UnlockHWSurface = GEM_UnlockHWSurface;
 	device->FlipHWSurface = GEM_FlipHWSurface;
 	device->FreeHWSurface = GEM_FreeHWSurface;
-	device->ToggleFullScreen = NULL /*GEM_ToggleFullScreen*/;
+	device->ToggleFullScreen = NULL;
 
 	/* Window manager */
 	device->SetCaption = GEM_SetCaption;
@@ -223,7 +220,7 @@ static void VDI_ReadExtInfo(_THIS, short *work_out)
 	if  (Getcookie(C_EdDI, &cookie_EdDI) != C_FOUND) {
 		return;
 	}
-	
+
 	EdDI_version = Atari_get_EdDI_version( (void *)cookie_EdDI);
 
 	vq_scrninfo(VDI_handle, work_out);
@@ -314,14 +311,14 @@ int GEM_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	GEM_version = aes_global[0];
 	if (GEM_version >= 0x0410) {
 		short ap_gout[4], errorcode;
-		
+
 		GEM_wfeatures=0;
 		errorcode=appl_getinfo(AES_WINDOW, &ap_gout[0], &ap_gout[1], &ap_gout[2], &ap_gout[3]);
 
 		if (errorcode==0) {
-			GEM_wfeatures=ap_gout[0];			
+			GEM_wfeatures=ap_gout[0];
 		}
-	}	
+	}
 
 	/* Ask VDI physical workstation handle opened by AES */
 	VDI_handle = graf_handle(&dummy, &dummy, &dummy, &dummy);
@@ -388,7 +385,7 @@ int GEM_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	} else {
 		VDI_oldnumcolors=1<<VDI_bpp;
 	}
-	
+
 	for(i = 0; i < VDI_oldnumcolors; i++) {
 		short rgb[3];
 
@@ -756,6 +753,11 @@ SDL_Surface *GEM_SetVideoMode(_THIS, SDL_Surface *current,
 			x2 += GEM_desk_x;
 			y2 += GEM_desk_y;
 
+			/* Align work area on 16 pixels boundary (faster for bitplanes modes) */
+			wind_calc(WC_WORK, GEM_win_type, x2,y2,w2,h2, &x2,&y2,&w2,&h2);
+			x2 &= -16;
+			wind_calc(WC_BORDER, GEM_win_type, x2,y2,w2,h2, &x2,&y2,&w2,&h2);
+
 			/* Destroy existing window */
 			if (GEM_handle >= 0) {
 				wind_close(GEM_handle);
@@ -775,7 +777,10 @@ SDL_Surface *GEM_SetVideoMode(_THIS, SDL_Surface *current,
 #endif
 
 			/* Setup window name */
-			wind_set(GEM_handle,WF_NAME,(short)(((unsigned long)GEM_title_name)>>16),(short)(((unsigned long)GEM_title_name) & 0xffff),0,0);
+			wind_set(GEM_handle,WF_NAME,
+				(short)(((unsigned long)GEM_title_name)>>16),
+				(short)(((unsigned long)GEM_title_name) & 0xffff),
+				0,0);
 			GEM_refresh_name = SDL_FALSE;
 
 			/* Open the window */
@@ -1063,35 +1068,22 @@ static int GEM_SetColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors)
 
 	for(i = 0; i < ncolors; i++)
 	{
-		int		r, g, b;
-		short	rgb[3];
+		int r, g, b;
+		short rgb[3];
 
 		r = colors[i].r;
 		g = colors[i].g;
 		b = colors[i].b;
 
 		rgb[0] = VDI_curpalette[i][0] = (1000 * r) / 255;
-		rgb[1] = VDI_curpalette[i][1] =(1000 * g) / 255;
-		rgb[2] = VDI_curpalette[i][2] =(1000 * b) / 255;
+		rgb[1] = VDI_curpalette[i][1] = (1000 * g) / 255;
+		rgb[2] = VDI_curpalette[i][2] = (1000 * b) / 255;
 
 		vs_color(VDI_handle, vdi_index[firstcolor+i], rgb);
 	}
 
 	return(1);
 }
-
-#if 0
-static int GEM_ToggleFullScreen(_THIS, int on)
-{
-	if (on) {
-		GEM_LockScreen(this);
-	} else {
-		GEM_UnlockScreen(this);
-	}
-
-	return(1);
-}
-#endif
 
 /* Note:  If we are terminated, this could be called in the middle of
    another SDL video routine -- notably UpdateRects.
@@ -1145,7 +1137,7 @@ void GEM_VideoQuit(_THIS)
 		SDL_modelist[0]=NULL;
 	}
 
-	this->screen->pixels = NULL;	
+	this->screen->pixels = NULL;
 }
 
 void GEM_wind_redraw(_THIS, int winhandle, short *inside)
@@ -1203,7 +1195,7 @@ static void refresh_window(_THIS, int winhandle, short *rect)
 	if (iconified && GEM_icon) {
 		short icon_rect[4], dst_rect[4];
 		short iconx,icony;
-		
+
 		surface = GEM_icon;
 
 		GEM_ClearRect(this, rect);
@@ -1264,12 +1256,12 @@ static void refresh_window(_THIS, int winhandle, short *rect)
 		/* Redraw all window content */
 		pxy[0] = rect[0]-wind_pxy[0];
 		pxy[1] = rect[1]-wind_pxy[1];
-	 	pxy[2] = rect[2]-wind_pxy[0];   
-	 	pxy[3] = rect[3]-wind_pxy[1];  
+	 	pxy[2] = rect[2]-wind_pxy[0];
+	 	pxy[3] = rect[3]-wind_pxy[1];
 
 		pxy[4] = rect[0];
 		pxy[5] = rect[1];
-		pxy[6] = rect[2];  
+		pxy[6] = rect[2];
 		pxy[7] = rect[3];
 	}
 

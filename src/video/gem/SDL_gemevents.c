@@ -24,7 +24,7 @@
 /*
  * GEM SDL video driver implementation
  * inspired from the Dummy SDL driver
- * 
+ *
  * Patrice Mandin
  * and work from
  * Olivier Landemarre, Johan Klockars, Xavier Joubert, Claude Attard
@@ -161,7 +161,7 @@ void GEM_PumpEvents(_THIS)
 		if (gem_currentkeyboard[i] && !gem_previouskeyboard[i])
 			SDL_PrivateKeyboard(SDL_PRESSED,
 				SDL_Atari_TranslateKey(i, &keysym, SDL_TRUE));
-			
+
 		/* Key unpressed ? */
 		if (gem_previouskeyboard[i] && !gem_currentkeyboard[i])
 			SDL_PrivateKeyboard(SDL_RELEASED,
@@ -196,7 +196,7 @@ static int do_messages(_THIS, short *message, short latest_msg_id)
 			quit=(message[1] == latest_msg_id);
 			break;
 		case WM_CLOSED:
-		case AP_TERM:    
+		case AP_TERM:
 			SDL_PrivateQuit();
 			quit=1;
 			break;
@@ -227,7 +227,10 @@ static int do_messages(_THIS, short *message, short latest_msg_id)
 			}
 			/* Update window title */
 			if (GEM_refresh_name && GEM_icon_name) {
-				wind_set(GEM_handle,WF_NAME,(short)(((unsigned long)GEM_icon_name)>>16),(short)(((unsigned long)GEM_icon_name) & 0xffff),0,0);
+				wind_set(GEM_handle,WF_NAME,
+					(short)(((unsigned long)GEM_icon_name)>>16),
+					(short)(((unsigned long)GEM_icon_name) & 0xffff),
+					0,0);
 				GEM_refresh_name = SDL_FALSE;
 			}
 			break;
@@ -239,7 +242,10 @@ static int do_messages(_THIS, short *message, short latest_msg_id)
 				SDL_PrivateAppActive(1, SDL_APPACTIVE);
 			}
 			if (GEM_refresh_name && GEM_title_name) {
-				wind_set(GEM_handle,WF_NAME,(short)(((unsigned long)GEM_title_name)>>16),(short)(((unsigned long)GEM_title_name) & 0xffff),0,0);
+				wind_set(GEM_handle,WF_NAME,
+					(short)(((unsigned long)GEM_title_name)>>16),
+					(short)(((unsigned long)GEM_title_name) & 0xffff),
+					0,0);
 				GEM_refresh_name = SDL_FALSE;
 			}
 			break;
@@ -280,7 +286,7 @@ static int do_messages(_THIS, short *message, short latest_msg_id)
 			}
 			break;
 	}
-	
+
 	return quit;
 }
 
@@ -383,10 +389,10 @@ static void do_mouse_buttons(_THIS, short mb)
 
 	for (i=0;i<3;i++) {
 		int curbutton, prevbutton;
-		
+
 		curbutton = mb & (1<<i);
 		prevbutton = prevmb & (1<<i);
-	
+
 		if (curbutton && !prevbutton) {
 			SDL_PrivateMouseButton(SDL_PRESSED, i+1, 0, 0);
 		}
