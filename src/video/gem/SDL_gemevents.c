@@ -188,7 +188,6 @@ void GEM_PumpEvents(_THIS)
 static int do_messages(_THIS, short *message, short latest_msg_id)
 {
 	int quit;
-	short x2,y2,w2,h2;
 
 	quit = 0;
 	switch (message[0]) {
@@ -202,6 +201,7 @@ static int do_messages(_THIS, short *message, short latest_msg_id)
 			break;
 		case WM_MOVED:
 			wind_set(message[3],WF_CURRXYWH,message[4],message[5],message[6],message[7]);
+			wind_get (message[3], WF_WORKXYWH, &GEM_work_x, &GEM_work_y, &GEM_work_w, &GEM_work_h);
 			break;
 		case WM_TOPPED:
 			wind_set(message[3],WF_TOP,message[4],0,0,0);
@@ -219,7 +219,7 @@ static int do_messages(_THIS, short *message, short latest_msg_id)
 			break;
 		case WM_ICONIFY:
 		case WM_ALLICONIFY:
-			wind_set(message[3],WF_ICONIFY,message[4],message[5],message[6],message[7]);
+			wind_set (message[3],WF_ICONIFY,message[4],message[5],message[6],message[7]);
 			/* If we're active, make ourselves inactive */
 			if ( SDL_GetAppState() & SDL_APPACTIVE ) {
 				/* Send an internal deactivate event */
@@ -235,7 +235,7 @@ static int do_messages(_THIS, short *message, short latest_msg_id)
 			}
 			break;
 		case WM_UNICONIFY:
-			wind_set(message[3],WF_UNICONIFY,message[4],message[5],message[6],message[7]);
+			wind_set (message[3],WF_UNICONIFY,message[4],message[5],message[6],message[7]);
 			/* If we're not active, make ourselves active */
 			if ( !(SDL_GetAppState() & SDL_APPACTIVE) ) {
 				/* Send an internal activate event */
@@ -251,10 +251,10 @@ static int do_messages(_THIS, short *message, short latest_msg_id)
 			break;
 		case WM_SIZED:
 			wind_set (message[3], WF_CURRXYWH, message[4], message[5], message[6], message[7]);
-			wind_get (message[3], WF_WORKXYWH, &x2, &y2, &w2, &h2);
+			wind_get (message[3], WF_WORKXYWH, &GEM_work_x, &GEM_work_y, &GEM_work_w, &GEM_work_h);
 			GEM_win_fulled = SDL_FALSE;		/* Cancel maximized flag */
 			GEM_lock_redraw = SDL_TRUE;		/* Prevent redraw till buffers resized */
-			SDL_PrivateResize(w2, h2);
+			SDL_PrivateResize(GEM_work_w, GEM_work_h);
 			break;
 		case WM_FULLED:
 			{
@@ -271,9 +271,9 @@ static int do_messages(_THIS, short *message, short latest_msg_id)
 					GEM_win_fulled = SDL_TRUE;
 				}
 				wind_set (message[3], WF_CURRXYWH, x, y, w, h);
-				wind_get (message[3], WF_WORKXYWH, &x2, &y2, &w2, &h2);
+				wind_get (message[3], WF_WORKXYWH, &GEM_work_x, &GEM_work_y, &GEM_work_w, &GEM_work_h);
 				GEM_lock_redraw = SDL_TRUE;		/* Prevent redraw till buffers resized */
-				SDL_PrivateResize(w2, h2);
+				SDL_PrivateResize(GEM_work_w, GEM_work_h);
 			}
 			break;
 		case WM_BOTTOMED:

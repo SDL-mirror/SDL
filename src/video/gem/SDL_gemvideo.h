@@ -75,6 +75,8 @@ struct SDL_PrivateVideoData {
 	short desk_w, desk_h;
 	short win_handle;			/* Our window handle */
 	int window_type;			/* Window type */
+	short work_x, work_y;		/* Window work area x,y,w,h */
+	short work_w, work_h;
 	const char *title_name;		/* Window title */
 	const char *icon_name;		/* Icon title */
 	short version;				/* AES version */
@@ -115,13 +117,17 @@ struct SDL_PrivateVideoData {
 #define VDI_screensize		(this->hidden->screensize)
 #define VDI_dst_mfdb		(this->hidden->dst_mfdb)
 
-#define GEM_ap_id		(this->hidden->ap_id)
+#define GEM_ap_id			(this->hidden->ap_id)
 #define GEM_desk_x			(this->hidden->desk_x)
 #define GEM_desk_y			(this->hidden->desk_y)
 #define GEM_desk_w			(this->hidden->desk_w)
 #define GEM_desk_h			(this->hidden->desk_h)
 #define GEM_handle			(this->hidden->win_handle)
 #define GEM_win_type		(this->hidden->window_type)
+#define GEM_work_x			(this->hidden->work_x)
+#define GEM_work_y			(this->hidden->work_y)
+#define GEM_work_w			(this->hidden->work_w)
+#define GEM_work_h			(this->hidden->work_h)
 #define GEM_title_name		(this->hidden->title_name)
 #define GEM_icon_name		(this->hidden->icon_name)
 #define GEM_refresh_name	(this->hidden->refresh_name)

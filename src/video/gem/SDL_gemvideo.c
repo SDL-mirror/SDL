@@ -349,6 +349,11 @@ int GEM_VideoInit(_THIS, SDL_PixelFormat *vformat)
 		return 1;
 	}
 
+	GEM_work_x = GEM_desk_x;
+	GEM_work_y = GEM_desk_y;
+	GEM_work_w = GEM_desk_w;
+	GEM_work_h = GEM_desk_h;
+
 	/* Read bit depth */
 	vq_extnd(VDI_handle, 1, work_out);
 	VDI_bpp = work_out[4];
@@ -793,6 +798,7 @@ SDL_Surface *GEM_SetVideoMode(_THIS, SDL_Surface *current,
 			}
 		}
 
+		wind_get (GEM_handle, WF_WORKXYWH, &GEM_work_x,&GEM_work_y,&GEM_work_w,&GEM_work_h);
 		GEM_fullscreen = SDL_FALSE;
 	}
 
@@ -933,16 +939,12 @@ static void GEM_UpdateRectsFullscreen(_THIS, int numrects, SDL_Rect *rects)
 
 static void GEM_UpdateRectsWindowed(_THIS, int numrects, SDL_Rect *rects)
 {
-	short pxy[4], wind_pxy[4];
+	short pxy[4];
 	int i;
 
-	if (wind_get(GEM_handle, WF_WORKXYWH, &wind_pxy[0], &wind_pxy[1], &wind_pxy[2], &wind_pxy[3])==0) {
-		return;
-	}
-
 	for ( i=0; i<numrects; ++i ) {
-		pxy[0] = wind_pxy[0] + rects[i].x;
-		pxy[1] = wind_pxy[1] + rects[i].y;
+		pxy[0] = GEM_work_x + rects[i].x;
+		pxy[1] = GEM_work_y + rects[i].y;
 		pxy[2] = rects[i].w;
 		pxy[3] = rects[i].h;
 
@@ -1028,10 +1030,13 @@ static int GEM_FlipHWSurfaceFullscreen(_THIS, SDL_Surface *surface)
 
 static int GEM_FlipHWSurfaceWindowed(_THIS, SDL_Surface *surface)
 {
-	short	pxy[8];
+	short pxy[4];
 
 	/* Update the whole window */
-	wind_get(GEM_handle, WF_WORKXYWH, &pxy[0], &pxy[1], &pxy[2], &pxy[3]);
+	pxy[0] = GEM_work_x;
+	pxy[1] = GEM_work_y;
+	pxy[2] = GEM_work_w;
+	pxy[3] = GEM_work_h;
 
 	GEM_wind_redraw(this, GEM_handle, pxy);
 
@@ -1188,9 +1193,10 @@ static void refresh_window(_THIS, int winhandle, short *rect)
 		}
 	}
 
-	if (wind_get(winhandle, WF_WORKXYWH, &wind_pxy[0], &wind_pxy[1], &wind_pxy[2], &wind_pxy[3])==0) {
-		return;
-	}
+	wind_pxy[0] = GEM_work_x;
+	wind_pxy[1] = GEM_work_y;
+	wind_pxy[2] = GEM_work_w;
+	wind_pxy[3] = GEM_work_h;
 
 	if (iconified && GEM_icon) {
 		short icon_rect[4], dst_rect[4];
