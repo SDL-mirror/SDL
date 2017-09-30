@@ -740,7 +740,7 @@ SDL_Surface *GEM_SetVideoMode(_THIS, SDL_Surface *current,
 		/* Recreate window ? only for different widget or non-created window */
 		if ((old_win_type != GEM_win_type) || (GEM_handle < 0)) {
 			/* Calculate window size */
-			if (!wind_calc(WC_BORDER, GEM_win_type, 0,0,width,height, &x2,&y2,&w2,&h2)) {
+			if (!wind_calc(WC_BORDER, GEM_win_type, 0,0,width+16,height, &x2,&y2,&w2,&h2)) {
 				GEM_FreeBuffers(this);
 				SDL_SetError("Can not calculate window attributes");
 				return NULL;
@@ -762,7 +762,6 @@ SDL_Surface *GEM_SetVideoMode(_THIS, SDL_Surface *current,
 			wind_calc(WC_WORK, GEM_win_type, x2,y2,w2,h2, &x2,&y2,&w2,&h2);
 			x2 &= -16;
 			x2 -= 8;
-			w2 += 16;
 			wind_calc(WC_BORDER, GEM_win_type, x2,y2,w2,h2, &x2,&y2,&w2,&h2);
 
 			/* Destroy existing window */
@@ -795,7 +794,7 @@ SDL_Surface *GEM_SetVideoMode(_THIS, SDL_Surface *current,
 		} else {
 			/* Resize window to fit asked video mode */
 			wind_get (GEM_handle, WF_WORKXYWH, &x2,&y2,&w2,&h2);
-			if (wind_calc(WC_BORDER, GEM_win_type, x2,y2,width,height, &x2,&y2,&w2,&h2)) {
+			if (wind_calc(WC_BORDER, GEM_win_type, x2,y2,width+16,height, &x2,&y2,&w2,&h2)) {
 				wind_set (GEM_handle, WF_CURRXYWH, x2,y2,w2,h2);
 			}
 		}
