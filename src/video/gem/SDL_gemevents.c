@@ -187,9 +187,9 @@ void GEM_PumpEvents(_THIS)
 
 static int do_messages(_THIS, short *message, short latest_msg_id)
 {
-	int quit, update_work_area, sdl_resize;
+	int quit, update_work_area, align_work_area, sdl_resize;
 
-	quit = update_work_area = sdl_resize = 0;
+	quit = update_work_area = align_work_area = sdl_resize = 0;
 	switch (message[0]) {
 		case MSG_SDL_ID:
 			quit=(message[1] == latest_msg_id);
@@ -201,7 +201,7 @@ static int do_messages(_THIS, short *message, short latest_msg_id)
 			break;
 		case WM_MOVED:
 			wind_set(message[3],WF_CURRXYWH,message[4],message[5],message[6],message[7]);
-			update_work_area = 1;
+			update_work_area = align_work_area = 1;
 			break;
 		case WM_TOPPED:
 			wind_set(message[3],WF_TOP,message[4],0,0,0);
@@ -249,11 +249,11 @@ static int do_messages(_THIS, short *message, short latest_msg_id)
 					0,0);
 				GEM_refresh_name = SDL_FALSE;
 			}
-			update_work_area = 1;
+			update_work_area = align_work_area = 1;
 			break;
 		case WM_SIZED:
 			wind_set (message[3], WF_CURRXYWH, message[4], message[5], message[6], message[7]);
-			update_work_area = sdl_resize = 1;
+			update_work_area = align_work_area = sdl_resize = 1;
 			GEM_win_fulled = SDL_FALSE;		/* Cancel maximized flag */
 			GEM_lock_redraw = SDL_TRUE;		/* Prevent redraw till buffers resized */
 			break;
@@ -272,7 +272,7 @@ static int do_messages(_THIS, short *message, short latest_msg_id)
 					GEM_win_fulled = SDL_TRUE;
 				}
 				wind_set (message[3], WF_CURRXYWH, x, y, w, h);
-				update_work_area = sdl_resize = 1;
+				update_work_area = align_work_area = sdl_resize = 1;
 				GEM_lock_redraw = SDL_TRUE;		/* Prevent redraw till buffers resized */
 			}
 			break;
@@ -289,6 +289,26 @@ static int do_messages(_THIS, short *message, short latest_msg_id)
 
 	if (update_work_area) {
 		wind_get (message[3], WF_WORKXYWH, &GEM_work_x, &GEM_work_y, &GEM_work_w, &GEM_work_h);
+
+		/* Align work area on 16 pixels boundary (faster for bitplanes modes) */
+		if (align_work_area) {
+			int aligned_x;
+			short pxy[4];
+
+			aligned_x = GEM_work_x;
+			if (aligned_x & 15) {
+				aligned_x = (aligned_x|15)+1;
+
+				pxy[0] = GEM_work_x;
+				pxy[1] = GEM_work_y;
+				pxy[2] = aligned_x - 1;
+				pxy[3] = pxy[1] + GEM_work_h - 1;
+				GEM_clear_rect(this, pxy);
+			}
+			GEM_work_w -= (aligned_x - GEM_work_x);
+			GEM_work_x = aligned_x;
+		}
+
 		if (sdl_resize) {
 			SDL_PrivateResize(GEM_work_w, GEM_work_h);
 		}

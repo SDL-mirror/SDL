@@ -93,7 +93,6 @@ static void GEM_UpdateRects(_THIS, int numrects, SDL_Rect *rects);
 /* Internal functions */
 static void GEM_FreeBuffers(_THIS);
 static void GEM_ClearScreen(_THIS);
-static void GEM_ClearRect(_THIS, short *rect);
 static void GEM_SetNewPalette(_THIS, Uint16 newpal[256][3]);
 static void GEM_LockScreen(_THIS);
 static void GEM_UnlockScreen(_THIS);
@@ -500,7 +499,7 @@ static void GEM_FreeBuffers(_THIS)
 	}
 }
 
-static void GEM_ClearRect(_THIS, short *rect)
+void GEM_clear_rect(_THIS, short *rect)
 {
 	short oldrgb[3], rgb[3]={0,0,0};
 
@@ -524,7 +523,7 @@ static void GEM_ClearScreen(_THIS)
 	pxy[0] = pxy[1] = 0;
 	pxy[2] = VDI_w - 1;
 	pxy[3] = VDI_h - 1;
-	GEM_ClearRect(this, pxy);
+	GEM_clear_rect(this, pxy);
 
 	v_show_c(VDI_handle, 1);
 }
@@ -1204,7 +1203,7 @@ static void refresh_window(_THIS, int winhandle, short *rect)
 
 		surface = GEM_icon;
 
-		GEM_ClearRect(this, rect);
+		GEM_clear_rect(this, rect);
 
 		/* Calculate centered icon(x,y,w,h) relative to window */
 		iconx = (wind_pxy[2]-surface->w)>>1;
