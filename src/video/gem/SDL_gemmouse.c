@@ -51,8 +51,9 @@ void GEM_FreeWMCursor(_THIS, WMcursor *cursor)
 
 	if (cursor == NULL)
 		return;
-	
+
 	graf_mouse(ARROW, NULL);
+	GEM_prev_cursor = NULL;
 
 	if (cursor->mform_p != NULL)
 		SDL_free(cursor->mform_p);
@@ -88,7 +89,7 @@ WMcursor *GEM_CreateWMCursor(_THIS,
 	}
 
 	/* Allocate mform */
-	new_mform = (MFORM *)SDL_malloc(sizeof(MFORM));		
+	new_mform = (MFORM *)SDL_malloc(sizeof(MFORM));
 	if (new_mform == NULL) {
 		SDL_free(cursor);
 		SDL_OutOfMemory();
@@ -157,8 +158,8 @@ void GEM_WarpWMCursor(_THIS, Uint16 x, Uint16 y)
 	/* This seems to work only on AES 3.4 (Falcon) */
 
 	EVNTREC	warpevent;
-	
-	warpevent.ap_event = APPEVNT_MOUSE; 
+
+	warpevent.ap_event = APPEVNT_MOUSE;
 	warpevent.ap_value = (x << 16) | y;
 
 	appl_tplay(&warpevent, 1, 1000);
@@ -185,7 +186,10 @@ void GEM_CheckMouseMode(_THIS)
 		/* Application defined cursor only over the application window */
 		if ((SDL_GetAppState() & full_focus) == full_focus) {
 			if (GEM_cursor) {
-				graf_mouse(USER_DEF, GEM_cursor->mform_p);
+				if (GEM_cursor != GEM_prev_cursor) {
+					graf_mouse(USER_DEF, GEM_cursor->mform_p);
+					GEM_prev_cursor = GEM_cursor;
+				}
 				set_system_cursor = 0;
 			} else {
 				hide_system_cursor = SDL_TRUE;
@@ -204,7 +208,8 @@ void GEM_CheckMouseMode(_THIS)
 		GEM_cursor_hidden = hide_system_cursor;
 	}
 
-	if (set_system_cursor) {
+	if (set_system_cursor && GEM_prev_cursor) {
 		graf_mouse(ARROW, NULL);
+		GEM_prev_cursor = NULL;
 	}
 }

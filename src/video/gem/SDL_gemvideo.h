@@ -92,6 +92,7 @@ struct SDL_PrivateVideoData {
 	void *menubar;				/* Menu bar save buffer when going fullscreen */
 	SDL_bool use_dev_mouse;		/* Use /dev/mouse ? */
 	WMcursor *cursor;			/* To restore cursor when leaving/entering window */
+	WMcursor *prev_cursor;		/* Previous cursor */
 
 	SDL_bool fullscreen;		/* Fullscreen or windowed mode ? */
 	SDL_Rect *SDL_modelist[SDL_NUMMODES+1];	/* Mode list */
@@ -146,6 +147,7 @@ struct SDL_PrivateVideoData {
 #define GEM_menubar			(this->hidden->menubar)
 #define GEM_usedevmouse		(this->hidden->use_dev_mouse)
 #define GEM_cursor			(this->hidden->cursor)
+#define GEM_prev_cursor		(this->hidden->prev_cursor)
 
 #define GEM_buffer1			(this->hidden->buffer1)
 #define GEM_buffer2			(this->hidden->buffer2)
