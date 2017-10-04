@@ -850,10 +850,12 @@ void GEM_align_work_area(_THIS, short windowid, int clear_pads, int iconified)
 
 	/* Align work area on 16 pixels boundary (faster for bitplanes modes) */
 	new_x = GEM_work_x;
+	new_w = GEM_work_w;
 	if (new_x & 15) {
 		new_x = (new_x|15)+1;
+	} else {
+		new_w -= 16;
 	}
-	new_w = GEM_work_w;
 	new_w -= (new_x - GEM_work_x);
 	new_w &= -16;
 
@@ -1297,12 +1299,29 @@ static void refresh_window(_THIS, int winhandle, short *rect)
 #if DEBUG_VIDEO_GEM
 		printf("sdl:video:gem: refresh_window(): draw frame buffer\n");
 #endif
+		/* Y1,Y2 for padding zones */
+		pxy[1] = rect[1];
+		pxy[3] = rect[3];
+
+		/* Clear left padding zone ? */
+		pxy[0] = rect[0];
+		pxy[2] = GEM_work_x-1;
+		if (pxy[0]<pxy[2]) {
+			GEM_ClearRect(this, pxy);
+		}
+
+		/* Clear right padding zone ? */
+		pxy[0] = GEM_work_x+GEM_work_w;
+		pxy[2] = rect[2]-1;
+		if (pxy[0]<pxy[2]) {
+			GEM_ClearRect(this, pxy);
+		}
 
 		/* Redraw all window content */
 		pxy[0] = rect[0]-GEM_work_x;
 		pxy[1] = rect[1]-GEM_work_y;
-	 	pxy[2] = rect[2]-GEM_work_x;
-	 	pxy[3] = rect[3]-GEM_work_y;
+		pxy[2] = rect[2]-GEM_work_x;
+		pxy[3] = rect[3]-GEM_work_y;
 
 		pxy[4] = rect[0];
 		pxy[5] = rect[1];
