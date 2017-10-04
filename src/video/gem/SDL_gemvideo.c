@@ -1225,22 +1225,17 @@ void GEM_wind_redraw(_THIS, int winhandle, short *inside)
 static void refresh_window(_THIS, int winhandle, short *rect)
 {
 	MFDB mfdb_src;
-	short pxy[8],wind_pxy[8];
+	short pxy[8];
 	SDL_Surface *surface;
 	int iconified;
 
 	/* Is window iconified ? */
 	iconified = 0;
 /*	if (GEM_wfeatures & (1<<WF_ICONIFY))*/ {
-		if (wind_get(winhandle, WF_ICONIFY, &wind_pxy[0], &wind_pxy[1], &wind_pxy[2], &wind_pxy[3])!=0) {
-			iconified = wind_pxy[0];
+		if (wind_get(winhandle, WF_ICONIFY, &pxy[0], &pxy[1], &pxy[2], &pxy[3])!=0) {
+			iconified = pxy[0];
 		}
 	}
-
-	wind_pxy[0] = GEM_work_x;
-	wind_pxy[1] = GEM_work_y;
-	wind_pxy[2] = GEM_work_w;
-	wind_pxy[3] = GEM_work_h;
 
 	if (iconified && GEM_icon) {
 		short icon_rect[4], dst_rect[4];
@@ -1251,8 +1246,8 @@ static void refresh_window(_THIS, int winhandle, short *rect)
 		GEM_ClearRect(this, rect);
 
 		/* Calculate centered icon(x,y,w,h) relative to window */
-		iconx = (wind_pxy[2]-surface->w)>>1;
-		icony = (wind_pxy[3]-surface->h)>>1;
+		iconx = (GEM_work_w-surface->w)>>1;
+		icony = (GEM_work_h-surface->h)>>1;
 
 		icon_rect[0] = iconx;
 		icon_rect[1] = icony;
@@ -1260,8 +1255,8 @@ static void refresh_window(_THIS, int winhandle, short *rect)
 		icon_rect[3] = surface->h;
 
 		/* Calculate redraw rectangle(x,y,w,h) relative to window */
-		dst_rect[0] = rect[0]-wind_pxy[0];
-		dst_rect[1] = rect[1]-wind_pxy[1];
+		dst_rect[0] = rect[0]-GEM_work_x;
+		dst_rect[1] = rect[1]-GEM_work_y;
 		dst_rect[2] = rect[2]-rect[0]+1;
 		dst_rect[3] = rect[3]-rect[1]+1;
 
@@ -1279,8 +1274,8 @@ static void refresh_window(_THIS, int winhandle, short *rect)
 #endif
 
 		/* Calculate icon(x1,y1,x2,y2) relative to screen */
-		icon_rect[0] += wind_pxy[0];
-		icon_rect[1] += wind_pxy[1];
+		icon_rect[0] += GEM_work_x;
+		icon_rect[1] += GEM_work_y;
 		icon_rect[2] += icon_rect[0]-1;
 		icon_rect[3] += icon_rect[1]-1;
 
@@ -1291,10 +1286,10 @@ static void refresh_window(_THIS, int winhandle, short *rect)
 	 	pxy[7]=pxy[3]=MIN(icon_rect[3],rect[3]);
 
 		/* Calculate icon source image pos relative to window */
-		pxy[0] -= wind_pxy[0]+iconx;
-		pxy[1] -= wind_pxy[1]+icony;
-		pxy[2] -= wind_pxy[0]+iconx;
-		pxy[3] -= wind_pxy[1]+icony;
+		pxy[0] -= GEM_work_x+iconx;
+		pxy[1] -= GEM_work_y+icony;
+		pxy[2] -= GEM_work_x+iconx;
+		pxy[3] -= GEM_work_y+icony;
 
 	} else {
 		surface = this->screen;
@@ -1304,10 +1299,10 @@ static void refresh_window(_THIS, int winhandle, short *rect)
 #endif
 
 		/* Redraw all window content */
-		pxy[0] = rect[0]-wind_pxy[0];
-		pxy[1] = rect[1]-wind_pxy[1];
-	 	pxy[2] = rect[2]-wind_pxy[0];
-	 	pxy[3] = rect[3]-wind_pxy[1];
+		pxy[0] = rect[0]-GEM_work_x;
+		pxy[1] = rect[1]-GEM_work_y;
+	 	pxy[2] = rect[2]-GEM_work_x;
+	 	pxy[3] = rect[3]-GEM_work_y;
 
 		pxy[4] = rect[0];
 		pxy[5] = rect[1];
@@ -1319,18 +1314,18 @@ static void refresh_window(_THIS, int winhandle, short *rect)
 		void *src, *dest;
 		int x1,x2;
 
-		x1 = (rect[0]-wind_pxy[0]) & ~15;
-		x2 = rect[2]-wind_pxy[0];
+		x1 = (rect[0]-GEM_work_x) & ~15;
+		x2 = rect[2]-GEM_work_x;
 		if (x2 & 15) {
 			x2 = (x2 | 15) +1;
 		}
 
 		src = surface->pixels;
-		src += surface->pitch * (rect[1]-wind_pxy[1]);
+		src += surface->pitch * (rect[1]-GEM_work_y);
 		src += x1;
 
 		dest = GEM_buffer2;
-		dest += surface->pitch * (rect[1]-wind_pxy[1]);
+		dest += surface->pitch * (rect[1]-GEM_work_y);
 		dest += x1;
 
 		SDL_Atari_C2pConvert(
