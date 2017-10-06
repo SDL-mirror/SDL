@@ -410,6 +410,7 @@ int GEM_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	GEM_handle = -1;
 	GEM_locked = SDL_FALSE;
 	GEM_win_fulled = SDL_FALSE;
+	GEM_iconified = SDL_FALSE;
 	GEM_fullscreen = SDL_FALSE;
 	GEM_lock_redraw = SDL_TRUE;	/* Prevent redraw till buffers are setup */
 
@@ -791,6 +792,8 @@ SDL_Surface *GEM_SetVideoMode(_THIS, SDL_Surface *current,
 
 			/* Open the window */
 			wind_open(GEM_handle,x2,y2,w2,h2);
+
+			GEM_iconified = SDL_FALSE;
 		} else {
 			/* Resize window to fit asked video mode */
 			wind_get (GEM_handle, WF_WORKXYWH, &x2,&y2,&w2,&h2);
@@ -799,7 +802,7 @@ SDL_Surface *GEM_SetVideoMode(_THIS, SDL_Surface *current,
 			}
 		}
 
-		GEM_align_work_area(this, GEM_handle, 0, 0);
+		GEM_align_work_area(this, GEM_handle, 0);
 		GEM_fullscreen = SDL_FALSE;
 	}
 
@@ -839,12 +842,12 @@ SDL_Surface *GEM_SetVideoMode(_THIS, SDL_Surface *current,
 	return(current);
 }
 
-void GEM_align_work_area(_THIS, short windowid, int clear_pads, int iconified)
+void GEM_align_work_area(_THIS, short windowid, int clear_pads)
 {
 	int new_x, new_w;
 
 	wind_get(windowid, WF_WORKXYWH, &GEM_work_x,&GEM_work_y,&GEM_work_w,&GEM_work_h);
-	if (iconified) {
+	if (GEM_iconified) {
 		return;
 	}
 
@@ -1229,17 +1232,8 @@ static void refresh_window(_THIS, int winhandle, short *rect)
 	MFDB mfdb_src;
 	short pxy[8];
 	SDL_Surface *surface;
-	int iconified;
 
-	/* Is window iconified ? */
-	iconified = 0;
-/*	if (GEM_wfeatures & (1<<WF_ICONIFY))*/ {
-		if (wind_get(winhandle, WF_ICONIFY, &pxy[0], &pxy[1], &pxy[2], &pxy[3])!=0) {
-			iconified = pxy[0];
-		}
-	}
-
-	if (iconified && GEM_icon) {
+	if (GEM_iconified && GEM_icon) {
 		short icon_rect[4], dst_rect[4];
 		short iconx,icony;
 

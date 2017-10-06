@@ -37,7 +37,7 @@ struct WMcursor {
 
 /* Functions prototypes */
 void GEM_wind_redraw(_THIS, int winhandle, short *inside);
-void GEM_align_work_area(_THIS, short windowid, int clear_pads, int iconified);
+void GEM_align_work_area(_THIS, short windowid, int clear_pads);
 
 /* Private display data */
 
@@ -84,6 +84,7 @@ struct SDL_PrivateVideoData {
 	short wfeatures;			/* AES window features */
 	SDL_bool refresh_name;		/* Change window title ? */
 	SDL_bool window_fulled;		/* Window maximized ? */
+	SDL_bool iconified;			/* Window iconified ? */
 	SDL_bool mouse_relative;	/* Report relative mouse movement */
 	SDL_bool locked;			/* AES locked for fullscreen ? */
 	SDL_bool lock_redraw;		/* Prevent redraw till buffers are setup */
@@ -136,6 +137,7 @@ struct SDL_PrivateVideoData {
 #define GEM_version			(this->hidden->version)
 #define GEM_wfeatures		(this->hidden->wfeatures)
 #define GEM_win_fulled		(this->hidden->window_fulled)
+#define GEM_iconified		(this->hidden->iconified)
 #define GEM_mouse_relative	(this->hidden->mouse_relative)
 #define GEM_locked			(this->hidden->locked)
 #define GEM_lock_redraw		(this->hidden->lock_redraw)

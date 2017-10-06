@@ -233,7 +233,8 @@ static int do_messages(_THIS, short *message, short latest_msg_id)
 					0,0);
 				GEM_refresh_name = SDL_FALSE;
 			}
-			update_work_area = iconified = 1;
+			GEM_iconified = SDL_TRUE;
+			update_work_area = 1;
 			break;
 		case WM_UNICONIFY:
 			wind_set (message[3],WF_UNICONIFY,message[4],message[5],message[6],message[7]);
@@ -249,6 +250,7 @@ static int do_messages(_THIS, short *message, short latest_msg_id)
 					0,0);
 				GEM_refresh_name = SDL_FALSE;
 			}
+			GEM_iconified = SDL_FALSE;
 			update_work_area = 1;
 			break;
 		case WM_SIZED:
@@ -288,7 +290,7 @@ static int do_messages(_THIS, short *message, short latest_msg_id)
 	}
 
 	if (update_work_area) {
-		GEM_align_work_area(this, message[3], 1, iconified);
+		GEM_align_work_area(this, message[3], 1);
 
 		if (sdl_resize) {
 			SDL_PrivateResize(GEM_work_w, GEM_work_h);
