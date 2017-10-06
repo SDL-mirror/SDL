@@ -1364,14 +1364,6 @@ static void refresh_window(_THIS, int winhandle, short *rect)
 		mfdb_src.fd_addr=GEM_buffer2;
 	}
 
-#if DEBUG_VIDEO_GEM
-	printf("sdl:video:gem: redraw %dx%d: (%d,%d,%d,%d) to (%d,%d,%d,%d)\n",
-		surface->w, surface->h,
-		pxy[0],pxy[1],pxy[2],pxy[3],
-		pxy[4],pxy[5],pxy[6],pxy[7]
-	);
-#endif
-
 	vro_cpyfm( VDI_handle, S_ONLY, pxy, &mfdb_src, &VDI_dst_mfdb);
 }
 
