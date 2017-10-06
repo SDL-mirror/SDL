@@ -506,7 +506,7 @@ void GEM_ClearRect(_THIS, short *pxy)
 {
 	short oldrgb[3], rgb[3]={0,0,0};
 
-	vq_color(VDI_handle, vdi_index[0], 1, oldrgb);
+	vq_color(VDI_handle, vdi_index[0], 0, oldrgb);
 	vs_color(VDI_handle, vdi_index[0], rgb);
 
 	vsf_color(VDI_handle,0);
@@ -876,24 +876,20 @@ void GEM_align_work_area(_THIS, short windowid, int clear_pads)
 	new_w &= ~15;
 
 	if (clear_pads) {
-		short pxy[4];
+		short rect[4];
 
-		pxy[1] = GEM_work_y;
-		pxy[3] = pxy[1] + GEM_work_h - 1;
+		rect[1] = GEM_work_y;
+		rect[3] = GEM_work_h;
 
 		/* Left padding */
-		pxy[0] = GEM_work_x;
-		pxy[2] = new_x - 1;
-		if (pxy[0]<=pxy[2]) {
-			GEM_ClearRect(this, pxy);
-		}
+		rect[0] = GEM_work_x;
+		rect[2] = new_x-GEM_work_x+1;
+		GEM_ClearRectXYWH(this, rect);
 
 		/* Right padding */
-		pxy[0] = new_x + new_w;
-		pxy[2] = GEM_work_x + GEM_work_w - 1;
-		if (pxy[0]<=pxy[2]) {
-			GEM_ClearRect(this, pxy);
-		}
+		rect[0] = new_x + new_w;
+		rect[2] = (GEM_work_w-new_w)-(new_x-GEM_work_x)+1;
+		GEM_ClearRectXYWH(this, rect);
 	}
 
 	GEM_work_w = new_w;
@@ -1222,8 +1218,6 @@ void GEM_wind_redraw(_THIS, int winhandle, short *inside)
 		while (todo[2] && todo[3]) {
 
 			if (rc_intersect((GRECT *)inside,(GRECT *)todo)) {
-				todo[2] += todo[0]-1;
-				todo[3] += todo[1]-1;
 				refresh_window(this, winhandle, todo);
 			}
 
@@ -1243,120 +1237,105 @@ void GEM_wind_redraw(_THIS, int winhandle, short *inside)
 static void refresh_window(_THIS, int winhandle, short *rect)
 {
 	MFDB mfdb_src;
-	short pxy[8];
+	short pxy[8], work_rect[4];
 	SDL_Surface *surface;
+	int max_width, max_height;
 
-	if (GEM_iconified && GEM_icon) {
-		short icon_rect[4], dst_rect[4];
-		short iconx,icony;
+	work_rect[0] = GEM_work_x;
+	work_rect[1] = GEM_work_y;
+	work_rect[2] = GEM_work_w;
+	work_rect[3] = GEM_work_h;
 
-		surface = GEM_icon;
+	surface = this->screen;
 
-		GEM_ClearRect(this, rect);
+	if (GEM_iconified) {
+		/* Fill all iconified window */
+		GEM_ClearRectXYWH(this, rect);
 
-		/* Calculate centered icon(x,y,w,h) relative to window */
-		iconx = (GEM_work_w-surface->w)>>1;
-		icony = (GEM_work_h-surface->h)>>1;
-
-		icon_rect[0] = iconx;
-		icon_rect[1] = icony;
-		icon_rect[2] = surface->w;
-		icon_rect[3] = surface->h;
-
-		/* Calculate redraw rectangle(x,y,w,h) relative to window */
-		dst_rect[0] = rect[0]-GEM_work_x;
-		dst_rect[1] = rect[1]-GEM_work_y;
-		dst_rect[2] = rect[2]-rect[0]+1;
-		dst_rect[3] = rect[3]-rect[1]+1;
-
-		/* Does the icon rectangle must be redrawn ? */
-		if (!rc_intersect((GRECT *)icon_rect, (GRECT *)dst_rect)) {
-			return;
+		if (GEM_icon) {
+			surface = GEM_icon;
 		}
 
-#if DEBUG_VIDEO_GEM
-		printf("sdl:video:gem:  clip(0,0,%d,%d) to (%d,%d,%d,%d)\n",
-			surface->w-1,surface->h-1, dst_rect[0],dst_rect[1],dst_rect[2],dst_rect[3]);
-		printf("sdl:video:gem:  icon(%d,%d,%d,%d)\n",
-			icon_rect[0], icon_rect[1], icon_rect[2], icon_rect[3]);
-		printf("sdl:video:gem: refresh_window(): draw icon\n");
-#endif
-
-		/* Calculate icon(x1,y1,x2,y2) relative to screen */
-		icon_rect[0] += GEM_work_x;
-		icon_rect[1] += GEM_work_y;
-		icon_rect[2] += icon_rect[0]-1;
-		icon_rect[3] += icon_rect[1]-1;
-
-		/* Calculate intersection rectangle to redraw */
-		pxy[4]=pxy[0]=MAX(icon_rect[0],rect[0]);
-		pxy[5]=pxy[1]=MAX(icon_rect[1],rect[1]);
- 		pxy[6]=pxy[2]=MIN(icon_rect[2],rect[2]);
-	 	pxy[7]=pxy[3]=MIN(icon_rect[3],rect[3]);
-
-		/* Calculate icon source image pos relative to window */
-		pxy[0] -= GEM_work_x+iconx;
-		pxy[1] -= GEM_work_y+icony;
-		pxy[2] -= GEM_work_x+iconx;
-		pxy[3] -= GEM_work_y+icony;
-
+		/* Center icon inside window if it is smaller */
+		if (GEM_work_w>surface->w) {
+			work_rect[0] += (GEM_work_w-surface->w)>>1;
+			work_rect[2] = surface->w;
+		}
+		if (GEM_work_h>surface->h) {
+			work_rect[1] += (GEM_work_h-surface->h)>>1;
+			work_rect[3] = surface->h;
+		}
 	} else {
-		surface = this->screen;
-
-#if DEBUG_VIDEO_GEM
-		printf("sdl:video:gem: refresh_window(): draw frame buffer\n");
-#endif
 		/* Y1,Y2 for padding zones */
 		pxy[1] = rect[1];
-		pxy[3] = rect[3];
+		pxy[3] = rect[1]+rect[3]-1;
 
 		/* Clear left padding zone ? */
 		pxy[0] = rect[0];
-		pxy[2] = GEM_work_x-1;
-		if (pxy[0]<pxy[2]) {
+		pxy[2] = MIN(rect[0]+rect[2]-1, GEM_work_x-1);
+		if (pxy[0]<=pxy[2]) {
 			GEM_ClearRect(this, pxy);
 		}
 
 		/* Clear right padding zone ? */
-		pxy[0] = GEM_work_x+GEM_work_w;
-		pxy[2] = rect[2]-1;
-		if (pxy[0]<pxy[2]) {
+		pxy[0] = MAX(rect[0], GEM_work_x+GEM_work_w);
+		pxy[2] = rect[0]+rect[2]-1;
+		if (pxy[0]<=pxy[2]) {
 			GEM_ClearRect(this, pxy);
 		}
-
-		/* Redraw all window content */
-		pxy[0] = rect[0]-GEM_work_x;
-		pxy[1] = rect[1]-GEM_work_y;
-		pxy[2] = rect[2]-GEM_work_x;
-		pxy[3] = rect[3]-GEM_work_y;
-
-		pxy[4] = rect[0];
-		pxy[5] = rect[1];
-		pxy[6] = rect[2];
-		pxy[7] = rect[3];
 	}
+
+	/* Do we intersect zone to redraw ? */
+	if (!rc_intersect((GRECT *)work_rect, (GRECT *)rect)) {
+		return;
+	}
+
+	/* Calculate intersection rectangle to redraw */
+	max_width = MIN(work_rect[2], rect[2]);
+	max_height = MIN(work_rect[3], rect[3]);
+
+	pxy[4]=pxy[0]=MAX(work_rect[0],rect[0]);
+	pxy[5]=pxy[1]=MAX(work_rect[1],rect[1]);
+	pxy[6]=pxy[2]=pxy[0]+max_width-1;
+	pxy[7]=pxy[3]=pxy[1]+max_height-1;
+
+	/* Calculate source image pos relative to window */
+	pxy[0] -= GEM_work_x;
+	pxy[1] -= GEM_work_y;
+	pxy[2] -= GEM_work_x;
+	pxy[3] -= GEM_work_y;
+
+	/* TODO: finally clip against screen */
+
+#if DEBUG_VIDEO_GEM
+	printf("sdl:video:gem: redraw %dx%d: (%d,%d,%d,%d) to (%d,%d,%d,%d)\n",
+		surface->w, surface->h,
+		pxy[0],pxy[1],pxy[2],pxy[3],
+		pxy[4],pxy[5],pxy[6],pxy[7]
+	);
+#endif
 
 	if (GEM_bufops & B2S_C2P_1TO2) {
 		void *src, *dest;
 		int x1,x2;
 
-		x1 = (rect[0]-GEM_work_x) & ~15;
-		x2 = rect[2]-GEM_work_x;
+		x1 = pxy[0] & ~15;
+		x2 = pxy[2];
 		if (x2 & 15) {
 			x2 = (x2 | 15) +1;
 		}
 
 		src = surface->pixels;
-		src += surface->pitch * (rect[1]-GEM_work_y);
+		src += surface->pitch * pxy[1];
 		src += x1;
 
 		dest = GEM_buffer2;
-		dest += surface->pitch * (rect[1]-GEM_work_y);
+		dest += surface->pitch * pxy[1];
 		dest += x1;
 
 		SDL_Atari_C2pConvert(
 			src, dest,
-			x2-x1, rect[3]-rect[1]+1,
+			x2-x1, pxy[3]-pxy[1]+1,
 			SDL_FALSE,
 			surface->pitch, surface->pitch
 		);
