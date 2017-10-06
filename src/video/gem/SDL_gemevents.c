@@ -187,9 +187,9 @@ void GEM_PumpEvents(_THIS)
 
 static int do_messages(_THIS, short *message, short latest_msg_id)
 {
-	int quit, update_work_area, iconified, sdl_resize;
+	int quit, update_work_area, sdl_resize;
 
-	quit = update_work_area = iconified = sdl_resize = 0;
+	quit = update_work_area = sdl_resize = 0;
 	switch (message[0]) {
 		case MSG_SDL_ID:
 			quit=(message[1] == latest_msg_id);

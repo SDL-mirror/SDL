@@ -93,7 +93,8 @@ static void GEM_UpdateRects(_THIS, int numrects, SDL_Rect *rects);
 /* Internal functions */
 static void GEM_FreeBuffers(_THIS);
 static void GEM_ClearScreen(_THIS);
-static void GEM_ClearRect(_THIS, short *rect);
+static void GEM_ClearRect(_THIS, short *pxy);
+static void GEM_ClearRectXYWH(_THIS, short *rect);
 static void GEM_SetNewPalette(_THIS, Uint16 newpal[256][3]);
 static void GEM_LockScreen(_THIS);
 static void GEM_UnlockScreen(_THIS);
@@ -501,19 +502,31 @@ static void GEM_FreeBuffers(_THIS)
 	}
 }
 
-void GEM_ClearRect(_THIS, short *rect)
+void GEM_ClearRect(_THIS, short *pxy)
 {
 	short oldrgb[3], rgb[3]={0,0,0};
 
-	vq_color(VDI_handle, vdi_index[0], 0, oldrgb);
+	vq_color(VDI_handle, vdi_index[0], 1, oldrgb);
 	vs_color(VDI_handle, vdi_index[0], rgb);
 
 	vsf_color(VDI_handle,0);
 	vsf_interior(VDI_handle,1);
 	vsf_perimeter(VDI_handle,0);
-	v_bar(VDI_handle, rect);
+	v_bar(VDI_handle, pxy);
 
 	vs_color(VDI_handle, vdi_index[0], oldrgb);
+}
+
+void GEM_ClearRectXYWH(_THIS, short *rect)
+{
+	short pxy[4];
+
+	pxy[0] = rect[0];
+	pxy[1] = rect[1];
+	pxy[2] = rect[0]+rect[2]-1;
+	pxy[3] = rect[1]+rect[3]-1;
+
+	GEM_ClearRect(this, pxy);
 }
 
 static void GEM_ClearScreen(_THIS)
@@ -761,7 +774,7 @@ SDL_Surface *GEM_SetVideoMode(_THIS, SDL_Surface *current,
 
 			/* Align work area on 16 pixels boundary (faster for bitplanes modes) */
 			wind_calc(WC_WORK, GEM_win_type, x2,y2,w2,h2, &x2,&y2,&w2,&h2);
-			x2 &= -16;
+			x2 &= ~15;
 			x2 -= 8;
 			wind_calc(WC_BORDER, GEM_win_type, x2,y2,w2,h2, &x2,&y2,&w2,&h2);
 
@@ -860,7 +873,7 @@ void GEM_align_work_area(_THIS, short windowid, int clear_pads)
 		new_w -= 16;
 	}
 	new_w -= (new_x - GEM_work_x);
-	new_w &= -16;
+	new_w &= ~15;
 
 	if (clear_pads) {
 		short pxy[4];
@@ -988,16 +1001,16 @@ static void GEM_UpdateRectsFullscreen(_THIS, int numrects, SDL_Rect *rects)
 
 static void GEM_UpdateRectsWindowed(_THIS, int numrects, SDL_Rect *rects)
 {
-	short pxy[4];
+	short rect[4];
 	int i;
 
 	for ( i=0; i<numrects; ++i ) {
-		pxy[0] = GEM_work_x + rects[i].x;
-		pxy[1] = GEM_work_y + rects[i].y;
-		pxy[2] = rects[i].w;
-		pxy[3] = rects[i].h;
+		rect[0] = GEM_work_x + rects[i].x;
+		rect[1] = GEM_work_y + rects[i].y;
+		rect[2] = rects[i].w;
+		rect[3] = rects[i].h;
 
-		GEM_wind_redraw(this, GEM_handle, pxy);
+		GEM_wind_redraw(this, GEM_handle, rect);
 	}
 }
 
@@ -1079,15 +1092,15 @@ static int GEM_FlipHWSurfaceFullscreen(_THIS, SDL_Surface *surface)
 
 static int GEM_FlipHWSurfaceWindowed(_THIS, SDL_Surface *surface)
 {
-	short pxy[4];
+	short rect[4];
 
 	/* Update the whole window */
-	pxy[0] = GEM_work_x;
-	pxy[1] = GEM_work_y;
-	pxy[2] = GEM_work_w;
-	pxy[3] = GEM_work_h;
+	rect[0] = GEM_work_x;
+	rect[1] = GEM_work_y;
+	rect[2] = GEM_work_w;
+	rect[3] = GEM_work_h;
 
-	GEM_wind_redraw(this, GEM_handle, pxy);
+	GEM_wind_redraw(this, GEM_handle, rect);
 
 	return(0);
 }
@@ -1361,12 +1374,12 @@ static void refresh_window(_THIS, int winhandle, short *rect)
 		mfdb_src.fd_w=width;
 	}
 	mfdb_src.fd_h=surface->h;
-  	mfdb_src.fd_nplanes=surface->format->BitsPerPixel;
+	mfdb_src.fd_nplanes=surface->format->BitsPerPixel;
 	mfdb_src.fd_wdwidth=mfdb_src.fd_w>>4;
 	mfdb_src.fd_stand=
 		mfdb_src.fd_r1=
-  		mfdb_src.fd_r2=
-	  	mfdb_src.fd_r3= 0;
+		mfdb_src.fd_r2=
+		mfdb_src.fd_r3= 0;
 
 	if (GEM_bufops & B2S_VROCPYFM_2TOS) {
 		mfdb_src.fd_addr=GEM_buffer2;
