@@ -36,8 +36,8 @@ struct WMcursor {
 #define _THIS	SDL_VideoDevice *this
 
 /* Functions prototypes */
-void GEM_wind_redraw(_THIS, int winhandle, short *inside);
-void GEM_align_work_area(_THIS, short windowid, int clear_pads);
+void GEM_wind_redraw(_THIS, int winhandle, short *inside, SDL_bool pad_only);
+void GEM_align_work_area(_THIS, short windowid, SDL_bool clear_pads);
 
 /* Private display data */
 

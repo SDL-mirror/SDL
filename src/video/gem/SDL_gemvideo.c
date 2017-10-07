@@ -98,7 +98,7 @@ static void GEM_ClearRectXYWH(_THIS, short *rect);
 static void GEM_SetNewPalette(_THIS, Uint16 newpal[256][3]);
 static void GEM_LockScreen(_THIS);
 static void GEM_UnlockScreen(_THIS);
-static void refresh_window(_THIS, int winhandle, short *rect);
+static void refresh_window(_THIS, int winhandle, short *rect, SDL_bool pad_only);
 
 #if SDL_VIDEO_OPENGL
 /* OpenGL functions */
@@ -855,9 +855,9 @@ SDL_Surface *GEM_SetVideoMode(_THIS, SDL_Surface *current,
 	return(current);
 }
 
-void GEM_align_work_area(_THIS, short windowid, int clear_pads)
+void GEM_align_work_area(_THIS, short windowid, SDL_bool clear_pads)
 {
-	int new_x, new_w;
+	int new_x, new_w, old_x, old_w;
 
 	wind_get(windowid, WF_WORKXYWH, &GEM_work_x,&GEM_work_y,&GEM_work_w,&GEM_work_h);
 	if (GEM_iconified) {
@@ -865,8 +865,8 @@ void GEM_align_work_area(_THIS, short windowid, int clear_pads)
 	}
 
 	/* Align work area on 16 pixels boundary (faster for bitplanes modes) */
-	new_x = GEM_work_x;
-	new_w = GEM_work_w;
+	new_x = old_x = GEM_work_x;
+	new_w = old_w = GEM_work_w;
 	if (new_x & 15) {
 		new_x = (new_x|15)+1;
 	} else {
@@ -875,6 +875,9 @@ void GEM_align_work_area(_THIS, short windowid, int clear_pads)
 	new_w -= (new_x - GEM_work_x);
 	new_w &= ~15;
 
+	GEM_work_x = new_x;
+	GEM_work_w = new_w;
+
 	if (clear_pads) {
 		short rect[4];
 
@@ -882,18 +885,15 @@ void GEM_align_work_area(_THIS, short windowid, int clear_pads)
 		rect[3] = GEM_work_h;
 
 		/* Left padding */
-		rect[0] = GEM_work_x;
-		rect[2] = new_x-GEM_work_x+1;
-		GEM_ClearRectXYWH(this, rect);
+		rect[0] = old_x;
+		rect[2] = new_x-old_x+1;
+		GEM_wind_redraw(this, GEM_handle, rect, SDL_TRUE);
 
 		/* Right padding */
 		rect[0] = new_x + new_w;
-		rect[2] = (GEM_work_w-new_w)-(new_x-GEM_work_x)+1;
-		GEM_ClearRectXYWH(this, rect);
+		rect[2] = (old_w-new_w)-(new_x-old_x)+1;
+		GEM_wind_redraw(this, GEM_handle, rect, SDL_TRUE);
 	}
-
-	GEM_work_w = new_w;
-	GEM_work_x = new_x;
 }
 
 static int GEM_AllocHWSurface(_THIS, SDL_Surface *surface)
@@ -1006,7 +1006,7 @@ static void GEM_UpdateRectsWindowed(_THIS, int numrects, SDL_Rect *rects)
 		rect[2] = rects[i].w;
 		rect[3] = rects[i].h;
 
-		GEM_wind_redraw(this, GEM_handle, rect);
+		GEM_wind_redraw(this, GEM_handle, rect, SDL_FALSE);
 	}
 }
 
@@ -1096,7 +1096,7 @@ static int GEM_FlipHWSurfaceWindowed(_THIS, SDL_Surface *surface)
 	rect[2] = GEM_work_w;
 	rect[3] = GEM_work_h;
 
-	GEM_wind_redraw(this, GEM_handle, rect);
+	GEM_wind_redraw(this, GEM_handle, rect, SDL_FALSE);
 
 	return(0);
 }
@@ -1203,7 +1203,7 @@ void GEM_VideoQuit(_THIS)
 	this->screen->pixels = NULL;
 }
 
-void GEM_wind_redraw(_THIS, int winhandle, short *inside)
+void GEM_wind_redraw(_THIS, int winhandle, short *inside, SDL_bool pad_only)
 {
 	short todo[4];
 
@@ -1218,7 +1218,7 @@ void GEM_wind_redraw(_THIS, int winhandle, short *inside)
 		while (todo[2] && todo[3]) {
 
 			if (rc_intersect((GRECT *)inside,(GRECT *)todo)) {
-				refresh_window(this, winhandle, todo);
+				refresh_window(this, winhandle, todo, pad_only);
 			}
 
 			if (wind_get(winhandle, WF_NEXTXYWH, &todo[0], &todo[1], &todo[2], &todo[3])==0) {
@@ -1234,7 +1234,7 @@ void GEM_wind_redraw(_THIS, int winhandle, short *inside)
 	v_show_c(VDI_handle,1);
 }
 
-static void refresh_window(_THIS, int winhandle, short *rect)
+static void refresh_window(_THIS, int winhandle, short *rect, SDL_bool pad_only)
 {
 	MFDB mfdb_src;
 	short pxy[8], work_rect[4];
@@ -1286,7 +1286,7 @@ static void refresh_window(_THIS, int winhandle, short *rect)
 	}
 
 	/* Do we intersect zone to redraw ? */
-	if (!rc_intersect((GRECT *)work_rect, (GRECT *)rect)) {
+	if (pad_only || !rc_intersect((GRECT *)work_rect, (GRECT *)rect)) {
 		return;
 	}
 
