@@ -1116,7 +1116,7 @@ static int GEM_FlipHWSurface(_THIS, SDL_Surface *surface)
 
 static int GEM_SetColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors)
 {
-	int i;
+	int i, has_input_focus;
 	SDL_Surface *surface;
 
 #ifdef DEBUG_VIDEO_GEM
@@ -1128,6 +1128,8 @@ static int GEM_SetColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors)
 	if (surface->format->BitsPerPixel > 8) {
 		return 1;
 	}
+
+	has_input_focus = ((SDL_GetAppState() & SDL_APPINPUTFOCUS) == SDL_APPINPUTFOCUS);
 
 	for(i = 0; i < ncolors; i++)
 	{
@@ -1142,7 +1144,9 @@ static int GEM_SetColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors)
 		rgb[1] = VDI_curpalette[i][1] = (1000 * g) / 255;
 		rgb[2] = VDI_curpalette[i][2] = (1000 * b) / 255;
 
-		vs_color(VDI_handle, vdi_index[firstcolor+i], rgb);
+		if (has_input_focus) {
+			vs_color(VDI_handle, vdi_index[firstcolor+i], rgb);
+		}
 	}
 
 	return(1);
