@@ -504,7 +504,11 @@ static void GEM_FreeBuffers(_THIS)
 
 void GEM_ClearRect(_THIS, short *pxy)
 {
-	short oldrgb[3], rgb[3]={0,0,0};
+	short oldrgb[3], rgb[3]={0,0,0}, clip_pxy[4];
+
+	clip_pxy[0] = clip_pxy[1] = 0;
+	clip_pxy[2] = VDI_w - 1;
+	clip_pxy[3] = VDI_h - 1;
 
 	vq_color(VDI_handle, 0, 0, oldrgb);
 	vs_color(VDI_handle, 0, rgb);
@@ -512,7 +516,10 @@ void GEM_ClearRect(_THIS, short *pxy)
 	vsf_color(VDI_handle,0);
 	vsf_interior(VDI_handle,1);
 	vsf_perimeter(VDI_handle,0);
+
+	vs_clip(VDI_handle, 1, clip_pxy);
 	v_bar(VDI_handle, pxy);
+	vs_clip(VDI_handle, 0, NULL);
 
 	vs_color(VDI_handle, 0, oldrgb);
 }
@@ -1238,6 +1245,22 @@ static void refresh_window(_THIS, int winhandle, short *rect, SDL_bool pad_only)
 	work_rect[2] = GEM_work_w;
 	work_rect[3] = GEM_work_h;
 
+	/* Clip against screen */
+	if (work_rect[0]<0) {
+		work_rect[2] += work_rect[0];
+		work_rect[0] = 0;
+	}
+	if (work_rect[0]+work_rect[2]>=VDI_w) {
+		work_rect[2] = VDI_w-work_rect[0];
+	}
+	if (work_rect[1]<0) {
+		work_rect[3] += work_rect[1];
+		work_rect[1] = 0;
+	}
+	if (work_rect[1]+work_rect[3]>=VDI_h) {
+		work_rect[3] = VDI_h-work_rect[1];
+	}
+
 	surface = this->screen;
 
 	if (GEM_iconified) {
@@ -1296,8 +1319,6 @@ static void refresh_window(_THIS, int winhandle, short *rect, SDL_bool pad_only)
 	pxy[1] -= GEM_work_y;
 	pxy[2] -= GEM_work_x;
 	pxy[3] -= GEM_work_y;
-
-	/* TODO: finally clip against screen */
 
 #if DEBUG_VIDEO_GEM
 	printf("sdl:video:gem: redraw %dx%d: (%d,%d,%d,%d) to (%d,%d,%d,%d)\n",
