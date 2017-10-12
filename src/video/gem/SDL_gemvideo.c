@@ -506,15 +506,15 @@ void GEM_ClearRect(_THIS, short *pxy)
 {
 	short oldrgb[3], rgb[3]={0,0,0};
 
-	vq_color(VDI_handle, vdi_index[0], 0, oldrgb);
-	vs_color(VDI_handle, vdi_index[0], rgb);
+	vq_color(VDI_handle, 0, 0, oldrgb);
+	vs_color(VDI_handle, 0, rgb);
 
 	vsf_color(VDI_handle,0);
 	vsf_interior(VDI_handle,1);
 	vsf_perimeter(VDI_handle,0);
 	v_bar(VDI_handle, pxy);
 
-	vs_color(VDI_handle, vdi_index[0], oldrgb);
+	vs_color(VDI_handle, 0, oldrgb);
 }
 
 void GEM_ClearRectXYWH(_THIS, short *rect)
@@ -546,17 +546,9 @@ static void GEM_ClearScreen(_THIS)
 static void GEM_SetNewPalette(_THIS, Uint16 newpal[256][3])
 {
 	int i;
-	short rgb[3];
-
-	if (VDI_oldnumcolors==0)
-		return;
 
 	for(i = 0; i < VDI_oldnumcolors; i++) {
-		rgb[0] = newpal[i][0];
-		rgb[1] = newpal[i][1];
-		rgb[2] = newpal[i][2];
-
-		vs_color(VDI_handle, i, rgb);
+		vs_color(VDI_handle, i, (short *) newpal[i]);
 	}
 }
 
@@ -1133,19 +1125,15 @@ static int GEM_SetColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors)
 
 	for(i = 0; i < ncolors; i++)
 	{
-		int r, g, b;
-		short rgb[3];
+		int j;
 
-		r = colors[i].r;
-		g = colors[i].g;
-		b = colors[i].b;
-
-		rgb[0] = VDI_curpalette[i][0] = (1000 * r) / 255;
-		rgb[1] = VDI_curpalette[i][1] = (1000 * g) / 255;
-		rgb[2] = VDI_curpalette[i][2] = (1000 * b) / 255;
+		j = vdi_index[firstcolor+i];
+		VDI_curpalette[j][0] = (1000 * colors[i].r) / 255;
+		VDI_curpalette[j][1] = (1000 * colors[i].g) / 255;
+		VDI_curpalette[j][2] = (1000 * colors[i].b) / 255;
 
 		if (has_input_focus) {
-			vs_color(VDI_handle, vdi_index[firstcolor+i], rgb);
+			vs_color(VDI_handle, j, (short *) VDI_curpalette[j]);
 		}
 	}
 
