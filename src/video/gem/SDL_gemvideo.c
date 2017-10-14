@@ -68,6 +68,8 @@
 
 /* Variables */
 
+static short internal_ap_id;
+
 static unsigned char vdi_index[256] = {
 	0,  2,  3,  6,  4,  7,  5,   8,
 	9, 10, 11, 14, 12, 15, 13, 255
@@ -110,10 +112,10 @@ static void GEM_GL_SwapBuffers(_THIS);
 static int GEM_Available(void)
 {
 	/* Test if AES available */
-	if (appl_init() == -1)
+	internal_ap_id = appl_init();
+	if (internal_ap_id == -1)
 		return 0;
 
-	appl_exit();
 	return 1;
 }
 
@@ -302,7 +304,7 @@ int GEM_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	short work_in[12], work_out[272], dummy;
 
 	/* Open AES (Application Environment Services) */
-	GEM_ap_id = appl_init();
+	GEM_ap_id = internal_ap_id;
 	if (GEM_ap_id == -1) {
 		fprintf(stderr,"Can not open AES\n");
 		return 1;
