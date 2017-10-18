@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2016 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2017 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -52,7 +52,7 @@
 #endif
 
 #ifdef __HAIKU__
-#include <be/kernel/OS.h>
+#include <kernel/OS.h>
 #endif
 
 #ifdef __amigaos4__
@@ -167,6 +167,7 @@ SDL_SYS_SetupThread(const char *name)
     }
     pthread_sigmask(SIG_BLOCK, &mask, 0);
 #endif /* !__NACL__ */
+
 
 #ifdef PTHREAD_CANCEL_ASYNCHRONOUS
     /* Allow ourselves to be asynchronously cancelled */

@@ -883,7 +883,6 @@ _loadTestFace(void)
    SDL_Texture *tface;
 
    face = SDLTest_ImageFace();
-
    if (face == NULL) {
       return NULL;
    }

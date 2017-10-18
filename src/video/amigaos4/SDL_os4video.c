@@ -365,8 +365,8 @@ OS4_CreateDevice(int devindex)
     device->GetDisplayModes = OS4_GetDisplayModes;
     device->SetDisplayMode = OS4_SetDisplayMode;
 
-    device->CreateWindow = OS4_CreateWindow;
-    device->CreateWindowFrom = OS4_CreateWindowFrom;
+    device->CreateSDLWindow = OS4_CreateWindow;
+    device->CreateSDLWindowFrom = OS4_CreateWindowFrom;
     device->SetWindowTitle = OS4_SetWindowTitle;
     //device->SetWindowIcon = OS4_SetWindowIcon;
     device->SetWindowPosition = OS4_SetWindowPosition;

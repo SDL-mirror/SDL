@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2016 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2017 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -33,7 +33,7 @@ extern int OS4_GL_MakeCurrent(_THIS, SDL_Window * window, SDL_GLContext context)
 extern void OS4_GL_GetDrawableSize(_THIS, SDL_Window * window, int *w, int *h);
 extern int OS4_GL_SetSwapInterval(_THIS, int interval);
 extern int OS4_GL_GetSwapInterval(_THIS);
-extern void OS4_GL_SwapWindow(_THIS, SDL_Window * window);
+extern int OS4_GL_SwapWindow(_THIS, SDL_Window * window);
 extern void OS4_GL_DeleteContext(_THIS, SDL_GLContext context);
 
 /* Non-SDL functions */

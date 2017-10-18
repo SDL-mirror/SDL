@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2016 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2017 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -24,7 +24,7 @@
 
 /* GIMP RGB C-Source image dump (blit.c) */
 
-const SDLTest_SurfaceImage_t SDLTest_imageBlit = {
+static const SDLTest_SurfaceImage_t SDLTest_imageBlit = {
   80, 60, 3,
   "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"
   "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"
@@ -571,7 +571,7 @@ SDL_Surface *SDLTest_ImageBlit32()
     return c;
 }
 
-const SDLTest_SurfaceImage_t SDLTest_imageBlitColor = {
+static const SDLTest_SurfaceImage_t SDLTest_imageBlitColor = {
   80, 60, 3,
   "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"
   "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"
@@ -1064,7 +1064,7 @@ SDL_Surface *SDLTest_ImageBlitColor32()
     return c;
 }
 
-const SDLTest_SurfaceImage_t SDLTest_imageBlitAlpha = {
+static const SDLTest_SurfaceImage_t SDLTest_imageBlitAlpha = {
   80, 60, 3,
   "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"
   "\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0"
@@ -1575,6 +1575,8 @@ SDL_Surface *SDLTest_ImageBlitAlpha()
          );
    return surface;
 }
+
+/* vi: set ts=4 sw=4 expandtab: */
 
 SDL_Surface *SDLTest_ImageBlitAlpha32()
 {

@@ -70,7 +70,8 @@ typedef struct
     Uint8 r, g, b, a;
 } SDL_BlitInfo;
 
-typedef void (SDLCALL * SDL_BlitFunc) (SDL_BlitInfo * info);
+typedef void (*SDL_BlitFunc) (SDL_BlitInfo *info);
+
 
 typedef struct
 {
@@ -471,14 +472,14 @@ do {                                                                    \
 #define DUFFS_LOOP8(pixel_copy_increment, width)                        \
 { int n = (width+7)/8;                                                  \
     switch (width & 7) {                                                \
-    case 0: do {    pixel_copy_increment;                               \
-    case 7:     pixel_copy_increment;                                   \
-    case 6:     pixel_copy_increment;                                   \
-    case 5:     pixel_copy_increment;                                   \
-    case 4:     pixel_copy_increment;                                   \
-    case 3:     pixel_copy_increment;                                   \
-    case 2:     pixel_copy_increment;                                   \
-    case 1:     pixel_copy_increment;                                   \
+    case 0: do {    pixel_copy_increment; /* fallthrough */             \
+    case 7:     pixel_copy_increment;     /* fallthrough */             \
+    case 6:     pixel_copy_increment;     /* fallthrough */             \
+    case 5:     pixel_copy_increment;     /* fallthrough */             \
+    case 4:     pixel_copy_increment;     /* fallthrough */             \
+    case 3:     pixel_copy_increment;     /* fallthrough */             \
+    case 2:     pixel_copy_increment;     /* fallthrough */             \
+    case 1:     pixel_copy_increment;     /* fallthrough */             \
         } while ( --n > 0 );                                            \
     }                                                                   \
 }
@@ -487,10 +488,10 @@ do {                                                                    \
 #define DUFFS_LOOP4(pixel_copy_increment, width)                        \
 { int n = (width+3)/4;                                                  \
     switch (width & 3) {                                                \
-    case 0: do {    pixel_copy_increment;                               \
-    case 3:     pixel_copy_increment;                                   \
-    case 2:     pixel_copy_increment;                                   \
-    case 1:     pixel_copy_increment;                                   \
+    case 0: do {    pixel_copy_increment;   /* fallthrough */           \
+    case 3:     pixel_copy_increment;       /* fallthrough */           \
+    case 2:     pixel_copy_increment;       /* fallthrough */           \
+    case 1:     pixel_copy_increment;       /* fallthrough */           \
         } while (--n > 0);                                              \
     }                                                                   \
 }

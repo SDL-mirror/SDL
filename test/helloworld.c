@@ -179,7 +179,10 @@ static void openGL(SDL_Window *w)
 
         if (c) {
 
-            SDL_GL_SetSwapInterval(1);
+            //SDL_GL_SetSwapInterval(1);
+
+            Uint32 start = SDL_GetTicks();
+            Uint32 frames = 0;
 
             while (eventLoopInner()) {
                 glMatrixMode(GL_PROJECTION);
@@ -205,7 +208,12 @@ static void openGL(SDL_Window *w)
                 glEnd();
 
                 SDL_GL_SwapWindow(w);
+                frames++;
             }
+
+            Uint32 end = SDL_GetTicks();
+            printf("%u frames in %u ms - %f\n", frames, end - start, 1000.f * frames / (end - start));
+
 
             SDL_GL_DeleteContext(c);
         }
@@ -652,7 +660,7 @@ int main(void)
         //testPath();
         //testManyWindows();
         //testFullscreen();
-        //testFullscreenOpenGL();
+        testFullscreenOpenGL();
         //testOpenGL();
         //testOpenGLES2();
         //testOpenGLSwitching();
@@ -674,7 +682,7 @@ int main(void)
         //testOpaqueWindow();
         //testWindowBordersSize();
         //testHiddenWindow();
-	testRelativeMouse();
+        //testRelativeMouse();
 
         SDL_Quit();
     }

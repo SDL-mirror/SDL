@@ -105,6 +105,20 @@ OS4_GLES_UnloadLibrary(_THIS)
     OS4_CloseLibrary(&OGLES2base);
 }
 
+static void
+OS4_GetWindowSize(_THIS, struct Window * window, int * width, int * height)
+{
+    LONG ret = IIntuition->GetWindowAttrs(
+                    window,
+                    WA_InnerWidth, width,
+                    WA_InnerHeight, height,
+                    TAG_DONE);
+
+    if (ret) {
+        dprintf("GetWindowAttrs() returned %d\n", ret);
+    }
+}
+
 SDL_GLContext
 OS4_GLES_CreateContext(_THIS, SDL_Window * window)
 {
@@ -133,11 +147,7 @@ OS4_GLES_CreateContext(_THIS, SDL_Window * window)
 #endif
         }
 
-        IIntuition->GetWindowAttrs(
-                        data->syswin,
-                        WA_InnerWidth, &width,
-                        WA_InnerHeight, &height,
-                        TAG_DONE);
+        OS4_GetWindowSize(_this, data->syswin, &width, &height);
 
 #if MANAGE_BITMAP
         depth = IGraphics->GetBitMapAttr(data->syswin->RPort->BitMap, BMA_BITSPERPIXEL);
@@ -217,7 +227,7 @@ OS4_GLES_MakeCurrent(_THIS, SDL_Window * window, SDL_GLContext context)
     return result;
 }
 
-void
+int
 OS4_GLES_SwapWindow(_THIS, SDL_Window * window)
 {
     //dprintf("Called\n");
@@ -232,15 +242,10 @@ OS4_GLES_SwapWindow(_THIS, SDL_Window * window)
 #if MANAGE_BITMAP
             struct BitMap *temp;
             int w, h;
+            BOOL blitRpRet;
+            int32 blitRet;
 
-            LONG ret = IIntuition->GetWindowAttrs(data->syswin,
-                WA_InnerWidth, &w,
-                WA_InnerHeight, &h,
-                TAG_DONE);
-
-            if (ret) {
-                dprintf("GetWindowAttrs() returned %d\n", ret);
-            }
+            OS4_GetWindowSize(_this, data->syswin, &w, &h);
 #endif
 
             glFinish();
@@ -252,11 +257,14 @@ OS4_GLES_SwapWindow(_THIS, SDL_Window * window)
             aglSwapBuffers();
 
 #if MANAGE_BITMAP
-            IGraphics->BltBitMapRastPort(data->glBackBuffer, 0, 0, data->syswin->RPort,
+            blitRpRet = IGraphics->BltBitMapRastPort(data->glBackBuffer, 0, 0, data->syswin->RPort,
                 data->syswin->BorderLeft, data->syswin->BorderTop, w, h, 0xC0);
 
-            /* copy back into front */
-            IGraphics->BltBitMapTags(BLITA_Source,  data->glBackBuffer,
+            if (!blitRpRet) {
+                dprintf("BltBitMapRastPort() failed\n");
+            }
+
+            blitRet = IGraphics->BltBitMapTags(BLITA_Source,  data->glBackBuffer,
                                      BLITA_SrcType, BLITT_BITMAP,
                                      BLITA_SrcX,    0,
                                      BLITA_SrcY,    0,
@@ -269,11 +277,17 @@ OS4_GLES_SwapWindow(_THIS, SDL_Window * window)
                                      BLITA_Minterm, 0xC0,
                                      TAG_DONE);
 
-            temp = data->glFrontBuffer;
-            data->glFrontBuffer = data->glBackBuffer;
-            data->glBackBuffer = temp;
+            if (blitRet == -1) {
+                temp = data->glFrontBuffer;
+                data->glFrontBuffer = data->glBackBuffer;
+                data->glBackBuffer = temp;
 
-            aglSetBitmap(data->glBackBuffer);
+                aglSetBitmap(data->glBackBuffer);
+
+                return 0;
+            } else {
+                dprintf("BltBitMapTags() returned %d\n", blitRet);
+            }
 #endif
         } else {
             dprintf("No OpenGL ES 2 context\n");
@@ -281,6 +295,8 @@ OS4_GLES_SwapWindow(_THIS, SDL_Window * window)
     } else {
         OS4_GLES_LogLibraryError();
     }
+
+    return -1;
 }
 
 void

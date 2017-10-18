@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2016 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2017 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -146,6 +146,12 @@ OS4_GL_AllocateBuffers(_THIS, int width, int height, int depth, SDL_WindowData *
         return SDL_FALSE;
     }
 
+    uint32 srcFmt = IGraphics->GetBitMapAttr(data->glBackBuffer, BMA_PIXELFORMAT);
+    uint32 src2Fmt = IGraphics->GetBitMapAttr(data->glFrontBuffer, BMA_PIXELFORMAT);
+    uint32 dstFmt = IGraphics->GetBitMapAttr(data->syswin->RPort->BitMap, BMA_PIXELFORMAT);
+
+    dprintf("SRC FMT %u, SRC2 FMT %u, DST FMT %u\n", srcFmt, src2Fmt, dstFmt);
+
     return SDL_TRUE;
 }
 
@@ -162,6 +168,20 @@ OS4_GL_FreeBuffers(_THIS, SDL_WindowData * data)
     if (data->glBackBuffer) {
         IGraphics->FreeBitMap(data->glBackBuffer);
         data->glBackBuffer = NULL;
+    }
+}
+
+static void
+OS4_GetWindowSize(_THIS, struct Window * window, int * width, int * height)
+{
+    LONG ret = IIntuition->GetWindowAttrs(
+                window,
+                WA_InnerWidth, &width,
+                WA_InnerHeight, &height,
+                TAG_DONE);
+
+    if (ret) {
+        dprintf("GetWindowAttrs() returned %d\n", ret);
     }
 }
 
@@ -188,11 +208,7 @@ OS4_GL_CreateContext(_THIS, SDL_Window * window)
 
         depth = IGraphics->GetBitMapAttr(data->syswin->RPort->BitMap, BMA_BITSPERPIXEL);
 
-        IIntuition->GetWindowAttrs(
-                        data->syswin,
-                        WA_InnerWidth, &width,
-                        WA_InnerHeight, &height,
-                        TAG_DONE);
+        OS4_GetWindowSize(_this, data->syswin, &width, &height);
 
         if (!OS4_GL_AllocateBuffers(_this, width, height, depth, data)) {
             SDL_SetError("Failed to allocate OpenGL buffers");
@@ -274,15 +290,7 @@ OS4_GL_GetDrawableSize(_THIS, SDL_Window * window, int * w, int * h)
     int counter = 0;
 
     while (counter++ < 100) {
-        LONG result = IIntuition->GetWindowAttrs(
-                    data->syswin,
-                    WA_InnerWidth, &width,
-                    WA_InnerHeight, &height,
-                    TAG_DONE);
-
-        if (result) {
-            dprintf("GetWindowAttrs() returned %d\n", result);
-        }
+        OS4_GetWindowSize(_this, data->syswin, &width, &height);
 
         if (width != window->w || height != window->h) {
             dprintf("Waiting for Intuition %d\n", counter);
@@ -331,7 +339,7 @@ OS4_GL_GetSwapInterval(_THIS)
     return data->vsyncEnabled ? 1 : 0;
 }
 
-void
+int
 OS4_GL_SwapWindow(_THIS, SDL_Window * window)
 {
     //dprintf("Called\n");
@@ -347,21 +355,13 @@ OS4_GL_SwapWindow(_THIS, SDL_Window * window)
             int w, h;
             GLint buf;
 
-            LONG ret;
+            int32 blitRet;
 
             mglUnlockDisplay();
 
-            /* besure all has finished before we start blitting (testing to find lockup cause) */
             ((struct GLContextIFace *)data->glContext)->MGLWaitGL(); // TODO: still needed?
 
-            ret = IIntuition->GetWindowAttrs(data->syswin,
-                WA_InnerWidth, &w,
-                WA_InnerHeight, &h,
-                TAG_DONE);
-
-            if (ret) {
-                dprintf("GetWindowAttrs() returned %d\n", ret);
-            }
+            OS4_GetWindowSize(_this, data->syswin, &w, &h);
 
             if (videodata->vsyncEnabled) {
                 IGraphics->WaitTOF();
@@ -369,16 +369,18 @@ OS4_GL_SwapWindow(_THIS, SDL_Window * window)
 
             glGetIntegerv(GL_DRAW_BUFFER, &buf);
 
-            if (buf == GL_BACK) {
-                IGraphics->BltBitMapRastPort(data->glBackBuffer, 0, 0, data->syswin->RPort,
+            if (buf == GL_BACK || buf == GL_FRONT) {
+                struct BitMap *from = (buf == GL_BACK) ? data->glBackBuffer : data->glFrontBuffer;
+
+                BOOL ret = IGraphics->BltBitMapRastPort(from, 0, 0, data->syswin->RPort,
                     data->syswin->BorderLeft, data->syswin->BorderTop, w, h, 0xC0);
-            } else if (buf == GL_FRONT) {
-                IGraphics->BltBitMapRastPort(data->glFrontBuffer, 0, 0, data->syswin->RPort,
-                    data->syswin->BorderLeft, data->syswin->BorderTop, w, h, 0xC0);
+
+                if (!ret) {
+                    dprintf("BltBitMapRastPort() failed\n");
+                }
             }
 
-            /* copy back into front */
-            IGraphics->BltBitMapTags(BLITA_Source,  data->glBackBuffer,
+            blitRet = IGraphics->BltBitMapTags(BLITA_Source,  data->glBackBuffer,
                                      BLITA_SrcType, BLITT_BITMAP,
                                      BLITA_SrcX,    0,
                                      BLITA_SrcY,    0,
@@ -391,20 +393,28 @@ OS4_GL_SwapWindow(_THIS, SDL_Window * window)
                                      BLITA_Minterm, 0xC0,
                                      TAG_DONE);
 
-            temp = data->glFrontBuffer;
-            data->glFrontBuffer = data->glBackBuffer;
-            data->glBackBuffer = temp;
+            if (blitRet == -1) {
+                temp = data->glFrontBuffer;
+                data->glFrontBuffer = data->glBackBuffer;
+                data->glBackBuffer = temp;
 
-            ((struct GLContextIFace *)data->glContext)->MGLUpdateContextTags(
-                                MGLCC_FrontBuffer,data->glFrontBuffer,
-                                MGLCC_BackBuffer, data->glBackBuffer,
-                                TAG_DONE);
+                ((struct GLContextIFace *)data->glContext)->MGLUpdateContextTags(
+                                    MGLCC_FrontBuffer,data->glFrontBuffer,
+                                    MGLCC_BackBuffer, data->glBackBuffer,
+                                    TAG_DONE);
+                return 0;
+            } else {
+                dprintf("BltBitMapTags() returned %d\n", blitRet);
+                return -1;
+            }
         } else {
             dprintf("No MiniGL context\n");
         }
     } else {
         OS4_GL_LogLibraryError();
     }
+
+    return -1;
 }
 
 void
