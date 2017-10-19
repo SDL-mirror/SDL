@@ -65,7 +65,7 @@ OS4_OpenAhiDevice(OS4AudioData * os4data)
         if (os4data->ahiRequest[0]) {
 
             if (!IExec->OpenDevice(AHINAME, 0, (struct IORequest *)os4data->ahiRequest[0], 0)) {
-                
+
                 dprintf("%s opened\n", AHINAME);
 
                 /* Create a copy */
@@ -207,7 +207,7 @@ OS4_OpenDevice(_THIS, void * handle, const char * devname, int iscapture)
     OS4AudioData *os4data = NULL;
 
     dprintf("handle %p, devname %s, iscapture %d\n", handle, devname, iscapture);
-    
+
     _this->hidden = (OS4AudioData *) SDL_malloc(sizeof(OS4AudioData));
 
     if (!_this->hidden) {
@@ -231,14 +231,14 @@ OS4_OpenDevice(_THIS, void * handle, const char * devname, int iscapture)
     os4data->audioBufferSize = _this->spec.size;
     os4data->audioBuffer[0] = (Uint8 *) SDL_malloc(_this->spec.size);
     os4data->audioBuffer[1] = (Uint8 *) SDL_malloc(_this->spec.size);
-    
+
     if (os4data->audioBuffer[0] == NULL || os4data->audioBuffer[1] == NULL) {
         OS4_CloseDevice(_this);
         dprintf("No memory for audio buffer\n");
         SDL_SetError("No memory for audio buffer");
         return -1;
     }
-    
+
     SDL_memset(os4data->audioBuffer[0], _this->spec.silence, _this->spec.size);
     SDL_memset(os4data->audioBuffer[1], _this->spec.silence, _this->spec.size);
 
@@ -247,7 +247,7 @@ OS4_OpenDevice(_THIS, void * handle, const char * devname, int iscapture)
         case AUDIO_U8:
             os4data->ahiType = (_this->spec.channels < 2) ? AHIST_M8S : AHIST_S8S;
             break;
-    
+
         default:
             os4data->ahiType = (_this->spec.channels < 2) ? AHIST_M16S : AHIST_S16S;
             break;
@@ -468,7 +468,7 @@ OS4_Init(SDL_AudioDriverImpl * impl)
     return 1;
 }
 
-AudioBootStrap AMIGAOS4_bootstrap = {
+AudioBootStrap AMIGAOS4AUDIO_bootstrap = {
    DRIVER_NAME, "AmigaOS4 AHI audio", OS4_Init, 0
 };
 #endif
