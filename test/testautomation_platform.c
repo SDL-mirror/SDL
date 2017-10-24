@@ -372,6 +372,7 @@ int platform_testSetErrorInvalidInput(void *arg)
    int result;
    const char *invalidError = NULL;
    const char *probeError = "Testing";
+   const char *nullStr = "(null)";
    char *lastError;
    size_t len;
 
@@ -389,8 +390,9 @@ int platform_testSetErrorInvalidInput(void *arg)
    if (lastError != NULL)
    {
      len = SDL_strlen(lastError);
-     SDLTest_AssertCheck(len == 0,
-             "SDL_GetError(): expected message len 0, was len: %i",
+     SDLTest_AssertCheck(len == SDL_strlen(nullStr),
+             "SDL_GetError(): expected message len %i, was len: %i",
+             SDL_strlen(nullStr),
              (int) len);
    }
 
@@ -409,9 +411,9 @@ int platform_testSetErrorInvalidInput(void *arg)
    if (lastError != NULL)
    {
      len = SDL_strlen(lastError);
-     SDLTest_AssertCheck(len == SDL_strlen(probeError),
+     SDLTest_AssertCheck(len == SDL_strlen(nullStr),
              "SDL_GetError(): expected message len %i, was len: %i",
-             SDL_strlen(probeError),
+             SDL_strlen(nullStr),
              len);
    }
 
