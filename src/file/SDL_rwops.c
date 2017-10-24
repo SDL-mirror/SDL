@@ -32,7 +32,7 @@
 #include "../core/windows/SDL_windows.h"
 #endif
 
-#ifdef __amigaos4__
+#ifdef __AMIGAOS4__
 #define off64_t _off64_t
 #endif
 
@@ -368,6 +368,12 @@ stdio_seek(SDL_RWops * context, Sint64 offset, int whence)
 #if defined(FSEEK_OFF_MIN) && defined(FSEEK_OFF_MAX)
     if (offset < (Sint64)(FSEEK_OFF_MIN) || offset > (Sint64)(FSEEK_OFF_MAX)) {
         return SDL_SetError("Seek offset out of range");
+    }
+#endif
+
+#ifdef __AMIGAOS4__
+    if ((context->hidden.stdio.fp->_flags & __SL64) == 0) {
+        return SDL_SetError("File wasn't opened with fopen64");
     }
 #endif
 
