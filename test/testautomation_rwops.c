@@ -398,7 +398,7 @@ rwops_testFPRead(void)
    int result;
 
    /* Run read tests. */
-   fp = fopen(RWopsReadTestFilename, "r");
+   fp = fopen64(RWopsReadTestFilename, "r");
    SDLTest_AssertCheck(fp != NULL, "Verify handle from opening file '%s' in read mode is not NULL", RWopsReadTestFilename);
 
    /* Bail out if NULL */
@@ -448,7 +448,7 @@ rwops_testFPWrite(void)
    int result;
 
    /* Run write tests. */
-   fp = fopen(RWopsWriteTestFilename, "w+");
+   fp = fopen64(RWopsWriteTestFilename, "w+");
    SDLTest_AssertCheck(fp != NULL, "Verify handle from opening file '%s' in write mode is not NULL", RWopsWriteTestFilename);
 
    /* Bail out if NULL */
