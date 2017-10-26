@@ -19,42 +19,45 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
-#include <linux/input.h>
+/**
+ *  \file SDL_test_memory.h
+ *
+ *  Include file for SDL test framework.
+ *
+ *  This code is a part of the SDL2_test library, not the main SDL library.
+ */
 
-struct SDL_joylist_item;
+#ifndef SDL_test_memory_h_
+#define SDL_test_memory_h_
 
-/* The private structure used to keep track of a joystick */
-struct joystick_hwdata
-{
-    int fd;
-    struct SDL_joylist_item *item;
-    SDL_JoystickGUID guid;
-    char *fname;                /* Used in haptic subsystem */
+#include "begin_code.h"
+/* Set up for C function definitions, even when using C++ */
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-    /* The current Linux joystick driver maps hats to two axes */
-    struct hwdata_hat
-    {
-        int axis[2];
-    } *hats;
-    /* The current Linux joystick driver maps balls to two axes */
-    struct hwdata_ball
-    {
-        int axis[2];
-    } *balls;
 
-    /* Support for the Linux 2.4 unified input interface */
-    Uint8 key_map[KEY_MAX];
-    Uint8 abs_map[ABS_MAX];
-    struct axis_correct
-    {
-        int used;
-        int coef[3];
-    } abs_correct[ABS_MAX];
+/**
+ * \brief Start tracking SDL memory allocations
+ * 
+ * \note This should be called before any other SDL functions for complete tracking coverage
+ */
+int SDLTest_TrackAllocations();
 
-    int fresh;
+/**
+ * \brief Print a log of any outstanding allocations
+ *
+ * \note This can be called after SDL_Quit()
+ */
+void SDLTest_LogAllocations();
 
-    /* Steam Controller support */
-    SDL_bool m_bSteamController;
-};
+
+/* Ends C function definitions when using C++ */
+#ifdef __cplusplus
+}
+#endif
+#include "close_code.h"
+
+#endif /* SDL_test_memory_h_ */
 
 /* vi: set ts=4 sw=4 expandtab: */
