@@ -176,8 +176,8 @@ OS4_GetWindowSize(_THIS, struct Window * window, int * width, int * height)
 {
     LONG ret = IIntuition->GetWindowAttrs(
                 window,
-                WA_InnerWidth, &width,
-                WA_InnerHeight, &height,
+                WA_InnerWidth, width,
+                WA_InnerHeight, height,
                 TAG_DONE);
 
     if (ret) {
