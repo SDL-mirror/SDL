@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2014 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2017 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -33,39 +33,55 @@
 char *
 SDL_GetBasePath(void)
 {
-	size_t len = 0;
-	char *retval = NULL;
+    size_t len = 0;
+    char *buffer = NULL;
 
-	len = SDL_strlen(OS4_BASE_PATH) + 1;
+    len = SDL_strlen(OS4_BASE_PATH) + 1;
 
-	retval = (char *) SDL_malloc(len);
-	if (!retval) {
-		SDL_OutOfMemory();
-		return NULL;
-	}
+    buffer = (char *) SDL_malloc(len);
+    if (!buffer) {
+        SDL_OutOfMemory();
+        return NULL;
+    }
 
-	SDL_memset(retval, 0, len);
-	SDL_snprintf(retval, len, "%s", OS4_BASE_PATH);
+    SDL_memset(buffer, 0, len);
+    SDL_snprintf(buffer, len, "%s", OS4_BASE_PATH);
 
-	return retval;
+    return buffer;
 }
 
 char *
 SDL_GetPrefPath(const char *org, const char *app)
 {
-    size_t len = 0;
-    char *retval = NULL;
+    size_t len = 5; // "ENV:" + NUL
+    char *buffer = NULL;
 
-    len = 4 + SDL_strlen(org) + SDL_strlen(app) + 3;
-    retval = (char *) SDL_malloc(len);
-    if (!retval) {
+    if (org) {
+        len += SDL_strlen(org) + 1;
+    }
+
+    if (app) {
+        len += SDL_strlen(app) + 1;
+    }
+
+    buffer = (char *) SDL_malloc(len);
+    if (!buffer) {
         SDL_OutOfMemory();
         return NULL;
     }
-	SDL_memset(retval, 0, len);
-    SDL_snprintf(retval, len, "%s%s/%s/", "ENV:", org, app);
+    SDL_memset(buffer, 0, len);
 
-	return retval;
+    SDL_snprintf(buffer, len, "ENV:");
+
+    if (org) {
+        SDL_snprintf(buffer + SDL_strlen(buffer), len - SDL_strlen(buffer), "%s/", org);
+    }
+
+    if (app) {
+        SDL_snprintf(buffer + SDL_strlen(buffer), len - SDL_strlen(buffer), "%s/", app);
+    }
+
+    return buffer;
 }
 
 #endif /* SDL_FILESYSTEM_AMIGAOS4 */
