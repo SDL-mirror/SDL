@@ -114,26 +114,23 @@ OS4_TranslateUnicode(_THIS, uint16 code, uint32 qualifier)
 static void
 OS4_HandleKeyboard(_THIS, struct MyIntuiMessage * imsg)
 {
-    if ((imsg->Qualifier & IEQUALIFIER_REPEAT) == 0) {
+    uint8 rawkey = imsg->Code & 0x7F;
 
-        uint8 rawkey = imsg->Code & 0x7F;
+    if (rawkey < sizeof(amiga_scancode_table) / sizeof(amiga_scancode_table[0])) {
 
-        if (rawkey < sizeof(amiga_scancode_table) / sizeof(amiga_scancode_table[0])) {
+        SDL_Scancode s = amiga_scancode_table[rawkey];
 
-            SDL_Scancode s = amiga_scancode_table[rawkey];
+        if (imsg->Code <= 127) {
 
-            if (imsg->Code <= 127) {
+            char text[2];
 
-                char text[2];
+            text[0] = OS4_TranslateUnicode(_this, imsg->Code, imsg->Qualifier);
+            text[1] = '\0';
 
-                text[0] = OS4_TranslateUnicode(_this, imsg->Code, imsg->Qualifier);
-                text[1] = '\0';
-
-                SDL_SendKeyboardKey(SDL_PRESSED, s);
-                SDL_SendKeyboardText(text);
-            } else {
-                SDL_SendKeyboardKey(SDL_RELEASED, s);
-            }
+            SDL_SendKeyboardKey(SDL_PRESSED, s);
+            SDL_SendKeyboardText(text);
+        } else {
+            SDL_SendKeyboardKey(SDL_RELEASED, s);
         }
     }
 }
