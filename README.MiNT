@@ -5,7 +5,7 @@ Using the Simple DirectMedia Layer on Atari
 
     If you want to build SDL from sources to create SDL programs on Atari:
         see sections I - II.
-	
+
     If you want to create SDL programs on Atari using SDL binary build,
         download it from my web site (URL at end of this file).
 
@@ -50,7 +50,7 @@ III.  Enjoy! :)
   can use the web interface:
 
 	http://www.libsdl.org/mailman/listinfo/sdl
-  
+
 ==============================================================================
 IV.  What is supported:
 
@@ -185,6 +185,7 @@ Xbios video:
 		of testing SDL.
 	TT:
 		320x480x8 and 320x240x8 (software double-lined mode).
+		NOVA video card: All modes with 8 bits or higher depth.
 	Falcon:
 		All modes supported by the current monitor (RVB or VGA).
 		BlowUp and Centscreen: Extended modes.
@@ -248,6 +249,6 @@ Audio drivers:
 	X-Sound driver (GSXB compatible):
 		http://www.uni-ulm.de/~s_thuth/atari/xsound_e.html
 
--- 
+--
 Patrice Mandin <patmandin@gmail.com>
 http://pmandin.atari.org/

@@ -33,6 +33,7 @@
 #include "../SDL_sysvideo.h"
 
 #include "SDL_xbios.h"
+#include "SDL_xbios_nova.h"
 
 static const xbiosmode_t ttmodes[]={
 	{TT_LOW,320,480,8, XBIOSMODE_C2P},
@@ -47,12 +48,19 @@ static int setColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors);
 
 void SDL_XBIOS_VideoInit_TT(_THIS)
 {
+	long cookie_nova;
+
 	XBIOS_listModes = listModes;
 	XBIOS_saveMode = saveMode;
 	XBIOS_setMode = setMode;
 	XBIOS_restoreMode = restoreMode;
 
 	this->SetColors = setColors;
+
+	/* NOVA card ? */
+	if (Getcookie(C_NOVA, &cookie_nova) == C_FOUND) {
+		SDL_XBIOS_VideoInit_Nova(this, (void *) cookie_nova);
+	}
 }
 
 static void listModes(_THIS, int actually_add)
