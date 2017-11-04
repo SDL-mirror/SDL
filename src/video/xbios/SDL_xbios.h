@@ -71,6 +71,8 @@ struct SDL_PrivateVideoData {
 	void (*saveMode)(_THIS, SDL_PixelFormat *vformat);	/* Save mode,palette,vbase change format if needed */
 	void (*setMode)(_THIS, xbiosmode_t *new_video_mode);	/* Set mode */
 	void (*restoreMode)(_THIS);	/* Restore system mode */
+	void (*vsync)(_THIS);
+	void (*getScreenFormat)(_THIS, int bpp, Uint32 *rmask, Uint32 *gmask, Uint32 *bmask, Uint32 *amask);	/* Get TrueColor screen format */
 	int (*getLineWidth)(_THIS, xbiosmode_t *new_video_mode, int width, int bpp);	/* Return video mode pitch */
 	void (*swapVbuffers)(_THIS);	/* Swap video buffers */
 	int (*allocVbuffers)(_THIS, int num_buffers, int bufsize);	/* Allocate video buffers */
@@ -122,6 +124,8 @@ enum {
 #define XBIOS_saveMode		(this->hidden->saveMode)
 #define XBIOS_setMode		(this->hidden->setMode)
 #define XBIOS_restoreMode	(this->hidden->restoreMode)
+#define XBIOS_vsync			(this->hidden->vsync)
+#define XBIOS_getScreenFormat	(this->hidden->getScreenFormat)
 #define XBIOS_getLineWidth	(this->hidden->getLineWidth)
 #define XBIOS_swapVbuffers	(this->hidden->swapVbuffers)
 #define XBIOS_allocVbuffers	(this->hidden->allocVbuffers)

@@ -346,7 +346,7 @@ static void updateRects_SV(_THIS, int numrects, SDL_Rect *rects)
 
 	if ((surface->flags & SDL_DOUBLEBUF) == SDL_DOUBLEBUF) {
 		Setscreen(-1,XBIOS_screens[XBIOS_fbnum],-1);
-		Vsync();
+		(*XBIOS_vsync)(this);
 
 		XBIOS_fbnum ^= 1;
 	}
@@ -369,7 +369,7 @@ static int flipHWSurface_SV(_THIS, SDL_Surface *surface)
 
  	if ((surface->flags & SDL_DOUBLEBUF) == SDL_DOUBLEBUF) {
 		Setscreen(-1,XBIOS_screens[XBIOS_fbnum],-1);
-		Vsync();
+		(*XBIOS_vsync)(this);
 
 		XBIOS_fbnum ^= 1;
 	}
