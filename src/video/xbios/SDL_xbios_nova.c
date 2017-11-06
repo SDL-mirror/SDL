@@ -50,6 +50,7 @@
 static nova_xcb_t *NOVA_xcb;			/* Pointer to Nova infos */
 static nova_resolution_t *NOVA_modes;	/* Video modes loaded from a file */
 static int NOVA_modecount;				/* Number of loaded modes */
+static unsigned char NOVA_blnk_time;	/* Original blank time */
 
 /*--- Functions ---*/
 
@@ -164,6 +165,9 @@ static void saveMode(_THIS, SDL_PixelFormat *vformat)
 	XBIOS_oldvbase = NOVA_xcb->base;
 
 	/* TODO: save palette ? */
+
+	NOVA_blnk_time = NOVA_xcb->blnk_time;
+	NOVA_xcb->blnk_time = 0;
 }
 
 static void setMode(_THIS, xbiosmode_t *new_video_mode)
@@ -177,6 +181,8 @@ static void restoreMode(_THIS)
 	NOVA_SetMode(this, XBIOS_oldvmode);
 
 	/* TODO: restore palette ? */
+
+	NOVA_xcb->blnk_time = NOVA_blnk_time;
 }
 
 static void vsync_NOVA(_THIS)
