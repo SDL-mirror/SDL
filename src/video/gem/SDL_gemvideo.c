@@ -213,6 +213,41 @@ VideoBootStrap GEM_bootstrap = {
 	GEM_Available, GEM_CreateDevice
 };
 
+static void VDI_ReadNOVAInfo(_THIS, short *work_out)
+{
+	long cookie_nova;
+
+	/* Read NOVA informations */
+	if  (Getcookie(C_NOVA, &cookie_nova) != C_FOUND) {
+		return;
+	}
+
+	switch(VDI_bpp) {
+		case 15:
+			VDI_redmask = 31<<2;
+			VDI_greenmask = 3;
+			VDI_bluemask = 31<<8;
+			VDI_alphamask = 1<<7;
+			break;
+		case 16:
+			VDI_redmask = 31<<3;
+			VDI_greenmask = 7;
+			VDI_bluemask = 31<<8;
+			break;
+		case 24:
+			VDI_redmask = 255;
+			VDI_greenmask = 255<<8;
+			VDI_bluemask = 255<<16;
+			break;
+		case 32:
+			VDI_redmask = 255<<24;
+			VDI_greenmask = 255<<16;
+			VDI_bluemask = 255<<8;
+			VDI_alphamask = 255;
+			break;
+	}
+}
+
 static void VDI_ReadExtInfo(_THIS, short *work_out)
 {
 	unsigned long EdDI_version;
@@ -421,6 +456,7 @@ int GEM_VideoInit(_THIS, SDL_PixelFormat *vformat)
 	VDI_pitch = VDI_w * VDI_pixelsize;
 	VDI_format = ( (VDI_bpp <= 8) ? VDI_FORMAT_INTER : VDI_FORMAT_PACK);
 	VDI_redmask = VDI_greenmask = VDI_bluemask = VDI_alphamask = 0;
+	VDI_ReadNOVAInfo(this, work_out);
 	VDI_ReadExtInfo(this, work_out);
 
 #ifdef DEBUG_VIDEO_GEM
