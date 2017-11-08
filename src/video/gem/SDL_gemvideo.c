@@ -222,6 +222,8 @@ static void VDI_ReadNOVAInfo(_THIS, short *work_out)
 		return;
 	}
 
+	VDI_format = VDI_FORMAT_PACK;
+
 	switch(VDI_bpp) {
 		case 15:
 			VDI_redmask = 31<<2;
