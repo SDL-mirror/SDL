@@ -137,10 +137,14 @@ OS4_GLES_CreateContext(_THIS, SDL_Window * window)
         SDL_WindowData *data = window->driverdata;
 
         if (data->glContext) {
-            dprintf("Old context %p found\n", data->glContext);
-
-            aglDestroyContext(data->glContext);
+            // SDL_GL_DeleteContext() doesn't clear it,
+            // because there is no window parameter
+            dprintf("Old context pointer %p\n", data->glContext);
             data->glContext = NULL;
+        }
+
+        if (data->glBackBuffer) {
+            dprintf("Old back buffer pointer %p\n", data->glBackBuffer);
 
 #if MANAGE_BITMAP
             OS4_GL_FreeBuffers(_this, data);
@@ -173,7 +177,8 @@ OS4_GLES_CreateContext(_THIS, SDL_Window * window)
 
         if (data->glContext) {
 
-            dprintf("OpenGL ES 2 context created for window '%s'\n", window->title);
+            dprintf("OpenGL ES 2 context %p created for window '%s'\n",
+                data->glContext, window->title);
 
             aglMakeCurrent(data->glContext);
             glViewport(0, 0, width, height);
@@ -204,7 +209,7 @@ OS4_GLES_MakeCurrent(_THIS, SDL_Window * window, SDL_GLContext context)
     int result = -1;
 
     if (!window || !context) {
-        dprintf("Called w=%p c=%p\n", window, context);
+        dprintf("Called window=%p context=%p\n", window, context);
     }
 
     if (IOGLES2) {
@@ -302,7 +307,7 @@ OS4_GLES_SwapWindow(_THIS, SDL_Window * window)
 void
 OS4_GLES_DeleteContext(_THIS, SDL_GLContext context)
 {
-    dprintf("Called\n");
+    dprintf("Called with context=%p\n", context);
 
     if (IOGLES2) {
 

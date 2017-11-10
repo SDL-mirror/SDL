@@ -198,10 +198,15 @@ OS4_GL_CreateContext(_THIS, SDL_Window * window)
         SDL_WindowData * data = window->driverdata;
 
         if (data->glContext) {
+            // SDL_GL_DeleteContext() doesn't clear it,
+            // because there is no window parameter
             dprintf("Old context %p found\n", data->glContext);
-
-            ((struct GLContextIFace *)data->glContext)->DeleteContext();
             data->glContext = NULL;
+        }
+
+        if (data->glFrontBuffer || data->glBackBuffer) {
+            dprintf("Old front buffer pointer %p, back buffer pointer %p\n",
+                data->glFrontBuffer, data->glBackBuffer);
 
             OS4_GL_FreeBuffers(_this, data);
         }
@@ -227,7 +232,8 @@ OS4_GL_CreateContext(_THIS, SDL_Window * window)
 
         if (data->glContext) {
 
-            dprintf("GL context created for window '%s'\n", window->title);
+            dprintf("MiniGL context %p created for window '%s'\n",
+                data->glContext, window->title);
 
             ((struct GLContextIFace *)data->glContext)->GLViewport(0, 0, width, height);
             mglMakeCurrent(data->glContext);
@@ -257,7 +263,7 @@ OS4_GL_MakeCurrent(_THIS, SDL_Window * window, SDL_GLContext context)
     int result = -1;
 
     if (!window || !context) {
-        dprintf("Called w=%p c=%p\n", window, context);
+        dprintf("Called window=%p context=%p\n", window, context);
     }
 
     if (IMiniGL) {
@@ -420,7 +426,7 @@ OS4_GL_SwapWindow(_THIS, SDL_Window * window)
 void
 OS4_GL_DeleteContext(_THIS, SDL_GLContext context)
 {
-    dprintf("Called\n");
+    dprintf("Called with context=%p\n", context);
 
     if (IMiniGL) {
 
