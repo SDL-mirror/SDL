@@ -118,6 +118,14 @@ OS4_GL_AllocateBuffers(_THIS, int width, int height, int depth, SDL_WindowData *
 {
     dprintf("Allocate double buffer bitmaps %d*%d*%d\n", width, height, depth);
 
+    if (data->glFrontBuffer) {
+        dprintf("Old front buffer %p found\n");
+    }
+
+    if (data->glBackBuffer) {
+        dprintf("Old back buffer %p found\n");
+    }
+
     if (!(data->glFrontBuffer = IGraphics->AllocBitMapTags(
                                     width,
                                     height,
@@ -198,9 +206,12 @@ OS4_GL_CreateContext(_THIS, SDL_Window * window)
         SDL_WindowData * data = window->driverdata;
 
         if (data->glContext) {
-            // SDL_GL_DeleteContext() doesn't clear it,
-            // because there is no window parameter
-            dprintf("Old context %p found\n", data->glContext);
+            struct GLContextIFace *IGL = (struct GLContextIFace *)data->glContext;
+
+            dprintf("Old context %p found, deleting\n", data->glContext);
+
+            IGL->DeleteContext();
+
             data->glContext = NULL;
         }
 
@@ -216,7 +227,7 @@ OS4_GL_CreateContext(_THIS, SDL_Window * window)
         OS4_GetWindowSize(_this, data->syswin, &width, &height);
 
         if (!OS4_GL_AllocateBuffers(_this, width, height, depth, data)) {
-            SDL_SetError("Failed to allocate OpenGL buffers");
+            SDL_SetError("Failed to allocate MiniGL buffers");
             return NULL;
         }
 
@@ -242,9 +253,9 @@ OS4_GL_CreateContext(_THIS, SDL_Window * window)
             return data->glContext;
 
         } else {
-            dprintf("Failed to create OpenGL context for window '%s'\n", window->title);
+            dprintf("Failed to create MiniGL context for window '%s'\n", window->title);
 
-            SDL_SetError("Failed to create OpenGL context");
+            SDL_SetError("Failed to create MiniGL context");
 
             OS4_GL_FreeBuffers(_this, data);
 
@@ -431,10 +442,31 @@ OS4_GL_DeleteContext(_THIS, SDL_GLContext context)
     if (IMiniGL) {
 
         if (context) {
-            struct GLContextIFace *IGL = context;
-            IGL->DeleteContext();
-        }
+            SDL_Window *sdlwin;
+            Uint32 deletions = 0;
 
+            for (sdlwin = _this->windows; sdlwin; sdlwin = sdlwin->next) {
+
+                SDL_WindowData *data = sdlwin->driverdata;
+
+                if (data->glContext == context) {
+                    struct GLContextIFace *IGL = context;
+
+                    dprintf("Found MiniGL context, clearing window binding\n");
+
+                    IGL->DeleteContext();
+
+                    data->glContext = NULL;
+                    deletions++;
+                }
+            }
+
+            if (deletions == 0) {
+                dprintf("MiniGL context doesn't seem to have window binding\n");
+            }
+        } else {
+            dprintf("No context to delete\n");
+        }
     } else {
         OS4_GL_LogLibraryError();
     }
@@ -447,6 +479,7 @@ OS4_GL_ResizeContext(_THIS, SDL_Window * window)
         SDL_WindowData *data = window->driverdata;
 
         if (data) {
+
             uint32 depth;
 
             OS4_GL_FreeBuffers(_this, data);
@@ -455,7 +488,7 @@ OS4_GL_ResizeContext(_THIS, SDL_Window * window)
 
             if (OS4_GL_AllocateBuffers(_this, window->w, window->h, depth, data)) {
 
-                dprintf("Resizing context to %d*%d\n", window->w, window->h);
+                dprintf("Resizing MiniGL context to %d*%d\n", window->w, window->h);
 
                 ((struct GLContextIFace *)data->glContext)->MGLUpdateContextTags(
                                 MGLCC_FrontBuffer, data->glFrontBuffer,
@@ -467,9 +500,11 @@ OS4_GL_ResizeContext(_THIS, SDL_Window * window)
                 return SDL_TRUE;
 
             } else {
-                dprintf("Failed to re-allocate OpenGL buffers\n");
+                dprintf("Failed to re-allocate MiniGL buffers\n");
                 //SDL_Quit();
             }
+        } else {
+            dprintf("Window data NULL\n");
         }
     } else {
         OS4_GL_LogLibraryError();

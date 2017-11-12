@@ -137,9 +137,10 @@ OS4_GLES_CreateContext(_THIS, SDL_Window * window)
         SDL_WindowData *data = window->driverdata;
 
         if (data->glContext) {
-            // SDL_GL_DeleteContext() doesn't clear it,
-            // because there is no window parameter
-            dprintf("Old context pointer %p\n", data->glContext);
+            dprintf("Old context %p found, deleting\n", data->glContext);
+
+            aglDestroyContext(data->glContext);
+
             data->glContext = NULL;
         }
 
@@ -312,7 +313,28 @@ OS4_GLES_DeleteContext(_THIS, SDL_GLContext context)
     if (IOGLES2) {
 
         if (context) {
-            aglDestroyContext(context);
+            SDL_Window *sdlwin;
+            Uint32 deletions = 0;
+
+            for (sdlwin = _this->windows; sdlwin; sdlwin = sdlwin->next) {
+
+                SDL_WindowData *data = sdlwin->driverdata;
+
+                if (data->glContext == context) {
+                    dprintf("Found OpenGL ES 2 context, clearing window binding\n");
+
+                    aglDestroyContext(context);
+
+                    data->glContext = NULL;
+                    deletions++;
+                }
+            }
+
+            if (deletions == 0) {
+                dprintf("OpenGL ES 2 context doesn't seem to have window binding\n");
+            }
+        } else {
+            dprintf("No context to delete\n");
         }
 
     } else {
@@ -344,7 +366,7 @@ OS4_GLES_ResizeContext(_THIS, SDL_Window * window)
                 return SDL_TRUE;
 
             } else {
-                dprintf("Failed to re-allocate OpenGL buffers\n");
+                dprintf("Failed to re-allocate OpenGL ES 2 buffers\n");
                 //SDL_Quit();
             }
         }
