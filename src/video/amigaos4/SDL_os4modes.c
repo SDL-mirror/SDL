@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2016 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2017 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -153,7 +153,6 @@ OS4_GetDisplayBounds(_THIS, SDL_VideoDisplay * display, SDL_Rect * rect)
 void
 OS4_GetDisplayModes(_THIS, SDL_VideoDisplay * display)
 {
-	//SDL_DisplayData *displaydata = (SDL_DisplayData *) display->driverdata;
 	SDL_DisplayMode mode;
 	ULONG id = INVALID_ID;
 
@@ -179,10 +178,17 @@ void
 OS4_CloseScreenInternal(_THIS, struct Screen * screen)
 {
 	if (screen) {
+		SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
+
 		dprintf("Close screen %p\n", screen);
 
-		if (IIntuition->CloseScreen(screen) == FALSE) {
-    		dprintf("Screen has open window(s)\n");
+		if (screen != data->publicScreen) {
+
+			if (IIntuition->CloseScreen(screen) == FALSE) {
+				dprintf("Screen has open window(s), cannot close\n");
+			}
+		} else {
+			dprintf("Cannot close public screen\n");
 		}
 
 	} else {
@@ -207,17 +213,18 @@ OS4_SetDisplayMode(_THIS, SDL_VideoDisplay * display, SDL_DisplayMode * mode)
 		return 0;
 	}
 
-	dprintf("Opening screen id %d: %d*%d*%d\n", data->modeid, mode->w, mode->h, bpp);
-
 	displaydata->screen = IIntuition->OpenScreenTags(NULL,
-		SA_Width, 		mode->w,
-		SA_Height,		mode->h,
-		SA_Depth,		bpp,
-		SA_DisplayID,	data->modeid,
-		SA_Quiet,		TRUE,
-		SA_ShowTitle,	FALSE,
-		SA_ErrorCode,	&openError,
+		SA_Width,       mode->w,
+		SA_Height,      mode->h,
+		SA_Depth,       bpp,
+		SA_DisplayID,   data->modeid,
+		SA_Quiet,       TRUE,
+		SA_ShowTitle,   FALSE,
+		SA_ErrorCode,   &openError,
 		TAG_DONE);
+
+	dprintf("Opened screen id %d: %d*%d*%d (address %p)\n",
+		data->modeid, mode->w, mode->h, bpp, displaydata->screen);
 
 	if (!displaydata->screen) {
 		switch (openError) {
@@ -225,7 +232,7 @@ OS4_SetDisplayMode(_THIS, SDL_VideoDisplay * display, SDL_DisplayMode * mode)
 				SDL_SetError("Monitor for display mode not available");
 				break;
 			case OSERR_NOCHIPS:
-				SDL_SetError("Newer custom chips required (yeah, sure!)");
+				SDL_SetError("Newer custom chips required");
 				break;
 			case OSERR_NOMEM:
 			case OSERR_NOCHIPMEM:
@@ -243,12 +250,13 @@ OS4_SetDisplayMode(_THIS, SDL_VideoDisplay * display, SDL_DisplayMode * mode)
 				break;
 			default:
 				SDL_SetError("OpenScreen failed");
+				break;
 		}
 		return -1;
 	}
 
-	/* Paint it black (it helps in cases where window doesn't fill the screen)
-	...do we need a backfill hook? */
+	// Paint it black (it helps in cases where window doesn't fill the screen)
+	// ...do we need a backfill hook?
 	IGraphics->RectFillColor(&displaydata->screen->RastPort, 0, 0, mode->w - 1, mode->h - 1, 0xFF000000);
 
 	return 0;

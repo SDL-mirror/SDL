@@ -93,7 +93,7 @@ OS4_SetupWindowData(_THIS, SDL_Window * sdlwin, struct Window * syswin)
         sdlwin->h = height;
     }
 
-    /* Pass SDL window as user data */
+    // Pass SDL window as user data
     data->appWin = IWorkbench->AddAppWindow(0, (ULONG)sdlwin, syswin, videodata->appMsgPort, TAG_DONE);
 
     if (!data->appWin) {
@@ -164,7 +164,7 @@ OS4_GetScreenForWindow(_THIS, SDL_VideoDisplay * display)
     } else {
         SDL_VideoData *videodata = (SDL_VideoData *) _this->driverdata;
 
-        dprintf("Window mode\n");
+        dprintf("Window mode (public screen)\n");
         return videodata->publicScreen;
     }
 }
@@ -220,12 +220,12 @@ OS4_CreateWindowInternal(_THIS, SDL_Window * window, SDL_VideoDisplay * display)
 
     struct Screen *screen = OS4_GetScreenForWindow(_this, display);
 
-    OS4_BackFillHook.h_Data = IGraphics; /* Smuggle interface ptr for the hook */
+    OS4_BackFillHook.h_Data = IGraphics; // Smuggle interface ptr for the hook
 
     OS4_CenterWindow(screen, window);
 
-    dprintf("Trying to open window '%s' at (%d,%d) of size (%dx%d)\n",
-        window->title, window->x, window->y, window->w, window->h);
+    dprintf("Opening window '%s' at (%d,%d) of size (%dx%d) on screen %p\n",
+        window->title, window->x, window->y, window->w, window->h, screen);
 
     syswin = IIntuition->OpenWindowTags(
         NULL,
@@ -244,19 +244,17 @@ OS4_CreateWindowInternal(_THIS, SDL_Window * window, SDL_VideoDisplay * display)
         WA_BackFill, &OS4_BackFillHook,
         TAG_DONE);
 
-    if (!syswin) {
+    if (syswin) {
+        dprintf("Window address %p\n", syswin);
+    } else {
         dprintf("Couldn't create window\n");
         return NULL;
     }
 
     if (window->flags & SDL_WINDOW_RESIZABLE) {
 
-        /* If this window is resizable, reset window size limits
-         * so that the user can actually resize it.
-         *
-         * What's a useful minimum size, anyway?
-         */
-
+        // If this window is resizable, reset window size limits
+        // so that the user can actually resize it.
         BOOL ret = IIntuition->WindowLimits(syswin,
             syswin->BorderLeft + syswin->BorderRight + 100,
             syswin->BorderTop + syswin->BorderBottom + 100,
@@ -494,8 +492,13 @@ static void
 OS4_CloseWindowInternal(_THIS, struct Window * window)
 {
     if (window) {
-        dprintf("Closing window '%s'\n", window->Title);
+        dprintf("Closing window '%s' (address %p)\n", window->Title, window);
+        struct Screen *screen = window->WScreen;
+
         IIntuition->CloseWindow(window);
+
+        OS4_CloseScreenInternal(_this, screen);
+
     } else {
         dprintf("NULL pointer\n");
     }
@@ -513,42 +516,43 @@ OS4_SetWindowFullscreen(_THIS, SDL_Window * window, SDL_VideoDisplay * display, 
         SDL_WindowData *data = window->driverdata;
 
         if (window->flags & SDL_WINDOW_FOREIGN) {
-            dprintf("Native window '%s', mode change ignored\n", window->title);
+            dprintf("Native window '%s' (%p), mode change ignored\n", window->title, data->syswin);
         } else {
+            if (fullscreen) {
+                // Detect dummy transition and keep calm
+                SDL_DisplayData *displayData = display->driverdata;
+
+                if (displayData->screen && data->syswin) {
+                    if (data->syswin->WScreen == displayData->screen) {
+                        dprintf("Same screen, useless mode change ignored\n");
+                        return;
+                    }
+                }
+            }
+
             OS4_RemoveAppWindow(_this, data);
 
             if (data->syswin) {
-                dprintf("Reopening window '%s' due to mode change\n", window->title);
+                dprintf("Reopening window '%s' (%p) due to mode change\n",
+                    window->title, data->syswin);
 
                 OS4_CloseWindowInternal(_this, data->syswin);
-                data->syswin = NULL;
 
             } else {
                 dprintf("System window doesn't exist yet, let's open it\n");
             }
 
-            if (!fullscreen) {
-                SDL_DisplayData * displayData = display->driverdata;
-
-                if (displayData->screen) {
-                    OS4_CloseScreenInternal(_this, displayData->screen);
-                    displayData->screen = NULL;
-                }
-
-                display = NULL;
-            }
-
-            data->syswin = OS4_CreateWindowInternal(_this, window, display);
+            data->syswin = OS4_CreateWindowInternal(_this, window, fullscreen ? display : NULL);
 
             if (fullscreen) {
-                /* Workaround: make the new fullscreen window active */
+                // Workaround: make the new fullscreen window active
                 OS4_ShowWindow(_this, window);
             }
         }
     }
 }
 
-/* This may be called from os4events.c, too */
+// This may be called from os4events.c
 void
 OS4_SetWindowGrabInternal(_THIS, struct Window * w, SDL_bool activate)
 {
@@ -563,8 +567,8 @@ OS4_SetWindowGrabInternal(_THIS, struct Window * w, SDL_bool activate)
         LONG ret;
 
         if (activate) {
-            /* It seems to be that grabbed window should be active, otherwise some other
-            window (like shell) may be grabbed? */
+            // It seems to be that grabbed window should be active, otherwise some other
+            // window (like shell) may be grabbed?
             IIntuition->ActivateWindow(w);
 
             ret = IIntuition->SetWindowAttrs(w,
@@ -612,9 +616,6 @@ OS4_DestroyWindow(_THIS, SDL_Window * window)
         if (data->syswin) {
 
             if (!(window->flags & SDL_WINDOW_FOREIGN)) {
-                SDL_VideoData *videodata = (SDL_VideoData *) _this->driverdata;
-
-                struct Screen *screen = data->syswin->WScreen;
 
                 if (SDL_IsShapedWindow(window)) {
                     OS4_DestroyShape(_this, window);
@@ -622,10 +623,6 @@ OS4_DestroyWindow(_THIS, SDL_Window * window)
 
                 OS4_CloseWindowInternal(_this, data->syswin);
                 data->syswin = NULL;
-
-                if (screen != videodata->publicScreen) {
-                    OS4_CloseScreenInternal(_this, screen);
-                }
             } else {
                 dprintf("Ignored for native window\n");
             }
@@ -661,7 +658,7 @@ OS4_GetWindowWMInfo(_THIS, SDL_Window * window, struct SDL_SysWMinfo * info)
 int
 OS4_SetWindowHitTest(SDL_Window * window, SDL_bool enabled)
 {
-    return 0;  /* just succeed, the real work is done elsewhere. */
+    return 0; // just succeed, the real work is done elsewhere
 }
 
 int
