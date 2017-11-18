@@ -35,7 +35,8 @@
 #define DEBUG
 #include "../../main/amigaos4/SDL_os4debug.h"
 
-SDL_WindowShaper* OS4_CreateShaper(SDL_Window * window)
+SDL_WindowShaper*
+OS4_CreateShaper(SDL_Window * window)
 {
     _THIS = SDL_GetVideoDevice();
 
@@ -54,7 +55,7 @@ SDL_WindowShaper* OS4_CreateShaper(SDL_Window * window)
         result = SDL_malloc(sizeof(SDL_WindowShaper));
 
         if (result) {
-            SDL_ShapeData* data = SDL_malloc(sizeof(SDL_ShapeData));
+            SDL_ShapeData *data = SDL_malloc(sizeof(SDL_ShapeData));
 
             result->window = window;
             result->mode.mode = ShapeModeDefault;
@@ -95,11 +96,12 @@ SDL_WindowShaper* OS4_CreateShaper(SDL_Window * window)
     return result;
 }
 
-static struct BitMap * OS4_MakeAlphaBitMap(void * source, int width, int height)
+static struct BitMap *
+OS4_MakeAlphaBitMap(void * source, int width, int height)
 {
     _THIS = SDL_GetVideoDevice();
 
-    struct BitMap * sysbm = IGraphics->AllocBitMapTags(
+    struct BitMap *sysbm = IGraphics->AllocBitMapTags(
         width,
         height,
         8,
@@ -150,11 +152,13 @@ static struct BitMap * OS4_MakeAlphaBitMap(void * source, int width, int height)
     return sysbm;
 }
 
-static struct ClipRect* OS4_SetAlphaLayer(struct Window * window, SDL_ShapeData * data)
+static struct ClipRect*
+OS4_SetAlphaLayer(struct Window * window, SDL_ShapeData * data)
 {
     _THIS = SDL_GetVideoDevice();
 
     struct ClipRect *cliprect;
+    struct ClipRect *oldCliprect = NULL;
 
     ILayers->LockLayerInfo(&window->WScreen->LayerInfo);
 
@@ -174,18 +178,23 @@ static struct ClipRect* OS4_SetAlphaLayer(struct Window * window, SDL_ShapeData 
         cliprect->bounds.MaxX = data->width - 1;
         cliprect->bounds.MaxY = data->height - 1;
 
-        ILayers->ChangeLayerAlpha(window->WLayer, cliprect, NULL);
-        //IIntuition->SetWindowAttrs(window, WA_AlphaClips, cliprect, TAG_DONE); TODO: which method is better?
+        oldCliprect = ILayers->ChangeLayerAlpha(window->WLayer, cliprect, NULL);
+        //IIntuition->SetWindowAttrs(window, WA_AlphaClips, cliprect, TAG_DONE); //TODO: which method is better?
     } else {
         dprintf("Failed to allocate cliprect\n");
     }
 
     ILayers->UnlockLayerInfo(&window->WScreen->LayerInfo);
 
+    if (oldCliprect == (struct ClipRect *)-1) {
+        dprintf("Failed to install layer alpha\n");
+    }
+
     return cliprect; //TODO
 }
 
-void OS4_DestroyShape(_THIS, SDL_Window * window)
+void
+OS4_DestroyShape(_THIS, SDL_Window * window)
 {
     SDL_WindowShaper *shaper = window->shaper;
 
@@ -233,12 +242,13 @@ void OS4_DestroyShape(_THIS, SDL_Window * window)
 
 }
 
-int OS4_SetWindowShape(SDL_WindowShaper * shaper, SDL_Surface * shape, SDL_WindowShapeMode * shape_mode)
+int
+OS4_SetWindowShape(SDL_WindowShaper * shaper, SDL_Surface * shape, SDL_WindowShapeMode * shape_mode)
 {
     if (shaper && shape && shape_mode && shaper->driverdata) {
 
-        SDL_ShapeData* data = shaper->driverdata;
-        SDL_WindowData* windowdata = shaper->window->driverdata;
+        SDL_ShapeData *data = shaper->driverdata;
+        SDL_WindowData *windowdata = shaper->window->driverdata;
 
         if (shape->format->Amask == 0 && SDL_SHAPEMODEALPHA(shape_mode->mode)) {
             dprintf("Shape doesn't have alpha channel\n");
@@ -284,14 +294,15 @@ int OS4_SetWindowShape(SDL_WindowShaper * shaper, SDL_Surface * shape, SDL_Windo
     }
 }
 
-int OS4_ResizeWindowShape(SDL_Window * window)
+int
+OS4_ResizeWindowShape(SDL_Window * window)
 {
     if (window->shaper) {
 
-        SDL_ShapeData* data = window->shaper->driverdata;
+        SDL_ShapeData *data = window->shaper->driverdata;
 
         if (data) {
-            Uint32 bitmapsize = window->w * window->h;
+            const Uint32 bitmapsize = window->w * window->h;
 
             dprintf("Called for '%s'\n", window->title);
 
@@ -317,7 +328,7 @@ int OS4_ResizeWindowShape(SDL_Window * window)
 
             window->shaper->userx = window->x;
             window->shaper->usery = window->y;
-            SDL_SetWindowPosition(window, -1000, -1000);//??
+            //SDL_SetWindowPosition(window, -1000, -1000);//??
 
             return 0;
         } else {
