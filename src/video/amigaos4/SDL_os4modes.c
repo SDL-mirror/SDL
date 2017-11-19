@@ -72,10 +72,10 @@ OS4_GetDisplayMode(_THIS, ULONG id, SDL_DisplayMode * mode)
 
         switch (diminfo.MaxDepth) {
         case 32:
-            mode->format = SDL_PIXELFORMAT_RGBA8888; //SDL_PIXELFORMAT_RGB888;
+            mode->format = SDL_PIXELFORMAT_ARGB8888;
             break;
         case 24:
-            mode->format = SDL_PIXELFORMAT_RGB888; // SDL_PIXELFORMAT_RGB24;
+            mode->format = SDL_PIXELFORMAT_RGB888;
             break;
         case 16:
             mode->format = SDL_PIXELFORMAT_RGB565;
@@ -175,7 +175,7 @@ OS4_GetDisplayModes(_THIS, SDL_VideoDisplay * display)
 }
 
 void
-OS4_CloseScreenInternal(_THIS, struct Screen * screen)
+OS4_CloseScreen(_THIS, struct Screen * screen)
 {
     if (screen) {
         SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;

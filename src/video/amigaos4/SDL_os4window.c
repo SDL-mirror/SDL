@@ -38,7 +38,7 @@
 
 extern SDL_bool (*OS4_ResizeGlContext)(_THIS, SDL_Window * window);
 
-static void OS4_CloseWindowInternal(_THIS, struct Window * window);
+static void OS4_CloseWindow(_THIS, struct Window * window);
 
 static SDL_bool
 OS4_IsFullscreen(SDL_Window * window)
@@ -207,7 +207,7 @@ OS4_CenterWindow(struct Screen * screen, SDL_Window * window)
 }
 
 static struct Window *
-OS4_CreateWindowInternal(_THIS, SDL_Window * window, SDL_VideoDisplay * display)
+OS4_CreateSystemWindow(_THIS, SDL_Window * window, SDL_VideoDisplay * display)
 {
     SDL_VideoData *videodata = (SDL_VideoData *) _this->driverdata;
 
@@ -279,7 +279,7 @@ OS4_CreateWindow(_THIS, SDL_Window * window)
         // SDL_SetWindowFullscreen() and open the window then.
         dprintf("Open fullscreen window with delay\n");
     } else {
-        if (!(syswin = OS4_CreateWindowInternal(_this, window, NULL))) {
+        if (!(syswin = OS4_CreateSystemWindow(_this, window, NULL))) {
             return SDL_SetError("Failed to create system window");
         }
     }
@@ -289,7 +289,7 @@ OS4_CreateWindow(_THIS, SDL_Window * window)
         OS4_RemoveAppWindow(_this, window->driverdata);
 
         if (syswin) {
-            OS4_CloseWindowInternal(_this, syswin);
+            OS4_CloseWindow(_this, syswin);
         }
 
         return SDL_SetError("Failed to setup window data");
@@ -333,7 +333,7 @@ OS4_SetWindowTitle(_THIS, SDL_Window * window)
 }
 
 void
-OS4_SetWindowBoxInternal(_THIS, SDL_Window * window)
+OS4_SetWindowBox(_THIS, SDL_Window * window)
 {
     SDL_WindowData *data = window->driverdata;
 
@@ -432,12 +432,14 @@ OS4_ShowWindow(_THIS, SDL_Window * window)
 {
     SDL_WindowData *data = window->driverdata;
 
-    dprintf("Showing window '%s'\n", window->title);
-
     if (data && data->syswin) {
 
+        LONG ret;
+
+        dprintf("Showing window '%s'\n", window->title);
+
         // TODO: could use ShowWindow but what we pass for the Other?
-        LONG ret = IIntuition->SetWindowAttrs(data->syswin,
+        ret = IIntuition->SetWindowAttrs(data->syswin,
             WA_Hidden, FALSE,
             TAG_DONE);
 
@@ -462,12 +464,13 @@ OS4_HideWindow(_THIS, SDL_Window * window)
 {
     SDL_WindowData *data = window->driverdata;
 
-    dprintf("Hiding window '%s'\n", window->title);
-
     if (data && data->syswin) {
+        BOOL result;
 
-        /* TODO: how to hide a fullscreen window? Close the screen? */
-        BOOL result = IIntuition->HideWindow(data->syswin);
+        dprintf("Hiding window '%s'\n", window->title);
+
+        // TODO: how to hide a fullscreen window? Close the screen?
+        result = IIntuition->HideWindow(data->syswin);
 
         if (!result) {
             dprintf("HideWindow() failed\n");
@@ -480,24 +483,25 @@ OS4_RaiseWindow(_THIS, SDL_Window * window)
 {
     SDL_WindowData *data = window->driverdata;
 
-    dprintf("Raising window '%s'\n", window->title);
-
     if (data && data->syswin) {
+        dprintf("Raising window '%s'\n", window->title);
+
         IIntuition->WindowToFront(data->syswin);
         IIntuition->ActivateWindow(data->syswin);
     }
 }
 
 static void
-OS4_CloseWindowInternal(_THIS, struct Window * window)
+OS4_CloseWindow(_THIS, struct Window * window)
 {
     if (window) {
         dprintf("Closing window '%s' (address %p)\n", window->Title, window);
+
         struct Screen *screen = window->WScreen;
 
         IIntuition->CloseWindow(window);
 
-        OS4_CloseScreenInternal(_this, screen);
+        OS4_CloseScreen(_this, screen);
 
     } else {
         dprintf("NULL pointer\n");
@@ -507,13 +511,14 @@ OS4_CloseWindowInternal(_THIS, struct Window * window)
 void
 OS4_SetWindowFullscreen(_THIS, SDL_Window * window, SDL_VideoDisplay * display, SDL_bool fullscreen)
 {
-    dprintf("Trying to set '%s' into %s mode\n", window->title, fullscreen ? "fullscreen" : "window");
-
     if (window->is_destroying) {
         // This function gets also called during window closing
         dprintf("Window '%s' is being destroyed, mode change ignored\n", window->title);
     } else {
         SDL_WindowData *data = window->driverdata;
+
+        dprintf("Trying to set '%s' into %s mode\n", window->title,
+            fullscreen ? "fullscreen" : "window");
 
         if (window->flags & SDL_WINDOW_FOREIGN) {
             dprintf("Native window '%s' (%p), mode change ignored\n", window->title, data->syswin);
@@ -536,13 +541,13 @@ OS4_SetWindowFullscreen(_THIS, SDL_Window * window, SDL_VideoDisplay * display, 
                 dprintf("Reopening window '%s' (%p) due to mode change\n",
                     window->title, data->syswin);
 
-                OS4_CloseWindowInternal(_this, data->syswin);
+                OS4_CloseWindow(_this, data->syswin);
 
             } else {
                 dprintf("System window doesn't exist yet, let's open it\n");
             }
 
-            data->syswin = OS4_CreateWindowInternal(_this, window, fullscreen ? display : NULL);
+            data->syswin = OS4_CreateSystemWindow(_this, window, fullscreen ? display : NULL);
 
             if (fullscreen) {
                 // Workaround: make the new fullscreen window active
@@ -554,7 +559,7 @@ OS4_SetWindowFullscreen(_THIS, SDL_Window * window, SDL_VideoDisplay * display, 
 
 // This may be called from os4events.c
 void
-OS4_SetWindowGrabInternal(_THIS, struct Window * w, SDL_bool activate)
+OS4_SetWindowGrabPrivate(_THIS, struct Window * w, SDL_bool activate)
 {
     if (w) {
         struct IBox grabBox = {
@@ -597,7 +602,7 @@ OS4_SetWindowGrab(_THIS, SDL_Window * window, SDL_bool grabbed)
     SDL_WindowData *data = window->driverdata;
 
     if (data) {
-        OS4_SetWindowGrabInternal(_this, data->syswin, grabbed);
+        OS4_SetWindowGrabPrivate(_this, data->syswin, grabbed);
         data->pointerGrabTicks = 0;
     }
 }
@@ -621,7 +626,7 @@ OS4_DestroyWindow(_THIS, SDL_Window * window)
                     OS4_DestroyShape(_this, window);
                 }
 
-                OS4_CloseWindowInternal(_this, data->syswin);
+                OS4_CloseWindow(_this, data->syswin);
                 data->syswin = NULL;
             } else {
                 dprintf("Ignored for native window\n");

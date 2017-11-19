@@ -48,26 +48,25 @@ struct MyIntuiMessage
     uint16 Qualifier;
 
     struct Gadget *Gadget;
-
     struct Window *IDCMPWindow;
 
     int16  RelativeMouseX;
     int16  RelativeMouseY;
 
-    int16  WindowMouseX;    /* Absolute pointer position, relative to */
-    int16  WindowMouseY;    /* top-left corner of inner window */
+    int16  WindowMouseX; // Absolute pointer position, relative to
+    int16  WindowMouseY; // top-left corner of inner window
 
     int16  ScreenMouseX;
     int16  ScreenMouseY;
 
-    int16  Width;       /* Inner window dimensions */
+    int16  Width; // Inner window dimensions
     int16  Height;
 };
 
 extern OS4_GlobalMouseState globalMouseState;
 
-/* We could possibly use also Window.userdata field to contain SDL_Window,
-and thus avoid searching */
+// We could possibly use also Window.userdata field to contain SDL_Window,
+// and thus avoid searching
 static SDL_Window *
 OS4_FindWindow(_THIS, struct Window * syswin)
 {
@@ -80,7 +79,6 @@ OS4_FindWindow(_THIS, struct Window * syswin)
         if (data->syswin == syswin) {
 
             //dprintf("Found window %p\n", syswin);
-
             return sdlwin;
         }
     }
@@ -220,7 +218,7 @@ OS4_HandleHitTestMotion(_THIS, SDL_Window * sdlwin, struct MyIntuiMessage * imsg
     sdlwin->w = w;
     sdlwin->h = h;
 
-    OS4_SetWindowBoxInternal(_this, sdlwin);
+    OS4_SetWindowBox(_this, sdlwin);
 }
 
 static SDL_bool
@@ -272,7 +270,8 @@ OS4_HandleMouseMotion(_THIS, struct MyIntuiMessage * imsg)
     }
 }
 
-static SDL_bool OS4_HandleHitTest(_THIS, SDL_Window * sdlwin, struct MyIntuiMessage * imsg)
+static SDL_bool
+OS4_HandleHitTest(_THIS, SDL_Window * sdlwin, struct MyIntuiMessage * imsg)
 {
     if (sdlwin->hit_test) {
         const SDL_Point point = { imsg->WindowMouseX, imsg->WindowMouseY };
@@ -394,8 +393,9 @@ OS4_HandleResize(_THIS, struct MyIntuiMessage * imsg)
         HitTestInfo *hti = &((SDL_WindowData *)sdlwin->driverdata)->hti;
 
         if (OS4_IsHitTestResize(hti)) {
-            /* Intuition notifies about resize during hit test action, but it will confuse hit test logic.
-            That is why we ignore these for now. */
+            // Intuition notifies about resize during hit test action,
+            // but it will confuse hit test logic.
+            // That is why we ignore these for now.
             dprintf("Resize notification ignored because resize is still in progress\n");
         } else {
             dprintf("Window resized to %d*%d\n", imsg->Width, imsg->Height);
@@ -468,7 +468,7 @@ OS4_HandleTicks(_THIS, struct MyIntuiMessage * imsg)
             if (++data->pointerGrabTicks >= POINTER_GRAB_TIMEOUT) {
                 data->pointerGrabTicks = 0;
 
-                OS4_SetWindowGrabInternal(_this, imsg->IDCMPWindow, TRUE);
+                OS4_SetWindowGrabPrivate(_this, imsg->IDCMPWindow, TRUE);
             }
         }
     }
@@ -491,8 +491,8 @@ OS4_HandleAppWindow(_THIS, struct AppMessage * amsg)
 static void
 OS4_CopyRelevantFields(struct IntuiMessage * src, struct MyIntuiMessage * dst)
 {
-    /* Copy relevant fields. This makes it safer if the window goes away during
-      this loop (re-open due to keystroke) */
+    // Copy relevant fields. This makes it safer if the window goes away during
+    //  this loop (re-open due to keystroke)
     dst->Class           = src->Class;
     dst->Code            = src->Code;
     dst->Qualifier       = src->Qualifier;
