@@ -21930,6 +21930,7 @@ $as_echo_n "checking for OpenGL ES v2 headers... " >&6; }
 
          #include <GLES2/gl2.h>
          #include <GLES2/gl2ext.h>
+         #include <ogles2/ogles2_defs.h>
 
 int
 main ()
@@ -26169,7 +26170,7 @@ cat >>$CONFIG_STATUS <<_ACEOF || ac_write_fail=1
 _ACAWK
 cat >>"\$ac_tmp/subs1.awk" <<_ACAWK &&
   for (key in S) S_is_set[key] = 1
-  FS = ""
+  FS = ""
 
 }
 {
@@ -26301,7 +26302,7 @@ s/'"$ac_delim"'/"\\\
 
 cat >>$CONFIG_STATUS <<_ACEOF || ac_write_fail=1
   for (key in D) D_is_set[key] = 1
-  FS = ""
+  FS = ""
 }
 /^[\t ]*#[\t ]*(define|undef)[\t ]+$ac_word_re([\t (]|\$)/ {
   line = \$ 0

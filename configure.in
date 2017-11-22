@@ -2436,6 +2436,7 @@ CheckAmigaOS4GLES()
         AC_TRY_COMPILE([
          #include <GLES2/gl2.h>
          #include <GLES2/gl2ext.h>
+         #include <ogles2/ogles2_defs.h>
         ],[
         ],[
         video_opengles_v2=yes
