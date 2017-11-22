@@ -223,9 +223,11 @@ OS4_GLES_MakeCurrent(_THIS, SDL_Window * window, SDL_GLContext context)
                 SDL_SetError("Context pointer mismatch");
             } else {
                 aglMakeCurrent(context);
-                result = 0;
             }
         }
+
+        result = 0;
+
     } else {
         OS4_GLES_LogLibraryError();
     }

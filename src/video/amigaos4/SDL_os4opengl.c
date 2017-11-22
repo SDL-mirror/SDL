@@ -287,9 +287,11 @@ OS4_GL_MakeCurrent(_THIS, SDL_Window * window, SDL_GLContext context)
                 SDL_SetError("Context pointer mismatch");
             } else {
                 mglMakeCurrent(context);
-                result = 0;
             }
         }
+
+        result = 0;
+
     } else {
         OS4_GL_LogLibraryError();
     }
