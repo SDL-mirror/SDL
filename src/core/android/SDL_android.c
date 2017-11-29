@@ -417,11 +417,11 @@ JNIEXPORT int JNICALL SDL_JAVA_INTERFACE(nativeRunMain)(JNIEnv* env, jclass cls,
     library_handle = dlopen(library_file, RTLD_GLOBAL);
     if (library_handle) {
         const char *function_name;
-        SDL_main_func SDL_main;
+        SDL_main_func SDL_main_f;
 
         function_name = (*env)->GetStringUTFChars(env, function, NULL);
-        SDL_main = (SDL_main_func)dlsym(library_handle, function_name);
-        if (SDL_main) {
+        SDL_main_f = (SDL_main_func)dlsym(library_handle, function_name);
+        if (SDL_main_f) {
             int i;
             int argc;
             int len;
@@ -456,7 +456,7 @@ JNIEXPORT int JNICALL SDL_JAVA_INTERFACE(nativeRunMain)(JNIEnv* env, jclass cls,
 
 
             /* Run the application. */
-            status = SDL_main(argc, argv);
+            status = SDL_main_f(argc, argv);
 
             /* Release the arguments. */
             for (i = 0; i < argc; ++i) {
