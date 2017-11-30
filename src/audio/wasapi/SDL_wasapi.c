@@ -413,6 +413,7 @@ RecoverWasapiDevice(_THIS)
         this->hidden->default_device_generation = SDL_AtomicGet(this->iscapture ?  &default_capture_generation : &default_playback_generation);
         ret = IMMDeviceEnumerator_GetDefaultAudioEndpoint(enumerator, dataflow, SDL_WASAPI_role, &device);
         if (FAILED(ret)) {
+            SDL_AtomicSet(&this->shutdown, 1);
             return SDL_FALSE;  /* can't find a new default device! */
         }
     } else {

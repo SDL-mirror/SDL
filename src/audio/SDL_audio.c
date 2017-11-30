@@ -689,7 +689,8 @@ SDL_RunAudio(void *devicep)
             /* if this fails...oh well. We'll play silence here. */
             SDL_AudioStreamPut(device->stream, data, data_len);
 
-            while (SDL_AudioStreamAvailable(device->stream) >= ((int) device->spec.size)) {
+            while (SDL_AudioStreamAvailable(device->stream) >= ((int) device->spec.size) &&
+                !SDL_AtomicGet(&device->shutdown)) {
                 int got;
                 data = SDL_AtomicGet(&device->enabled) ? current_audio.impl.GetDeviceBuf(device) : NULL;
                 got = SDL_AudioStreamGet(device->stream, data ? data : device->work_buffer, device->spec.size);
