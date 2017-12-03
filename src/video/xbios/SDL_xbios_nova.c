@@ -257,9 +257,13 @@ static int setColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors)
 
 static void NOVA_SetMode(_THIS, int num_mode)
 {
+	void *oldstack;
+
 	if ((num_mode<0) || (num_mode>=NOVA_modecount)) {
 		return;
 	}
+
+	oldstack = (void *)Super(NULL);
 
 	__asm__ __volatile__ (
 			"moveql	#0,d0\n\t"
@@ -272,10 +276,16 @@ static void NOVA_SetMode(_THIS, int num_mode)
 		: /* clobbered registers */
 			"d0", "d1", "d2", "a0", "a1", "cc", "memory"
 	);
+
+	SuperToUser(oldstack);
 }
 
 static void NOVA_SetScreen(_THIS, void *screen)
 {
+	void *oldstack;
+
+	oldstack = (void *)Super(NULL);
+
 	__asm__ __volatile__ (
 			"movel	%0,a0\n\t"
 			"movel	%1,a1\n\t"
@@ -286,15 +296,20 @@ static void NOVA_SetScreen(_THIS, void *screen)
 		: /* clobbered registers */
 			"d0", "d1", "d2", "a0", "a1", "cc", "memory"
 	);
+
+	SuperToUser(oldstack);
 }
 
 static void NOVA_SetColor(_THIS, int index, int r, int g, int b)
 {
 	Uint8 color[3];
+	void *oldstack;
 
 	color[0] = r;
 	color[1] = g;
 	color[2] = b;
+
+	oldstack = (void *)Super(NULL);
 
 	__asm__ __volatile__ (
 			"movel	%0,d0\n\t"
@@ -307,6 +322,8 @@ static void NOVA_SetColor(_THIS, int index, int r, int g, int b)
 		: /* clobbered registers */
 			"d0", "d1", "d2", "a0", "a1", "cc", "memory"
 	);
+
+	SuperToUser(oldstack);
 }
 
 static nova_resolution_t *NOVA_LoadModes(int *num_modes)
