@@ -356,7 +356,6 @@ OS4_HandleMouseButtons(_THIS, struct MyIntuiMessage * imsg)
         }
 
         // TODO: can we support more buttons?
-
         SDL_SendMouseButton(sdlwin, 0, state, button);
     }
 }
@@ -383,7 +382,6 @@ OS4_HandleMouseWheel(_THIS, struct MyIntuiMessage * imsg)
     }
 }
 
-
 static void
 OS4_HandleResize(_THIS, struct MyIntuiMessage * imsg)
 {
@@ -404,7 +402,8 @@ OS4_HandleResize(_THIS, struct MyIntuiMessage * imsg)
                 SDL_WindowData *data = (SDL_WindowData *)sdlwin->driverdata;
 
                 SDL_SendWindowEvent(sdlwin, SDL_WINDOWEVENT_RESIZED,
-                    imsg->Width, imsg->Height);
+                    imsg->Width,
+                    imsg->Height);
 
                 if (SDL_IsShapedWindow(sdlwin)) {
                     OS4_ResizeWindowShape(sdlwin);
@@ -415,6 +414,20 @@ OS4_HandleResize(_THIS, struct MyIntuiMessage * imsg)
                 }
             }
         }
+    }
+}
+
+static void
+OS4_HandleMove(_THIS, struct MyIntuiMessage * imsg)
+{
+    SDL_Window *sdlwin = OS4_FindWindow(_this, imsg->IDCMPWindow);
+
+    if (sdlwin) {
+            SDL_SendWindowEvent(sdlwin, SDL_WINDOWEVENT_MOVED,
+                imsg->IDCMPWindow->LeftEdge,
+                imsg->IDCMPWindow->TopEdge);
+
+        dprintf("Window %p changed\n", sdlwin);
     }
 }
 
@@ -548,6 +561,11 @@ OS4_EventHandler(_THIS)
                 break;
 
             case IDCMP_NEWSIZE:
+                OS4_HandleResize(_this, &msg);
+                break;
+
+            case IDCMP_CHANGEWINDOW:
+                OS4_HandleMove(_this, &msg);
                 OS4_HandleResize(_this, &msg);
                 break;
 

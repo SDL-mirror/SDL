@@ -32,6 +32,7 @@
 
 #include "SDL_syswm.h"
 #include "../../events/SDL_keyboard_c.h"
+#include "../../events/SDL_events_c.h"
 
 #define DEBUG
 #include "../../main/amigaos4/SDL_os4debug.h"
@@ -39,6 +40,20 @@
 extern SDL_bool (*OS4_ResizeGlContext)(_THIS, SDL_Window * window);
 
 static void OS4_CloseWindow(_THIS, struct Window * window);
+
+void
+OS4_GetWindowSize(_THIS, struct Window * window, int * width, int * height)
+{
+    LONG ret = IIntuition->GetWindowAttrs(
+               window,
+               WA_InnerWidth, width,
+               WA_InnerHeight, height,
+               TAG_DONE);
+
+    if (ret) {
+        dprintf("GetWindowAttrs() returned %d\n", ret);
+    }
+}
 
 static SDL_bool
 OS4_IsFullscreen(SDL_Window * window)
@@ -77,15 +92,7 @@ OS4_SetupWindowData(_THIS, SDL_Window * sdlwin, struct Window * syswin)
         int width = 0;
         int height = 0;
 
-        LONG ret = IIntuition->GetWindowAttrs(
-            data->syswin,
-            WA_InnerWidth, &width,
-            WA_InnerHeight, &height,
-            TAG_DONE);
-
-        if (ret) {
-            dprintf("GetWindowAttrs() returned %d\n", ret);
-        }
+        OS4_GetWindowSize(_this, data->syswin, &width, &height);
 
         dprintf("'%s' dimensions %d*%d\n", sdlwin->title, width, height);
 
@@ -106,10 +113,10 @@ OS4_SetupWindowData(_THIS, SDL_Window * sdlwin, struct Window * syswin)
 static uint32
 OS4_GetIDCMPFlags(SDL_Window * window, SDL_bool fullscreen)
 {
-    uint32 IDCMPFlags  = IDCMP_MOUSEBUTTONS | IDCMP_MOUSEMOVE
-                       | IDCMP_DELTAMOVE | IDCMP_RAWKEY | IDCMP_ACTIVEWINDOW
-                       | IDCMP_INACTIVEWINDOW | IDCMP_INTUITICKS
-                       | IDCMP_EXTENDEDMOUSE;
+    uint32 IDCMPFlags = IDCMP_MOUSEBUTTONS | IDCMP_MOUSEMOVE
+                      | IDCMP_DELTAMOVE | IDCMP_RAWKEY | IDCMP_ACTIVEWINDOW
+                      | IDCMP_INACTIVEWINDOW | IDCMP_INTUITICKS
+                      | IDCMP_EXTENDEDMOUSE;
 
     dprintf("Called\n");
 
@@ -120,7 +127,7 @@ OS4_GetIDCMPFlags(SDL_Window * window, SDL_bool fullscreen)
 
         if (window->flags & SDL_WINDOW_RESIZABLE) {
             //IDCMPFlags  |= IDCMP_SIZEVERIFY; no handling so far
-            IDCMPFlags |= IDCMP_NEWSIZE;
+            IDCMPFlags |= (IDCMP_NEWSIZE | IDCMP_CHANGEWINDOW);
         }
     }
 
@@ -195,14 +202,36 @@ static struct Hook OS4_BackFillHook = {
 static void
 OS4_CenterWindow(struct Screen * screen, SDL_Window * window)
 {
-    if (SDL_WINDOWPOS_ISCENTERED(window->x) || SDL_WINDOWPOS_ISUNDEFINED(window->x)) {
-        window->x = (screen->Width - window->w) / 2;
+    if (SDL_WINDOWPOS_ISCENTERED(window->windowed.x) ||
+        SDL_WINDOWPOS_ISUNDEFINED(window->windowed.x)) {
+
+        window->windowed.x = (screen->Width - window->windowed.w) / 2;
         dprintf("X centered\n");
     }
 
-    if (SDL_WINDOWPOS_ISCENTERED(window->y) || SDL_WINDOWPOS_ISUNDEFINED(window->y)) {
-        window->y = (screen->Height - window->h) / 2;
+    if (SDL_WINDOWPOS_ISCENTERED(window->windowed.y) ||
+        SDL_WINDOWPOS_ISUNDEFINED(window->windowed.y)) {
+
+        window->windowed.y = (screen->Height - window->windowed.h) / 2;
         dprintf("Y centered\n");
+    }
+}
+
+static void
+OS4_DefineWindowBox(SDL_Window * window, struct Screen * screen, SDL_bool fullscreen, SDL_Rect * box)
+{
+    if (fullscreen && screen) {
+        box->x = 0; // window->x;
+        box->y = 0; // window->y;
+        box->w = screen->Width; // window->w;
+        box->h = screen->Height; // window->h;
+    } else {
+        OS4_CenterWindow(screen, window);
+
+        box->x = window->windowed.x;
+        box->y = window->windowed.y;
+        box->w = window->windowed.w;
+        box->h = window->windowed.h;
     }
 }
 
@@ -220,22 +249,24 @@ OS4_CreateSystemWindow(_THIS, SDL_Window * window, SDL_VideoDisplay * display)
 
     struct Screen *screen = OS4_GetScreenForWindow(_this, display);
 
+    SDL_Rect box;
+
     OS4_BackFillHook.h_Data = IGraphics; // Smuggle interface ptr for the hook
 
-    OS4_CenterWindow(screen, window);
+    OS4_DefineWindowBox(window, screen, fullscreen, &box);
 
     dprintf("Opening window '%s' at (%d,%d) of size (%dx%d) on screen %p\n",
-        window->title, window->x, window->y, window->w, window->h, screen);
+        window->title, box.x, box.y, box.w, box.h, screen);
 
     syswin = IIntuition->OpenWindowTags(
         NULL,
         WA_PubScreen, screen,
         WA_Title, fullscreen ? NULL : window->title,
         WA_ScreenTitle, window->title,
-        WA_Left, window->x,
-        WA_Top, window->y,
-        WA_InnerWidth, window->w,
-        WA_InnerHeight, window->h,
+        WA_Left, box.x,
+        WA_Top, box.y,
+        WA_InnerWidth, box.w,
+        WA_InnerHeight, box.h,
         WA_Flags, windowFlags,
         WA_IDCMP, IDCMPFlags,
         WA_Hidden, (window->flags & SDL_WINDOW_HIDDEN) ? TRUE : FALSE,
@@ -391,17 +422,11 @@ OS4_SetWindowSize(_THIS, SDL_Window * window)
         int width = 0;
         int height = 0;
 
-        LONG ret = IIntuition->GetWindowAttrs(
-                        data->syswin,
-                        WA_InnerWidth, &width,
-                        WA_InnerHeight, &height,
-                        TAG_DONE);
-
-        if (ret) {
-            dprintf("GetWindowAttrs() returned %d\n", ret);
-        }
+        OS4_GetWindowSize(_this, data->syswin, &width, &height);
 
         if (width != window->w || height != window->h) {
+
+            LONG ret;
 
             dprintf("New window size %d*%d\n", window->w, window->h);
 
@@ -523,6 +548,10 @@ OS4_SetWindowFullscreen(_THIS, SDL_Window * window, SDL_VideoDisplay * display, 
         if (window->flags & SDL_WINDOW_FOREIGN) {
             dprintf("Native window '%s' (%p), mode change ignored\n", window->title, data->syswin);
         } else {
+
+            int oldWidth = 0;
+            int oldHeight = 0;
+
             if (fullscreen) {
                 // Detect dummy transition and keep calm
                 SDL_DisplayData *displayData = display->driverdata;
@@ -541,6 +570,7 @@ OS4_SetWindowFullscreen(_THIS, SDL_Window * window, SDL_VideoDisplay * display, 
                 dprintf("Reopening window '%s' (%p) due to mode change\n",
                     window->title, data->syswin);
 
+                OS4_GetWindowSize(_this, data->syswin, &oldWidth, &oldHeight);
                 OS4_CloseWindow(_this, data->syswin);
 
             } else {
@@ -549,9 +579,22 @@ OS4_SetWindowFullscreen(_THIS, SDL_Window * window, SDL_VideoDisplay * display, 
 
             data->syswin = OS4_CreateSystemWindow(_this, window, fullscreen ? display : NULL);
 
-            if (fullscreen) {
-                // Workaround: make the new fullscreen window active
+            if (data->syswin) {
+                // Make sure the new window is active
                 OS4_ShowWindow(_this, window);
+
+                if (oldWidth && oldHeight) {
+                    int width, height;
+
+                    OS4_GetWindowSize(_this, data->syswin, &width, &height);
+
+                    if (oldWidth != width || oldHeight != height) {
+
+                        dprintf("Inform SDL about window resize\n");
+                        SDL_SendWindowEvent(window, SDL_WINDOWEVENT_RESIZED,
+                            width, height);
+                    }
+                }
             }
         }
     }

@@ -649,7 +649,6 @@ SDL_GetNumVideoDisplays(void)
     return _this->num_displays;
 }
 
-#ifndef __AMIGAOS4__
 static int
 SDL_GetIndexOfDisplay(SDL_VideoDisplay *display)
 {
@@ -664,7 +663,6 @@ SDL_GetIndexOfDisplay(SDL_VideoDisplay *display)
     /* Couldn't find the display, just use index 0 */
     return 0;
 }
-#endif
 
 void *
 SDL_GetDisplayDriverData(int displayIndex)
@@ -1474,7 +1472,6 @@ on the backend side, after we know the screen size. */
     window->windowed.w = window->w;
     window->windowed.h = window->h;
 
-#ifndef __AMIGAOS4__ /* As above */
     if (flags & SDL_WINDOW_FULLSCREEN) {
         SDL_VideoDisplay *display = SDL_GetDisplayForWindow(window);
         int displayIndex;
@@ -1488,7 +1485,6 @@ on the backend side, after we know the screen size. */
         window->w = bounds.w;
         window->h = bounds.h;
     }
-#endif
 
     window->flags = ((flags & CREATE_FLAGS) | SDL_WINDOW_HIDDEN);
     window->last_fullscreen_flags = window->flags;

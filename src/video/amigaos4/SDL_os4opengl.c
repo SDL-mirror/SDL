@@ -179,20 +179,6 @@ OS4_GL_FreeBuffers(_THIS, SDL_WindowData * data)
     }
 }
 
-static void
-OS4_GetWindowSize(_THIS, struct Window * window, int * width, int * height)
-{
-    LONG ret = IIntuition->GetWindowAttrs(
-                window,
-                WA_InnerWidth, width,
-                WA_InnerHeight, height,
-                TAG_DONE);
-
-    if (ret) {
-        dprintf("GetWindowAttrs() returned %d\n", ret);
-    }
-}
-
 SDL_GLContext
 OS4_GL_CreateContext(_THIS, SDL_Window * window)
 {

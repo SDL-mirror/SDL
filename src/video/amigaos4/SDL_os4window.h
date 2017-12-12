@@ -48,6 +48,8 @@ typedef struct
     HitTestInfo hti;
 } SDL_WindowData;
 
+extern void OS4_GetWindowSize(_THIS, struct Window * window, int * width, int * height);
+
 extern int OS4_CreateWindow(_THIS, SDL_Window * window);
 extern int OS4_CreateWindowFrom(_THIS, SDL_Window * window, const void *data);
 extern void OS4_SetWindowTitle(_THIS, SDL_Window * window);

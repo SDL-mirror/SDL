@@ -105,20 +105,6 @@ OS4_GLES_UnloadLibrary(_THIS)
     OS4_CloseLibrary(&OGLES2base);
 }
 
-static void
-OS4_GetWindowSize(_THIS, struct Window * window, int * width, int * height)
-{
-    LONG ret = IIntuition->GetWindowAttrs(
-                    window,
-                    WA_InnerWidth, width,
-                    WA_InnerHeight, height,
-                    TAG_DONE);
-
-    if (ret) {
-        dprintf("GetWindowAttrs() returned %d\n", ret);
-    }
-}
-
 SDL_GLContext
 OS4_GLES_CreateContext(_THIS, SDL_Window * window)
 {
