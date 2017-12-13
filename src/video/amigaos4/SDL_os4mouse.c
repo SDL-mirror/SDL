@@ -307,6 +307,17 @@ OS4_FreeCursor(SDL_Cursor * cursor)
     }
 }
 
+void
+OS4_RefreshCursorState(void)
+{
+    SDL_Mouse *mouse = SDL_GetMouse();
+    if (mouse) {
+        dprintf("Mouse shown %d\n", mouse->cursor_shown);
+        // Force cursor redraw
+        SDL_SetCursor(NULL);
+    }
+}
+
 static int
 OS4_WarpMouseInternal(struct Screen *screen, int x, int y)
 {

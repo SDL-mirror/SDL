@@ -29,6 +29,7 @@
 #include "SDL_os4window.h"
 #include "SDL_os4modes.h"
 #include "SDL_os4opengl.h"
+#include "SDL_os4mouse.h"
 
 #include "SDL_syswm.h"
 #include "../../events/SDL_keyboard_c.h"
@@ -296,6 +297,9 @@ OS4_CreateSystemWindow(_THIS, SDL_Window * window, SDL_VideoDisplay * display)
             dprintf("Failed to set window limits\n");
         }
     }
+
+    // If cursor was disabled earlier, make sure also this window gets the news
+    OS4_RefreshCursorState();
 
     return syswin;
 }

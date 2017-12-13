@@ -32,6 +32,8 @@ typedef struct OS4_GlobalMouseState
 	int buttonPressed[SDL_BUTTON_RIGHT+1];
 } OS4_GlobalMouseState;
 
+extern void OS4_RefreshCursorState(void);
+
 extern void OS4_InitMouse(_THIS);
 extern void OS4_QuitMouse(_THIS);
 
