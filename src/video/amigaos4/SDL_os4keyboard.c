@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2014 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2017 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -23,6 +23,7 @@
 #if SDL_VIDEO_DRIVER_AMIGAOS4
 
 #include "SDL_os4video.h"
+#include "SDL_os4keyboard.h"
 
 #include "../../events/SDL_keyboard_c.h"
 #include "../../events/scancodes_amiga.h"
@@ -142,12 +143,9 @@ OS4_HasClipboardText(_THIS)
 	return SDL_FALSE;
 }
 
-/* Alphabetic scancodes for PC keyboards */
 void
 OS4_InitKeyboard(_THIS)
 {
-	//SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
-
 	OS4_UpdateKeymap(_this);
 
 	//SDL_SetScancodeName(SDL_SCANCODE_APPLICATION, "Menu");

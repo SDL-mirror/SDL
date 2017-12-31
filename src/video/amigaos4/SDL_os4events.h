@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2014 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2017 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -24,6 +24,7 @@
 #define _SDL_os4events_h
 
 extern void OS4_PumpEvents(_THIS);
+extern void OS4_SyncKeyModifiers(_THIS);
 
 #endif /* _SDL_os4events_h */
 

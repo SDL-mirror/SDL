@@ -27,6 +27,7 @@
 #include "SDL_os4video.h"
 #include "SDL_os4window.h"
 #include "SDL_os4opengl.h"
+#include "SDL_os4opengles.h"
 #include "SDL_os4library.h"
 
 #include <proto/ogles2.h>

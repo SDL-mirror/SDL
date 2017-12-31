@@ -25,7 +25,6 @@
 #include <proto/exec.h>
 
 #include "SDL_video.h"
-#include "SDL_mouse.h"
 #include "SDL_hints.h"
 #include "SDL_version.h"
 
@@ -73,7 +72,7 @@ OS4_Available(void)
 static SDL_bool
 OS4_OpenLibraries(_THIS)
 {
-    dprintf("Called\n");
+    dprintf("Opening libraries\n");
 
     GfxBase       = OS4_OpenLibrary("graphics.library", 54);
     LayersBase    = OS4_OpenLibrary("layers.library", 53);
@@ -97,7 +96,7 @@ OS4_OpenLibraries(_THIS)
         if (IGraphics && ILayers && IIntuition && IIcon &&
             IWorkbench && IKeymap && ITextClip) {
 
-            dprintf("All libraries OK\n");
+            dprintf("All library interfaces OK\n");
 
             return SDL_TRUE;
 
@@ -114,7 +113,7 @@ OS4_OpenLibraries(_THIS)
 static void
 OS4_CloseLibraries(_THIS)
 {
-    dprintf("Called\n");
+    dprintf("Closing libraries\n");
 
     OS4_DropInterface((void *)&ITextClip);
     OS4_DropInterface((void *)&IKeymap);
@@ -189,6 +188,12 @@ OS4_AllocSystemResources(_THIS)
         return SDL_FALSE;
     }
 
+    IInput = (struct InputIFace *)OS4_GetInterface((struct Library *)data->inputReq->io_Device);
+    if (!IInput) {
+        SDL_SetError("Failed to get IInput interface");
+        return SDL_FALSE;
+    }
+
     return SDL_TRUE;
 }
 
@@ -198,6 +203,8 @@ OS4_FreeSystemResources(_THIS)
     SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
 
     dprintf("Called\n");
+
+    OS4_DropInterface((void *)&IInput);
 
     if (data->inputReq) {
         dprintf("Deleting input.device\n");

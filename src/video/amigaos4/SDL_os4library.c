@@ -22,6 +22,8 @@
 
 #if SDL_VIDEO_DRIVER_AMIGAOS4
 
+#include "SDL_os4library.h"
+
 #define DEBUG
 #include "../../main/amigaos4/SDL_os4debug.h"
 

@@ -31,6 +31,7 @@
 #include <proto/layers.h>
 #include <proto/icon.h>
 #include <proto/textclip.h>
+#include <proto/input.h>
 
 #include "../SDL_sysvideo.h"
 
@@ -63,6 +64,7 @@ typedef struct
     struct WorkbenchIFace   *iWorkbench;
     struct KeymapIFace      *iKeymap;
     struct TextClipIFace    *iTextClip;
+    struct InputIFace       *iInput;
 
     BOOL                    vsyncEnabled;
 } SDL_VideoData;
@@ -82,6 +84,7 @@ typedef struct
 #define IWorkbench ((SDL_VideoData *) _this->driverdata)->iWorkbench
 #define IKeymap ((SDL_VideoData *) _this->driverdata)->iKeymap
 #define ITextClip ((SDL_VideoData *) _this->driverdata)->iTextClip
+#define IInput ((SDL_VideoData *) _this->driverdata)->iInput
 
 extern void * OS4_SaveAllocPooled(_THIS, uint32 size);
 extern void * OS4_SaveAllocVecPooled(_THIS, uint32 size);

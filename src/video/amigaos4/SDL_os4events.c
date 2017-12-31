@@ -29,6 +29,7 @@
 #include "SDL_os4shape.h"
 #include "SDL_os4mouse.h"
 #include "SDL_os4window.h"
+#include "SDL_os4events.h"
 
 #include "../../events/SDL_keyboard_c.h"
 #include "../../events/SDL_mouse_c.h"
@@ -63,7 +64,39 @@ struct MyIntuiMessage
     int16  Height;
 };
 
+struct QualifierItem
+{
+    UWORD qualifier;
+    SDL_Keymod keymod;
+    const char* name;
+};
+
 extern OS4_GlobalMouseState globalMouseState;
+
+void
+OS4_SyncKeyModifiers(_THIS)
+{
+    int i;
+    UWORD qualifiers = IInput->PeekQualifier();
+
+    struct QualifierItem map[] = {
+        { IEQUALIFIER_LSHIFT, KMOD_LSHIFT, "Left Shift" },
+        { IEQUALIFIER_RSHIFT, KMOD_RSHIFT, "Right Shift" },
+        { IEQUALIFIER_CAPSLOCK, KMOD_CAPS, "Capslock" },
+        { IEQUALIFIER_CONTROL, KMOD_CTRL, "Control" },
+        { IEQUALIFIER_LALT, KMOD_LALT, "Left Alt" },
+        { IEQUALIFIER_RALT, KMOD_RALT, "Right Alt" },
+        { IEQUALIFIER_LCOMMAND, KMOD_LGUI, "Left Amiga" },
+        { IEQUALIFIER_RCOMMAND, KMOD_RGUI, "Right Amiga" }
+    };
+
+    dprintf("Current qualifiers: %d\n", qualifiers);
+
+    for (i = 0; i < SDL_arraysize(map); i++) {
+        dprintf("%s %s\n", map[i].name, (qualifiers & map[i].qualifier) ? "ON" : "off");
+        SDL_ToggleModState(map[i].keymod, (qualifiers & map[i].qualifier) != 0);
+    }
+}
 
 // We could possibly use also Window.userdata field to contain SDL_Window,
 // and thus avoid searching
