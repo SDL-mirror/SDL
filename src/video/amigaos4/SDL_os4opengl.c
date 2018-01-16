@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2017 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2018 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -119,12 +119,11 @@ OS4_GL_AllocateBuffers(_THIS, int width, int height, int depth, SDL_WindowData *
 {
     dprintf("Allocate double buffer bitmaps %d*%d*%d\n", width, height, depth);
 
-    if (data->glFrontBuffer) {
-        dprintf("Old front buffer %p found\n");
-    }
+    if (data->glFrontBuffer || data->glBackBuffer) {
+        dprintf("Old front buffer pointer %p, back buffer pointer %p\n",
+            data->glFrontBuffer, data->glBackBuffer);
 
-    if (data->glBackBuffer) {
-        dprintf("Old back buffer %p found\n");
+        OS4_GL_FreeBuffers(_this, data);
     }
 
     if (!(data->glFrontBuffer = IGraphics->AllocBitMapTags(
@@ -187,7 +186,8 @@ OS4_GL_CreateContext(_THIS, SDL_Window * window)
 
     if (IMiniGL) {
 
-        int width, height;
+        int width = window->w;
+        int height = window->h;
         uint32 depth;
 
         SDL_WindowData * data = window->driverdata;
@@ -202,16 +202,7 @@ OS4_GL_CreateContext(_THIS, SDL_Window * window)
             data->glContext = NULL;
         }
 
-        if (data->glFrontBuffer || data->glBackBuffer) {
-            dprintf("Old front buffer pointer %p, back buffer pointer %p\n",
-                data->glFrontBuffer, data->glBackBuffer);
-
-            OS4_GL_FreeBuffers(_this, data);
-        }
-
         depth = IGraphics->GetBitMapAttr(data->syswin->RPort->BitMap, BMA_BITSPERPIXEL);
-
-        OS4_GetWindowSize(_this, data->syswin, &width, &height);
 
         if (!OS4_GL_AllocateBuffers(_this, width, height, depth, data)) {
             SDL_SetError("Failed to allocate MiniGL buffers");
@@ -469,11 +460,7 @@ OS4_GL_ResizeContext(_THIS, SDL_Window * window)
 
         if (data) {
 
-            uint32 depth;
-
-            OS4_GL_FreeBuffers(_this, data);
-
-            depth = IGraphics->GetBitMapAttr(data->syswin->RPort->BitMap, BMA_BITSPERPIXEL);
+            uint32 depth = IGraphics->GetBitMapAttr(data->syswin->RPort->BitMap, BMA_BITSPERPIXEL);
 
             if (OS4_GL_AllocateBuffers(_this, window->w, window->h, depth, data)) {
 

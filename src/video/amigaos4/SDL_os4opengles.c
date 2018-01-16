@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2017 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2018 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -113,7 +113,8 @@ OS4_GLES_CreateContext(_THIS, SDL_Window * window)
 
     if (IOGLES2) {
 
-        int width, height;
+        int width = window->w;
+        int height = window->h;
 
 #if MANAGE_BITMAP
         uint32 depth;
@@ -130,16 +131,6 @@ OS4_GLES_CreateContext(_THIS, SDL_Window * window)
 
             data->glContext = NULL;
         }
-
-        if (data->glBackBuffer) {
-            dprintf("Old back buffer pointer %p\n", data->glBackBuffer);
-
-#if MANAGE_BITMAP
-            OS4_GL_FreeBuffers(_this, data);
-#endif
-        }
-
-        OS4_GetWindowSize(_this, data->syswin, &width, &height);
 
 #if MANAGE_BITMAP
         depth = IGraphics->GetBitMapAttr(data->syswin->RPort->BitMap, BMA_BITSPERPIXEL);
@@ -339,11 +330,7 @@ OS4_GLES_ResizeContext(_THIS, SDL_Window * window)
         SDL_WindowData *data = window->driverdata;
 
         if (data) {
-            uint32 depth;
-
-            OS4_GL_FreeBuffers(_this, data);
-
-            depth = IGraphics->GetBitMapAttr(data->syswin->RPort->BitMap, BMA_BITSPERPIXEL);
+            uint32 depth = IGraphics->GetBitMapAttr(data->syswin->RPort->BitMap, BMA_BITSPERPIXEL);
 
             if (OS4_GL_AllocateBuffers(_this, window->w, window->h, depth, data)) {
 
