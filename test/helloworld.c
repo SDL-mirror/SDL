@@ -52,12 +52,28 @@ static SDL_bool eventLoopInner(void)
             case SDL_TEXTINPUT:
                 {
                     SDL_TextEditingEvent * te = (SDL_TextEditingEvent *)&e;
+                    SDL_Window * w = SDL_GetWindowFromID(te->windowID);
+
                     printf("Text input '%s'\n", te->text);
 
                     if (strcmp("q", te->text) == 0) {
                         running = SDL_FALSE;
                     } else if (strcmp("w", te->text) == 0) {
-                        SDL_WarpMouseInWindow( SDL_GetWindowFromID(te->windowID), 50, 50);
+                        SDL_WarpMouseInWindow(w, 50, 50);
+                    } else if (strcmp("f", te->text) == 0) {
+                        static int t = 1;
+
+                        printf("Toggle fullscreen %d\n", t);
+                        SDL_SetWindowFullscreen(w, t ? SDL_WINDOW_FULLSCREEN : 0);
+
+                        t ^= 1;
+                    } else if (strcmp("t", te->text) == 0) {
+                        printf("Change size...\n");
+                        SDL_SetWindowSize(w, rand() % 1000, rand() % 1000);
+                    } else if (strcmp("c", te->text) == 0) {
+                        static int c = 1;
+                        SDL_ShowCursor(c);
+                        c ^= 1;
                     }
                 }
                 break;
@@ -133,8 +149,8 @@ static void testRelativeMouse()
     SDL_Window * w = SDL_CreateWindow("relative", 100, 100, 100, 100, 0);
 
     if (w) {
-	//SDL_SetRelativeMouseMode(SDL_FALSE);
-	//SDL_SetRelativeMouseMode(SDL_TRUE);
+    //SDL_SetRelativeMouseMode(SDL_FALSE);
+    //SDL_SetRelativeMouseMode(SDL_TRUE);
 
         eventLoop();
 
@@ -150,6 +166,28 @@ static void testFullscreen()
         SDL_WINDOW_FULLSCREEN);
 
     if (w) {
+        //SDL_SetWindowSize(w, 1280, 960);
+        //SDL_SetWindowSize(w, 640, 480);
+        //SDL_SetWindowSize(w, 800, 600);
+
+        //SDL_SetWindowFullscreen(w, SDL_WINDOW_FULLSCREEN);
+        //SDL_SetWindowFullscreen(w, SDL_WINDOW_FULLSCREEN);
+        //SDL_SetWindowFullscreen(w, 0);
+        //SDL_SetWindowFullscreen(w, 0);
+
+        SDL_Delay(3000);
+
+        SDL_DisplayMode dm;
+        dm.format = SDL_PIXELFORMAT_ARGB8888;
+        dm.w = 1280;
+        dm.h = 960;
+        dm.refresh_rate = 0;
+        dm.driverdata = NULL;
+
+        //SDL_SetWindowDisplayMode(w, &dm);
+
+        //SDL_SetWindowFullscreen(w, SDL_WINDOW_FULLSCREEN);
+
         eventLoop();
 
         SDL_DestroyWindow(w);
@@ -161,7 +199,7 @@ static void testFullscreenDesktop()
     SDL_Window * w = SDL_CreateWindow("Desktop mode",
         SDL_WINDOWPOS_UNDEFINED,
         SDL_WINDOWPOS_UNDEFINED,
-        640, 480,
+        640, 400,
         SDL_WINDOW_FULLSCREEN_DESKTOP);
 
     if (w) {
@@ -171,11 +209,19 @@ static void testFullscreenDesktop()
     }
 }
 
-
+// TODO: should load GL functions
 static void openGL(SDL_Window *w)
 {
     if (w) {
         SDL_GLContext c = SDL_GL_CreateContext(w);
+
+        SDL_GL_DeleteContext(c);
+
+        printf("Context after deletion: %p\n", SDL_GL_GetCurrentContext());
+
+        SDL_SetWindowSize(w, 101, 101);
+
+        c = SDL_GL_CreateContext(w);
 
         if (c) {
 
@@ -248,7 +294,21 @@ static void testOpenGLES2()
         300,
         SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL);
 
-    openGL(w);
+    if (w)
+    {
+        SDL_GLContext c = SDL_GL_CreateContext(w);
+
+        if (c) {
+            printf("OGLES2 context created\n");
+            SDL_GL_DeleteContext(c);
+        } else {
+            printf("Failed to create OGLES2 context\n");
+        }
+
+        SDL_DestroyWindow(w);
+    } else {
+        printf("Failed to create window\n");
+    }
 }
 
 static void testOpenGLSwitching()
@@ -523,6 +583,25 @@ static void testCustomCursor()
     }
 }
 
+
+static void testHiddenCursor()
+{
+    //SDL_ShowCursor(0);
+
+    SDL_Window * w = SDL_CreateWindow("Hidden cursor", 0, 0, 640, 480, SDL_WINDOW_FULLSCREEN);
+
+    if (w) {
+        int c = 0;
+
+        while (eventLoopInner()) {
+            SDL_Delay(1000);
+        }
+
+        SDL_DestroyWindow(w);
+    }
+}
+
+
 static void testClipboard()
 {
     SDL_Window * w = SDL_CreateWindow("Clipboard", 100, 100, 100, 100, 0);
@@ -651,7 +730,6 @@ static void testHiddenWindow()
 
         SDL_DestroyWindow(w);
      }
-
 }
 
 int main(void)
@@ -660,9 +738,9 @@ int main(void)
         //testPath();
         //testManyWindows();
         //testFullscreen();
-        testFullscreenOpenGL();
+        //testFullscreenOpenGL();
         //testOpenGL();
-        //testOpenGLES2();
+        testOpenGLES2();
         //testOpenGLSwitching();
         //testRenderer();
         //testDraw();
@@ -675,6 +753,7 @@ int main(void)
         //testPC();
         //testSystemCursors();
         //testCustomCursor();
+        //testHiddenCursor();
         //testClipboard();
         //testHint();
         //testGlobalMouseState();
