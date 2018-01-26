@@ -1,3 +1,10 @@
+/*
+
+This is not an official SDL2 test. It's a collection of random tests
+for doing ad-hoc testing related to AmigaOS 4 port.
+
+*/
+
 #include <stdio.h>
 #include "SDL2/SDL.h"
 #include "SDL2/SDL_opengl.h"
@@ -14,7 +21,7 @@ static SDL_bool eventLoopInner(void)
     while(SDL_PollEvent(&e)) {
         switch (e.type) {
             case SDL_QUIT:
-                printf("Quit\n");
+                puts("Quit");
                 running = SDL_FALSE;
                 break;
 
@@ -46,7 +53,7 @@ static SDL_bool eventLoopInner(void)
                 break;
 
             case SDL_TEXTEDITING:
-                printf("Text editing\n");
+                puts("Text editing");
                 break;
 
             case SDL_TEXTINPUT:
@@ -68,7 +75,7 @@ static SDL_bool eventLoopInner(void)
 
                         t ^= 1;
                     } else if (strcmp("t", te->text) == 0) {
-                        printf("Change size...\n");
+                        puts("Change size...");
                         SDL_SetWindowSize(w, rand() % 1000, rand() % 1000);
                     } else if (strcmp("c", te->text) == 0) {
                         static int c = 1;
@@ -149,8 +156,8 @@ static void testRelativeMouse()
     SDL_Window * w = SDL_CreateWindow("relative", 100, 100, 100, 100, 0);
 
     if (w) {
-    //SDL_SetRelativeMouseMode(SDL_FALSE);
-    //SDL_SetRelativeMouseMode(SDL_TRUE);
+        //SDL_SetRelativeMouseMode(SDL_FALSE);
+        //SDL_SetRelativeMouseMode(SDL_TRUE);
 
         eventLoop();
 
@@ -185,7 +192,6 @@ static void testFullscreen()
         dm.driverdata = NULL;
 
         //SDL_SetWindowDisplayMode(w, &dm);
-
         //SDL_SetWindowFullscreen(w, SDL_WINDOW_FULLSCREEN);
 
         eventLoop();
@@ -210,7 +216,8 @@ static void testFullscreenDesktop()
 }
 
 // TODO: should load GL functions
-static void openGL(SDL_Window *w)
+// NOTE: will not work on OGLES2 (try testgles2.c instead of)
+static void drawUsingFixedFunctionPipeline(SDL_Window *w)
 {
     if (w) {
         SDL_GLContext c = SDL_GL_CreateContext(w);
@@ -278,7 +285,7 @@ static void testOpenGL()
         300,
         SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL);
 
-    openGL(w);
+    drawUsingFixedFunctionPipeline(w);
 }
 
 static void testOpenGLES2()
@@ -299,15 +306,15 @@ static void testOpenGLES2()
         SDL_GLContext c = SDL_GL_CreateContext(w);
 
         if (c) {
-            printf("OGLES2 context created\n");
+            puts("OGLES2 context created, now exiting");
             SDL_GL_DeleteContext(c);
         } else {
-            printf("Failed to create OGLES2 context\n");
+            puts("Failed to create OGLES2 context");
         }
 
         SDL_DestroyWindow(w);
     } else {
-        printf("Failed to create window\n");
+        puts("Failed to create OGLES2 window");
     }
 }
 
@@ -334,7 +341,7 @@ static void testOpenGLSwitching()
 
     //SDL_RecreateWindow(w, SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL);
 
-    openGL(w);
+    drawUsingFixedFunctionPipeline(w);
 }
 
 static void testFullscreenOpenGL()
@@ -346,7 +353,7 @@ static void testFullscreenOpenGL()
         900,
         SDL_WINDOW_FULLSCREEN | SDL_WINDOW_OPENGL);
 
-    openGL(w);
+    drawUsingFixedFunctionPipeline(w);
 }
 
 static void testRenderer()
@@ -620,7 +627,7 @@ static void testClipboard()
         SDL_DestroyWindow(w);
      }
 
-    printf("Leaving message to clipboard\n");
+    puts("Leaving message to clipboard");
 
     SDL_SetClipboardText("Amiga rules!");
 }
@@ -732,8 +739,21 @@ static void testHiddenWindow()
      }
 }
 
+static void testInitEverything()
+{
+    if (SDL_Init(SDL_INIT_EVERYTHING) == 0) {
+        puts("I works?");
+    } else {
+        puts("Expected failure, there is no force feedback (haptic) here");
+    }
+
+    SDL_Quit();
+}
+
 int main(void)
 {
+    testInitEverything();
+
     if (SDL_Init(SDL_INIT_VIDEO|SDL_INIT_TIMER) == 0) {
         //testPath();
         //testManyWindows();
@@ -762,9 +782,11 @@ int main(void)
         //testWindowBordersSize();
         //testHiddenWindow();
         //testRelativeMouse();
-
-        SDL_Quit();
+    } else {
+        printf("%s\n", SDL_GetError());
     }
+
+    SDL_Quit();
 
     return 0;
 }
