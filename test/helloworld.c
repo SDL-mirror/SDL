@@ -222,14 +222,6 @@ static void drawUsingFixedFunctionPipeline(SDL_Window *w)
     if (w) {
         SDL_GLContext c = SDL_GL_CreateContext(w);
 
-        SDL_GL_DeleteContext(c);
-
-        printf("Context after deletion: %p\n", SDL_GL_GetCurrentContext());
-
-        SDL_SetWindowSize(w, 101, 101);
-
-        c = SDL_GL_CreateContext(w);
-
         if (c) {
 
             //SDL_GL_SetSwapInterval(1);
@@ -276,30 +268,61 @@ static void drawUsingFixedFunctionPipeline(SDL_Window *w)
 
 }
 
-static void testOpenGL()
+static SDL_Window* createWindow(const char *name)
 {
-    SDL_Window * w = SDL_CreateWindow("Centered & Resizable OpenGL window",
+    return SDL_CreateWindow(name,
         SDL_WINDOWPOS_CENTERED,
         SDL_WINDOWPOS_CENTERED,
         400,
         300,
         SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL);
+}
+
+static void testDeleteContext()
+{
+    SDL_Window* w = createWindow("Context deletion");
+    if (w) {
+        SDL_GLContext c = SDL_GL_CreateContext(w);
+
+        if (c) {
+            SDL_GL_DeleteContext(c);
+
+            printf("Context after deletion: %p\n", SDL_GL_GetCurrentContext());
+
+            SDL_SetWindowSize(w, 101, 101);
+
+            c = SDL_GL_CreateContext(w);
+
+            if (c) {
+                SDL_GL_DeleteContext(c);
+            }
+        }
+        SDL_DestroyWindow(w);
+    }
+}
+
+static void testOpenGL()
+{
+    SDL_Window * w = createWindow("Centered & Resizable OpenGL window");
 
     drawUsingFixedFunctionPipeline(w);
 }
 
 static void testOpenGLES2()
 {
+    int mask, major, minor;
+
+    SDL_GL_GetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, &mask);
+    SDL_GL_GetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, &major);
+    SDL_GL_GetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, &minor);
+
+    printf("Current GL mask %d, major version %d, minor version %d\n", mask, major, minor);
+
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
 
-    SDL_Window * w = SDL_CreateWindow("Centered & Resizable OGLES2 window",
-        SDL_WINDOWPOS_CENTERED,
-        SDL_WINDOWPOS_CENTERED,
-        400,
-        300,
-        SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL);
+    SDL_Window * w = createWindow("Centered & Resizable OGLES2 window");
 
     if (w)
     {
@@ -316,30 +339,33 @@ static void testOpenGLES2()
     } else {
         puts("Failed to create OGLES2 window");
     }
+
+    // Restore flags
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, mask);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, major);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, minor);
 }
+
 
 static void testOpenGLSwitching()
 {
-    SDL_Window * w = SDL_CreateWindow("Centered & Resizable OpenGL window",
-        SDL_WINDOWPOS_CENTERED,
-        SDL_WINDOWPOS_CENTERED,
-        400,
-        300,
-        SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL);
+    SDL_Window* w = createWindow("Centered & Resizable OpenGL window");
+    SDL_DestroyWindow(w);
 
     // Switch to OGLES2
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
 
-    //SDL_RecreateWindow(w, SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL);
+    w = createWindow("Centered & Resizable OGLES2 window");
+    SDL_DestroyWindow(w);
 
     // Switch back to "any" OpenGL
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, 0);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 1);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
 
-    //SDL_RecreateWindow(w, SDL_WINDOW_RESIZABLE | SDL_WINDOW_OPENGL);
+    w = createWindow("Centered & Resizable OpenGL window");
 
     drawUsingFixedFunctionPipeline(w);
 }
@@ -752,16 +778,17 @@ static void testInitEverything()
 
 int main(void)
 {
-    testInitEverything();
+    //testInitEverything();
 
     if (SDL_Init(SDL_INIT_VIDEO|SDL_INIT_TIMER) == 0) {
         //testPath();
         //testManyWindows();
         //testFullscreen();
         //testFullscreenOpenGL();
+        //testDeleteContext();
         //testOpenGL();
-        testOpenGLES2();
-        //testOpenGLSwitching();
+        //testOpenGLES2();
+        testOpenGLSwitching();
         //testRenderer();
         //testDraw();
         //testMessageBox();
