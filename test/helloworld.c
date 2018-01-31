@@ -350,7 +350,10 @@ static void testOpenGLES2()
 static void testOpenGLSwitching()
 {
     SDL_Window* w = createWindow("Centered & Resizable OpenGL window");
-    SDL_DestroyWindow(w);
+
+    if (w) {
+        SDL_DestroyWindow(w);
+    }
 
     // Switch to OGLES2
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
@@ -358,12 +361,15 @@ static void testOpenGLSwitching()
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
 
     w = createWindow("Centered & Resizable OGLES2 window");
-    SDL_DestroyWindow(w);
 
-    // Switch back to "any" OpenGL
+    if (w) {
+        SDL_DestroyWindow(w);
+    }
+
+    // Switch back to MiniGL
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, 0);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 1);
-    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
 
     w = createWindow("Centered & Resizable OpenGL window");
 
@@ -380,6 +386,17 @@ static void testFullscreenOpenGL()
         SDL_WINDOW_FULLSCREEN | SDL_WINDOW_OPENGL);
 
     drawUsingFixedFunctionPipeline(w);
+}
+
+static void testOpenGLVersion()
+{
+    int mask, major, minor;
+
+    SDL_GL_GetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, &mask);
+    SDL_GL_GetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, &major);
+    SDL_GL_GetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, &minor);
+
+    printf("Current GL mask %d, major version %d, minor version %d\n", mask, major, minor);
 }
 
 static void testRenderer()
@@ -789,6 +806,7 @@ int main(void)
         //testOpenGL();
         //testOpenGLES2();
         testOpenGLSwitching();
+        //testOpenGLVersion();
         //testRenderer();
         //testDraw();
         //testMessageBox();
