@@ -364,6 +364,8 @@ static void testOpenGLSwitching()
 
     if (w) {
         SDL_DestroyWindow(w);
+    } else {
+        printf("%s\n", SDL_GetError());
     }
 
     // Switch back to MiniGL

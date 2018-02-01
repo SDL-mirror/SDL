@@ -337,6 +337,7 @@ OS4_LoadGlLibrary(_THIS, const char * path)
 #endif
 
     dprintf("Invalid OpenGL version\n");
+    SDL_SetError("Invalid OpenGL version");
     return -1;
 }
 
