@@ -189,6 +189,7 @@ extern SDL_RenderDriver GLES_RenderDriver;
 extern SDL_RenderDriver DirectFB_RenderDriver;
 extern SDL_RenderDriver METAL_RenderDriver;
 extern SDL_RenderDriver PSP_RenderDriver;
+extern SDL_RenderDriver OS4_RenderDriver;
 extern SDL_RenderDriver SW_RenderDriver;
 
 /* Blend mode functions */

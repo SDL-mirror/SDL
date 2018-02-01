@@ -270,6 +270,12 @@ GL_LoadFunctions(GL_RenderData * data)
 #ifdef __SDL_NOGETPROCADDR__
 #define SDL_PROC(ret,func,params) data->func=func;
 #else
+#ifdef __amigaos4__
+#define SDL_PROC(ret,func,params) \
+    do { \
+        *(void **)&data->func = SDL_GL_GetProcAddress(#func); \
+    } while ( 0 );
+#else
 #define SDL_PROC(ret,func,params) \
     do { \
         *(void **)&data->func = SDL_GL_GetProcAddress(#func); \
@@ -278,6 +284,7 @@ GL_LoadFunctions(GL_RenderData * data)
         } \
     } while ( 0 );
 #endif /* __SDL_NOGETPROCADDR__ */
+#endif
 
 #include "SDL_glfuncs.h"
 #undef SDL_PROC
@@ -1154,6 +1161,40 @@ GL_SetColor(GL_RenderData * data, Uint8 r, Uint8 g, Uint8 b, Uint8 a)
     }
 }
 
+#ifdef __amigaos4__
+
+static void
+GL_SetBlendMode(GL_RenderData * data, int blendMode)
+{
+    /* We don't have luxury of glBlendFuncSeparate so this is a crippled version */
+    if (blendMode != data->current.blendMode) {
+        switch (blendMode) {
+        case SDL_BLENDMODE_NONE:
+            data->glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+            data->glDisable(GL_BLEND);
+            break;
+        case SDL_BLENDMODE_BLEND:
+            data->glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+            data->glEnable(GL_BLEND);
+            data->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            break;
+        case SDL_BLENDMODE_ADD:
+            data->glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+            data->glEnable(GL_BLEND); /* TODO */
+            data->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            break;
+        case SDL_BLENDMODE_MOD:
+            data->glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+            data->glEnable(GL_BLEND); /* TODO */
+            data->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            break;
+        }
+        data->current.blendMode = blendMode;
+    }
+}
+
+#else
+
 static void
 GL_SetBlendMode(GL_RenderData * data, SDL_BlendMode blendMode)
 {
@@ -1171,6 +1212,8 @@ GL_SetBlendMode(GL_RenderData * data, SDL_BlendMode blendMode)
         data->current.blendMode = blendMode;
     }
 }
+
+#endif
 
 static void
 GL_SetDrawingState(SDL_Renderer * renderer)

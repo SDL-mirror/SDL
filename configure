@@ -21215,6 +21215,20 @@ $as_echo "#define SDL_VIDEO_DRIVER_HAIKU 1" >>confdefs.h
     fi
 }
 
+CheckAmigaOS4Video()
+{
+    if test x$enable_video = xyes; then
+
+$as_echo "#define SDL_VIDEO_DRIVER_AMIGAOS4 1" >>confdefs.h
+$as_echo "#define SDL_VIDEO_RENDER_AMIGAOS4 1" >> confdefs.h
+
+        SOURCES="$SOURCES $srcdir/src/video/amigaos4/*.c"
+
+        have_video=yes
+        SUMMARY_video="${SUMMARY_video} amigaos4"
+    fi
+}
+
 CheckCOCOA()
 {
     # Check whether --enable-video-cocoa was given.
@@ -21997,6 +22011,66 @@ $as_echo "#define SDL_VIDEO_RENDER_OGL 1" >>confdefs.h
 
         EXTRA_LDFLAGS="$EXTRA_LDFLAGS -lGL"
         SUMMARY_video="${SUMMARY_video} opengl"
+    fi
+}
+
+CheckAmigaOS4GL()
+{
+    if test x$enable_video = xyes -a x$enable_video_opengl = xyes; then
+
+$as_echo "#define SDL_VIDEO_OPENGL 1" >>confdefs.h
+
+
+$as_echo "#define SDL_VIDEO_OPENGL_AMIGAOS4 1" >>confdefs.h
+
+
+$as_echo "#define SDL_VIDEO_RENDER_OGL 1" >>confdefs.h
+
+#        EXTRA_LDFLAGS="$EXTRA_LDFLAGS -lGL -lGLU"
+
+        SUMMARY_video="${SUMMARY_video} opengl"
+    fi
+}
+
+CheckAmigaOS4GLES2()
+{
+    if test x$enable_video = xyes -a x$enable_video_opengles = xyes; then
+        { $as_echo "$as_me:${as_lineno-$LINENO}: checking for OpenGL ES v2 headers" >&5
+$as_echo_n "checking for OpenGL ES v2 headers... " >&6; }
+        video_opengles_v2=no
+        cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+         #include <GLES2/gl2.h>
+         #include <GLES2/gl2ext.h>
+         #include <ogles2/ogles2_defs.h>
+
+int
+main ()
+{
+
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"; then :
+
+        video_opengles_v2=yes
+
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: $video_opengles_v2" >&5
+$as_echo "$video_opengles_v2" >&6; }
+        if test x$video_opengles_v2 = xyes; then
+
+$as_echo "#define SDL_VIDEO_OPENGL_ES2 1" >>confdefs.h
+
+
+$as_echo "#define SDL_VIDEO_RENDER_OGL_ES2 1" >>confdefs.h
+
+            SUMMARY_video="${SUMMARY_video} opengl_es2"
+        fi
     fi
 }
 
@@ -24337,7 +24411,81 @@ if eval test \"x\$"$as_ac_File"\" = x"yes"; then :
 else
   EXTRA_LDFLAGS="$EXTRA_LDFLAGS -lstdc++"
 fi
+        ;;
+    *-*-amigaos*)
+        ARCH=amigaos4
+        ac_default_prefix=/progdir
+        CheckDummyVideo
+        CheckDummyAudio
+        CheckAmigaOS4Video
+        CheckAmigaOS4GL
+        CheckAmigaOS4GLES2
+        #CheckDLOPEN
+        CheckPTHREAD
 
+        # Set up files for the thread library
+#        if test x$enable_threads = xyes; then
+#
+#$as_echo "#define SDL_THREAD_AMIGAOS4 1" >>confdefs.h
+#
+#            SOURCES="$SOURCES $srcdir/src/thread/amigaos4/*.c"
+#            have_threads=yes
+#        fi
+        # Set up files for the audio library
+        if test x$enable_audio = xyes; then
+			SUMMARY_audio="${SUMMARY_audio} amigaos4"
+$as_echo "#define SDL_AUDIO_DRIVER_AMIGAOS4 1" >>confdefs.h
+
+            SOURCES="$SOURCES $srcdir/src/audio/amigaos4/*.c"
+            have_audio=yes
+        fi
+        # Set up files for the joystick library
+        if test x$enable_joystick = xyes; then
+
+$as_echo "#define SDL_JOYSTICK_AMIGAINPUT 1" >>confdefs.h
+			SUMMARY_input="${SUMMARY_input} amigainput"
+            SOURCES="$SOURCES $srcdir/src/joystick/amigaos4/*.c"
+            have_joystick=yes
+        fi
+        # Set up files for the timer library
+#        if test x$enable_timers = xyes; then
+#
+#$as_echo "#define SDL_TIMER_AMIGAOS4 1" >>confdefs.h
+#
+#            SOURCES="$SOURCES $srcdir/src/timer/amigaos4/*.c"
+#            have_timers=yes
+#        fi
+        if test x$enable_timers = xyes; then
+
+$as_echo "#define SDL_TIMER_UNIX 1" >>confdefs.h
+
+            SOURCES="$SOURCES $srcdir/src/timer/unix/*.c"
+            have_timers=yes
+        fi
+        # Set up files for the system filesystem library
+        if test x$enable_filesystem = xyes; then
+
+$as_echo "#define SDL_FILESYSTEM_AMIGAOS4 1" >>confdefs.h
+
+            SOURCES="$SOURCES $srcdir/src/filesystem/amigaos4/*.c"
+            have_filesystem=yes
+        fi
+
+        # Set up files for the shared object loading library
+        if test x$enable_loadso = xyes; then
+
+$as_echo "#define SDL_LOADSO_AMIGAOS4 1" >>confdefs.h
+
+            SOURCES="$SOURCES $srcdir/src/loadso/amigaos4/*.c"
+            have_loadso=yes
+        fi
+        
+        # The AmigaOS4 platform requires special setup.
+        SOURCES="$srcdir/src/main/amigaos4/*.c $SOURCES"
+        #EXTRA_LDFLAGS="-use-dynld -Wl,-export-dynamic -Wl,-no-undefined $EXTRA_LDFLAGS -ldl"
+        EXTRA_LDFLAGS="-lpthread"
+
+        EXTRA_CFLAGS="$EXTRA_CFLAGS -mstrict-align"
         ;;
     arm*-apple-darwin*|*-ios-*)
         ARCH=ios
@@ -24809,9 +24957,8 @@ fi
 
 SDL_STATIC_LIBS="$SDL_LIBS $EXTRA_LDFLAGS"
 
-
-
-
+# AmigaOS4 hack! This is only to pass "-use-dynld" for sdl2-config
+SDL_LIBS="-use-dynld $SDL_LIBS $EXTRA_LDFLAGS"
 
 if test x$enable_shared = xyes; then
     ENABLE_SHARED_TRUE=

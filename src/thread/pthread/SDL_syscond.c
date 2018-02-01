@@ -29,6 +29,19 @@
 #include "SDL_thread.h"
 #include "SDL_sysmutex_c.h"
 
+#ifdef __amigaos4__
+#ifndef timespec
+
+/* FIXME: hack to get compile working. At least my SDK defines timespec only for CLIB2 */
+struct timespec
+{
+	unsigned int tv_sec;
+	unsigned int tv_nsec;
+};
+
+#endif
+#endif
+
 struct SDL_cond
 {
     pthread_cond_t cond;

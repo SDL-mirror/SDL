@@ -51,7 +51,33 @@ extern "C" {
 #endif
 
 /* Global definitions */
+#ifdef __amigaos4__
+#   ifndef __LONG_MAX__
+#     define __LONG_MAX__ 2147483647L
+#   endif
+#   undef LONG_MIN
+#   define LONG_MIN (-LONG_MAX-1)
+#   undef LONG_MAX
+#   define LONG_MAX __LONG_MAX__
 
+/* Maximum value an `unsigned long int' can hold.  (Minimum is 0).  */
+#   undef ULONG_MAX
+#   define ULONG_MAX (LONG_MAX * 2UL + 1)
+
+#   ifndef __LONG_LONG_MAX__
+#    define __LONG_LONG_MAX__ 9223372036854775807LL
+#   endif
+
+/* Minimum and maximum values a `signed long long int' can hold.  */
+#    undef LLONG_MIN
+#    define LLONG_MIN (-LLONG_MAX-1)
+#    undef LLONG_MAX
+#    define LLONG_MAX __LONG_LONG_MAX__
+
+/* Maximum value an `unsigned long long int' can hold.  (Minimum is 0).  */
+#    undef ULLONG_MAX
+#    define ULLONG_MAX (LLONG_MAX * 2ULL + 1)
+#endif
 /*
  * Note: Maximum size of SDLTest log message is less than SDL's limit
  * to ensure we can fit additional information such as the timestamp.

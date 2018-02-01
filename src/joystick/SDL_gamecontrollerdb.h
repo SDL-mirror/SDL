@@ -224,6 +224,8 @@ static const char *s_ControllerMappings [] =
 #endif
 #if defined(SDL_JOYSTICK_EMSCRIPTEN)
     "emscripten,Standard Gamepad,a:b0,b:b1,back:b8,dpdown:b13,dpleft:b14,dpright:b15,dpup:b12,guide:b16,leftshoulder:b4,leftstick:b10,lefttrigger:b6,leftx:a0,lefty:a1,rightshoulder:b5,rightstick:b11,righttrigger:b7,rightx:a2,righty:a3,start:b9,x:b2,y:b3,",
+#elif defined(__AMIGAOS4__)
+	"53504545442d4c494e4b20436f6d7065,SPEED-LINK Competition Pro,platform:AmigaOS 4,x:b2,a:b0,b:b1,y:b3,rightx:a0,righty:a1,",
 #endif
     NULL
 };

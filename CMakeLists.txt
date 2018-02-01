@@ -121,6 +121,9 @@ elseif(CMAKE_SYSTEM_NAME MATCHES "BeOS.*")
   message_error("BeOS support has been removed as of SDL 2.0.2.")
 elseif(CMAKE_SYSTEM_NAME MATCHES "Haiku.*")
   set(HAIKU TRUE)
+elseif(CMAKE_SYSTEM_NAME MATCHES "Amiga.*")
+  set(AMIGA TRUE)
+  message("*** AmigaOS 4 build ***")
 endif()
 
 # Don't mistake osx for unix
@@ -136,7 +139,7 @@ else()
   set(UNIX_OR_MAC_SYS OFF)
 endif()
 
-if (UNIX_OR_MAC_SYS AND NOT EMSCRIPTEN) # JavaScript does not yet have threading support, so disable pthreads when building for Emscripten.
+if (AMIGA OR (UNIX_OR_MAC_SYS AND NOT EMSCRIPTEN)) # JavaScript does not yet have threading support, so disable pthreads when building for Emscripten.
   set(SDL_PTHREADS_ENABLED_BY_DEFAULT ON)
 else()
   set(SDL_PTHREADS_ENABLED_BY_DEFAULT OFF)
@@ -148,7 +151,7 @@ if(APPLE OR ARCH_64)
     set(OPT_DEF_SSEMATH ON)
   endif()
 endif()
-if(UNIX OR MINGW OR MSYS)
+if(UNIX OR MINGW OR MSYS OR AMIGA)
   set(OPT_DEF_LIBC ON)
 endif()
 
@@ -453,6 +456,12 @@ if(USE_GCC OR USE_CLANG)
   endif()
 endif()
 
+if(AMIGA)
+  # Disable Altivec for now. It gives problem for people without it.
+  message("Disabling Altivec...")
+  set(ALTIVEC FALSE)
+endif()
+
 if(ASSEMBLY)
   if(USE_GCC OR USE_CLANG)
     set(SDL_ASSEMBLY_ROUTINES 1)
@@ -699,10 +708,12 @@ if(LIBC)
       list(APPEND EXTRA_LIBS m)
     endif()
 
-    check_library_exists(iconv iconv_open "" HAVE_LIBICONV)
-    if(HAVE_LIBICONV)
-      list(APPEND EXTRA_LIBS iconv)
-      set(HAVE_ICONV 1)
+    if(NOT AMIGA) # we don't have libiconv
+      check_library_exists(iconv iconv_open "" HAVE_LIBICONV)
+      if(HAVE_LIBICONV)
+        list(APPEND EXTRA_LIBS iconv)
+        set(HAVE_ICONV 1)
+      endif()
     endif()
 
     if(NOT APPLE)
@@ -1519,6 +1530,62 @@ elseif(HAIKU)
       list(APPEND EXTRA_LIBS GL)
       set(HAVE_VIDEO_OPENGL TRUE)
     endif()
+  endif()
+
+  CheckPTHREAD()
+elseif(AMIGA)
+  message("AmigaOS 4 specific stuff")
+
+  if(SDL_VIDEO)
+    set(SDL_VIDEO_DRIVER_AMIGAOS4 1)
+    file(GLOB AMIGAOS4VIDEO_SOURCES ${SDL2_SOURCE_DIR}/src/video/amigaos4/*.c)
+    set(SOURCE_FILES ${SOURCE_FILES} ${AMIGAOS4VIDEO_SOURCES})
+    set(HAVE_SDL_VIDEO TRUE)
+
+    set(SDL_VIDEO_RENDER_AMIGAOS4 1)
+
+    if(VIDEO_OPENGL)
+      set(SDL_VIDEO_RENDER_OGL 1) # MiniGL should be there
+      set(SDL_VIDEO_OPENGL 1)
+      set(HAVE_VIDEO_OPENGL TRUE)
+    endif()
+
+    CheckOpenGLES2()
+  endif()
+
+  if(SDL_AUDIO)
+    set(SDL_AUDIO_DRIVER_AMIGAOS4 1)
+    file(GLOB AUDIO_SOURCES ${SDL2_SOURCE_DIR}/src/audio/amigaos4/*.c)
+    set(SOURCE_FILES ${SOURCE_FILES} ${AUDIO_SOURCES})
+    set(HAVE_SDL_AUDIO TRUE)
+  endif()
+
+  if(SDL_TIMERS)
+    set(SDL_TIMER_UNIX 1)
+    file(GLOB TIMER_SOURCES ${SDL2_SOURCE_DIR}/src/timer/unix/*.c)
+    set(SOURCE_FILES ${SOURCE_FILES} ${TIMER_SOURCES})
+    set(HAVE_SDL_TIMERS TRUE)
+  endif(SDL_TIMERS)
+
+  if(SDL_LOADSO)
+    set(SDL_LOADSO_AMIGAOS4 1)
+    file(GLOB LOADSO_SOURCES ${SDL2_SOURCE_DIR}/src/loadso/amigaos4/*.c)
+    set(SOURCE_FILES ${SOURCE_FILES} ${LOADSO_SOURCES})
+    set(HAVE_SDL_LOADSO TRUE)
+  endif()
+
+  if(SDL_FILESYSTEM)
+    set(SDL_FILESYSTEM_AMIGAOS4 1)
+    file(GLOB FILESYSTEM_SOURCES ${SDL2_SOURCE_DIR}/src/filesystem/amigaos4/*.c)
+    set(SOURCE_FILES ${SOURCE_FILES} ${FILESYSTEM_SOURCES})
+    set(HAVE_SDL_FILESYSTEM TRUE)
+  endif()
+
+  if(SDL_JOYSTICK)
+    set(SDL_JOYSTICK_AMIGAINPUT 1) # TODO: rename?
+    file(GLOB JOYSTICK_SOURCES ${SDL2_SOURCE_DIR}/src/joystick/amigaos4/*.c)
+    set(SOURCE_FILES ${SOURCE_FILES} ${JOYSTICK_SOURCES})
+    set(HAVE_SDL_JOYSTICK TRUE)
   endif()
 
   CheckPTHREAD()

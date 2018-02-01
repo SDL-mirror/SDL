@@ -36,6 +36,8 @@
 #include "psp/SDL_systhread_c.h"
 #elif SDL_THREAD_STDCPP
 #include "stdcpp/SDL_systhread_c.h"
+#elif SDL_THREAD_AMIGAOS4
+#include "amigaos4/SDL_systhread_c.h"
 #else
 #error Need thread implementation for this platform
 #include "generic/SDL_systhread_c.h"

@@ -30,6 +30,10 @@
 #define MOOSEFRAME_SIZE (MOOSEPIC_W * MOOSEPIC_H)
 #define MOOSEFRAMES_COUNT 10
 
+#ifdef __amigaos4__
+static  const char STACK_COOKIE[] __attribute__((used)) = "$STACK:200000";
+#endif
+
 SDL_Color MooseColors[84] = {
     {49, 49, 49, SDL_ALPHA_OPAQUE}
     , {66, 24, 0, SDL_ALPHA_OPAQUE}
