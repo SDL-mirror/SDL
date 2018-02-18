@@ -11,25 +11,24 @@ OpenGL ES 2.0 (optional)
 Building SDL 2.0 library
 ================================================================================
 
-sh configure --disable-altivec --prefix=/SDK/local/newlib/
-make
+    sh configure --disable-altivec --prefix=/SDK/local/newlib/
+    make
 
 After building, "make install" should work. Optionally you can also build tests:
 
-cd test
-sh configure
-make
+    cd test
+    sh configure
+    make
 
 ================================================================================
 Using SDL 2.0 in your projects
 ================================================================================
 
-#include "SDL2/SDL.h"
-...do magical SDL2 things...
+    #include "SDL2/SDL.h"
+    ...do magical SDL2 things...
 
 
-gcc helloworld.c -use-dynld -lSDL2 -lpthread
-
+    gcc helloworld.c -use-dynld -lSDL2 -lpthread
 
 ================================================================================
 About SDL_Renderers
@@ -52,13 +51,13 @@ support them. Compositing renderer currently supports only 32-bit bitmaps. If
 
 It's possible to select the preferred renderer before its creation, like this:
 
-SDL_SetHint(SDL_HINT_RENDER_DRIVER, name);
+    SDL_SetHint(SDL_HINT_RENDER_DRIVER, name);
 
 where name is "software", "opengl" or "compositing".
 
 It's possible to enable VSYNC with:
 
-SDL_SetHint(SDL_HINT_RENDER_VSYNC, "1");
+    SDL_SetHint(SDL_HINT_RENDER_VSYNC, "1");
 
 There is a benchmark tool called sdl2benchmark which was written to test
 available renderers.
@@ -73,12 +72,22 @@ you have to create an OpenGL context, instead of SDL_Renderer.
 If you would like to create an OpenGL ES 2.0 context, you need to specify the
 version before window creation, for example:
 
-SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
-SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
-SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
 
 If context version is not specified, or OpenGL ES 2.0 is not supported by the
 system, MiniGL context is created instead of.
+
+================================================================================
+WinUAE
+================================================================================
+
+Because WinUAE doesn't support hardware-accelerated compositing or 3D, you need
+to install the following software:
+
+- http://os4depot.net/index.php?function=showfile&file=graphics/misc/patchcompositetags.lha
+- http://os4depot.net/index.php?function=showfile&file=library/graphics/wazp3d.lha
 
 ================================================================================
 Tips
