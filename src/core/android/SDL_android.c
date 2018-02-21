@@ -209,8 +209,10 @@ static jclass mActivityClass;
 /* method signatures */
 static jmethodID midGetNativeSurface;
 static jmethodID midSetActivityTitle;
+static jmethodID midSetWindowStyle;
 static jmethodID midSetOrientation;
 static jmethodID midGetContext;
+static jmethodID midIsAndroidTV;
 static jmethodID midInputGetInputDeviceIds;
 static jmethodID midSendMessage;
 static jmethodID midShowTextInput;
@@ -301,10 +303,14 @@ JNIEXPORT void JNICALL SDL_JAVA_INTERFACE(nativeSetupJNI)(JNIEnv* mEnv, jclass c
                                 "getNativeSurface","()Landroid/view/Surface;");
     midSetActivityTitle = (*mEnv)->GetStaticMethodID(mEnv, mActivityClass,
                                 "setActivityTitle","(Ljava/lang/String;)Z");
+    midSetWindowStyle = (*mEnv)->GetStaticMethodID(mEnv, mActivityClass,
+                                "setWindowStyle","(Z)V");
     midSetOrientation = (*mEnv)->GetStaticMethodID(mEnv, mActivityClass,
                                 "setOrientation","(IIZLjava/lang/String;)V");
     midGetContext = (*mEnv)->GetStaticMethodID(mEnv, mActivityClass,
                                 "getContext","()Landroid/content/Context;");
+    midIsAndroidTV = (*mEnv)->GetStaticMethodID(mEnv, mActivityClass,
+                                "isAndroidTV","()Z");
     midInputGetInputDeviceIds = (*mEnv)->GetStaticMethodID(mEnv, mActivityClass,
                                 "inputGetInputDeviceIds", "(I)[I");
     midSendMessage = (*mEnv)->GetStaticMethodID(mEnv, mActivityClass,
@@ -326,9 +332,10 @@ JNIEXPORT void JNICALL SDL_JAVA_INTERFACE(nativeSetupJNI)(JNIEnv* mEnv, jclass c
                                 "getManifestEnvironmentVariables", "()Z");
 
     midGetDisplayDPI = (*mEnv)->GetStaticMethodID(mEnv, mActivityClass, "getDisplayDPI", "()Landroid/util/DisplayMetrics;");
+    midGetDisplayDPI = (*mEnv)->GetStaticMethodID(mEnv, mActivityClass, "getDisplayDPI", "()Landroid/util/DisplayMetrics;");
 
     if (!midGetNativeSurface ||
-       !midSetActivityTitle || !midSetOrientation || !midGetContext || !midInputGetInputDeviceIds ||
+       !midSetActivityTitle || !midSetWindowStyle || !midSetOrientation || !midGetContext || !midIsAndroidTV || !midInputGetInputDeviceIds ||
        !midSendMessage || !midShowTextInput || !midIsScreenKeyboardShown ||
        !midClipboardSetText || !midClipboardGetText || !midClipboardHasText ||
        !midOpenAPKExpansionInputStream || !midGetManifestEnvironmentVariables|| !midGetDisplayDPI) {
@@ -901,6 +908,12 @@ void Android_JNI_SetActivityTitle(const char *title)
     jstring jtitle = (jstring)((*mEnv)->NewStringUTF(mEnv, title));
     (*mEnv)->CallStaticBooleanMethod(mEnv, mActivityClass, midSetActivityTitle, jtitle);
     (*mEnv)->DeleteLocalRef(mEnv, jtitle);
+}
+
+void Android_JNI_SetWindowStyle(SDL_bool fullscreen)
+{
+    JNIEnv *mEnv = Android_JNI_GetEnv();
+    (*mEnv)->CallStaticVoidMethod(mEnv, mActivityClass, midSetWindowStyle, fullscreen ? 1 : 0);
 }
 
 void Android_JNI_SetOrientation(int w, int h, int resizable, const char *hint)
@@ -1991,6 +2004,12 @@ void *SDL_AndroidGetActivity(void)
 
     /* return SDLActivity.getContext(); */
     return (*env)->CallStaticObjectMethod(env, mActivityClass, midGetContext);
+}
+
+SDL_bool SDL_IsAndroidTV(void)
+{
+    JNIEnv *env = Android_JNI_GetEnv();
+    return (*env)->CallStaticBooleanMethod(env, mActivityClass, midIsAndroidTV);
 }
 
 const char * SDL_AndroidGetInternalStoragePath(void)

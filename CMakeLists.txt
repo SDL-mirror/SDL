@@ -652,7 +652,7 @@ if(LIBC)
             _stricmp _strnicmp sscanf
             acos acosf asin asinf atan atanf atan2 atan2f ceil ceilf
             copysign copysignf cos cosf fabs fabsf floor floorf fmod fmodf
-            log logf pow powf scalbn scalbnf sin sinf sqrt sqrtf tan tanf)
+            log logf log10 log10f pow powf scalbn scalbnf sin sinf sqrt sqrtf tan tanf)
       string(TOUPPER ${_FN} _UPPER)
       set(HAVE_${_UPPER} 1)
     endforeach()
@@ -1863,10 +1863,12 @@ if(NOT (WINDOWS OR CYGWIN))
     else()
         set(SOEXT "so")
     endif()
-    install(CODE "
-      execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink
-      \"libSDL2-2.0.${SOEXT}\" \"libSDL2.${SOEXT}\")")
-    install(FILES ${SDL2_BINARY_DIR}/libSDL2.${SOEXT} DESTINATION "lib${LIB_SUFFIX}")
+    if(NOT ANDROID)
+        install(CODE "
+          execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink
+          \"libSDL2-2.0.${SOEXT}\" \"libSDL2.${SOEXT}\")")
+        install(FILES ${SDL2_BINARY_DIR}/libSDL2.${SOEXT} DESTINATION "lib${LIB_SUFFIX}")
+    endif()
   endif()
   if(FREEBSD)
     # FreeBSD uses ${PREFIX}/libdata/pkgconfig

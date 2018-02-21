@@ -16690,7 +16690,7 @@ if test "x$ac_cv_lib_m_pow" = xyes; then :
   LIBS="$LIBS -lm"; EXTRA_LDFLAGS="$EXTRA_LDFLAGS -lm"
 fi
 
-    for ac_func in acos acosf asin asinf atan atanf atan2 atan2f ceil ceilf copysign copysignf cos cosf fabs fabsf floor floorf fmod fmodf log logf pow powf scalbn scalbnf sin sinf sqrt sqrtf tan tanf
+    for ac_func in acos acosf asin asinf atan atanf atan2 atan2f ceil ceilf copysign copysignf cos cosf fabs fabsf floor floorf fmod fmodf log logf log10 log10f pow powf scalbn scalbnf sin sinf sqrt sqrtf tan tanf
 do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
 ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
@@ -19220,7 +19220,7 @@ $as_echo "#define SDL_VIDEO_DRIVER_WAYLAND_QT_TOUCH 1" >>confdefs.h
 
             fi
 
-            WAYLAND_PROTOCOLS_UNSTABLE="relative-pointer-unstable-v1 pointer-constraints-unstable-v1"
+            WAYLAND_PROTOCOLS_UNSTABLE="relative-pointer-unstable-v1 pointer-constraints-unstable-v1 xdg-shell-unstable-v6"
 
             SOURCES="$SOURCES $srcdir/src/video/wayland/*.c"
             EXTRA_CFLAGS="$EXTRA_CFLAGS $WAYLAND_CFLAGS -I\$(gen)"
@@ -19551,7 +19551,7 @@ fi
             RPI_LDFLAGS="-Wl,-R/usr/pkg/lib -L/usr/pkg/lib -lbcm_host"
         else
             RPI_CFLAGS="-I/opt/vc/include -I/opt/vc/include/interface/vcos/pthreads -I/opt/vc/include/interface/vmcs_host/linux"
-            RPI_LDFLAGS="-L/opt/vc/lib -lbcm_host"
+            RPI_LDFLAGS="-Wl,-rpath,/opt/vc/lib -L/opt/vc/lib -lbcm_host"
         fi
 
         # Save the original compiler flags and libraries
@@ -21328,6 +21328,8 @@ $as_echo "#define SDL_VIDEO_RENDER_METAL 1" >>confdefs.h
 
             SOURCES="$SOURCES $srcdir/src/render/metal/*.m"
             SUMMARY_video="${SUMMARY_video} metal"
+        else
+            enable_render_metal=no
         fi
     fi
 }

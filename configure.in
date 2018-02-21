@@ -271,7 +271,7 @@ if test x$enable_libc = xyes; then
     AC_CHECK_FUNCS(malloc calloc realloc free getenv setenv putenv unsetenv qsort abs bcopy memset memcpy memmove wcslen wcscmp strlen strlcpy strlcat _strrev _strupr _strlwr strchr strrchr strstr itoa _ltoa _uitoa _ultoa strtol strtoul _i64toa _ui64toa strtoll strtoull atoi atof strcmp strncmp _stricmp strcasecmp _strnicmp strncasecmp vsscanf vsnprintf fopen64 fseeko fseeko64 sigaction setjmp nanosleep sysconf sysctlbyname getauxval poll)
 
     AC_CHECK_LIB(m, pow, [LIBS="$LIBS -lm"; EXTRA_LDFLAGS="$EXTRA_LDFLAGS -lm"])
-    AC_CHECK_FUNCS(acos acosf asin asinf atan atanf atan2 atan2f ceil ceilf copysign copysignf cos cosf fabs fabsf floor floorf fmod fmodf log logf pow powf scalbn scalbnf sin sinf sqrt sqrtf tan tanf)
+    AC_CHECK_FUNCS(acos acosf asin asinf atan atanf atan2 atan2f ceil ceilf copysign copysignf cos cosf fabs fabsf floor floorf fmod fmodf log logf log10 log10f pow powf scalbn scalbnf sin sinf sqrt sqrtf tan tanf)
 
     AC_CHECK_LIB(iconv, iconv_open, [LIBS="$LIBS -liconv"; EXTRA_LDFLAGS="$EXTRA_LDFLAGS -liconv"])
     AC_CHECK_FUNCS(iconv)
@@ -1409,7 +1409,7 @@ AC_HELP_STRING([--enable-video-wayland-qt-touch], [QtWayland server support for 
                 AC_DEFINE(SDL_VIDEO_DRIVER_WAYLAND_QT_TOUCH, 1, [ ])
             fi
 
-            WAYLAND_PROTOCOLS_UNSTABLE="relative-pointer-unstable-v1 pointer-constraints-unstable-v1"
+            WAYLAND_PROTOCOLS_UNSTABLE="relative-pointer-unstable-v1 pointer-constraints-unstable-v1 xdg-shell-unstable-v6"
 
             SOURCES="$SOURCES $srcdir/src/video/wayland/*.c"
             EXTRA_CFLAGS="$EXTRA_CFLAGS $WAYLAND_CFLAGS -I\$(gen)"
@@ -1580,7 +1580,7 @@ AC_HELP_STRING([--enable-video-rpi], [use Raspberry Pi video driver [[default=ye
             RPI_LDFLAGS="-Wl,-R/usr/pkg/lib -L/usr/pkg/lib -lbcm_host"
         else
             RPI_CFLAGS="-I/opt/vc/include -I/opt/vc/include/interface/vcos/pthreads -I/opt/vc/include/interface/vmcs_host/linux"
-            RPI_LDFLAGS="-L/opt/vc/lib -lbcm_host"
+            RPI_LDFLAGS="-Wl,-rpath,/opt/vc/lib -L/opt/vc/lib -lbcm_host"
         fi
 
         # Save the original compiler flags and libraries
@@ -2105,6 +2105,8 @@ AC_HELP_STRING([--enable-render-metal], [enable the Metal render driver [[defaul
             AC_DEFINE(SDL_VIDEO_RENDER_METAL, 1, [ ])
             SOURCES="$SOURCES $srcdir/src/render/metal/*.m"
             SUMMARY_video="${SUMMARY_video} metal"
+        else
+            enable_render_metal=no
         fi
     fi
 }
