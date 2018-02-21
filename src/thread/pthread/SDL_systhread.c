@@ -95,7 +95,11 @@ SDL_SYS_CreateThread(SDL_Thread * thread, void *args)
     #if defined(__MACOSX__) || defined(__IPHONEOS__) || defined(__LINUX__)
     if (!checked_setname) {
         void *fn = dlsym(RTLD_DEFAULT, "pthread_setname_np");
-        *(void **)&ppthread_setname_np = fn;
+        #if defined(__MACOSX__) || defined(__IPHONEOS__)
+        ppthread_setname_np = (int(*)(const char*)) fn;
+        #elif defined(__LINUX__)
+        ppthread_setname_np = (int(*)(pthread_t, const char*)) fn;
+        #endif
         checked_setname = SDL_TRUE;
     }
     #endif
@@ -224,7 +228,7 @@ SDL_SYS_SetThreadPriority(SDL_ThreadPriority priority)
     int policy;
     pthread_t thread = pthread_self();
 
-    if (pthread_getschedparam(thread, &policy, &sched) < 0) {
+    if (pthread_getschedparam(thread, &policy, &sched) != 0) {
         return SDL_SetError("pthread_getschedparam() failed");
     }
     if (priority == SDL_THREAD_PRIORITY_LOW) {
@@ -236,7 +240,7 @@ SDL_SYS_SetThreadPriority(SDL_ThreadPriority priority)
         int max_priority = sched_get_priority_max(policy);
         sched.sched_priority = (min_priority + (max_priority - min_priority) / 2);
     }
-    if (pthread_setschedparam(thread, policy, &sched) < 0) {
+    if (pthread_setschedparam(thread, policy, &sched) != 0) {
         return SDL_SetError("pthread_setschedparam() failed");
     }
     return 0;

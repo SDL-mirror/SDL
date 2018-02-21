@@ -39,7 +39,7 @@
 int Wayland_Vulkan_LoadLibrary(_THIS, const char *path)
 {
     VkExtensionProperties *extensions = NULL;
-    Uint32 extensionCount = 0;
+    Uint32 i, extensionCount = 0;
     SDL_bool hasSurfaceExtension = SDL_FALSE;
     SDL_bool hasWaylandSurfaceExtension = SDL_FALSE;
     PFN_vkGetInstanceProcAddr vkGetInstanceProcAddr = NULL;
@@ -56,12 +56,13 @@ int Wayland_Vulkan_LoadLibrary(_THIS, const char *path)
         return -1;
     SDL_strlcpy(_this->vulkan_config.loader_path, path,
                 SDL_arraysize(_this->vulkan_config.loader_path));
-    *(void**)&vkGetInstanceProcAddr = SDL_LoadFunction(_this->vulkan_config.loader_handle, "vkGetInstanceProcAddr");
+    vkGetInstanceProcAddr = (PFN_vkGetInstanceProcAddr)SDL_LoadFunction(
+        _this->vulkan_config.loader_handle, "vkGetInstanceProcAddr");
     if(!vkGetInstanceProcAddr)
         goto fail;
-    _this->vulkan_config.vkGetInstanceProcAddr = vkGetInstanceProcAddr;
+    _this->vulkan_config.vkGetInstanceProcAddr = (void *)vkGetInstanceProcAddr;
     _this->vulkan_config.vkEnumerateInstanceExtensionProperties =
-        (PFN_vkEnumerateInstanceExtensionProperties)_this->vulkan_config.vkGetInstanceProcAddr(
+        (void *)((PFN_vkGetInstanceProcAddr)_this->vulkan_config.vkGetInstanceProcAddr)(
             VK_NULL_HANDLE, "vkEnumerateInstanceExtensionProperties");
     if(!_this->vulkan_config.vkEnumerateInstanceExtensionProperties)
         goto fail;
@@ -71,7 +72,7 @@ int Wayland_Vulkan_LoadLibrary(_THIS, const char *path)
         &extensionCount);
     if(!extensions)
         goto fail;
-    for(Uint32 i = 0; i < extensionCount; i++)
+    for(i = 0; i < extensionCount; i++)
     {
         if(SDL_strcmp(VK_KHR_SURFACE_EXTENSION_NAME, extensions[i].extensionName) == 0)
             hasSurfaceExtension = SDL_TRUE;

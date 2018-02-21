@@ -294,7 +294,7 @@ static int GLES2_LoadFunctions(GLES2_DriverContext * data)
 #else
 #define SDL_PROC(ret,func,params) \
     do { \
-        *(void **)&data->func = SDL_GL_GetProcAddress(#func); \
+        data->func = SDL_GL_GetProcAddress(#func); \
         if ( ! data->func ) { \
             return SDL_SetError("Couldn't load GLES2 function %s: %s", #func, SDL_GetError()); \
         } \
