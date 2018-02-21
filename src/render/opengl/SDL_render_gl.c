@@ -37,8 +37,13 @@
  * these should match the defaults selected in SDL_GL_ResetAttributes 
  */
 
+#ifdef __AMIGAOS4__
+#define RENDERER_CONTEXT_MAJOR 1
+#define RENDERER_CONTEXT_MINOR 3
+#else
 #define RENDERER_CONTEXT_MAJOR 2
 #define RENDERER_CONTEXT_MINOR 1
+#endif
 
 /* OpenGL renderer implementation */
 
