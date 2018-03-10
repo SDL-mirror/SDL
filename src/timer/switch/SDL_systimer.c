@@ -18,7 +18,61 @@
      misrepresented as being the original software.
   3. This notice may not be removed or altered from any source distribution.
 */
+#include "../../SDL_internal.h"
 
+#ifdef SDL_TIMER_SWITCH
+
+#include "SDL_thread.h"
+#include "SDL_timer.h"
+#include "../SDL_timer_c.h"
 #include <switch.h>
 
-typedef Thread SYS_ThreadHandle;
+static bool started = false;
+
+static Uint64 start = 0;
+
+void
+SDL_TicksInit(void)
+{
+    if (started) {
+        return;
+    }
+
+    start = SDL_GetPerformanceCounter();
+    started = true;
+}
+
+void
+SDL_TicksQuit(void)
+{
+    started = false;
+}
+
+Uint32 SDL_GetTicks(void)
+{
+    if (!started) {
+        SDL_TicksInit();
+    }
+
+    return (Uint32) ((SDL_GetPerformanceCounter() - start) * 1000 / SDL_GetPerformanceFrequency());
+}
+
+Uint64
+SDL_GetPerformanceCounter(void)
+{
+    return svcGetSystemTick();
+}
+
+Uint64
+SDL_GetPerformanceFrequency(void)
+{
+    return 19200000;
+}
+
+void
+SDL_Delay(Uint32 ms)
+{
+    svcSleepThread((Uint64) ms * 1000000);
+}
+
+#endif /* SDL_TIMER_SWITCH */

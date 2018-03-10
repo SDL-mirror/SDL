@@ -1,0 +1,78 @@
+cmake_minimum_required(VERSION 3.0)
+#set(CMAKE_VERBOSE_MAKEFILE ON)
+
+set(CMAKE_SYSTEM_NAME "Generic")
+
+set(DEVKITPRO $ENV{DEVKITPRO})
+set(CMAKE_SYSTEM_PROCESSOR "armv8-a")
+set(CMAKE_C_COMPILER "${DEVKITPRO}/devkitA64/bin/aarch64-none-elf-gcc")
+set(CMAKE_CXX_COMPILER "${DEVKITPRO}/devkitA64/bin/aarch64-none-elf-g++")
+set(CMAKE_ASM_COMPILER "${DEVKITPRO}/devkitA64/bin/aarch64-none-elf-as")
+set(CMAKE_AR "${DEVKITPRO}/devkitA64/bin/aarch64-none-elf-gcc-ar" CACHE STRING "")
+set(CMAKE_RANLIB "${DEVKITPRO}/devkitA64/bin/aarch64-none-elf-gcc-ranlib" CACHE STRING "")
+set(CMAKE_C_FLAGS "-O2 -march=armv8-a -mtune=cortex-a57 -mtp=soft -fPIC -ftls-model=local-exec -I${DEVKITPRO}/libnx/include -I${DEVKITPRO}/portlibs/switch/include" CACHE STRING "C flags")
+set(CMAKE_CXX_FLAGS "${CMAKE_C_FLAGS} -fpermissive -fno-rtti -fno-exceptions -std=gnu++11" CACHE STRING "C++ flags")
+set(CMAKE_FIND_ROOT_PATH ${DEVKITPRO} ${DEVKITPRO}/devkitA64 ${DEVKITPRO}/libnx ${DEVKITPRO}/portlibs/switch)
+set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
+set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
+set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
+set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)
+set(BUILD_SHARED_LIBS OFF CACHE INTERNAL "Shared libs not available")
+
+project(SDL2)
+
+set(SRC_DIRS
+        src
+        src/atomic
+        src/audio
+        #src/audio/switch
+        src/audio/dummy
+        src/cpuinfo
+        src/events
+        src/file
+        src/filesystem/dummy
+        src/haptic
+        src/haptic/dummy
+        src/joystick
+        #src/joystick/switch
+        src/joystick/dummy
+        src/libm
+        src/power
+        src/render
+        src/render/software
+        src/stdlib
+        src/thread
+        src/thread/switch
+        src/timer
+        src/timer/switch
+        src/video
+        src/video/yuv2rgb
+        src/video/switch
+        )
+
+set(SRC_FILES )
+foreach (DIR ${SRC_DIRS})
+    file(GLOB FILES ${DIR}/*.c*)
+    list(APPEND SRC_FILES ${FILES})
+endforeach (DIR)
+
+# SDL2 library
+add_library(${PROJECT_NAME} STATIC ${SRC_FILES})
+target_include_directories(${PROJECT_NAME} PUBLIC ${SRC_DIRS} include)
+target_compile_options(${PROJECT_NAME} PUBLIC -O3 -DSWITCH)
+
+# SDL2 test
+add_executable(${PROJECT_NAME}.elf test/testswitch.c)
+target_include_directories(${PROJECT_NAME}.elf PRIVATE include)
+#target_include_directories(${PROJECT_NAME}.elf PRIVATE ${DEVKITPRO}/portlibs/switch/include)
+target_compile_options(${PROJECT_NAME}.elf PRIVATE -O3 -DSWITCH)
+target_link_libraries(${PROJECT_NAME}.elf
+        ${PROJECT_NAME}
+        #${DEVKITPRO}/portlibs/switch/lib/libSDL2.a
+        ${DEVKITPRO}/libnx/lib/libnx.a
+        m
+        )
+set_target_properties(${PROJECT_NAME}.elf PROPERTIES LINK_FLAGS "-specs=${DEVKITPRO}/libnx/switch.specs")
+add_custom_target(${PROJECT_NAME}.nro
+        DEPENDS ${PROJECT_NAME}.elf
+        COMMAND elf2nro ${PROJECT_NAME}.elf ${PROJECT_NAME}.nro)

@@ -19,6 +19,4 @@
   3. This notice may not be removed or altered from any source distribution.
 */
 
-#include <switch.h>
-
-typedef Thread SYS_ThreadHandle;
+#include "../../SDL_internal.h"
