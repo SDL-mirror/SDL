@@ -25,6 +25,7 @@
 
 /* SDL internals */
 #include "../SDL_sysvideo.h"
+#include "../../events/SDL_keyboard_c.h"
 
 #include <switch.h>
 
@@ -88,6 +89,9 @@ static int SWITCH_VideoInit(_THIS)
 {
     SDL_DisplayMode mode;
 
+    consoleDebugInit(debugDevice_SVC);
+    stdout = stderr;
+
     gfxInitResolution(SCREEN_WIDTH, SCREEN_HEIGHT);
     gfxInitDefault();
     gfxSetMode(GfxMode_LinearDouble);
@@ -119,7 +123,14 @@ static int SWITCH_SetDisplayMode(_THIS, SDL_VideoDisplay *display, SDL_DisplayMo
 
 static void SWITCH_PumpEvents(_THIS)
 {
-    // TODO
+    if (!appletMainLoop()) {
+        SDL_Event ev;
+        ev.type = SDL_QUIT;
+        SDL_PushEvent(&ev);
+        return;
+    }
+
+    hidScanInput();
 }
 
 typedef struct
@@ -138,6 +149,8 @@ static int SWITCH_CreateWindowFramebuffer(_THIS, SDL_Window *window, Uint32 *for
     *pitch = w * 4;
     *format = SDL_PIXELFORMAT_ABGR8888;
     *pixels = gfxGetFramebuffer(NULL, NULL);
+
+    SDL_SetKeyboardFocus(window);
 
     return 0;
 }

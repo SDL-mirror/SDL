@@ -34,7 +34,7 @@ set(SRC_DIRS
         src/haptic
         src/haptic/dummy
         src/joystick
-        #src/joystick/switch
+        src/joystick/switch
         src/joystick/dummy
         src/libm
         src/power
@@ -59,13 +59,13 @@ endforeach (DIR)
 # SDL2 library
 add_library(${PROJECT_NAME} STATIC ${SRC_FILES})
 target_include_directories(${PROJECT_NAME} PUBLIC ${SRC_DIRS} include)
-target_compile_options(${PROJECT_NAME} PUBLIC -O3 -DSWITCH)
+target_compile_options(${PROJECT_NAME} PUBLIC -O3 -D__SWITCH__)
 
 # SDL2 test
 add_executable(${PROJECT_NAME}.elf test/testswitch.c)
 target_include_directories(${PROJECT_NAME}.elf PRIVATE include)
 #target_include_directories(${PROJECT_NAME}.elf PRIVATE ${DEVKITPRO}/portlibs/switch/include)
-target_compile_options(${PROJECT_NAME}.elf PRIVATE -O3 -DSWITCH)
+target_compile_options(${PROJECT_NAME}.elf PRIVATE -O3 -D__SWITCH__)
 target_link_libraries(${PROJECT_NAME}.elf
         ${PROJECT_NAME}
         #${DEVKITPRO}/portlibs/switch/lib/libSDL2.a
