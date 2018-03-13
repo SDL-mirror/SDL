@@ -22,7 +22,7 @@
 
 #if SDL_THREAD_SWITCH
 
-/* Semaphore functions for the VITA. */
+/* Semaphore functions for the SWITCH. */
 
 #include <stdio.h>
 

@@ -25,6 +25,7 @@
 /* SWITCH thread management routines for SDL */
 
 #include <stdio.h>
+#include <switch.h>
 
 #include "SDL_error.h"
 #include "SDL_thread.h"
@@ -32,14 +33,15 @@
 
 #define STACK_SIZE 0x2000
 
-static void ThreadEntry(void *argp)
+void
+SDL_SYS_RunThread(void *data)
 {
-    SDL_RunThread(*(void **) argp);
+    SDL_RunThread(data);
 }
 
 int SDL_SYS_CreateThread(SDL_Thread *thread, void *args)
 {
-    Result res = threadCreate(&thread->handle, ThreadEntry, args, STACK_SIZE, 0x2C, -2);
+    Result res = threadCreate(&thread->handle, SDL_SYS_RunThread, args, STACK_SIZE, 0x2B, -2);
     if (res != 0) {
         return SDL_SetError("threadCreate() failed: 0x%08X", res);
     }
@@ -59,7 +61,7 @@ void SDL_SYS_SetupThread(const char *name)
 
 SDL_threadID SDL_ThreadID(void)
 {
-    return (SDL_threadID) 0;
+    return (SDL_threadID) armGetTls();
 }
 
 void SDL_SYS_WaitThread(SDL_Thread *thread)
