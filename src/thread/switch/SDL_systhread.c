@@ -33,7 +33,7 @@
 
 #define STACK_SIZE 0x2000
 
-void
+static void
 SDL_SYS_RunThread(void *data)
 {
     SDL_RunThread(data);
