@@ -181,7 +181,8 @@ SDL_SYS_JoystickUpdate(SDL_Joystick *joystick)
         for (int i = 0; i < sizeof(pad_mapping) / sizeof(*pad_mapping); i++) {
             if (changed & pad_mapping[i]) {
                 SDL_PrivateJoystickButton(
-                    joystick, (Uint8) i, (Uint8) ((pad[index].buttons & pad_mapping[i]) ? SDL_PRESSED : SDL_RELEASED));
+                    joystick, (Uint8) BIT(i),
+                    (Uint8) ((pad[index].buttons & pad_mapping[i]) ? SDL_PRESSED : SDL_RELEASED));
             }
         }
     }
