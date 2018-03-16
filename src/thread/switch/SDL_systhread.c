@@ -67,18 +67,14 @@ SDL_threadID SDL_ThreadID(void)
 void SDL_SYS_WaitThread(SDL_Thread *thread)
 {
     threadWaitForExit(&thread->handle);
+    threadClose(&thread->handle);
 }
 
 void SDL_SYS_DetachThread(SDL_Thread *thread)
 {
-    // TODO ?
-    threadClose(&thread->handle);
-}
-
-void SDL_SYS_KillThread(SDL_Thread *thread)
-{
-    // TODO ?
-    threadClose(&thread->handle);
+    if (thread->handle.handle) {
+        threadClose(&thread->handle);
+    }
 }
 
 int SDL_SYS_SetThreadPriority(SDL_ThreadPriority priority)
