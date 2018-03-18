@@ -26,12 +26,18 @@
 /* SDL internals */
 #include "../SDL_sysvideo.h"
 #include "../../events/SDL_keyboard_c.h"
+#include "../../events/SDL_windowevents_c.h"
 
 #include <switch.h>
 
 #define SWITCH_DATA "_SDL_SwitchData"
 #define SCREEN_WIDTH    1280
 #define SCREEN_HEIGHT   720
+
+typedef struct
+{
+    SDL_Surface *surface;
+} SWITCH_WindowData;
 
 static int SWITCH_VideoInit(_THIS);
 
@@ -89,14 +95,12 @@ static int SWITCH_VideoInit(_THIS)
 {
     SDL_DisplayMode mode;
 
-    consoleDebugInit(debugDevice_SVC);
-    stdout = stderr;
-
     gfxInitResolution(SCREEN_WIDTH, SCREEN_HEIGHT);
     gfxInitDefault();
-    gfxSetMode(GfxMode_LinearDouble);
+    gfxSetMode(GfxMode_TiledDouble);
 
-    mode.format = SDL_PIXELFORMAT_ARGB8888;
+    // add default mode (1280x720)
+    mode.format = SDL_PIXELFORMAT_ABGR8888;
     mode.w = SCREEN_WIDTH;
     mode.h = SCREEN_HEIGHT;
     mode.refresh_rate = 60;
@@ -104,7 +108,11 @@ static int SWITCH_VideoInit(_THIS)
     if (SDL_AddBasicVideoDisplay(&mode) < 0) {
         return -1;
     }
+    SDL_AddDisplayMode(&_this->displays[0], &mode);
 
+    // allow any resolution
+    mode.w = 0;
+    mode.h = 0;
     SDL_AddDisplayMode(&_this->displays[0], &mode);
 
     return 0;
@@ -117,7 +125,9 @@ static void SWITCH_VideoQuit(_THIS)
 
 static int SWITCH_SetDisplayMode(_THIS, SDL_VideoDisplay *display, SDL_DisplayMode *mode)
 {
-    // TODO: use gfxConfigureResolution
+    SDL_SendWindowEvent(display->fullscreen_window,
+                        SDL_WINDOWEVENT_RESIZED, mode->w, mode->h);
+
     return 0;
 }
 
@@ -133,23 +143,38 @@ static void SWITCH_PumpEvents(_THIS)
     hidScanInput();
 }
 
-typedef struct
-{
-} SWITCH_WindowData;
-
 static int SWITCH_CreateWindowFramebuffer(_THIS, SDL_Window *window, Uint32 *format, void **pixels, int *pitch)
 {
-    int w, h;
+    int bpp;
+    Uint32 r, g, b, a;
+    SDL_Surface *surface;
+    SWITCH_WindowData *data;
 
-    //SWITCH_WindowData *data = SDL_calloc(1, sizeof(SWITCH_WindowData));
-    //SDL_SetWindowData(window, SWITCH_DATA, data);
+    // create sdl surface framebuffer
+    SDL_PixelFormatEnumToMasks(SDL_PIXELFORMAT_ABGR8888, &bpp, &r, &g, &b, &a);
+    surface = SDL_CreateRGBSurface(0, window->w, window->h, bpp, r, g, b, a);
+    if (!surface) {
+        return -1;
+    }
 
-    SDL_GetWindowSize(window, &w, &h);
-    gfxConfigureResolution(w, h);
-    *pitch = w * 4;
+    // hold a pointer to our surface
+    data = SDL_calloc(1, sizeof(SWITCH_WindowData));
+    data->surface = surface;
+    SDL_SetWindowData(window, SWITCH_DATA, data);
+
+    // use switch hardware scaling in fullscreen mode
+    if (window->flags & SDL_WINDOW_FULLSCREEN) {
+        gfxConfigureResolution(window->w, window->h);
+    }
+    else {
+        gfxConfigureResolution(0, 0);
+    }
+
     *format = SDL_PIXELFORMAT_ABGR8888;
-    *pixels = gfxGetFramebuffer(NULL, NULL);
+    *pixels = surface->pixels;
+    *pitch = surface->pitch;
 
+    // inform SDL we're ready to accept inputs
     SDL_SetKeyboardFocus(window);
 
     return 0;
@@ -157,25 +182,32 @@ static int SWITCH_CreateWindowFramebuffer(_THIS, SDL_Window *window, Uint32 *for
 
 static int SWITCH_UpdateWindowFramebuffer(_THIS, SDL_Window *window, const SDL_Rect *rects, int numrects)
 {
-    //SWITCH_WindowData *data = (SWITCH_WindowData *) SDL_GetWindowData(window, SWITCH_DATA);
-    //if (!data) {
-    //    return SDL_SetError("Couldn't find switch data for window");
-    //}
+    SWITCH_WindowData *data = (SWITCH_WindowData *) SDL_GetWindowData(window, SWITCH_DATA);
+
+    u32 *src = (u32 *) data->surface->pixels;
+    u32 *dst = (u32 *) gfxGetFramebuffer(NULL, NULL);
+    int x, y, w = window->w, h = window->h;
+
+    for (y = 0; y < h; y++) {
+        for (x = 0; x < w; x += 4) {
+            *((u128 *) &dst[gfxGetFramebufferDisplayOffset((u32) (x + window->x), (u32) (y + window->y))]) =
+                *((u128 *) &src[y * w + x]);
+        }
+    }
 
     gfxFlushBuffers();
     gfxSwapBuffers();
+    // TODO: handle SDL_RENDERER_PRESENTVSYNC (SW_RenderDriver not using flags)
     gfxWaitForVsync();
-
-    // update fb ptr for double buffering
-    window->surface->pixels = gfxGetFramebuffer(NULL, NULL);
 
     return 0;
 }
 
 static void SWITCH_DestroyWindowFramebuffer(_THIS, SDL_Window *window)
 {
-    //SWITCH_WindowData *data = (SWITCH_WindowData *) SDL_GetWindowData(window, SWITCH_DATA);
-    //SDL_free(data);
+    SWITCH_WindowData *data = (SWITCH_WindowData *) SDL_GetWindowData(window, SWITCH_DATA);
+    SDL_FreeSurface(data->surface);
+    SDL_free(data);
 }
 
 #endif /* SDL_VIDEO_DRIVER_SWITCH */

@@ -14,10 +14,9 @@
 #include <stdio.h>
 
 #include <switch.h>
+#include <render/SDL_sysrender.h>
+#include <video/SDL_sysvideo.h>
 #include "SDL2/SDL.h"
-
-#define WINDOW_WIDTH    1280
-#define WINDOW_HEIGHT   720
 
 int main(int argc, char *argv[])
 {
@@ -36,9 +35,20 @@ int main(int argc, char *argv[])
         return -1;
     }
 
+    // create a 800x600 centered window for demonstration.
+    // if SDL_WINDOW_FULLSCREEN flag is passed, the window will be hardware scaled to fit switch screen.
+    // maximum window dimension is currently limited to 1280x720
+    window = SDL_CreateWindow(NULL, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 800, 600, 0);
+    if (!window) {
+        printf("SDL_CreateWindow: %s\n", SDL_GetError());
+        SDL_Quit();
+        return -1;
+    }
+
     // switch only support software renderer for now
-    if (SDL_CreateWindowAndRenderer(WINDOW_WIDTH, WINDOW_HEIGHT, 0, &window, &renderer) < 0) {
-        printf("SDL_CreateWindowAndRenderer: %s\n", SDL_GetError());
+    renderer = SDL_CreateRenderer(window, 0, SDL_RENDERER_SOFTWARE);
+    if (!renderer) {
+        printf("SDL_CreateRenderer: %s\n", SDL_GetError());
         SDL_Quit();
         return -1;
     }
@@ -61,23 +71,30 @@ int main(int argc, char *argv[])
             }
         }
 
-        SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-        SDL_RenderClear(renderer);
+        for (int i = 0; i < 100; i++) {
 
-        // R
-        SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-        SDL_Rect r = {0, 0, 64, 64};
-        SDL_RenderFillRect(renderer, &r);
+            SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+            SDL_RenderClear(renderer);
 
-        // G
-        SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
-        SDL_Rect g = {64, 0, 64, 64};
-        SDL_RenderFillRect(renderer, &g);
+            SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255);
+            SDL_Rect bg = {0, 0, window->w, window->h};
+            SDL_RenderFillRect(renderer, &bg);
 
-        // B
-        SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
-        SDL_Rect b = {128, 0, 64, 64};
-        SDL_RenderFillRect(renderer, &b);
+            // R
+            SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+            SDL_Rect r = {0, 0, 64, 64};
+            SDL_RenderFillRect(renderer, &r);
+
+            // G
+            SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
+            SDL_Rect g = {64, 0, 64, 64};
+            SDL_RenderFillRect(renderer, &g);
+
+            // B
+            SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
+            SDL_Rect b = {128, 0, 64, 64};
+            SDL_RenderFillRect(renderer, &b);
+        }
 
         SDL_RenderPresent(renderer);
     }
