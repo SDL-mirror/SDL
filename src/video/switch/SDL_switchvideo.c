@@ -184,9 +184,19 @@ static int SWITCH_UpdateWindowFramebuffer(_THIS, SDL_Window *window, const SDL_R
 {
     SWITCH_WindowData *data = (SWITCH_WindowData *) SDL_GetWindowData(window, SWITCH_DATA);
 
-    u32 *src = (u32 *) data->surface->pixels;
-    u32 *dst = (u32 *) gfxGetFramebuffer(NULL, NULL);
+    u32 fb_w, fb_h;
     int x, y, w = window->w, h = window->h;
+    u32 *src = (u32 *) data->surface->pixels;
+    u32 *dst = (u32 *) gfxGetFramebuffer(&fb_w, &fb_h);
+
+    // prevent framebuffer overflow in case of resolution change outside SDL,
+    // which should not happen
+    if(window->x + w > fb_w) {
+        w = fb_w - window->x;
+    }
+    if(window->y + h > fb_h) {
+        h = fb_h - window->y;
+    }
 
     for (y = 0; y < h; y++) {
         for (x = 0; x < w; x += 4) {
