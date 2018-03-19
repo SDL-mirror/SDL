@@ -1468,8 +1468,8 @@ dnl Check for Mir
 CheckMir()
 {
     AC_ARG_ENABLE(video-mir,
-AC_HELP_STRING([--enable-video-mir], [use Mir video driver [[default=yes]]]),
-                  ,enable_video_mir=yes)
+AC_HELP_STRING([--enable-video-mir], [use Mir video driver [[default=no]]]),
+                  ,enable_video_mir=no)
 
     if test x$enable_video = xyes -a x$enable_video_mir = xyes; then
         AC_PATH_PROG(PKG_CONFIG, pkg-config, no)
@@ -2505,6 +2505,19 @@ CheckMacGL()
         AC_DEFINE(SDL_VIDEO_OPENGL_CGL, 1, [ ])
         AC_DEFINE(SDL_VIDEO_RENDER_OGL, 1, [ ])
         SUMMARY_video="${SUMMARY_video} opengl"
+    fi
+}
+
+dnl Check for MacOS OpenGLES
+CheckMacGLES()
+{
+    if test x$enable_video = xyes -a x$enable_video_opengles = xyes; then
+        video_opengl_egl=yes
+        AC_DEFINE(SDL_VIDEO_OPENGL_EGL, 1, [ ])
+        video_opengles_v2=yes
+        AC_DEFINE(SDL_VIDEO_OPENGL_ES2, 1, [ ])
+        AC_DEFINE(SDL_VIDEO_RENDER_OGL_ES2, 1, [ ])
+        SUMMARY_video="${SUMMARY_video} opengl_es2"
     fi
 }
 
@@ -3879,6 +3892,7 @@ AC_HELP_STRING([--enable-render-d3d], [enable the Direct3D render driver [[defau
         CheckMETAL
         CheckX11
         CheckMacGL
+        CheckMacGLES
         CheckOpenGLX11
         CheckVulkan
         CheckPTHREAD
