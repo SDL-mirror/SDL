@@ -201,9 +201,6 @@ SDL_SYS_JoystickClose(SDL_Joystick *joystick)
 void
 SDL_SYS_JoystickQuit(void)
 {
-    for (int i = 0; i < JOYSTICK_COUNT; i++) {
-        hidSetNpadJoyAssignmentModeDual(pad[i].id);
-    }
 }
 
 SDL_JoystickGUID SDL_SYS_JoystickGetDeviceGUID(int device_index)
