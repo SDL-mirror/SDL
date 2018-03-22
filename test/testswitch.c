@@ -14,7 +14,6 @@
 #include <stdio.h>
 
 #include <switch.h>
-#include <render/SDL_sysrender.h>
 #include <video/SDL_sysvideo.h>
 #include "SDL2/SDL.h"
 
@@ -53,21 +52,42 @@ int main(int argc, char *argv[])
         return -1;
     }
 
-    // open CONTROLLER_P1_AUTO
+    // open CONTROLLER_PLAYER_1 and CONTROLLER_PLAYER_2
+    // when connected, both joycons are mapped to joystick #0,
+    // else joycons are individually mapped to joystick #0, joystick #1, ...
     // https://github.com/devkitPro/SDL/blob/switch-sdl2/src/joystick/switch/SDL_sysjoystick.c#L45
-    if (SDL_JoystickOpen(0) == NULL) {
-        printf("SDL_JoystickOpen: %s\n", SDL_GetError());
-        SDL_Quit();
-        return -1;
+    for (int i = 0; i < 2; i++) {
+        if (SDL_JoystickOpen(i) == NULL) {
+            printf("SDL_JoystickOpen: %s\n", SDL_GetError());
+            SDL_Quit();
+            return -1;
+        }
     }
 
     while (!done) {
 
         while (SDL_PollEvent(&event)) {
-            // seek for (B) button press
-            // https://github.com/devkitPro/SDL/blob/switch-sdl2/src/joystick/switch/SDL_sysjoystick.c#L51
-            if (event.type == SDL_JOYBUTTONDOWN && event.jbutton.button == KEY_B) {
-                done = 1;
+
+            switch (event.type) {
+
+            case SDL_JOYAXISMOTION:
+                printf("Joystick %d axis %d value: %d\n",
+                       event.jaxis.which,
+                       event.jaxis.axis, event.jaxis.value);
+                break;
+
+            case SDL_JOYBUTTONDOWN:
+                printf("Joystick %d button %d down\n",
+                       event.jbutton.which, event.jbutton.button);
+                // seek for joystick #0 down (B)
+                // https://github.com/devkitPro/SDL/blob/switch-sdl2/src/joystick/switch/SDL_sysjoystick.c#L51
+                if (event.jbutton.which == 0 && event.jbutton.button == 1) {
+                    done = 1;
+                }
+                break;
+
+            default:
+                break;
             }
         }
 

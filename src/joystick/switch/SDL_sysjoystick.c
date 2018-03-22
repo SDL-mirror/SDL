@@ -29,7 +29,7 @@
 
 #include <switch.h>
 
-#define JOYSTICK_COUNT 9
+#define JOYSTICK_COUNT 8
 
 typedef struct JoystickState
 {
@@ -43,21 +43,22 @@ typedef struct JoystickState
 static JoystickState pad[JOYSTICK_COUNT];
 
 static HidControllerID pad_id[JOYSTICK_COUNT] = {
-    CONTROLLER_P1_AUTO, CONTROLLER_PLAYER_1, CONTROLLER_PLAYER_2,
-    CONTROLLER_PLAYER_3, CONTROLLER_PLAYER_4, CONTROLLER_PLAYER_5,
-    CONTROLLER_PLAYER_6, CONTROLLER_PLAYER_7, CONTROLLER_PLAYER_8
+    CONTROLLER_PLAYER_1, CONTROLLER_PLAYER_2,
+    CONTROLLER_PLAYER_3, CONTROLLER_PLAYER_4,
+    CONTROLLER_PLAYER_5, CONTROLLER_PLAYER_6,
+    CONTROLLER_PLAYER_7, CONTROLLER_PLAYER_8
 };
 
 static const HidControllerKeys pad_mapping[] = {
-    KEY_A, KEY_B, KEY_X, KEY_Y, KEY_LSTICK, KEY_RSTICK,
-    KEY_L, KEY_R, KEY_ZL, KEY_ZR, KEY_PLUS, KEY_MINUS,
+    KEY_A, KEY_B, KEY_X, KEY_Y,
+    KEY_LSTICK, KEY_RSTICK,
+    KEY_L, KEY_R,
+    KEY_ZL, KEY_ZR,
+    KEY_PLUS, KEY_MINUS,
     KEY_DLEFT, KEY_DUP, KEY_DRIGHT, KEY_DDOWN,
     KEY_LSTICK_LEFT, KEY_LSTICK_UP, KEY_LSTICK_RIGHT, KEY_LSTICK_DOWN,
-    KEY_RSTICK_LEFT, KEY_RSTICK_UP, KEY_RSTICK_RIGHT, KEY_RSTICK_DOWN,
-    KEY_SL, KEY_SR, KEY_TOUCH
+    KEY_RSTICK_LEFT, KEY_RSTICK_UP, KEY_RSTICK_RIGHT, KEY_RSTICK_DOWN
 };
-
-static int SDL_numjoysticks = JOYSTICK_COUNT;
 
 /* Function to scan the system for joysticks.
  * It should return 0, or -1 on an unrecoverable fatal error.
@@ -67,21 +68,23 @@ SDL_SYS_JoystickInit(void)
 {
     for (int i = 0; i < JOYSTICK_COUNT; i++) {
         pad[i].id = pad_id[i];
+        hidSetNpadJoyAssignmentModeSingleByDefault(pad[i].id);
     }
 
-    return SDL_numjoysticks;
+    return JOYSTICK_COUNT;
 }
 
 int
 SDL_SYS_NumJoysticks(void)
 {
-    return SDL_numjoysticks;
+    return JOYSTICK_COUNT;
 }
 
 void
 SDL_SYS_JoystickDetect(void)
 {
-    // TODO: handle joysticks change
+    pad[0].id = hidGetHandheldMode() ?
+                CONTROLLER_HANDHELD : CONTROLLER_PLAYER_1;
 }
 
 /* Function to get the device-dependent name of a joystick */
@@ -105,7 +108,7 @@ SDL_SYS_JoystickNameForDeviceIndex(int device_index)
     if (device_index == 8)
         return "Switch Controller #8";
 
-    return "Switch Controller #0 (Auto)";
+    return "Switch Controller #0";
 }
 
 /* Function to perform the mapping from device index to the instance id for this index */
@@ -175,13 +178,13 @@ SDL_SYS_JoystickUpdate(SDL_Joystick *joystick)
     }
 
     // Buttons
-    changed = pad_old[index].buttons ^pad[index].buttons;
+    changed = pad_old[index].buttons ^ pad[index].buttons;
     pad_old[index].buttons = pad[index].buttons;
     if (changed) {
-        for (int i = 0; i < sizeof(pad_mapping) / sizeof(*pad_mapping); i++) {
+        for (int i = 0; i < joystick->nbuttons; i++) {
             if (changed & pad_mapping[i]) {
                 SDL_PrivateJoystickButton(
-                    joystick, (Uint8) BIT(i),
+                    joystick, (Uint8) i,
                     (Uint8) ((pad[index].buttons & pad_mapping[i]) ? SDL_PRESSED : SDL_RELEASED));
             }
         }
@@ -198,6 +201,9 @@ SDL_SYS_JoystickClose(SDL_Joystick *joystick)
 void
 SDL_SYS_JoystickQuit(void)
 {
+    for (int i = 0; i < JOYSTICK_COUNT; i++) {
+        hidSetNpadJoyAssignmentModeDual(pad[i].id);
+    }
 }
 
 SDL_JoystickGUID SDL_SYS_JoystickGetDeviceGUID(int device_index)
