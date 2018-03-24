@@ -654,8 +654,10 @@ int DIB_CreateWindow(_THIS)
 		MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, windowid, -1, windowid_t, SDL_strlen(windowid) + 1);
 		SDL_Window = (HWND)wcstol(windowid_t, NULL, 0);
 		SDL_free(windowid_t);
+#elif defined(_WIN64)
+		SDL_Window = (HWND)SDL_strtoull(windowid, NULL, 0);
 #else
-		SDL_Window = (HWND)((size_t)SDL_strtoull(windowid, NULL, 0));
+		SDL_Window = (HWND)SDL_strtoul(windowid, NULL, 0);
 #endif
 		if ( SDL_Window == NULL ) {
 			SDL_SetError("Couldn't get user specified window");

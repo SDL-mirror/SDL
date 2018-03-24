@@ -947,7 +947,11 @@ int DX5_CreateWindow(_THIS)
 
 	SDL_windowid = (windowid != NULL);
 	if ( SDL_windowid ) {
-		SDL_Window = (HWND)((size_t)SDL_strtoull(windowid, NULL, 0));
+		#ifdef _WIN64
+		SDL_Window = (HWND)SDL_strtoull(windowid, NULL, 0);
+		#else
+		SDL_Window = (HWND)SDL_strtoul(windowid, NULL, 0);
+		#endif
 		if ( SDL_Window == NULL ) {
 			SDL_SetError("Couldn't get user specified window");
 			return(-1);
