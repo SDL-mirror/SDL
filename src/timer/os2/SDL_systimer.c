@@ -134,7 +134,7 @@ DECLSPEC void SDLCALL SDL_Delay(Uint32 ms)
  /* tib->tib_ptib2->tib2_ulpri = 0x0300;*/
  /* We do not want to run at high priority if a signal causes us
     to longjmp() out of this section... */
-      if (DosEnterMustComplete(&nesting))
+      else if (DosEnterMustComplete(&nesting))
         switch_priority = 0;
       else
         DosSetPriority(PRTYS_THREAD, PRTYC_TIMECRITICAL, 0, 0);
