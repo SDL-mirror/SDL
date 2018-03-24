@@ -536,11 +536,11 @@ SOURCE=..\..\src\video\SDL_yuvfuncs.h
 # End Source File
 # Begin Source File
 
-SOURCE=.\Version.rc
+SOURCE=..\..\src\main\win32\version.rc
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\src\video\wincommon\Wmmsg.h
+SOURCE=..\..\src\video\wincommon\wmmsg.h
 # End Source File
 # End Target
 # End Project
