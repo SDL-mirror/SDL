@@ -115,7 +115,7 @@ void SDL_SetError (const char *fmt, ...)
 /* This function has a bit more overhead than most error functions
    so that it supports internationalization and thread-safe errors.
 */
-char *SDL_GetErrorMsg(char *errstr, unsigned int maxlen)
+char *SDL_GetErrorMsg(char *errstr, int maxlen)
 {
 	SDL_error *error;
 
@@ -154,23 +154,31 @@ char *SDL_GetErrorMsg(char *errstr, unsigned int maxlen)
 				    case 'x':
 				    case 'X':
 					len = SDL_snprintf(msg, maxlen, tmp, error->args[argi++].value_i);
-					msg += len;
-					maxlen -= len;
+					if (len > 0) {
+						msg += len;
+						maxlen -= len;
+					}
 					break;
 				    case 'f':
 					len = SDL_snprintf(msg, maxlen, tmp, error->args[argi++].value_f);
-					msg += len;
-					maxlen -= len;
+					if (len > 0) {
+						msg += len;
+						maxlen -= len;
+					}
 					break;
 				    case 'p':
 					len = SDL_snprintf(msg, maxlen, tmp, error->args[argi++].value_ptr);
-					msg += len;
-					maxlen -= len;
+					if (len > 0) {
+						msg += len;
+						maxlen -= len;
+					}
 					break;
 				    case 's':
 					len = SDL_snprintf(msg, maxlen, tmp, SDL_LookupString(error->args[argi++].buf));
-					msg += len;
-					maxlen -= len;
+					if (len > 0) {
+						msg += len;
+						maxlen -= len;
+					}
 					break;
 				}
 			} else {
@@ -178,6 +186,12 @@ char *SDL_GetErrorMsg(char *errstr, unsigned int maxlen)
 				maxlen -= 1;
 			}
 		}
+
+		/* slide back if we've overshot the end of our buffer. */
+		if (maxlen < 0) {
+			msg -= (-maxlen) + 1;
+		}
+
 		*msg = 0;	/* NULL terminate the string */
 	}
 	return(errstr);
