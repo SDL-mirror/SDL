@@ -117,6 +117,8 @@
 #undef HAVE__UI64TOA
 #undef HAVE_STRTOLL
 #undef HAVE_STRTOULL
+#undef HAVE__STRTOI64
+#undef HAVE__STRTOUI64
 #undef HAVE_STRTOD
 #undef HAVE_ATOI
 #undef HAVE_ATOF

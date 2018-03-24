@@ -114,6 +114,10 @@ typedef unsigned int uintptr_t;
 #define HAVE_STRTOLL 1
 #define HAVE_STRTOULL 1
 #endif
+#if defined(__WATCOMC__) || (defined(_MSC_VER) && (_MSC_VER >= 1300)) || defined(_WIN64)
+#define HAVE__STRTOI64 1
+#define HAVE__STRTOUI64 1
+#endif
 #define HAVE_STRTOD 1
 #define HAVE_ATOI 1
 #define HAVE_ATOF 1

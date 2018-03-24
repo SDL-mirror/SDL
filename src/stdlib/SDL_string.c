@@ -603,7 +603,7 @@ char *SDL_ulltoa(Uint64 value, char *string, int radix)
 }
 #endif
 
-#ifndef HAVE_STRTOLL
+#if !defined(HAVE_STRTOLL) && !defined(HAVE__STRTOI64)
 Sint64 SDL_strtoll(const char *string, char **endp, int base)
 {
     size_t len;
@@ -625,7 +625,7 @@ Sint64 SDL_strtoll(const char *string, char **endp, int base)
 }
 #endif
 
-#ifndef HAVE_STRTOULL
+#if !defined(HAVE_STRTOULL) && !defined(HAVE__STRTOUI64)
 Uint64 SDL_strtoull(const char *string, char **endp, int base)
 {
     size_t len;
