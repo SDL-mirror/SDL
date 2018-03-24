@@ -583,6 +583,37 @@ static int SDL_MapVirtualKey(int scancode, int vkey)
 	return mvke?mvke:vkey;
 }
 
+#ifndef MAPVK_VK_TO_VSC
+#define MAPVK_VK_TO_VSC 0
+#endif
+void
+WIN_ResetDeadKeys(void)
+{
+    /*
+    if a deadkey has been typed, but not the next character (which the deadkey might modify),
+    this tries to undo the effect pressing the deadkey.
+    see: http://archives.miloush.net/michkap/archive/2006/09/10/748775.html
+    */
+    BYTE keyboardState[256];
+    WCHAR buffer[16];
+    UINT keycode, scancode, i;
+    int result;
+
+    GetKeyboardState(keyboardState);
+    keycode = VK_SPACE;
+    scancode = MapVirtualKey(keycode, MAPVK_VK_TO_VSC);
+    if (scancode == 0) {
+        return; /* the keyboard doesn't have this key */
+    }
+
+    for (i = 0; i < 5; i++) {
+        result = SDL_ToUnicode(keycode, scancode, keyboardState, (LPWSTR)buffer, 16, 0);
+        if (result > 0) {
+            return; /* success */
+        }
+    }
+}
+
 static SDL_keysym *TranslateKey(WPARAM vkey, UINT scancode, SDL_keysym *keysym, int pressed)
 {
 	/* Set the keysym information */

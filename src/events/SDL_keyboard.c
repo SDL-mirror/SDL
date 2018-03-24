@@ -334,8 +334,16 @@ int SDL_KeyboardInit(void)
 	/* Done.  Whew. */
 	return(0);
 }
+
+#ifdef _WIN32
+extern void WIN_ResetDeadKeys(void);
+#endif
+
 void SDL_KeyboardQuit(void)
 {
+#ifdef _WIN32
+	WIN_ResetDeadKeys();
+#endif
 }
 
 /* We lost the keyboard, so post key up messages for all pressed keys */
@@ -362,6 +370,11 @@ int SDL_EnableUNICODE(int enable)
 	if ( enable >= 0 ) {
 		SDL_TranslateUNICODE = enable;
 	}
+#ifdef _WIN32
+	if (enable != old_mode) {
+		WIN_ResetDeadKeys();
+	}
+#endif
 	return(old_mode);
 }
 
