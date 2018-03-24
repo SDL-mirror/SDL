@@ -310,10 +310,12 @@ int SDL_AudioInit(const char *driver_name)
 		SDL_AudioQuit();
 	}
 
+#if SDL_AUDIO_DRIVER_PULSE
 	/* SDL 2.0 uses the name "pulseaudio", so we'll support both */
 	if ( driver_name && SDL_strcasecmp(driver_name, "pulseaudio") == 0 ) {
 		driver_name = "pulse";
 	}
+#endif /* */
 
 	/* Select the proper audio driver */
 	audio = NULL;
