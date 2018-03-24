@@ -48,8 +48,8 @@ static ULONG ulFCFToUse =
 
 static int bMouseCaptured   = 0;
 static int bMouseCapturable = 0;
-static HPOINTER hptrGlobalPointer = NULL;
-static HPOINTER hptrCurrentIcon = NULL;
+static HPOINTER hptrGlobalPointer = NULLHANDLE;
+static HPOINTER hptrCurrentIcon = NULLHANDLE;
 static int iWindowSizeX = 320;
 static int iWindowSizeY = 200;
 static int bWindowResized = 0;
@@ -180,7 +180,7 @@ static UniChar NativeCharToUniChar(int chcode)
   int rc;
   UconvObject ucoTemp;
   char     achFrom[2];
-  char     *pchFrom;
+  void     *pchFrom;
   size_t   iFromCount;
   UniChar  aucTo[10];
   UniChar  *pucTo;
@@ -636,7 +636,7 @@ static MRESULT EXPENTRY WndProc( HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         bWindowResized = 1;
 
         // Make sure the window will be redrawn
-        WinInvalidateRegion(hwnd, NULL, TRUE);
+        WinInvalidateRegion(hwnd, NULLHANDLE, TRUE);
       }
       break;
 
@@ -725,7 +725,7 @@ static MRESULT EXPENTRY WndProc( HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
           if ((pVideo->hidden->iMouseVisible) && (!bMouseCaptured))
             WinSetPointer(HWND_DESKTOP, WinQuerySysPointer(HWND_DESKTOP, SPTR_ARROW, FALSE));
           else
-            WinSetPointer(HWND_DESKTOP, NULL);
+            WinSetPointer(HWND_DESKTOP, NULLHANDLE);
 
           if (bMouseCapturable)
           {
@@ -782,7 +782,7 @@ static MRESULT EXPENTRY WndProc( HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
           if (!bMouseCaptured)
           {
             WinSetCapture(HWND_DESKTOP, hwnd);
-            WinSetPointer(HWND_DESKTOP, NULL);
+            WinSetPointer(HWND_DESKTOP, NULLHANDLE);
             bMouseCaptured = 1;
             {
               SWP swpClient;
@@ -826,7 +826,7 @@ static MRESULT EXPENTRY WndProc( HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
           if (!bMouseCaptured)
           {
             WinSetCapture(HWND_DESKTOP, hwnd);
-            WinSetPointer(HWND_DESKTOP, NULL);
+            WinSetPointer(HWND_DESKTOP, NULLHANDLE);
             bMouseCaptured = 1;
             {
               SWP swpClient;
@@ -871,7 +871,7 @@ static MRESULT EXPENTRY WndProc( HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
           if (!bMouseCaptured)
           {
             WinSetCapture(HWND_DESKTOP, hwnd);
-            WinSetPointer(HWND_DESKTOP, NULL);
+            WinSetPointer(HWND_DESKTOP, NULLHANDLE);
             bMouseCaptured = 1;
             {
               SWP swpClient;
@@ -957,7 +957,7 @@ static MRESULT EXPENTRY WndProc( HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
         }
         else
         {
-          WinSetPointer(HWND_DESKTOP, NULL);
+          WinSetPointer(HWND_DESKTOP, NULLHANDLE);
         }
       }
 #ifdef DEBUG_BUILD
@@ -1257,7 +1257,7 @@ static void PMThreadFunc(void *pParm)
         bMouseCaptured = 0;
       }
       // Destroy our window
-      WinDestroyWindow(pVideo->hidden->hwndFrame); pVideo->hidden->hwndFrame=NULL;
+      WinDestroyWindow(pVideo->hidden->hwndFrame); pVideo->hidden->hwndFrame=NULLHANDLE;
       // Show pointer to make sure it will not be left hidden.
       WinSetPointer(HWND_DESKTOP, WinQuerySysPointer(HWND_DESKTOP, SPTR_ARROW, FALSE));
       WinShowPointer(HWND_DESKTOP, TRUE);
@@ -1475,7 +1475,7 @@ int os2fslib_ShowWMCursor(_THIS, WMcursor *cursor)
   else
   {
     WinSetPointer(HWND_DESKTOP, FALSE);
-    hptrGlobalPointer = NULL;
+    hptrGlobalPointer = NULLHANDLE;
     _this->hidden->iMouseVisible = 0;
   }
 
@@ -1610,7 +1610,7 @@ static void os2fslib_DestroyIcon(HWND hwndFrame)
   if (hptrCurrentIcon)
   {
     WinDestroyPointer(hptrCurrentIcon);
-    hptrCurrentIcon = NULL;
+    hptrCurrentIcon = NULLHANDLE;
 
     WinSendMsg(hwndFrame,
                WM_SETICON,
@@ -2256,7 +2256,7 @@ static void os2fslib_VideoQuit(_THIS)
         printf("[os2fslib_VideoQuit] : Destroying PM window!\n"); fflush(stdout);
 #endif
 
-        WinDestroyWindow(_this->hidden->hwndFrame); _this->hidden->hwndFrame=NULL;
+        WinDestroyWindow(_this->hidden->hwndFrame); _this->hidden->hwndFrame=NULLHANDLE;
       }
     }
 
@@ -2280,7 +2280,7 @@ static void os2fslib_VideoQuit(_THIS)
   if (hptrCurrentIcon)
   {
     WinDestroyPointer(hptrCurrentIcon);
-    hptrCurrentIcon = NULL;
+    hptrCurrentIcon = NULLHANDLE;
   }
 }
 
@@ -2564,7 +2564,7 @@ static SDL_Surface *os2fslib_SetVideoMode(_THIS, SDL_Surface *current,
   }
 
   // Redraw window
-  WinInvalidateRegion(_this->hidden->hwndClient, NULL, TRUE);
+  WinInvalidateRegion(_this->hidden->hwndClient, NULLHANDLE, TRUE);
 
   // Now destroy the message queue, if we've created it!
   if (ERRORIDERROR(hmqerror)==0)

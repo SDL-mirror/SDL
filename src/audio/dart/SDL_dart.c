@@ -48,7 +48,7 @@ LONG APIENTRY DARTEventFunc(ULONG ulStatus,
 			    PMCI_MIX_BUFFER pBuffer,
 			    ULONG ulFlags)
 {
-  if (ulFlags && MIX_WRITE_COMPLETE)
+  if (ulFlags & MIX_WRITE_COMPLETE)
   { // Playback of buffer completed!
 
     // Get pointer to buffer description
