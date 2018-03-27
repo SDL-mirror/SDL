@@ -34,10 +34,11 @@ int main(int argc, char *argv[])
         return -1;
     }
 
-    // create a 800x600 centered window for demonstration.
-    // if SDL_WINDOW_FULLSCREEN flag is passed, the window will be hardware scaled to fit switch screen.
+    // create a 800x600 window for demonstration.
+    // if SDL_WINDOW_FULLSCREEN flag is passed, it will be hardware scaled (stretched) to fit screen,
+    // will always be centered and aspect ratio maintained.
     // maximum window dimension is currently limited to 1280x720
-    window = SDL_CreateWindow(NULL, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 800, 600, 0);
+    window = SDL_CreateWindow(NULL, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 800, 600, SDL_WINDOW_FULLSCREEN);
     if (!window) {
         printf("SDL_CreateWindow: %s\n", SDL_GetError());
         SDL_Quit();
@@ -70,24 +71,24 @@ int main(int argc, char *argv[])
 
             switch (event.type) {
 
-            case SDL_JOYAXISMOTION:
-                printf("Joystick %d axis %d value: %d\n",
-                       event.jaxis.which,
-                       event.jaxis.axis, event.jaxis.value);
-                break;
+                case SDL_JOYAXISMOTION:
+                    printf("Joystick %d axis %d value: %d\n",
+                           event.jaxis.which,
+                           event.jaxis.axis, event.jaxis.value);
+                    break;
 
-            case SDL_JOYBUTTONDOWN:
-                printf("Joystick %d button %d down\n",
-                       event.jbutton.which, event.jbutton.button);
-                // seek for joystick #0 down (B)
-                // https://github.com/devkitPro/SDL/blob/switch-sdl2/src/joystick/switch/SDL_sysjoystick.c#L51
-                if (event.jbutton.which == 0 && event.jbutton.button == 1) {
-                    done = 1;
-                }
-                break;
+                case SDL_JOYBUTTONDOWN:
+                    printf("Joystick %d button %d down\n",
+                           event.jbutton.which, event.jbutton.button);
+                    // seek for joystick #0 down (B)
+                    // https://github.com/devkitPro/SDL/blob/switch-sdl2/src/joystick/switch/SDL_sysjoystick.c#L51
+                    if (event.jbutton.which == 0 && event.jbutton.button == 1) {
+                        done = 1;
+                    }
+                    break;
 
-            default:
-                break;
+                default:
+                    break;
             }
         }
 

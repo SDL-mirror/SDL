@@ -37,6 +37,7 @@
 typedef struct
 {
     SDL_Surface *surface;
+    int x_offset;
 } SWITCH_WindowData;
 
 static int SWITCH_VideoInit(_THIS);
@@ -157,22 +158,30 @@ static int SWITCH_CreateWindowFramebuffer(_THIS, SDL_Window *window, Uint32 *for
         return -1;
     }
 
-    // hold a pointer to our surface
+    // hold a pointer to our stuff
     data = SDL_calloc(1, sizeof(SWITCH_WindowData));
     data->surface = surface;
-    SDL_SetWindowData(window, SWITCH_DATA, data);
 
     // use switch hardware scaling in fullscreen mode
     if (window->flags & SDL_WINDOW_FULLSCREEN) {
-        gfxConfigureResolution(window->w, window->h);
+        float scaling = (float) window->h / (float) SCREEN_HEIGHT;
+        float w = SDL_min(SCREEN_WIDTH, SCREEN_WIDTH * scaling);
+        // calculate x offset, to respect aspect ratio
+        // round down to multiple of 4 for faster fb writes
+        int offset = (int) (w - (window->w)) / 2;
+        data->x_offset = offset & ~3;
+        gfxConfigureResolution((int) w, window->h);
     }
     else {
         gfxConfigureResolution(0, 0);
+        data->x_offset = 0;
     }
 
     *format = SDL_PIXELFORMAT_ABGR8888;
     *pixels = surface->pixels;
     *pitch = surface->pitch;
+
+    SDL_SetWindowData(window, SWITCH_DATA, data);
 
     // inform SDL we're ready to accept inputs
     SDL_SetKeyboardFocus(window);
@@ -189,25 +198,25 @@ static int SWITCH_UpdateWindowFramebuffer(_THIS, SDL_Window *window, const SDL_R
     u32 *src = (u32 *) data->surface->pixels;
     u32 *dst = (u32 *) gfxGetFramebuffer(&fb_w, &fb_h);
 
-    // prevent framebuffer overflow in case of resolution change outside SDL,
-    // which should not happen
-    if(window->x + w > fb_w) {
+    // prevent fb overflow in case of resolution change outside SDL
+    if (window->x + w > fb_w) {
         w = fb_w - window->x;
     }
-    if(window->y + h > fb_h) {
+    if (window->y + h > fb_h) {
         h = fb_h - window->y;
     }
 
     for (y = 0; y < h; y++) {
         for (x = 0; x < w; x += 4) {
-            *((u128 *) &dst[gfxGetFramebufferDisplayOffset((u32) (x + window->x), (u32) (y + window->y))]) =
+            *((u128 *) &dst[gfxGetFramebufferDisplayOffset(
+                (u32) (x + window->x + data->x_offset), (u32) (y + window->y))]) =
                 *((u128 *) &src[y * w + x]);
         }
     }
 
     gfxFlushBuffers();
     gfxSwapBuffers();
-    // TODO: handle SDL_RENDERER_PRESENTVSYNC (SW_RenderDriver not using flags)
+    // TODO: handle SDL_RENDERER_PRESENTVSYNC (SW_RenderDriver not accepting flags)
     gfxWaitForVsync();
 
     return 0;
