@@ -1572,7 +1572,7 @@ Optional Features:
                           QtWayland server support for Wayland video driver
                           [[default=yes]]
   --enable-wayland-shared dynamically load Wayland support [[default=maybe]]
-  --enable-video-mir      use Mir video driver [[default=yes]]
+  --enable-video-mir      use Mir video driver [[default=no]]
   --enable-mir-shared     dynamically load Mir support [[default=maybe]]
   --enable-video-rpi      use Raspberry Pi video driver [[default=yes]]
   --enable-video-x11      use X11 video driver [[default=yes]]
@@ -19300,7 +19300,7 @@ CheckMir()
 if test "${enable_video_mir+set}" = set; then :
   enableval=$enable_video_mir;
 else
-  enable_video_mir=yes
+  enable_video_mir=no
 fi
 
 
@@ -24623,10 +24623,10 @@ $as_echo "#define SDL_TIMER_UNIX 1" >>confdefs.h
         ;;
 	aarch64-none-elf*)
         ARCH=switch
-        EXTRA_CFLAGS="$EXTRA_CFLAGS -isystem${DEVKITPRO}/libnx/include -I${DEVKITPRO}/portlibs/switch/include -D__SWITCH__=1"
+        SDL_CFLAGS="$SDL_CFLAGS -isystem ${DEVKITPRO}/libnx/include -I${DEVKITPRO}/portlibs/switch/include -D__SWITCH__=1 -march=armv8-a -mtune=cortex-a57 -mtp=soft -ftls-model=local-exec"
+        SDL_LIBS="-march=armv8-a  -fPIC -specs=${DEVKITPRO}/libnx/switch.specs -L${DEVKITPRO}/portlibs/switch/lib $SDL_LIBS  -L${DEVKITPRO}/libnx/lib -lnx"
+        EXTRA_CFLAGS="$EXTRA_CFLAGS -g -O2 $SDL_CFLAGS -fPIC"
         CheckDeclarationAfterStatement
-        CheckDiskAudio
-        CheckDummyAudio
 
         # Set up files for the video library
         if test x$enable_video = xyes; then
