@@ -91,24 +91,7 @@ SDL_SYS_JoystickDetect(void)
 const char *
 SDL_SYS_JoystickNameForDeviceIndex(int device_index)
 {
-    if (device_index == 1)
-        return "Switch Controller #1";
-    if (device_index == 2)
-        return "Switch Controller #2";
-    if (device_index == 3)
-        return "Switch Controller #3";
-    if (device_index == 4)
-        return "Switch Controller #4";
-    if (device_index == 5)
-        return "Switch Controller #5";
-    if (device_index == 6)
-        return "Switch Controller #6";
-    if (device_index == 7)
-        return "Switch Controller #7";
-    if (device_index == 8)
-        return "Switch Controller #8";
-
-    return "Switch Controller #0";
+    return "Switch Controller";
 }
 
 /* Function to perform the mapping from device index to the instance id for this index */
