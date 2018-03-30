@@ -38,6 +38,7 @@ typedef struct
 {
     SDL_Surface *surface;
     int x_offset;
+    int y_offset;
 } SWITCH_WindowData;
 
 static int SWITCH_VideoInit(_THIS);
@@ -144,6 +145,26 @@ static void SWITCH_PumpEvents(_THIS)
     hidScanInput();
 }
 
+static void SWITCH_SetResolution(u32 width, u32 height)
+{
+    u32 x, y, w, h, i;
+    u32 *fb = (u32 *) gfxGetFramebuffer(&w, &h);
+
+    // clear "old" fb
+    for (i = 0; i < 2; i++) {
+        for (y = 0; y < h; y++) {
+            for (x = 0; x < w; x++) {
+                fb[gfxGetFramebufferDisplayOffset(x, y)] =
+                    (u32) RGBA8_MAXALPHA(0, 0, 0);
+            }
+        }
+        gfxFlushBuffers();
+        gfxSwapBuffers();
+    }
+
+    gfxConfigureResolution(width, height);
+}
+
 static int SWITCH_CreateWindowFramebuffer(_THIS, SDL_Window *window, Uint32 *format, void **pixels, int *pitch)
 {
     int bpp;
@@ -168,13 +189,18 @@ static int SWITCH_CreateWindowFramebuffer(_THIS, SDL_Window *window, Uint32 *for
         float w = SDL_min(SCREEN_WIDTH, SCREEN_WIDTH * scaling);
         // calculate x offset, to respect aspect ratio
         // round down to multiple of 4 for faster fb writes
-        int offset = (int) (w - (window->w)) / 2;
-        data->x_offset = offset & ~3;
-        gfxConfigureResolution((int) w, window->h);
+        data->x_offset = ((int) (w - window->w) / 2) & ~3;
+        data->y_offset = 0;
+        SWITCH_SetResolution((u32) w, (u32) window->h);
+        printf("gfxConfigureResolution: %i x %i (window: %i x %i, offset: %i x %i)\n",
+               (int) w, window->h, window->w, window->h, data->x_offset, data->y_offset);
     }
     else {
-        gfxConfigureResolution(0, 0);
-        data->x_offset = 0;
+        data->x_offset = ((SCREEN_WIDTH - window->w) / 2) & ~3;
+        data->y_offset = (SCREEN_HEIGHT - window->h) / 2;
+        SWITCH_SetResolution(0, 0);
+        printf("gfxConfigureResolution: %i x %i (window: %i x %i, offset: %i x %i)\n",
+               1280, 720, window->w, window->h, data->x_offset, data->y_offset);
     }
 
     *format = SDL_PIXELFORMAT_ABGR8888;
@@ -199,17 +225,17 @@ static int SWITCH_UpdateWindowFramebuffer(_THIS, SDL_Window *window, const SDL_R
     u32 *dst = (u32 *) gfxGetFramebuffer(&fb_w, &fb_h);
 
     // prevent fb overflow in case of resolution change outside SDL
-    if (window->x + w > fb_w) {
-        w = fb_w - window->x;
+    if (data->x_offset + w > fb_w) {
+        w = fb_w - data->x_offset;
     }
-    if (window->y + h > fb_h) {
-        h = fb_h - window->y;
+    if (data->y_offset + h > fb_h) {
+        h = fb_h - data->y_offset;
     }
 
     for (y = 0; y < h; y++) {
         for (x = 0; x < w; x += 4) {
             *((u128 *) &dst[gfxGetFramebufferDisplayOffset(
-                (u32) (x + window->x + data->x_offset), (u32) (y + window->y))]) =
+                (u32) (x + data->x_offset), (u32) (y + data->y_offset))]) =
                 *((u128 *) &src[y * w + x]);
         }
     }
