@@ -148,18 +148,23 @@ static void SWITCH_PumpEvents(_THIS)
 static void SWITCH_SetResolution(u32 width, u32 height)
 {
     u32 x, y, w, h, i;
-    u32 *fb = (u32 *) gfxGetFramebuffer(&w, &h);
+    u32 *fb;
 
-    // clear "old" fb
+    // clear framebuffers before switching res
     for (i = 0; i < 2; i++) {
+
+        fb = (u32 *) gfxGetFramebuffer(&w, &h);
+
         for (y = 0; y < h; y++) {
             for (x = 0; x < w; x++) {
                 fb[gfxGetFramebufferDisplayOffset(x, y)] =
                     (u32) RGBA8_MAXALPHA(0, 0, 0);
             }
         }
+
         gfxFlushBuffers();
         gfxSwapBuffers();
+        gfxWaitForVsync();
     }
 
     gfxConfigureResolution(width, height);
