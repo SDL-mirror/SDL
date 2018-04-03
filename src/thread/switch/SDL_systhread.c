@@ -31,7 +31,7 @@
 #include "SDL_thread.h"
 #include "../SDL_systhread.h"
 
-#define STACK_SIZE 0x2000
+#define STACK_SIZE 0x5000
 
 static void
 SDL_SYS_RunThread(void *data)
@@ -41,7 +41,7 @@ SDL_SYS_RunThread(void *data)
 
 int SDL_SYS_CreateThread(SDL_Thread *thread, void *args)
 {
-    Result res = threadCreate(&thread->handle, SDL_SYS_RunThread, args, STACK_SIZE, 0x2B, -2);
+    Result res = threadCreate(&thread->handle, SDL_SYS_RunThread, args, STACK_SIZE, 0x1C, -2);
     if (res != 0) {
         return SDL_SetError("threadCreate() failed: 0x%08X", res);
     }

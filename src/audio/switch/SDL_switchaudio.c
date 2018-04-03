@@ -74,7 +74,7 @@ SWITCHAUDIO_OpenDevice(_THIS, void *handle, const char *devname, int iscapture)
         this->hidden->source_buffer[i].next = NULL;
         this->hidden->source_buffer[i].buffer = this->hidden->buffer[i];
         this->hidden->source_buffer[i].buffer_size =
-            (u64) this->spec.size / this->spec.channels / 2;
+            (u64) this->spec.size / this->spec.channels / 4;
         this->hidden->source_buffer[i].data_size = (u64) this->spec.size;
         this->hidden->source_buffer[i].data_offset = (u64) 0;
         audoutAppendAudioOutBuffer(&this->hidden->source_buffer[i]);
