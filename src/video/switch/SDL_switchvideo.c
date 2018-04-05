@@ -27,6 +27,7 @@
 #include "../SDL_sysvideo.h"
 #include "../../events/SDL_keyboard_c.h"
 #include "../../events/SDL_windowevents_c.h"
+#include "SDL_switchtouch.h"
 
 #include <switch.h>
 
@@ -117,11 +118,15 @@ static int SWITCH_VideoInit(_THIS)
     mode.h = 0;
     SDL_AddDisplayMode(&_this->displays[0], &mode);
 
+    // init touch
+    SWITCH_InitTouch();
+
     return 0;
 }
 
 static void SWITCH_VideoQuit(_THIS)
 {
+    SWITCH_QuitTouch();
     gfxExit();
 }
 
@@ -143,6 +148,7 @@ static void SWITCH_PumpEvents(_THIS)
     }
 
     hidScanInput();
+    SWITCH_PollTouch();
 }
 
 static void SWITCH_SetResolution(u32 width, u32 height)
