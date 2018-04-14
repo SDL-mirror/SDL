@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2014 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2018 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -42,6 +42,9 @@ extern int OS4_SetDisplayMode(_THIS, SDL_VideoDisplay * display, SDL_DisplayMode
 extern void OS4_QuitModes(_THIS);
 
 extern void OS4_CloseScreen(_THIS, struct Screen *screen);
+
+extern SDL_bool OS4_LockPubScreen(_THIS);
+extern void OS4_UnlockPubScreen(_THIS);
 
 #endif /* _SDL_os4modes_h */
 

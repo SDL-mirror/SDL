@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2017 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2018 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -32,6 +32,7 @@
 #include <proto/icon.h>
 #include <proto/textclip.h>
 #include <proto/input.h>
+#include <proto/dos.h>
 
 #include "../SDL_sysvideo.h"
 
@@ -39,9 +40,11 @@
 
 typedef struct
 {
+    STRPTR                  appName;
+
     struct Screen          *publicScreen;
 
-    struct MsgPort         *userport;
+    struct MsgPort         *userPort;
     struct MsgPort         *appMsgPort;
 
     struct MsgPort         *inputPort;
@@ -56,6 +59,7 @@ typedef struct
     struct Library          *workbenchbase;
     struct Library          *keymapbase;
     struct Library          *textclipbase;
+    struct Library          *dosbase;
 
     struct GraphicsIFace    *iGraphics;
     struct LayersIFace      *iLayers;
@@ -65,6 +69,7 @@ typedef struct
     struct KeymapIFace      *iKeymap;
     struct TextClipIFace    *iTextClip;
     struct InputIFace       *iInput;
+    struct DOSIFace         *iDos;
 
     BOOL                    vsyncEnabled;
 } SDL_VideoData;
@@ -76,6 +81,7 @@ typedef struct
 #define WorkbenchBase ((SDL_VideoData *) _this->driverdata)->workbenchbase
 #define KeymapBase ((SDL_VideoData *) _this->driverdata)->keymapbase
 #define TextClipBase ((SDL_VideoData *) _this->driverdata)->textclipbase
+#define DOSBase ((SDL_VideoData *) _this->driverdata)->dosbase
 
 #define IGraphics ((SDL_VideoData *) _this->driverdata)->iGraphics
 #define ILayers ((SDL_VideoData *) _this->driverdata)->iLayers
@@ -85,6 +91,7 @@ typedef struct
 #define IKeymap ((SDL_VideoData *) _this->driverdata)->iKeymap
 #define ITextClip ((SDL_VideoData *) _this->driverdata)->iTextClip
 #define IInput ((SDL_VideoData *) _this->driverdata)->iInput
+#define IDOS ((SDL_VideoData *) _this->driverdata)->iDos
 
 extern void * OS4_SaveAllocPooled(_THIS, uint32 size);
 extern void * OS4_SaveAllocVecPooled(_THIS, uint32 size);

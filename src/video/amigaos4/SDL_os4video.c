@@ -81,9 +81,10 @@ OS4_OpenLibraries(_THIS)
     WorkbenchBase = OS4_OpenLibrary("workbench.library", MIN_LIB_VERSION);
     KeymapBase    = OS4_OpenLibrary("keymap.library", MIN_LIB_VERSION);
     TextClipBase  = OS4_OpenLibrary("textclip.library", MIN_LIB_VERSION);
+    DOSBase       = OS4_OpenLibrary("dos.library", MIN_LIB_VERSION);
 
     if (GfxBase && LayersBase && IntuitionBase && IconBase &&
-        WorkbenchBase && KeymapBase && TextClipBase) {
+        WorkbenchBase && KeymapBase && TextClipBase && DOSBase) {
 
         IGraphics  = (struct GraphicsIFace *)  OS4_GetInterface(GfxBase);
         ILayers    = (struct LayersIFace *)    OS4_GetInterface(LayersBase);
@@ -92,9 +93,10 @@ OS4_OpenLibraries(_THIS)
         IWorkbench = (struct WorkbenchIFace *) OS4_GetInterface(WorkbenchBase);
         IKeymap    = (struct KeymapIFace *)    OS4_GetInterface(KeymapBase);
         ITextClip  = (struct TextClipIFace *)  OS4_GetInterface(TextClipBase);
+        IDOS       = (struct DOSIFace *)       OS4_GetInterface(DOSBase);
 
         if (IGraphics && ILayers && IIntuition && IIcon &&
-            IWorkbench && IKeymap && ITextClip) {
+            IWorkbench && IKeymap && ITextClip && IDOS) {
 
             dprintf("All library interfaces OK\n");
 
@@ -115,6 +117,7 @@ OS4_CloseLibraries(_THIS)
 {
     dprintf("Closing libraries\n");
 
+    OS4_DropInterface((void *)&IDOS);
     OS4_DropInterface((void *)&ITextClip);
     OS4_DropInterface((void *)&IKeymap);
     OS4_DropInterface((void *)&IWorkbench);
@@ -123,6 +126,7 @@ OS4_CloseLibraries(_THIS)
     OS4_DropInterface((void *)&ILayers);
     OS4_DropInterface((void *)&IGraphics);
 
+    OS4_CloseLibrary(&DOSBase);
     OS4_CloseLibrary(&TextClipBase);
     OS4_CloseLibrary(&KeymapBase);
     OS4_CloseLibrary(&WorkbenchBase);
@@ -130,6 +134,38 @@ OS4_CloseLibraries(_THIS)
     OS4_CloseLibrary(&IntuitionBase);
     OS4_CloseLibrary(&LayersBase);
     OS4_CloseLibrary(&GfxBase);
+}
+
+static void
+OS4_FindApplicationName(_THIS)
+{
+    SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
+
+    size_t size;
+
+    char pathBuffer[MAX_DOS_PATH];
+    char nameBuffer[MAX_DOS_FILENAME];
+
+    if (IDOS->GetCliProgramName(pathBuffer, MAX_DOS_PATH - 1)) {
+        CONST_STRPTR filePart = IDOS->FilePart(pathBuffer);
+
+        snprintf(nameBuffer, MAX_DOS_FILENAME, "%s", filePart);
+    } else {
+        dprintf("Failed to get CLI program name, checking task node\n");
+
+        struct Task* me = IExec->FindTask(NULL);
+        snprintf(nameBuffer, MAX_DOS_FILENAME, "%s", ((struct Node *)me)->ln_Name);
+    }
+
+    size = SDL_strlen(nameBuffer) + 1;
+
+    data->appName = SDL_malloc(size);
+
+    if (data->appName) {
+        snprintf(data->appName, size, nameBuffer);
+    }
+
+    dprintf("Application name: '%s'\n", data->appName);
 }
 
 static SDL_bool
@@ -143,7 +179,9 @@ OS4_AllocSystemResources(_THIS)
         return SDL_FALSE;
     }
 
-    if (!(data->userport = IExec->AllocSysObjectTags(ASOT_PORT, TAG_DONE))) {
+    OS4_FindApplicationName(_this);
+
+    if (!(data->userPort = IExec->AllocSysObjectTags(ASOT_PORT, TAG_DONE))) {
         SDL_SetError("Couldn't allocate message port");
         return SDL_FALSE;
     }
@@ -226,17 +264,21 @@ OS4_FreeSystemResources(_THIS)
     }
 
     if (data->appMsgPort) {
-        struct AppMessage *amsg;
+        struct Message *msg;
 
-        while ((amsg = (struct AppMessage *)IExec->GetMsg(data->appMsgPort))) {
-            IExec->ReplyMsg((struct Message *) amsg);
+        while ((msg = IExec->GetMsg(data->appMsgPort))) {
+            IExec->ReplyMsg((struct Message *) msg);
         }
 
         IExec->FreeSysObject(ASOT_PORT, data->appMsgPort);
     }
 
-    if (data->userport) {
-        IExec->FreeSysObject(ASOT_PORT, data->userport);
+    if (data->userPort) {
+        IExec->FreeSysObject(ASOT_PORT, data->userPort);
+    }
+
+    if (data->appName) {
+        SDL_free(data->appName);
     }
 
     OS4_CloseLibraries(_this);
@@ -341,48 +383,9 @@ OS4_LoadGlLibrary(_THIS, const char * path)
     return -1;
 }
 
-static SDL_VideoDevice *
-OS4_CreateDevice(int devindex)
+static void
+OS4_SetFunctionPointers(SDL_VideoDevice * device)
 {
-    SDL_VideoDevice *device;
-    SDL_VideoData *data;
-    SDL_version version;
-
-    SDL_GetVersion(&version);
-
-    dprintf("*** SDL %d.%d.%d video initialization starts ***\n",
-        version.major, version.minor, version.patch);
-
-    /* Initialize all variables that we clean on shutdown */
-    device = (SDL_VideoDevice *) SDL_calloc(1, sizeof(SDL_VideoDevice));
-
-    if (device) {
-        data = (SDL_VideoData *) SDL_calloc(1, sizeof(SDL_VideoData));
-    } else {
-        data = NULL;
-    }
-
-    if (!data) {
-        SDL_free(device);
-        SDL_OutOfMemory();
-        return NULL;
-    }
-
-    device->driverdata = data;
-
-    if (!OS4_AllocSystemResources(device)) {
-        SDL_free(device);
-        SDL_free(data);
-
-        /* If we return with NULL, SDL_VideoQuit() can't clean up OS4 stuff. So let's do it now. */
-        OS4_FreeSystemResources(device);
-
-        SDL_Unsupported();
-
-        return NULL;
-    }
-
-    /* Set the function pointers */
     device->VideoInit = OS4_VideoInit;
     device->VideoQuit = OS4_VideoQuit;
 
@@ -399,9 +402,14 @@ OS4_CreateDevice(int devindex)
     device->ShowWindow = OS4_ShowWindow;
     device->HideWindow = OS4_HideWindow;
     device->RaiseWindow = OS4_RaiseWindow;
-    //device->MaximizeWindow = OS4_MaximizeWindow;
-    //device->MinimizeWindow = OS4_MinimizeWindow;
-    //device->RestoreWindow = OS4_RestoreWindow;
+
+    device->SetWindowMinimumSize = OS4_SetWindowMinMaxSize;
+    device->SetWindowMaximumSize = OS4_SetWindowMinMaxSize;
+
+    device->MaximizeWindow = OS4_MaximizeWindow;
+    device->MinimizeWindow = OS4_MinimizeWindow;
+    device->RestoreWindow = OS4_RestoreWindow;
+
     //device->SetWindowBordered = OS4_SetWindowBordered; // Not supported by SetWindowAttrs()?
     device->SetWindowFullscreen = OS4_SetWindowFullscreen;
     //device->SetWindowGammaRamp = OS4_SetWindowGammaRamp;
@@ -436,6 +444,50 @@ OS4_CreateDevice(int devindex)
     //device->ShowMessageBox = OS4_ShowMessageBox; Can be called without video initialization
 
     device->free = OS4_DeleteDevice;
+}
+
+static SDL_VideoDevice *
+OS4_CreateDevice(int devindex)
+{
+    SDL_VideoDevice *device;
+    SDL_VideoData *data;
+    SDL_version version;
+
+    SDL_GetVersion(&version);
+
+    dprintf("*** SDL %d.%d.%d video initialization starts ***\n",
+        version.major, version.minor, version.patch);
+
+    /* Initialize all variables that we clean on shutdown */
+    device = (SDL_VideoDevice *) SDL_calloc(1, sizeof(SDL_VideoDevice));
+
+    if (device) {
+        data = (SDL_VideoData *) SDL_calloc(1, sizeof(SDL_VideoData));
+    } else {
+        data = NULL;
+    }
+
+    if (!data) {
+        SDL_free(device);
+        SDL_OutOfMemory();
+        return NULL;
+    }
+
+    device->driverdata = data;
+
+    if (!OS4_AllocSystemResources(device)) {
+        /* If we return with NULL, SDL_VideoQuit() can't clean up OS4 stuff. So let's do it now. */
+        OS4_FreeSystemResources(device);
+
+        SDL_free(device);
+        SDL_free(data);
+
+        SDL_Unsupported();
+
+        return NULL;
+    }
+
+    OS4_SetFunctionPointers(device);
 
     return device;
 }
@@ -451,7 +503,7 @@ OS4_VideoInit(_THIS)
     dprintf("Called\n");
 
     if (OS4_InitModes(_this) < 0) {
-        return -1;
+        return SDL_SetError("Failed to initialize modes");
     }
 
     OS4_InitKeyboard(_this);
@@ -514,7 +566,7 @@ OS4_GetSharedMessagePort()
     if (vd) {
         SDL_VideoData *data = (SDL_VideoData *) vd->driverdata;
         if (data) {
-            return data->userport;
+            return data->userPort;
         }
     }
 

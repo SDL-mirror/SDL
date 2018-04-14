@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2017 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2018 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -94,6 +94,35 @@ OS4_GetDisplayMode(_THIS, ULONG id, SDL_DisplayMode * mode)
     return SDL_TRUE;
 }
 
+SDL_bool
+OS4_LockPubScreen(_THIS)
+{
+    SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
+
+    data->publicScreen = IIntuition->LockPubScreen(NULL);
+
+    if (data->publicScreen) {
+        dprintf("Public screen %p locked\n", data->publicScreen);
+        return SDL_TRUE;
+    } else {
+        dprintf("Failed to lock Workbench screen\n");
+        return SDL_FALSE;
+    }
+}
+
+void
+OS4_UnlockPubScreen(_THIS)
+{
+    SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
+
+    if (data->publicScreen) {
+        dprintf("Called\n");
+
+        IIntuition->UnlockPubScreen(NULL, data->publicScreen);
+        data->publicScreen = NULL;
+    }
+}
+
 int
 OS4_InitModes(_THIS)
 {
@@ -110,8 +139,7 @@ OS4_InitModes(_THIS)
         return SDL_OutOfMemory();
     }
 
-    data->publicScreen = IIntuition->LockPubScreen(NULL);
-    if (!data->publicScreen) {
+    if (!OS4_LockPubScreen(_this)) {
         SDL_free(displaydata);
         return SDL_SetError("No displays available");
     }
@@ -265,11 +293,9 @@ OS4_SetDisplayMode(_THIS, SDL_VideoDisplay * display, SDL_DisplayMode * mode)
 void
 OS4_QuitModes(_THIS)
 {
-    SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
-
     dprintf("Called\n");
 
-    IIntuition->UnlockPubScreen(NULL, data->publicScreen);
+    OS4_UnlockPubScreen(_this);
 }
 
 #endif /* SDL_VIDEO_DRIVER_AMIGAOS4 */

@@ -186,11 +186,12 @@ OS4_GL_CreateContext(_THIS, SDL_Window * window)
 
     if (IMiniGL) {
 
-        int width = window->w;
-        int height = window->h;
+        int width, height;
         uint32 depth;
 
         SDL_WindowData * data = window->driverdata;
+
+        OS4_GetWindowActiveSize(window, &width, &height);
 
         if (data->glContext) {
             struct GLContextIFace *IGL = (struct GLContextIFace *)data->glContext;
@@ -286,13 +287,18 @@ OS4_GL_GetDrawableSize(_THIS, SDL_Window * window, int * w, int * h)
     int height = 0;
     int counter = 0;
 
+    int activeWidth, activeHeight;
+
+    OS4_GetWindowActiveSize(window, &activeWidth, &activeHeight);
+
     while (counter++ < 100) {
         OS4_GetWindowSize(_this, data->syswin, &width, &height);
 
-        if (width != window->w || height != window->h) {
+        if (width != activeWidth || height != activeHeight) {
             dprintf("Waiting for Intuition %d\n", counter);
-            dprintf("w %d (ww %d), h %d (wh %d)\n", width, window->w, height, window->h);
-            usleep(1000);
+            dprintf("w %d (active width %d), h %d (active height %d)\n",
+                width, activeWidth, height, activeHeight);
+            usleep(1000); // TODO FIXME: this is slow (opens timer.device) currently
         } else {
             break;
         }
@@ -459,19 +465,22 @@ OS4_GL_ResizeContext(_THIS, SDL_Window * window)
         SDL_WindowData *data = window->driverdata;
 
         if (data) {
+            int width, height;
 
             uint32 depth = IGraphics->GetBitMapAttr(data->syswin->RPort->BitMap, BMA_BITSPERPIXEL);
 
-            if (OS4_GL_AllocateBuffers(_this, window->w, window->h, depth, data)) {
+            OS4_GetWindowActiveSize(window, &width, &height);
 
-                dprintf("Resizing MiniGL context to %d*%d\n", window->w, window->h);
+            if (OS4_GL_AllocateBuffers(_this, width, height, depth, data)) {
+
+                dprintf("Resizing MiniGL context to %d*%d\n", width, height);
 
                 ((struct GLContextIFace *)data->glContext)->MGLUpdateContextTags(
                                 MGLCC_FrontBuffer, data->glFrontBuffer,
                                 MGLCC_BackBuffer, data->glBackBuffer,
                                 TAG_DONE);
 
-                ((struct GLContextIFace *)data->glContext)->GLViewport(0, 0, window->w, window->h);
+                ((struct GLContextIFace *)data->glContext)->GLViewport(0, 0, width, height);
 
                 return SDL_TRUE;
 

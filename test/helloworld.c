@@ -136,6 +136,31 @@ static void testPath(void)
     SDL_free(bp);
 }
 
+static void testWindow()
+{
+    SDL_Window * w = SDL_CreateWindow("blah", 100, 100, 100, 100, SDL_WINDOW_RESIZABLE);
+
+    if (w) {
+        SDL_SetWindowMinimumSize(w, 50, 50);
+        SDL_SetWindowMaximumSize(w, 200, 200);
+
+        SDL_MinimizeWindow(w);
+        SDL_Delay(1000);
+
+        SDL_RestoreWindow(w);
+        SDL_Delay(1000);
+
+        SDL_MinimizeWindow(w);
+        SDL_Delay(1000);
+
+        SDL_MaximizeWindow(w);
+
+        eventLoop();
+
+        SDL_DestroyWindow(w);
+    }
+}
+
 static void testManyWindows()
 {
     SDL_Window * w = SDL_CreateWindow("blah", 100, 100, 100, 100, 0);
@@ -801,13 +826,14 @@ int main(void)
 
     if (SDL_Init(SDL_INIT_VIDEO|SDL_INIT_TIMER) == 0) {
         //testPath();
+        testWindow();
         //testManyWindows();
         //testFullscreen();
         //testFullscreenOpenGL();
         //testDeleteContext();
         //testOpenGL();
         //testOpenGLES2();
-        testOpenGLSwitching();
+        //testOpenGLSwitching();
         //testOpenGLVersion();
         //testRenderer();
         //testDraw();
