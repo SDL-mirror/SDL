@@ -10,8 +10,10 @@ LIBS	= @LIBS@
 TARGETS = \
 	checkkeys$(EXE) \
 	controllermap$(EXE) \
+	helloworld$(EXE) \
 	loopwave$(EXE) \
 	loopwavequeue$(EXE) \
+	sdl2benchmark$(EXE) \
 	testatomic$(EXE) \
 	testaudiocapture$(EXE) \
 	testaudiohotplug$(EXE) \
@@ -77,10 +79,16 @@ Makefile: $(srcdir)/Makefile.in
 checkkeys$(EXE): $(srcdir)/checkkeys.c
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
 
+helloworld$(EXE): $(srcdir)/helloworld.c
+	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
+
 loopwave$(EXE): $(srcdir)/loopwave.c
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
 
 loopwavequeue$(EXE): $(srcdir)/loopwavequeue.c
+	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
+
+sdl2benchmark$(EXE): $(srcdir)/sdl2benchmark.c
 	$(CC) -o $@ $^ $(CFLAGS) $(LIBS)
 
 testresample$(EXE): $(srcdir)/testresample.c
