@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2017 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2018 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -521,58 +521,81 @@ OS4_HandleTicks(_THIS, struct MyIntuiMessage * imsg)
 }
 
 static void
-OS4_HandleAppWindow(_THIS, struct AppMessage * amsg)
+OS4_HandleGadget(_THIS, struct MyIntuiMessage * msg)
 {
-    SDL_Window *window = (SDL_Window *)amsg->am_UserData;
+    dprintf("Gadget event %p\n", msg->Gadget);
+
+    if (msg->Gadget->GadgetID == GID_ICONIFY) {
+        SDL_Window *sdlwin = OS4_FindWindow(_this, msg->IDCMPWindow);
+
+        if (sdlwin) {
+            dprintf("Iconify button pressed\n");
+            OS4_IconifyWindow(_this, sdlwin);
+        }
+    }
+}
+
+static void
+OS4_HandleAppWindow(_THIS, struct AppMessage * msg)
+{
+    SDL_Window *window = (SDL_Window *)msg->am_UserData;
 
     int i;
-    for (i = 0; i < amsg->am_NumArgs; i++) {
-        dprintf("%s\n", amsg->am_ArgList[i].wa_Name);
-        SDL_SendDropFile(window, amsg->am_ArgList[i].wa_Name);
+    for (i = 0; i < msg->am_NumArgs; i++) {
+        dprintf("%s\n", msg->am_ArgList[i].wa_Name);
+        SDL_SendDropFile(window, msg->am_ArgList[i].wa_Name);
     }
 
     SDL_SendDropComplete(window);
 }
 
 static void
-OS4_CopyRelevantFields(struct IntuiMessage * src, struct MyIntuiMessage * dst)
+OS4_HandleAppIcon(_THIS, struct AppMessage * msg)
+{
+    SDL_Window *window = (SDL_Window *)msg->am_UserData;
+    dprintf("Window ptr = %p\n", window);
+
+    OS4_UniconifyWindow(_this, window);
+}
+
+static void
+OS4_CopyIdcmpMessage(struct IntuiMessage * src, struct MyIntuiMessage * dst)
 {
     // Copy relevant fields. This makes it safer if the window goes away during
-    //  this loop (re-open due to keystroke)
+    // this loop (re-open due to keystroke)
     dst->Class           = src->Class;
     dst->Code            = src->Code;
     dst->Qualifier       = src->Qualifier;
 
     dst->Gadget          = (struct Gadget *) src->IAddress;
 
-    dst->IDCMPWindow     = src->IDCMPWindow;
-
     dst->RelativeMouseX  = src->MouseX;
     dst->RelativeMouseY  = src->MouseY;
 
-    dst->WindowMouseX  = src->IDCMPWindow->MouseX - src->IDCMPWindow->BorderLeft;
-    dst->WindowMouseY  = src->IDCMPWindow->MouseY - src->IDCMPWindow->BorderTop;
+    dst->IDCMPWindow     = src->IDCMPWindow;
 
-    dst->ScreenMouseX  = src->IDCMPWindow->WScreen->MouseX;
-    dst->ScreenMouseY  = src->IDCMPWindow->WScreen->MouseY;
+    if (src->IDCMPWindow) {
+        dst->WindowMouseX = src->IDCMPWindow->MouseX - src->IDCMPWindow->BorderLeft;
+        dst->WindowMouseY = src->IDCMPWindow->MouseY - src->IDCMPWindow->BorderTop;
 
-    dst->Width           = src->IDCMPWindow->Width  - src->IDCMPWindow->BorderLeft - src->IDCMPWindow->BorderRight;
-    dst->Height          = src->IDCMPWindow->Height - src->IDCMPWindow->BorderTop  - src->IDCMPWindow->BorderBottom;
+        dst->ScreenMouseX = src->IDCMPWindow->WScreen->MouseX;
+        dst->ScreenMouseY = src->IDCMPWindow->WScreen->MouseY;
+
+        dst->Width        = src->IDCMPWindow->Width  - src->IDCMPWindow->BorderLeft - src->IDCMPWindow->BorderRight;
+        dst->Height       = src->IDCMPWindow->Height - src->IDCMPWindow->BorderTop  - src->IDCMPWindow->BorderBottom;
+    }
 }
 
 // TODO: we need to handle Intuition's window move (repositioning) event and update sdlwin's x&y
 static void
-OS4_EventHandler(_THIS)
+OS4_HandleIdcmpMessages(_THIS, struct MsgPort * msgPort)
 {
-    SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
-
-    struct AppMessage *amsg;
     struct IntuiMessage *imsg;
     struct MyIntuiMessage msg;
 
-    while ((imsg = (struct IntuiMessage *)IExec->GetMsg(data->userport))) {
+    while ((imsg = (struct IntuiMessage *)IExec->GetMsg(msgPort))) {
 
-        OS4_CopyRelevantFields(imsg, &msg);
+        OS4_CopyIdcmpMessage(imsg, &msg);
 
         IExec->ReplyMsg((struct Message *) imsg);
 
@@ -618,27 +641,46 @@ OS4_EventHandler(_THIS)
                 OS4_HandleTicks(_this, &msg);
                 break;
 
+            case IDCMP_GADGETUP:
+                OS4_HandleGadget(_this, &msg);
+                break;
+
             default:
                 dprintf("Unknown event received class %d, code %d\n", msg.Class, msg.Code);
                 break;
         }
     }
+}
 
-    while ((amsg = (struct AppMessage *)IExec->GetMsg(data->appMsgPort))) {
-        if (amsg->am_Type == AMTYPE_APPWINDOW) {
-            OS4_HandleAppWindow(_this, amsg);
-        } else {
-            dprintf("Unknown AppMsg %d %p\n", amsg->am_Type, (APTR)amsg->am_UserData);
+static void
+OS4_HandleAppMessages(_THIS, struct MsgPort * msgPort)
+{
+    struct AppMessage *msg;
+
+    while ((msg = (struct AppMessage *)IExec->GetMsg(msgPort))) {
+        switch (msg->am_Type) {
+            case AMTYPE_APPWINDOW:
+                OS4_HandleAppWindow(_this, msg);
+                break;
+            case AMTYPE_APPICON:
+                OS4_HandleAppIcon(_this, msg);
+                break;
+            default:
+                dprintf("Unknown AppMsg %d %p\n", msg->am_Type, (APTR)msg->am_UserData);
+                break;
         }
 
-        IExec->ReplyMsg((struct Message *) amsg);
+        IExec->ReplyMsg((struct Message *) msg);
     }
 }
 
 void
 OS4_PumpEvents(_THIS)
 {
-    OS4_EventHandler(_this);
+    SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
+
+    OS4_HandleIdcmpMessages(_this, data->userPort);
+    OS4_HandleAppMessages(_this, data->appMsgPort);
 }
 
 #endif /* SDL_VIDEO_DRIVER_AMIGAOS4 */

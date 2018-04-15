@@ -113,8 +113,9 @@ OS4_GLES_CreateContext(_THIS, SDL_Window * window)
 
     if (IOGLES2) {
 
-        int width = window->w;
-        int height = window->h;
+        int width, height;
+
+        OS4_GetWindowActiveSize(window, &width, &height);
 
 #if MANAGE_BITMAP
         uint32 depth;
@@ -330,15 +331,19 @@ OS4_GLES_ResizeContext(_THIS, SDL_Window * window)
         SDL_WindowData *data = window->driverdata;
 
         if (data) {
+            int width, height;
+
             uint32 depth = IGraphics->GetBitMapAttr(data->syswin->RPort->BitMap, BMA_BITSPERPIXEL);
 
-            if (OS4_GL_AllocateBuffers(_this, window->w, window->h, depth, data)) {
+            OS4_GetWindowActiveSize(window, &width, &height);
 
-                dprintf("Resizing context to %d*%d\n", window->w, window->h);
+            if (OS4_GL_AllocateBuffers(_this, width, height, depth, data)) {
+
+                dprintf("Resizing context to %d*%d\n", width, height);
 
                 aglSetBitmap(data->glBackBuffer);
 
-                glViewport(0, 0, window->w, window->h);
+                glViewport(0, 0, width, height);
                 return SDL_TRUE;
 
             } else {
