@@ -36,7 +36,11 @@
 static int
 SWITCHAUDIO_OpenDevice(_THIS, void *handle, const char *devname, int iscapture)
 {
-    Result res = audoutInitialize();
+    Result res;
+    SDL_bool supported_format = SDL_FALSE;
+    SDL_AudioFormat test_format;
+
+    res = audoutInitialize();
     if (res != 0) {
         return SDL_SetError("audoutInitialize failed (0x%x)", res);
     }
@@ -53,15 +57,19 @@ SWITCHAUDIO_OpenDevice(_THIS, void *handle, const char *devname, int iscapture)
     }
     SDL_zerop(this->hidden);
 
-    switch (this->spec.format & 0xff) {
-        case 8:
-        case 16:
-            this->spec.format = AUDIO_S16LSB;
-            break;
-        default:
-            return SDL_SetError("Unsupported audio format");
+    test_format = SDL_FirstAudioFormat(this->spec.format);
+    while ((!supported_format) && (test_format)) {
+        if (test_format == AUDIO_S16LSB) {
+            supported_format = SDL_TRUE;
+        } else {
+            test_format = SDL_NextAudioFormat();
+        }
+    }
+    if (!supported_format) {
+        return SDL_SetError("Unsupported audio format");
     }
 
+    this->spec.format = test_format;
     this->spec.freq = 48000;
     this->spec.channels = 2;
 
