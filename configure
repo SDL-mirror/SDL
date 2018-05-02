@@ -24647,6 +24647,72 @@ $as_echo "#define SDL_TIMER_UNIX 1" >>confdefs.h
             have_timers=yes
         fi
         ;;
+	aarch64-none-elf*)
+        ARCH=switch
+        SDL_CFLAGS="$SDL_CFLAGS -isystem ${DEVKITPRO}/libnx/include -I${DEVKITPRO}/portlibs/switch/include -D__SWITCH__=1 -march=armv8-a -mtune=cortex-a57 -mtp=soft -ftls-model=local-exec"
+        SDL_LIBS="-march=armv8-a  -fPIC -specs=${DEVKITPRO}/libnx/switch.specs -L${DEVKITPRO}/portlibs/switch/lib $SDL_LIBS  -L${DEVKITPRO}/libnx/lib -lnx"
+        EXTRA_CFLAGS="$EXTRA_CFLAGS -g -O2 $SDL_CFLAGS -fPIC"
+        CheckDeclarationAfterStatement
+
+        # Set up files for the video library
+        if test x$enable_video = xyes; then
+
+$as_echo "#define SDL_VIDEO_DRIVER_SWITCH 1" >>confdefs.h
+
+           SOURCES="$SOURCES $srcdir/src/video/switch/*.c"
+           SUMMARY_video="${SUMMARY_video} switch"
+           have_video=yes
+        fi
+        # Set up files for the audio library
+        if test x$enable_audio = xyes; then
+
+$as_echo "#define SDL_AUDIO_DRIVER_SWITCH 1" >>confdefs.h
+
+           SOURCES="$SOURCES $srcdir/src/audio/switch/*.c"
+           SUMMARY_audio="${SUMMARY_audio} switch"
+           have_audio=yes
+        fi
+        # Set up files for the joystick library
+        if test x$enable_joystick = xyes; then
+
+$as_echo "#define SDL_JOYSTICK_SWITCH 1" >>confdefs.h
+
+            SOURCES="$SOURCES $srcdir/src/joystick/switch/*.c"
+            have_joystick=yes
+        fi
+        # Set up files for the timer library
+        if test x$enable_timers = xyes; then
+
+$as_echo "#define SDL_TIMER_SWITCH 1" >>confdefs.h
+
+            SOURCES="$SOURCES $srcdir/src/timer/switch/*.c"
+            have_timers=yes
+        fi
+        # Set up files for the system power library
+        if test x$enable_power = xyes; then
+
+$as_echo "#define SDL_POWER_SWITCH 1" >>confdefs.h
+
+            SOURCES="$SOURCES $srcdir/src/power/switch/*.c"
+            have_power=yes
+        fi
+        # Set up files for the system filesystem library
+        if test x$enable_filesystem = xyes; then
+
+$as_echo "#define SDL_FILESYSTEM_SWITCH 1" >>confdefs.h
+
+            SOURCES="$SOURCES $srcdir/src/filesystem/switch/*.c"
+            have_filesystem=yes
+        fi
+        # Set up files for the thread library
+        if test x$enable_threads = xyes; then
+
+$as_echo "#define SDL_THREAD_SWITCH 1" >>confdefs.h
+
+            SOURCES="$SOURCES $srcdir/src/thread/switch/*.c"
+            have_threads=yes
+        fi
+        ;;
     *)
         as_fn_error $? "
 *** Unsupported host:  Please add to configure.in
