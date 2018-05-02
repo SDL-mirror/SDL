@@ -43,7 +43,7 @@ typedef struct JoystickState
 static JoystickState pad[JOYSTICK_COUNT];
 
 static HidControllerID pad_id[JOYSTICK_COUNT] = {
-    CONTROLLER_PLAYER_1, CONTROLLER_PLAYER_2,
+    CONTROLLER_HANDHELD, CONTROLLER_PLAYER_2,
     CONTROLLER_PLAYER_3, CONTROLLER_PLAYER_4,
     CONTROLLER_PLAYER_5, CONTROLLER_PLAYER_6,
     CONTROLLER_PLAYER_7, CONTROLLER_PLAYER_8
@@ -68,7 +68,6 @@ SDL_SYS_JoystickInit(void)
 {
     for (int i = 0; i < JOYSTICK_COUNT; i++) {
         pad[i].id = pad_id[i];
-        hidSetNpadJoyAssignmentModeSingleByDefault(pad[i].id);
     }
 
     return JOYSTICK_COUNT;
@@ -83,8 +82,6 @@ SDL_SYS_NumJoysticks(void)
 void
 SDL_SYS_JoystickDetect(void)
 {
-    pad[0].id = hidGetHandheldMode() ?
-                CONTROLLER_HANDHELD : CONTROLLER_PLAYER_1;
 }
 
 /* Function to get the device-dependent name of a joystick */
@@ -206,6 +203,6 @@ SDL_JoystickGUID SDL_SYS_JoystickGetGUID(SDL_Joystick *joystick)
     return guid;
 }
 
-#endif /* SDL_JOYSTICK_DUMMY || SDL_JOYSTICK_DISABLED */
+#endif /* SDL_JOYSTICK_SWITCH */
 
 /* vi: set ts=4 sw=4 expandtab: */
