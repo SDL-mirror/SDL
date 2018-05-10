@@ -213,8 +213,8 @@ endif()
 set(SDL_LIBS "-lSDL2")
 set(SDL_CFLAGS "")
 
-# Emscripten toolchain has a nonempty default value for this, and the checks 
-# in this file need to change that, so remember the original value, and 
+# Emscripten toolchain has a nonempty default value for this, and the checks
+# in this file need to change that, so remember the original value, and
 # restore back to that afterwards. For check_function_exists() to work in
 # Emscripten, this value must be at its default value.
 set(ORIG_CMAKE_REQUIRED_FLAGS ${CMAKE_REQUIRED_FLAGS})
@@ -247,7 +247,7 @@ endif()
 set(OPT_DEF_ASM TRUE)
 if(EMSCRIPTEN)
   # Set up default values for the currently supported set of subsystems:
-  # Emscripten/Javascript does not have assembly support, a dynamic library 
+  # Emscripten/Javascript does not have assembly support, a dynamic library
   # loading architecture, low-level CPU inspection or multithreading.
   set(OPT_DEF_ASM FALSE)
   set(SDL_SHARED_ENABLED_BY_DEFAULT OFF)
@@ -1012,7 +1012,7 @@ elseif(UNIX AND NOT APPLE AND NOT ANDROID)
         #include <linux/kd.h>
         #include <linux/keyboard.h>
 
-        int main(int argc, char **argv) 
+        int main(int argc, char **argv)
         {
             struct kbentry kbe;
             kbe.kb_table = KG_CTRL;
@@ -1762,7 +1762,7 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${EXTRA_CFLAGS}")
 
 # Always build SDLmain
 add_library(SDL2main STATIC ${SDLMAIN_SOURCES})
-target_include_directories(SDL2main PUBLIC $<INSTALL_INTERFACE:include>)
+target_include_directories(SDL2main PUBLIC $<INSTALL_INTERFACE:include/SDL2>)
 set(_INSTALL_LIBS "SDL2main")
 if (NOT ANDROID)
   set_target_properties(SDL2main PROPERTIES DEBUG_POSTFIX ${SDL_CMAKE_DEBUG_POSTFIX})
@@ -1791,7 +1791,7 @@ if(SDL_SHARED)
   endif()
   set(_INSTALL_LIBS "SDL2" ${_INSTALL_LIBS})
   target_link_libraries(SDL2 ${EXTRA_LIBS} ${EXTRA_LDFLAGS})
-  target_include_directories(SDL2 PUBLIC $<INSTALL_INTERFACE:include>)
+  target_include_directories(SDL2 PUBLIC $<INSTALL_INTERFACE:include/SDL2>)
   if (NOT ANDROID)
     set_target_properties(SDL2 PROPERTIES DEBUG_POSTFIX ${SDL_CMAKE_DEBUG_POSTFIX})
   endif()
@@ -1817,7 +1817,7 @@ if(SDL_STATIC)
   # libraries - do we need to consider this?
   set(_INSTALL_LIBS "SDL2-static" ${_INSTALL_LIBS})
   target_link_libraries(SDL2-static ${EXTRA_LIBS} ${EXTRA_LDFLAGS})
-  target_include_directories(SDL2-static PUBLIC $<INSTALL_INTERFACE:include>)
+  target_include_directories(SDL2-static PUBLIC $<INSTALL_INTERFACE:include/SDL2>)
   if (NOT ANDROID)
     set_target_properties(SDL2-static PROPERTIES DEBUG_POSTFIX ${SDL_CMAKE_DEBUG_POSTFIX})
   endif()
@@ -1828,7 +1828,7 @@ endif()
 if(SDL_TEST)
   file(GLOB TEST_SOURCES ${SDL2_SOURCE_DIR}/src/test/*.c)
   add_library(SDL2_test STATIC ${TEST_SOURCES})
-  
+
   add_subdirectory(test)
 endif()
 
@@ -1875,6 +1875,13 @@ endforeach()
 list(APPEND INCLUDE_FILES ${BIN_INCLUDE_FILES})
 install(FILES ${INCLUDE_FILES} DESTINATION include/SDL2)
 
+string(TOUPPER "${CMAKE_BUILD_TYPE}" UPPER_BUILD_TYPE)
+if (UPPER_BUILD_TYPE MATCHES DEBUG)
+  set(SOPOSTFIX "${SDL_CMAKE_DEBUG_POSTFIX}")
+else()
+  set(SOPOSTFIX "")
+endif()
+
 if(NOT (WINDOWS OR CYGWIN))
   if(SDL_SHARED)
     if (APPLE)
@@ -1885,7 +1892,8 @@ if(NOT (WINDOWS OR CYGWIN))
     if(NOT ANDROID)
         install(CODE "
           execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink
-          \"libSDL2-2.0.${SOEXT}\" \"libSDL2.${SOEXT}\")")
+            \"libSDL2-2.0${SOPOSTFIX}.${SOEXT}\" \"libSDL2.${SOEXT}\")"
+            WORKING_DIR "${SDL2_BINARY_DIR}")
         install(FILES ${SDL2_BINARY_DIR}/libSDL2.${SOEXT} DESTINATION "lib${LIB_SUFFIX}")
     endif()
   endif()
