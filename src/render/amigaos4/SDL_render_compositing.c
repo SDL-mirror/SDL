@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2017 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2018 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -678,7 +678,11 @@ OS4_RenderFillRects(SDL_Renderer * renderer, const SDL_FRect * rects, int count)
                 TAG_END);
 
             if (ret_code) {
-                dprintf("CompositeTags: %d\n", ret_code);
+                static Uint32 counter;
+
+                if ((counter++ % 100) == 0) {
+                    dprintf("CompositeTags: %d (fails: %u)\n", ret_code, counter);
+                }
             }
         }
 
@@ -746,8 +750,13 @@ OS4_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
         TAG_END);
 
     if (ret_code) {
-        dprintf("CompositeTags: %d\n", ret_code);
-        return -1;
+        static Uint32 counter;
+
+        if ((counter++ % 100) == 0) {
+            dprintf("CompositeTags: %d (fails: %u)\n", ret_code, counter);
+        }
+
+        return SDL_SetError("CompositeTags failed");
     }
 
     //dprintf("Took %d\n", SDL_GetTicks() - s);
@@ -810,8 +819,13 @@ OS4_RenderCopyEx(SDL_Renderer * renderer, SDL_Texture * texture,
         TAG_END);
 
     if (ret_code) {
-        dprintf("CompositeTags: %d\n", ret_code);
-        return -1;
+        static Uint32 counter;
+
+        if ((counter++ % 100) == 0) {
+            dprintf("CompositeTags: %d (fails: %u)\n", ret_code, counter);
+        }
+
+        return SDL_SetError("CompositeTags failed");
     }
 
     return 0;

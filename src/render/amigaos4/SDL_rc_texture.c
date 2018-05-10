@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2016 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2018 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -67,8 +67,7 @@ OS4_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
     if (!texturedata)
     {
         dprintf("Failed to allocate driver data\n");
-        SDL_OutOfMemory();
-        return -1;
+        return SDL_OutOfMemory();
     }
 
     texturedata->bitmap = OS4_AllocBitMap(renderer, texture->w, texture->h, bpp);
@@ -76,7 +75,7 @@ OS4_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
     if (!texturedata->bitmap) {
         dprintf("Failed to allocate bitmap\n");
         SDL_free(texturedata);
-        return -1;
+        return SDL_SetError("Failed to allocate bitmap");
     }
 
     /* Check texture parameters just for debug */
@@ -174,8 +173,7 @@ OS4_SetTextureColorMod(SDL_Renderer * renderer, SDL_Texture * texture)
 
             if (!(texturedata->rambuf = SDL_malloc(texture->w * texture->h * sizeof(Uint32)))) {
                 dprintf("Failed to allocate ram buffer\n");
-                SDL_OutOfMemory();
-                return -1;
+                return SDL_OutOfMemory();
             }
 
             /* Copy texture from VRAM to RAM buffer for faster color modulation. We also
@@ -202,13 +200,12 @@ OS4_SetTextureColorMod(SDL_Renderer * renderer, SDL_Texture * texture)
         if (!texturedata->finalbitmap) {
             if (!(texturedata->finalbitmap = OS4_AllocBitMap(renderer, texture->w, texture->h, 32))) {
                 dprintf("Failed to allocate final bitmap\n");
-                SDL_OutOfMemory();
-                return -1;
+                return SDL_OutOfMemory();
             }
         }
 
         if (!OS4_ModulateRGB(renderer, texture, texturedata->rambuf, texture->w * sizeof(Uint32))) {
-            return -1;
+            return SDL_SetError("RGB modulation failed");
         }
 
         /* Remember last values so that we can avoid re-modulation with same parameters */
@@ -256,13 +253,13 @@ OS4_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
 
     if (ret != -1) {
         dprintf("BltBitMapTags(): %d\n", ret);
-        return -1;
+        return SDL_SetError("BltBitMapTags failed");
     }
 
     if (OS4_IsColorModEnabled(texture)) {
         // This can be really slow, if done per frame
         if (!OS4_ModulateRGB(renderer, texture, (Uint8 *)pixels, pitch)) {
-            return -1;
+            return SDL_SetError("RGB modulation failed");
         }
     }
 
@@ -297,7 +294,7 @@ OS4_LockTexture(SDL_Renderer * renderer, SDL_Texture * texture,
         return 0;
     } else {
         dprintf("Lock failed\n");
-        return -1;
+        return SDL_SetError("Lock failed");
     }
 }
 

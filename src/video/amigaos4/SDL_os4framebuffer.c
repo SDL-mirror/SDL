@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2017 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2018 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -29,25 +29,26 @@
 #define DEBUG
 #include "../../main/amigaos4/SDL_os4debug.h"
 
-static PIX_FMT
-OS4_DepthToPixf(int depth)
-{
-    switch (depth) {
-        case 32: return PIXF_A8R8G8B8;
-        case 16: return PIXF_R5G6B5;
-        case 8: return PIXF_CLUT;
-        default: return PIXF_NONE;
-    }
-}
-
 static Uint32
 OS4_PixfToSdlPixelFormat(PIX_FMT from)
 {
     switch (from) {
+        // 32-bit
         case PIXF_A8R8G8B8: return SDL_PIXELFORMAT_ARGB8888;
+        case PIXF_B8G8R8A8: return SDL_PIXELFORMAT_BGRA8888;
+        case PIXF_A8B8G8R8: return SDL_PIXELFORMAT_ABGR8888;
+        case PIXF_R8G8B8A8: return SDL_PIXELFORMAT_RGBA8888;
+        // 24-bit (WinUAE Picasso-IV may use one)
+        case PIXF_R8G8B8: return SDL_PIXELFORMAT_RGB888;
+        case PIXF_B8G8R8: return SDL_PIXELFORMAT_BGR888;
+        // 16-bit
         case PIXF_R5G6B5: return SDL_PIXELFORMAT_RGB565;
+        // 8-bit
         case PIXF_CLUT: return SDL_PIXELFORMAT_INDEX8;
-        default: return SDL_PIXELFORMAT_UNKNOWN;
+        // What else we have...
+        default:
+            dprintf("Unknown native pixel format %d\n", from);
+            return SDL_PIXELFORMAT_UNKNOWN;
     }
 }
 
@@ -70,14 +71,16 @@ OS4_CreateWindowFramebuffer(_THIS, SDL_Window * window, Uint32 * format, void **
 
         if (!data->syswin) {
             dprintf("No system window\n");
-            SDL_SetError("No system window");
-            return -1;
+            return SDL_SetError("No system window");
         }
 
+        pixf = IGraphics->GetBitMapAttr(data->syswin->RPort->BitMap, BMA_PIXELFORMAT);
         depth = IGraphics->GetBitMapAttr(data->syswin->RPort->BitMap, BMA_BITSPERPIXEL);
-        pixf = OS4_DepthToPixf(depth);
 
-        dprintf("Allocating %d*%d*%d bitmap\n", window->w, window->h, depth);
+        *format = OS4_PixfToSdlPixelFormat(pixf);
+
+        dprintf("Native format %d, SDL format %d (%s)\n", pixf, *format, SDL_GetPixelFormatName(*format));
+        dprintf("Allocating %d*%d*%d bitmap)\n", window->w, window->h, depth);
 
         data->bitmap = IGraphics->AllocBitMapTags(
             window->w,
@@ -91,14 +94,8 @@ OS4_CreateWindowFramebuffer(_THIS, SDL_Window * window, Uint32 * format, void **
 
         if (!data->bitmap) {
             dprintf("Failed to allocate bitmap\n");
-            SDL_SetError("Failed to allocate bitmap for framebuffer");
-
-            return -1;
+            return SDL_SetError("Failed to allocate bitmap for framebuffer");
         }
-
-        *format = OS4_PixfToSdlPixelFormat(pixf);
-
-        dprintf("Native format %d, SDL format %d\n", pixf, *format);
 
         /* Lock the bitmap to get details. Since it's user private,
         it should be safe to cache address and pitch. */
@@ -115,12 +112,11 @@ OS4_CreateWindowFramebuffer(_THIS, SDL_Window * window, Uint32 * format, void **
             IGraphics->UnlockBitMap(lock);
         } else {
             dprintf("Failed to lock bitmap\n");
-            SDL_SetError("Failed to lock framebuffer bitmap");
 
             IGraphics->FreeBitMap(data->bitmap);
             data->bitmap = NULL;
 
-            return -1;
+            return SDL_SetError("Failed to lock framebuffer bitmap");
         }
     }
 
@@ -135,6 +131,7 @@ int
 OS4_UpdateWindowFramebuffer(_THIS, SDL_Window * window, const SDL_Rect * rects, int numrects)
 {
     SDL_WindowData * data = window->driverdata;
+    int32 ret = -1;
 
     //dprintf("Called\n");
 
@@ -158,7 +155,7 @@ OS4_UpdateWindowFramebuffer(_THIS, SDL_Window * window, const SDL_Rect * rects, 
             for (i = 0; i < numrects; ++i) {
                 const SDL_Rect * r = &rects[i];
 
-                int32 ret = IGraphics->BltBitMapTags(
+                ret = IGraphics->BltBitMapTags(
                     BLITA_Source, data->bitmap,
                     //BLITA_SrcType, BLITT_BITMAP,
                     BLITA_Dest, syswin->RPort,
@@ -178,6 +175,10 @@ OS4_UpdateWindowFramebuffer(_THIS, SDL_Window * window, const SDL_Rect * rects, 
 
             ILayers->UnlockLayer(syswin->WLayer);
         }
+    }
+
+    if (ret != -1) {
+        return SDL_SetError("BltBitMapTags failed");
     }
 
     return 0;
