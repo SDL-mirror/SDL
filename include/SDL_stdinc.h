@@ -575,13 +575,13 @@ extern DECLSPEC int SDLCALL SDL_strncasecmp(const char *str1, const char *str2, 
 extern DECLSPEC int SDLCALL SDL_sscanf(const char *text, const char *fmt, ...);
 #endif
 
-#ifdef HAVE_SNPRINTF
+#if defined(HAVE_SNPRINTF) && !(defined(__WATCOMC__) || defined(_WIN32))
 #define SDL_snprintf    snprintf
 #else
 extern DECLSPEC int SDLCALL SDL_snprintf(char *text, size_t maxlen, const char *fmt, ...);
 #endif
 
-#ifdef HAVE_VSNPRINTF
+#if defined(HAVE_VSNPRINTF) && !(defined(__WATCOMC__) || defined(_WIN32))
 #define SDL_vsnprintf   vsnprintf
 #else
 extern DECLSPEC int SDLCALL SDL_vsnprintf(char *text, size_t maxlen, const char *fmt, va_list ap);

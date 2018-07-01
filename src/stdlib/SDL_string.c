@@ -1013,7 +1013,7 @@ int SDL_sscanf(const char *text, const char *fmt, ...)
 }
 #endif
 
-#ifndef HAVE_SNPRINTF
+#if defined(__WATCOMC__) || defined(_WIN32) || !defined(HAVE_SNPRINTF)
 int SDL_snprintf(char *text, size_t maxlen, const char *fmt, ...)
 {
     va_list ap;
@@ -1027,7 +1027,15 @@ int SDL_snprintf(char *text, size_t maxlen, const char *fmt, ...)
 }
 #endif
 
-#ifndef HAVE_VSNPRINTF
+#if (defined(__WATCOMC__) || defined(_WIN32)) && defined(HAVE_LIBC)
+int SDL_vsnprintf(char *text, size_t maxlen, const char *fmt, va_list ap)
+{
+    int retval = _vsnprintf(text, maxlen, fmt, ap);
+    if (maxlen > 0) text[maxlen-1] = '\0';
+    if (retval < 0) retval = (int) maxlen;
+    return retval;
+}
+#elif !defined(HAVE_VSNPRINTF)
 static size_t SDL_PrintLong(char *text, long value, int radix, size_t maxlen)
 {
     char num[130];
