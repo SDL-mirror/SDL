@@ -200,11 +200,11 @@
 	</References>
 	<Files>
 		<File
-			RelativePath="..\..\..\Test\Loopwave.c"
+			RelativePath="..\..\..\test\loopwave.c"
 			>
 		</File>
 		<File
-			RelativePath="..\..\Sdl\Debug\SDL.lib"
+			RelativePath="..\..\SDL\Debug\SDL.lib"
 			>
 		</File>
 		<File

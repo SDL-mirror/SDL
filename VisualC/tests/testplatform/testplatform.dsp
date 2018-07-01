@@ -88,7 +88,7 @@ LINK32=link.exe
 # Name "testplatform - Win32 Debug"
 # Begin Source File
 
-SOURCE=..\..\Sdl\Debug\SDL.lib
+SOURCE=..\..\SDL\Debug\SDL.lib
 # End Source File
 # Begin Source File
 
@@ -96,7 +96,7 @@ SOURCE=..\..\SDLmain\Debug\SDLmain.lib
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\Test\testplatform.c
+SOURCE=..\..\..\test\testplatform.c
 # End Source File
 # End Target
 # End Project

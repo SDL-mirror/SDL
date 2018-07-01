@@ -88,7 +88,7 @@ LINK32=link.exe
 # Name "testvidinfo - Win32 Debug"
 # Begin Source File
 
-SOURCE=..\..\Sdl\Debug\SDL.lib
+SOURCE=..\..\SDL\Debug\SDL.lib
 # End Source File
 # Begin Source File
 
@@ -96,7 +96,7 @@ SOURCE=..\..\SDLmain\Debug\SDLmain.lib
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\..\Test\testvidinfo.c
+SOURCE=..\..\..\test\testvidinfo.c
 # End Source File
 # End Target
 # End Project

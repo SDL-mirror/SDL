@@ -96,7 +96,7 @@ SOURCE=..\..\src\video\default_cursor.h
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\src\video\windx5\Directx.h
+SOURCE=..\..\src\video\windx5\directx.h
 # End Source File
 # Begin Source File
 

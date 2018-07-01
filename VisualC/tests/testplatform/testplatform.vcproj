@@ -204,7 +204,7 @@
 	</References>
 	<Files>
 		<File
-			RelativePath="..\..\Sdl\Debug\SDL.lib"
+			RelativePath="..\..\SDL\Debug\SDL.lib"
 			>
 		</File>
 		<File
@@ -212,7 +212,7 @@
 			>
 		</File>
 		<File
-			RelativePath="..\..\..\Test\testplatform.c"
+			RelativePath="..\..\..\test\testplatform.c"
 			>
 			<FileConfiguration
 				Name="Debug|Win32"

@@ -204,7 +204,7 @@
 			>
 		</File>
 		<File
-			RelativePath="..\..\Sdl\Debug\SDL.lib"
+			RelativePath="..\..\SDL\Debug\SDL.lib"
 			>
 		</File>
 		<File

@@ -92,7 +92,7 @@ SOURCE=..\..\..\test\graywin.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\Sdl\Debug\SDL.lib
+SOURCE=..\..\SDL\Debug\SDL.lib
 # End Source File
 # Begin Source File
 

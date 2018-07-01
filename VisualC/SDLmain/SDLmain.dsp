@@ -100,7 +100,7 @@ LIB32=link.exe -lib
 # Name "SDLmain - Win32 Release_NoSTDIO"
 # Begin Source File
 
-SOURCE=..\..\Src\Main\Win32\SDL_win32_main.c
+SOURCE=..\..\src\main\win32\SDL_win32_main.c
 # End Source File
 # End Target
 # End Project

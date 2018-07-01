@@ -88,7 +88,7 @@ LINK32=link.exe
 # Name "testwm - Win32 Debug"
 # Begin Source File
 
-SOURCE=..\..\Sdl\Debug\SDL.lib
+SOURCE=..\..\SDL\Debug\SDL.lib
 # End Source File
 # Begin Source File
 

@@ -213,7 +213,7 @@
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\..\Src\Main\Win32\SDL_win32_main.c" />
+    <ClCompile Include="..\..\src\main\win32\SDL_win32_main.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

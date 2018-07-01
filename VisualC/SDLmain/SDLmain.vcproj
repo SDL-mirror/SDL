@@ -413,7 +413,7 @@
 	</References>
 	<Files>
 		<File
-			RelativePath="..\..\Src\Main\Win32\SDL_win32_main.c"
+			RelativePath="..\..\src\main\win32\SDL_win32_main.c"
 			>
 		</File>
 	</Files>

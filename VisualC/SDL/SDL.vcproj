@@ -503,19 +503,19 @@
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\video\Windx5\SDL_dx5events.c"
+			RelativePath="..\..\src\video\windx5\SDL_dx5events.c"
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\video\Windx5\SDL_dx5events_c.h"
+			RelativePath="..\..\src\video\windx5\SDL_dx5events_c.h"
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\video\Windx5\SDL_dx5video.c"
+			RelativePath="..\..\src\video\windx5\SDL_dx5video.c"
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\video\Windx5\SDL_dx5video.h"
+			RelativePath="..\..\src\video\windx5\SDL_dx5video.h"
 			>
 		</File>
 		<File
@@ -823,7 +823,7 @@
 			>
 		</File>
 		<File
-			RelativePath="..\..\src\video\wincommon\Wmmsg.h"
+			RelativePath="..\..\src\video\wincommon\wmmsg.h"
 			>
 		</File>
 	</Files>

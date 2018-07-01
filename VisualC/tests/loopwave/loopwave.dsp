@@ -88,11 +88,11 @@ LINK32=link.exe
 # Name "loopwave - Win32 Debug"
 # Begin Source File
 
-SOURCE=..\..\..\Test\Loopwave.c
+SOURCE=..\..\..\test\loopwave.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\Sdl\Debug\SDL.lib
+SOURCE=..\..\SDL\Debug\SDL.lib
 # End Source File
 # Begin Source File
 
