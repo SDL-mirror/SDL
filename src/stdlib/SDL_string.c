@@ -623,6 +623,15 @@ Sint64 SDL_strtoll(const char *string, char **endp, int base)
     }
     return value;
 }
+#elif defined(__WIN32__) /* so that the export won't be missing */
+#undef SDL_strtoll
+DECLSPEC Sint64 SDLCALL SDL_strtoll(const char *string, char **endp, int base) {
+    #ifdef HAVE__STRTOI64
+    return _strtoi64 (string, endp, base);
+    #else
+    return strtoll (string, endp, base);
+    #endif
+}
 #endif
 
 #if !defined(HAVE_STRTOULL) && !defined(HAVE__STRTOUI64)
@@ -644,6 +653,15 @@ Uint64 SDL_strtoull(const char *string, char **endp, int base)
         *endp = (char *)string + len;
     }
     return value;
+}
+#elif defined(__WIN32__) /* so that the export won't be missing */
+#undef SDL_strtoull
+DECLSPEC Uint64 SDLCALL SDL_strtoull(const char *string, char **endp, int base) {
+    #ifdef HAVE__STRTOUI64
+    return _strtoui64(string, endp, base);
+    #else
+    return strtoull(string, endp, base);
+    #endif
 }
 #endif
 
