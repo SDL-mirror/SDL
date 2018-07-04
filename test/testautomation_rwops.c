@@ -398,7 +398,11 @@ rwops_testFPRead(void)
    int result;
 
    /* Run read tests. */
+#ifdef __amigaos4__
+   fp = fopen64(RWopsReadTestFilename, "r");
+#else
    fp = fopen(RWopsReadTestFilename, "r");
+#endif
    SDLTest_AssertCheck(fp != NULL, "Verify handle from opening file '%s' in read mode is not NULL", RWopsReadTestFilename);
 
    /* Bail out if NULL */
@@ -448,7 +452,11 @@ rwops_testFPWrite(void)
    int result;
 
    /* Run write tests. */
+#ifdef __amigaos4__
+   fp = fopen64(RWopsWriteTestFilename, "w+");
+#else
    fp = fopen(RWopsWriteTestFilename, "w+");
+#endif
    SDLTest_AssertCheck(fp != NULL, "Verify handle from opening file '%s' in write mode is not NULL", RWopsWriteTestFilename);
 
    /* Bail out if NULL */

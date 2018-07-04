@@ -629,6 +629,12 @@ void Redraw()
     }
 }
 
+static void my_exit(void)
+{
+     SDLTest_CommonQuit(state);
+     SDL_Quit();
+}
+
 int main(int argc, char *argv[])
 {
     int i, done;
@@ -671,6 +677,7 @@ int main(int argc, char *argv[])
         return 2;
     }
 
+    atexit(my_exit);
 
 #ifdef HAVE_SDL_TTF
     /* Initialize fonts */

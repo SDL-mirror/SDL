@@ -194,6 +194,11 @@ main(int argc, char *argv[])
 
         drawstate->window = state->windows[i];
         drawstate->renderer = state->renderers[i];
+
+        if (!SDL_RenderTargetSupported(drawstate->renderer)) {
+            printf("Render targets are not supported for this renderer\n");
+            quit(2);
+        }
         drawstate->sprite = LoadTexture(drawstate->renderer, "icon.bmp", SDL_TRUE);
         drawstate->background = LoadTexture(drawstate->renderer, "sample.bmp", SDL_FALSE);
         if (!drawstate->sprite || !drawstate->background) {

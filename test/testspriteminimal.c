@@ -186,6 +186,14 @@ main(int argc, char *argv[])
         loop();
     }
 #endif
+
+    SDL_DestroyTexture(sprite);
+    SDL_DestroyRenderer(renderer);
+    SDL_DestroyWindow(window);
+
+    SDL_VideoQuit();
+    SDL_Quit();
+
     quit(0);
 
     return 0; /* to prevent compiler warning */

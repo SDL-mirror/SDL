@@ -448,6 +448,15 @@ main(int argc, char **argv)
             SDL_Delay(10);
         }
     }
+
+    SDL_DestroyTexture(output[0]);
+    SDL_DestroyTexture(output[1]);
+    SDL_DestroyTexture(output[2]);
+
+    SDL_DestroyRenderer(renderer);
+    SDL_DestroyWindow(window);
+    SDL_VideoQuit();
+
     SDL_Quit();
     return 0;
 }

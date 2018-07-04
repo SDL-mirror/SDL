@@ -141,6 +141,8 @@ main(int argc, char *argv[])
     }
 #endif
 
+    SDL_DestroyWindow(window);
+    SDL_DestroyRenderer(renderer);
     SDL_Quit();
     return 0;
 }

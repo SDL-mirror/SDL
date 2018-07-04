@@ -995,6 +995,7 @@ _compare(SDL_Surface *referenceSurface, int allowable_error)
    SDL_Rect rect;
    Uint8 *pixels;
    SDL_Surface *testSurface;
+   SDL_Surface *convertedReferenceSurface;
 
    /* Read pixels. */
    pixels = (Uint8 *)SDL_malloc(4*TESTRENDER_SCREEN_W*TESTRENDER_SCREEN_H);
@@ -1014,13 +1015,16 @@ _compare(SDL_Surface *referenceSurface, int allowable_error)
                                        RENDER_COMPARE_RMASK, RENDER_COMPARE_GMASK, RENDER_COMPARE_BMASK, RENDER_COMPARE_AMASK);
    SDLTest_AssertCheck(testSurface != NULL, "Verify result from SDL_CreateRGBSurfaceFrom is not NULL");
 
-   /* Compare surface. */
-   result = SDLTest_CompareSurfaces( testSurface, referenceSurface, allowable_error );
+   /* Compare surfaces, but first, convert the (often 24-bit) reference surface to 32-bit because
+   comparison function works badly for big-endian */
+   convertedReferenceSurface = SDL_ConvertSurfaceFormat(referenceSurface, RENDER_COMPARE_FORMAT, 0);
+   result = SDLTest_CompareSurfaces( testSurface, convertedReferenceSurface, allowable_error );
    SDLTest_AssertCheck(result == 0, "Validate result from SDLTest_CompareSurfaces, expected: 0, got: %i", result);
 
    /* Clean up. */
    SDL_free(pixels);
    SDL_FreeSurface(testSurface);
+   SDL_FreeSurface(convertedReferenceSurface);
 }
 
 /**
