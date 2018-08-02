@@ -849,8 +849,8 @@ printf("ConfigureNotify! (resize: %dx%d)\n", xevent.xconfigure.width, xevent.xco
 #endif
 		if ((X11_PendingConfigureNotifyWidth != -1) &&
 		    (X11_PendingConfigureNotifyHeight != -1)) {
-		    if ((xevent.xconfigure.width != X11_PendingConfigureNotifyWidth) &&
-			(xevent.xconfigure.height != X11_PendingConfigureNotifyHeight)) {
+		    if ((xevent.xconfigure.width == X11_PendingConfigureNotifyWidth) &&
+			(xevent.xconfigure.height == X11_PendingConfigureNotifyHeight)) {
 			    /* Event is from before the resize, so ignore. */
 			    break;
 		    }
