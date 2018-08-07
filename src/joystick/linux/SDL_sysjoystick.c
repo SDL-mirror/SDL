@@ -826,6 +826,9 @@ int SDL_SYS_JoystickOpen(SDL_Joystick *joystick)
 		return(-1);
 	}
 	SDL_memset(joystick->hwdata, 0, sizeof(*joystick->hwdata));
+#if SDL_INPUT_LINUXEV
+	SDL_memset(joystick->hwdata->abs_map, ABS_MAX, sizeof(*joystick->hwdata->abs_map)*ABS_MAX);
+#endif
 	joystick->hwdata->fd = fd;
 
 	/* Set the joystick to non-blocking read mode */
@@ -1123,15 +1126,17 @@ static __inline__ void EV_HandleEvents(SDL_Joystick *joystick)
 							events[i].value);
 					break;
 				    default:
-					events[i].value = EV_AxisCorrect(joystick, code, events[i].value);
+					if (joystick->hwdata->abs_map[code] != ABS_MAX ) {
+					  events[i].value = EV_AxisCorrect(joystick, code, events[i].value);
 #ifndef NO_LOGICAL_JOYSTICKS
-					if (!LogicalJoystickAxis(joystick,
+					  if (!LogicalJoystickAxis(joystick,
 				           joystick->hwdata->abs_map[code],
 					   events[i].value))
 #endif
-					SDL_PrivateJoystickAxis(joystick,
+					  SDL_PrivateJoystickAxis(joystick,
 				           joystick->hwdata->abs_map[code],
 					   events[i].value);
+					}
 					break;
 				}
 				break;
