@@ -100,7 +100,7 @@ static BlendMode modes[] = {
 static const char *getModeName(SDL_BlendMode mode)
 {
     int i;
-    
+
     static const char *unknown = "Unknown";
 
     for (i = 0; i < sizeof(modes) / sizeof(modes[0]); i++)
@@ -210,7 +210,7 @@ static SDL_bool prepareTexture(Context *ctx)
 
     if (result) {
         SDL_Log("[%s]Failed to set texture blend mode: %s\n", __FUNCTION__, SDL_GetError());
-        
+
         SDL_DestroyTexture(ctx->texture);
         ctx->texture = NULL;
 
@@ -332,14 +332,14 @@ static SDL_bool testPointsInner(Context *ctx, SDL_bool linemode)
     int iteration, result;
 
     result = SDL_SetRenderDrawBlendMode(ctx->renderer, ctx->mode);
-    
+
     if (result) {
         SDL_Log("[%s]Failed to set blend mode: %s\n", __FUNCTION__, SDL_GetError());
         return SDL_FALSE;
     }
 
     for (iteration = 0; iteration < ctx->iterations; iteration++) {
-        
+
         SDL_Point points[ctx->objects];
         int object;
 
@@ -357,7 +357,7 @@ static SDL_bool testPointsInner(Context *ctx, SDL_bool linemode)
         } else {
             result = SDL_RenderDrawPoints(ctx->renderer, points, ctx->objects);
         }
-        
+
         ctx->operations++;
 
         if (result) {
@@ -460,7 +460,7 @@ static SDL_bool testRenderCopyInner(Context *ctx, SDL_bool ex) {
                     &rect,
                     getRand(360),
                     NULL,
-                    SDL_FLIP_NONE);            
+                    SDL_FLIP_NONE);
             }
 
             if (result) {
@@ -512,7 +512,7 @@ static SDL_bool testColorModulation(Context *ctx)
             SDL_Log("[%s]Failed to set color modulation: %s\n", __FUNCTION__, SDL_GetError());
             result = SDL_FALSE;
             break;
-        }    
+        }
 
         result = testRenderCopyInner(ctx, SDL_FALSE);
     }
@@ -631,7 +631,7 @@ static void runTestSuite(Context *ctx)
     for (t = 0; t < sizeof(tests) / sizeof(tests[0]); t++) {
         for (m = 0; m < sizeof(modes) / sizeof(modes[0]); m++) {
             ctx->mode = modes[m].mode;
-            
+
             runTest(ctx, &tests[t]);
 
             checkEvents(ctx);
@@ -682,7 +682,7 @@ static void initContext(Context *ctx, int argc, char **argv)
 static void checkPixelFormat(Context *ctx)
 {
     Uint32 pf;
-    
+
     pf = SDL_GetWindowPixelFormat(ctx->window);
 
     SDL_Log("Pixel format 0x%X (%s)\n", pf, SDL_GetPixelFormatName(pf));
@@ -746,12 +746,12 @@ int main(int argc, char **argv)
         linked.major, linked.minor, linked.patch);
 
     SDL_Log("This tool measures the speed of various 2D drawing features\n");
-    SDL_Log("Press any key to quit\n");
+    SDL_Log("Press ESC key to quit\n");
 
     initContext(&ctx, argc, argv);
 
     ctx.surface = SDL_LoadBMP("sample.bmp");
-    
+
     if (ctx.surface) {
 
         SDL_Log("Image size %d*%d\n", ctx.surface->w, ctx.surface->h);
