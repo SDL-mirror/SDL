@@ -72,7 +72,6 @@ extern int FULLSCREEN_SetMode(int width, int height, int bpp);
 extern int RISCOS_ToggleFullScreen(_THIS, int fullscreen);
 
 extern int riscos_backbuffer;
-extern int mouseInWindow;
 extern int riscos_closeaction;
 
 /* Following needed to ensure window is shown immediately */
@@ -253,8 +252,6 @@ unsigned int WIMP_SetupWindow(_THIS, SDL_Surface *surface)
 	int y = (this->hidden->screen_height - surface->h) / 2;
 	int xeig = this->hidden->xeig;
 	int yeig = this->hidden->yeig;
-
-    mouseInWindow = 0;
     
 	/* Always delete the window and recreate on a change */
 	if (this->hidden->window_handle) WIMP_DeleteWindow(this);
