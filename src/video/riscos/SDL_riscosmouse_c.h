@@ -42,3 +42,4 @@ void FULLSCREEN_WarpWMCursor(_THIS, Uint16 x, Uint16 y);
 int WIMP_ShowWMCursor(_THIS, WMcursor *cursor);
 void WIMP_WarpWMCursor(_THIS, Uint16 x, Uint16 y);
 
+void WIMP_RestoreWimpCursor();

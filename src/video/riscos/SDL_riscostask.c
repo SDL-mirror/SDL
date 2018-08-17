@@ -136,7 +136,7 @@ void RISCOS_ExitTask()
     {
        /* Ensure cursor is put back to standard pointer shape if
           we have been running in a window */
-       _kernel_osbyte(106,1,0);
+       WIMP_RestoreWimpCursor();
     }
 
 	/* Ensure we end up back in the wimp */
