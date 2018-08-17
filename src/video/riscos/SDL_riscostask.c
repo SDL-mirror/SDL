@@ -72,9 +72,13 @@ static void dump_mode()
         int blockSize = 0;
 		int *storeBlock = (int *)stored_mode;
 
-        while(blockSize < 5 || storeBlock[blockSize] != -1)
+        while(blockSize < 5)
         {
            fprintf(stderr, "   %d\n", storeBlock[blockSize++]);
+        }
+        while(storeBlock[blockSize] != -1)
+        {
+           fprintf(stderr, "   %d   %d\n", storeBlock[blockSize++], storeBlock[blockSize++]);
         }
     }
 }
@@ -285,7 +289,8 @@ void RISCOS_StoreWimpMode()
 		int *storeBlock;
         int j;
 
-        while(blockSize < 5 || retBlock[blockSize] != -1) blockSize++;
+        while(blockSize < 5) blockSize++;
+        while(retBlock[blockSize] != -1) blockSize+=2;
         blockSize++;
         storeBlock = (int *)SDL_malloc(blockSize * sizeof(int));
         retBlock = (int *)regs.r[1];
@@ -294,7 +299,7 @@ void RISCOS_StoreWimpMode()
 
 		stored_mode = (int)storeBlock;
      }
-#if DUMP_MODE
+#ifdef DUMP_MODE
     fprintf(stderr, "Stored "); dump_mode();
 #endif
 }
@@ -312,7 +317,7 @@ void RISCOS_RestoreWimpMode()
 	/* Only need to restore if we are in full screen mode */
 	if (stored_mode == -1) return;
 
-#if DUMP_MODE
+#ifdef DUMP_MODE
    fprintf(stderr, "Restored"); dump_mode();
 #endif
 
