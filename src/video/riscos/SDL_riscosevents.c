@@ -63,10 +63,10 @@ static SDLKey RO_keymap[SDLK_LAST];
 #define ROKEY_NONE 255
 
 /* Id of last key in keyboard */
-#define ROKEY_LAST_KEY  124
+#define ROKEY_LAST_KEY  127
 
 /* Size of array for all keys */
-#define ROKEYBD_ARRAYSIZE 125
+#define ROKEYBD_ARRAYSIZE 128
 
 static char RO_pressed[ROKEYBD_ARRAYSIZE];
 
@@ -210,6 +210,9 @@ void RISCOS_InitOSKeymap(_THIS)
   RO_keymap[122] = SDLK_KP4;
   RO_keymap[123] = SDLK_KP5;
   RO_keymap[124] = SDLK_KP2;
+  RO_keymap[125] = SDLK_LSUPER;
+  RO_keymap[126] = SDLK_RSUPER;
+  RO_keymap[127] = SDLK_MENU;
 
   SDL_memset(RO_pressed, 0, ROKEYBD_ARRAYSIZE);
 }
