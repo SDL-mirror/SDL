@@ -32,7 +32,7 @@
    iconv() may or may not use const char ** for the inbuf param.
    If we get this wrong, it's just a warning, so no big deal.
 */
-#if defined(_XGP6) || \
+#if defined(_XGP6) || defined(__RISCOS__) || \
     defined(__GLIBC__) && ((__GLIBC__ > 2) || (__GLIBC__ == 2 && __GLIBC_MINOR__ >= 2))
 #define ICONV_INBUF_NONCONST
 #endif
