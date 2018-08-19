@@ -94,7 +94,7 @@ OS4_GetDisplayMode(_THIS, ULONG id, SDL_DisplayMode * mode)
     return SDL_TRUE;
 }
 
-SDL_bool
+static SDL_bool
 OS4_LockPubScreen(_THIS)
 {
     SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
@@ -110,7 +110,7 @@ OS4_LockPubScreen(_THIS)
     }
 }
 
-void
+static void
 OS4_UnlockPubScreen(_THIS)
 {
     SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
@@ -208,15 +208,16 @@ OS4_CloseScreen(_THIS, struct Screen * screen)
     if (screen) {
         SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
 
-        dprintf("Close screen %p\n", screen);
-
         if (screen != data->publicScreen) {
+            dprintf("Closing screen %p\n", screen);
 
             if (IIntuition->CloseScreen(screen) == FALSE) {
                 dprintf("Screen has open window(s), cannot close\n");
+            } else {
+                dprintf("Screen closed successfully\n");
             }
         } else {
-            dprintf("Cannot close public screen\n");
+            dprintf("Public screen, not closing\n");
         }
 
     } else {
