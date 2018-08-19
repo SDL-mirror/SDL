@@ -43,9 +43,6 @@ extern void OS4_QuitModes(_THIS);
 
 extern void OS4_CloseScreen(_THIS, struct Screen *screen);
 
-extern SDL_bool OS4_LockPubScreen(_THIS);
-extern void OS4_UnlockPubScreen(_THIS);
-
 #endif /* _SDL_os4modes_h */
 
 /* vi: set ts=4 sw=4 expandtab: */
