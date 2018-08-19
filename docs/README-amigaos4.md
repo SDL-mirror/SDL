@@ -81,6 +81,9 @@ version before window creation, for example:
 MiniGL context can be created using major version 1 and minor version 3. This is
 also the default setup.
 
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 1);
+    SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+
 ================================================================================
 WinUAE
 ================================================================================
@@ -117,8 +120,7 @@ OpenGL renderer doesn't support render targets and blend modes "ADD" or "MOD".
 This is due to missing features in MiniGL.
 
 ================================================================================
-Bugs
+Project page and bug tracker
 ================================================================================
 
-Old bug tracker (ramping down): https://sourceforge.net/projects/sdl2-amigaos4/
-New bug tracker: https://github.com/AmigaPorts/sdl2-amigaos4/issues
+https://github.com/AmigaPorts/SDL
