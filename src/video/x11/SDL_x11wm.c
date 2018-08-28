@@ -352,13 +352,14 @@ SDL_GrabMode X11_GrabInputNoLock(_THIS, SDL_GrabMode mode)
 			result = XGrabPointer(SDL_Display, SDL_Window, True, 0,
 						GrabModeAsync, GrabModeAsync,
 						SDL_Window, None, CurrentTime);
-			if ( result == GrabSuccess ) {
+			if ( result == GrabSuccess || result == GrabNotViewable ) {
 				break;
 			}
 			SDL_Delay(100);
 		}
 		if ( result != GrabSuccess ) {
 			/* Uh, oh, what do we do here? */ ;
+			return(SDL_GRAB_OFF);
 		}
 		/* Now grab the keyboard */
 		XGrabKeyboard(SDL_Display, WMwindow, True,
