@@ -54,7 +54,6 @@ make install prefix=$RPM_BUILD_ROOT%{prefix} \
              includedir=$RPM_BUILD_ROOT%{_includedir} \
              datadir=$RPM_BUILD_ROOT%{_datadir} \
              mandir=$RPM_BUILD_ROOT%{_mandir}
-ln -s libSDL-1.2.so.0 $RPM_BUILD_ROOT%{_libdir}/libSDL-1.1.so.0
 %else
 %makeinstall
 %endif
@@ -82,10 +81,13 @@ rm -rf $RPM_BUILD_ROOT
 %{_mandir}/man3/*
 
 %changelog
+* Sun Oct 14 2018 Ozkan Sezer <sezero@users.sourceforge.net>
+- Remove symlink for libSDL-1.0.so.0
+
 * Tue May 16 2006 Sam Lantinga <slouken@libsdl.org>
 - Removed support for Darwin, due to build problems on ps2linux
 
-* Mon Jan 03 2004 Anders Bjorklund <afb@algonet.se>
+* Sat Jan 03 2004 Anders Bjorklund <afb@algonet.se>
 - Added support for Darwin, updated spec file
 
 * Wed Jan 19 2000 Sam Lantinga <slouken@libsdl.org>
