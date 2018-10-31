@@ -27,6 +27,7 @@
 /* OpenGL shader implementation */
 
 typedef enum {
+    SHADER_INVALID = -1,
     SHADER_NONE,
     SHADER_SOLID,
     SHADER_RGB,
