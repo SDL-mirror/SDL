@@ -228,9 +228,7 @@ WIN_CheckWParamMouseButton(SDL_bool bwParamMousePressed, SDL_bool bSDLMousePress
         /* Ignore the button click for activation */
         if (!bwParamMousePressed) {
             data->focus_click_pending &= ~SDL_BUTTON(button);
-            if (!data->focus_click_pending) {
-                WIN_UpdateClipCursor(data->window);
-            }
+            WIN_UpdateClipCursor(data->window);
         }
         if (WIN_ShouldIgnoreFocusClick()) {
             return;
@@ -416,6 +414,13 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         }
         break;
 
+    case WM_NCACTIVATE:
+        {
+            /* Don't immediately clip the cursor in case we're clicking minimize/maximize buttons */
+            data->skip_update_clipcursor = SDL_TRUE;
+        }
+        break;
+
     case WM_ACTIVATE:
         {
             POINT cursorPos;
@@ -465,6 +470,8 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
                 SDL_ToggleModState(KMOD_CAPS, (GetKeyState(VK_CAPITAL) & 0x0001) != 0);
                 SDL_ToggleModState(KMOD_NUM, (GetKeyState(VK_NUMLOCK) & 0x0001) != 0);
             } else {
+                RECT rect;
+
                 data->in_window_deactivation = SDL_TRUE;
 
                 if (SDL_GetKeyboardFocus() == data->window) {
@@ -472,7 +479,10 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
                     WIN_ResetDeadKeys();
                 }
 
-                ClipCursor(NULL);
+                if (GetClipCursor(&rect) && SDL_memcmp(&rect, &data->cursor_clipped_rect, sizeof(rect) == 0)) {
+                    ClipCursor(NULL);
+                    SDL_zero(data->cursor_clipped_rect);
+                }
 
                 data->in_window_deactivation = SDL_FALSE;
             }
@@ -653,7 +663,7 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
         break;
 
     case WM_UNICHAR:
-        if ( wParam == UNICODE_NOCHAR ) {
+        if (wParam == UNICODE_NOCHAR) {
             returnCode = 1;
             break;
         }
@@ -661,8 +671,8 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     case WM_CHAR:
         {
             char text[5];
-            if ( WIN_ConvertUTF32toUTF8( (UINT32)wParam, text ) ) {
-                SDL_SendKeyboardText( text );
+            if (WIN_ConvertUTF32toUTF8((UINT32)wParam, text)) {
+                SDL_SendKeyboardText(text);
             }
         }
         returnCode = 0;
@@ -898,7 +908,8 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     case WM_TOUCH:
         if (data->videodata->GetTouchInputInfo && data->videodata->CloseTouchInputHandle) {
             UINT i, num_inputs = LOWORD(wParam);
-            PTOUCHINPUT inputs = SDL_stack_alloc(TOUCHINPUT, num_inputs);
+            SDL_bool isstack;
+            PTOUCHINPUT inputs = SDL_small_alloc(TOUCHINPUT, num_inputs, &isstack);
             if (data->videodata->GetTouchInputInfo((HTOUCHINPUT)lParam, num_inputs, inputs, sizeof(TOUCHINPUT))) {
                 RECT rect;
                 float x, y;
@@ -906,7 +917,7 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
                 if (!GetClientRect(hwnd, &rect) ||
                     (rect.right == rect.left && rect.bottom == rect.top)) {
                     if (inputs) {
-                        SDL_stack_free(inputs);
+                        SDL_small_free(inputs, isstack);
                     }
                     break;
                 }
@@ -940,7 +951,7 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
                     }
                 }
             }
-            SDL_stack_free(inputs);
+            SDL_small_free(inputs, isstack);
 
             data->videodata->CloseTouchInputHandle((HTOUCHINPUT)lParam);
             return 0;
@@ -953,15 +964,16 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
             HDROP drop = (HDROP) wParam;
             UINT count = DragQueryFile(drop, 0xFFFFFFFF, NULL, 0);
             for (i = 0; i < count; ++i) {
+                SDL_bool isstack;
                 UINT size = DragQueryFile(drop, i, NULL, 0) + 1;
-                LPTSTR buffer = SDL_stack_alloc(TCHAR, size);
+                LPTSTR buffer = SDL_small_alloc(TCHAR, size, &isstack);
                 if (buffer) {
                     if (DragQueryFile(drop, i, buffer, size)) {
                         char *file = WIN_StringToUTF8(buffer);
                         SDL_SendDropFile(data->window, file);
                         SDL_free(file);
                     }
-                    SDL_stack_free(buffer);
+                    SDL_small_free(buffer, isstack);
                 }
             }
             SDL_SendDropComplete(data->window);
@@ -1027,6 +1039,20 @@ WIN_WindowProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
     }
 }
 
+static void WIN_UpdateClipCursorForWindows()
+{
+    SDL_VideoDevice *_this = SDL_GetVideoDevice();
+    SDL_Window *window;
+
+    if (_this) {
+        for (window = _this->windows; window; window = window->next) {
+            if (window->driverdata) {
+                WIN_UpdateClipCursor(window);
+            }
+        }
+    }
+}
+
 /* A message hook called before TranslateMessage() */
 static SDL_WindowsMessageHook g_WindowsMessageHook = NULL;
 static void *g_WindowsMessageHookData = NULL;
@@ -1072,6 +1098,9 @@ WIN_PumpEvents(_THIS)
     if ((keystate[SDL_SCANCODE_RSHIFT] == SDL_PRESSED) && !(GetKeyState(VK_RSHIFT) & 0x8000)) {
         SDL_SendKeyboardKey(SDL_RELEASED, SDL_SCANCODE_RSHIFT);
     }
+
+    /* Update the clipping rect in case someone else has stolen it */
+    WIN_UpdateClipCursorForWindows();
 }
 
 /* to work around #3931, a bug introduced in Win10 Fall Creators Update (build nr. 16299)
@@ -1099,9 +1128,9 @@ IsWin10FCUorNewer(void)
             SDL_zero(info);
             info.dwOSVersionInfoSize = sizeof(info);
             if (getVersionPtr(&info) == 0) { /* STATUS_SUCCESS == 0 */
-                if (   (info.dwMajorVersion == 10 && info.dwMinorVersion == 0 && info.dwBuildNumber >= 16299)
-                    || (info.dwMajorVersion == 10 && info.dwMinorVersion > 0)
-                    || (info.dwMajorVersion > 10) )
+                if ((info.dwMajorVersion == 10 && info.dwMinorVersion == 0 && info.dwBuildNumber >= 16299) ||
+                    (info.dwMajorVersion == 10 && info.dwMinorVersion > 0) ||
+                    (info.dwMajorVersion > 10))
                 {
                     return SDL_TRUE;
                 }
