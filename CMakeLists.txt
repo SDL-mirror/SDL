@@ -42,10 +42,13 @@ include(${SDL2_SOURCE_DIR}/cmake/sdlchecks.cmake)
 # set SDL_BINARY_AGE and SDL_INTERFACE_AGE to 0.
 set(SDL_MAJOR_VERSION 2)
 set(SDL_MINOR_VERSION 0)
-set(SDL_MICRO_VERSION 8)
+set(SDL_MICRO_VERSION 9)
 set(SDL_INTERFACE_AGE 0)
-set(SDL_BINARY_AGE 8)
+set(SDL_BINARY_AGE 9)
 set(SDL_VERSION "${SDL_MAJOR_VERSION}.${SDL_MINOR_VERSION}.${SDL_MICRO_VERSION}")
+# the following should match the versions in Xcode project file:
+set(DYLIB_CURRENT_VERSION 10.0.0)
+set(DYLIB_COMPATIBILITY_VERSION 1.0.0)
 
 # Set defaults preventing destination file conflicts
 set(SDL_CMAKE_DEBUG_POSTFIX "d"
@@ -213,6 +216,12 @@ endif()
 set(SDL_LIBS "-lSDL2")
 set(SDL_CFLAGS "")
 
+# When building shared lib for Windows with MinGW,
+# avoid the DLL having a "lib" prefix
+if(WINDOWS)
+  set(CMAKE_SHARED_LIBRARY_PREFIX "")
+endif()
+
 # Emscripten toolchain has a nonempty default value for this, and the checks
 # in this file need to change that, so remember the original value, and
 # restore back to that afterwards. For check_function_exists() to work in
@@ -264,7 +273,7 @@ endif()
 
 set(SDL_SUBSYSTEMS
     Atomic Audio Video Render Events Joystick Haptic Power Threads Timers
-    File Loadso CPUinfo Filesystem Dlopen)
+    File Loadso CPUinfo Filesystem Dlopen Sensor)
 foreach(_SUB ${SDL_SUBSYSTEMS})
   string(TOUPPER ${_SUB} _OPT)
   if (NOT DEFINED SDL_${_OPT}_ENABLED_BY_DEFAULT)
@@ -320,8 +329,6 @@ set_option(VIDEO_X11           "Use X11 video driver" ${UNIX_SYS})
 set_option(VIDEO_WAYLAND       "Use Wayland video driver" ${UNIX_SYS})
 dep_option(WAYLAND_SHARED      "Dynamically load Wayland support" ON "VIDEO_WAYLAND" OFF)
 dep_option(VIDEO_WAYLAND_QT_TOUCH  "QtWayland server support for Wayland video driver" ON "VIDEO_WAYLAND" OFF)
-set_option(VIDEO_MIR           "Use Mir video driver" ${UNIX_SYS})
-dep_option(MIR_SHARED          "Dynamically load Mir support" ON "VIDEO_MIR" OFF)
 set_option(VIDEO_RPI           "Use Raspberry Pi video driver" ${UNIX_SYS})
 dep_option(X11_SHARED          "Dynamically load X11 support" ON "VIDEO_X11" OFF)
 set(SDL_X11_OPTIONS Xcursor Xinerama XInput Xrandr Xscrnsaver XShape Xvm)
@@ -331,6 +338,7 @@ foreach(_SUB ${SDL_X11_OPTIONS})
 endforeach()
 set_option(VIDEO_COCOA         "Use Cocoa video driver" ${APPLE})
 set_option(DIRECTX             "Use DirectX for Windows audio/video" ${WINDOWS})
+set_option(WASAPI              "Use the Windows WASAPI audio driver" ${WINDOWS})
 set_option(RENDER_D3D          "Enable the Direct3D render driver" ${WINDOWS})
 set_option(VIDEO_VIVANTE       "Use Vivante EGL video driver" ${UNIX_SYS})
 dep_option(VIDEO_VULKAN        "Enable Vulkan support" ON "ANDROID OR APPLE OR LINUX OR WINDOWS" OFF)
@@ -447,6 +455,8 @@ if(USE_GCC OR USE_CLANG)
 
   if(APPLE)
     list(APPEND EXTRA_LDFLAGS "-Wl,-undefined,error")
+    list(APPEND EXTRA_LDFLAGS "-Wl,-compatibility_version,${DYLIB_COMPATIBILITY_VERSION}")
+    list(APPEND EXTRA_LDFLAGS "-Wl,-current_version,${DYLIB_CURRENT_VERSION}")
   else()
     set(CMAKE_REQUIRED_FLAGS "-Wl,--no-undefined")
     check_c_compiler_flag("" HAVE_NO_UNDEFINED)
@@ -652,7 +662,7 @@ if(LIBC)
             _ultoa strtol strtoul strtoll strtod atoi atof strcmp strncmp
             _stricmp _strnicmp sscanf
             acos acosf asin asinf atan atanf atan2 atan2f ceil ceilf
-            copysign copysignf cos cosf fabs fabsf floor floorf fmod fmodf
+            copysign copysignf cos cosf exp expf fabs fabsf floor floorf fmod fmodf
             log logf log10 log10f pow powf scalbn scalbnf sin sinf sqrt sqrtf tan tanf)
       string(TOUPPER ${_FN} _UPPER)
       set(HAVE_${_UPPER} 1)
@@ -754,6 +764,10 @@ if(SDL_HAPTIC)
   file(GLOB HAPTIC_SOURCES ${SDL2_SOURCE_DIR}/src/haptic/*.c)
   set(SOURCE_FILES ${SOURCE_FILES} ${HAPTIC_SOURCES})
 endif()
+if(SDL_SENSOR)
+  file(GLOB SENSOR_SOURCES ${SDL2_SOURCE_DIR}/src/sensor/*.c)
+  set(SOURCE_FILES ${SOURCE_FILES} ${SENSOR_SOURCES})
+endif()
 if(SDL_POWER)
   file(GLOB POWER_SOURCES ${SDL2_SOURCE_DIR}/src/power/*.c)
   set(SOURCE_FILES ${SOURCE_FILES} ${POWER_SOURCES})
@@ -854,6 +868,12 @@ if(ANDROID)
     file(GLOB TIMER_SOURCES ${SDL2_SOURCE_DIR}/src/timer/unix/*.c)
     set(SOURCE_FILES ${SOURCE_FILES} ${TIMER_SOURCES})
     set(HAVE_SDL_TIMERS TRUE)
+  endif()
+  if(SDL_SENSOR)
+    set(SDL_SENSOR_ANDROID 1)
+    set(HAVE_SDL_SENSORS TRUE)
+    file(GLOB ANDROID_SENSOR_SOURCES ${SDL2_SOURCE_DIR}/src/sensor/android/*.c)
+    set(SOURCE_FILES ${SOURCE_FILES} ${ANDROID_SENSOR_SOURCES})
   endif()
   if(SDL_VIDEO)
     set(SDL_VIDEO_DRIVER_ANDROID 1)
@@ -986,7 +1006,6 @@ elseif(UNIX AND NOT APPLE AND NOT ANDROID)
     # Need to check for Raspberry PI first and add platform specific compiler flags, otherwise the test for GLES fails!
     CheckRPI()
     CheckX11()
-    CheckMir()
     CheckDirectFB()
     CheckOpenGLX11()
     CheckOpenGLESX11()
@@ -1052,6 +1071,12 @@ elseif(UNIX AND NOT APPLE AND NOT ANDROID)
         set(HAVE_IBUS_IBUS_H TRUE)
         include_directories(${IBUS_INCLUDE_DIRS})
         list(APPEND EXTRA_LIBS ${IBUS_LIBRARIES})
+      endif()
+      if(HAVE_LIBUNWIND_H)
+        # We've already found the header, so REQUIRE the lib to be present
+        pkg_search_module(UNWIND REQUIRED libunwind)
+        pkg_search_module(UNWIND_GENERIC REQUIRED libunwind-generic)
+        list(APPEND EXTRA_LIBS ${UNWIND_LIBRARIES} ${UNWIND_GENERIC_LIBRARIES})
       endif()
     endif()
 
@@ -1194,8 +1219,6 @@ elseif(WINDOWS)
     check_include_file(ddraw.h HAVE_DDRAW_H)
     check_include_file(dsound.h HAVE_DSOUND_H)
     check_include_file(dinput.h HAVE_DINPUT_H)
-    check_include_file(mmdeviceapi.h HAVE_MMDEVICEAPI_H)
-    check_include_file(audioclient.h HAVE_AUDIOCLIENT_H)
     check_include_file(dxgi.h HAVE_DXGI_H)
     if(HAVE_D3D_H OR HAVE_D3D11_H OR HAVE_DDRAW_H OR HAVE_DSOUND_H OR HAVE_DINPUT_H)
       set(HAVE_DIRECTX TRUE)
@@ -1207,6 +1230,11 @@ elseif(WINDOWS)
     endif()
     set(CMAKE_REQUIRED_FLAGS ${ORIG_CMAKE_REQUIRED_FLAGS})
   endif()
+
+  # headers needed elsewhere ...
+  check_include_file(mmdeviceapi.h HAVE_MMDEVICEAPI_H)
+  check_include_file(audioclient.h HAVE_AUDIOCLIENT_H)
+  check_include_file(endpointvolume.h HAVE_ENDPOINTVOLUME_H)
 
   if(SDL_AUDIO)
     set(SDL_AUDIO_DRIVER_WINMM 1)
@@ -1220,7 +1248,7 @@ elseif(WINDOWS)
       set(SOURCE_FILES ${SOURCE_FILES} ${DSOUND_AUDIO_SOURCES})
     endif()
 
-    if(HAVE_AUDIOCLIENT_H AND HAVE_MMDEVICEAPI_H)
+    if(WASAPI AND HAVE_AUDIOCLIENT_H AND HAVE_MMDEVICEAPI_H)
       set(SDL_AUDIO_DRIVER_WASAPI 1)
       file(GLOB WASAPI_AUDIO_SOURCES ${SDL2_SOURCE_DIR}/src/audio/wasapi/*.c)
       set(SOURCE_FILES ${SOURCE_FILES} ${WASAPI_AUDIO_SOURCES})
@@ -1594,6 +1622,7 @@ endif()
 
 if(VIDEO_VULKAN)
   set(SDL_VIDEO_VULKAN 1)
+  set(HAVE_VIDEO_VULKAN TRUE)
 endif()
 
 # Dummies
@@ -1605,7 +1634,7 @@ endif()
 # This leads to missing internal references on building, since the
 # src/X/*.c does not get included.
 if(NOT HAVE_SDL_JOYSTICK)
-  set(SDL_JOYSTICK_DISABLED 1)
+  set(SDL_JOYSTICK_DUMMY 1)
   if(SDL_JOYSTICK AND NOT APPLE) # results in unresolved symbols on OSX
 
     file(GLOB JOYSTICK_SOURCES ${SDL2_SOURCE_DIR}/src/joystick/dummy/*.c)
@@ -1613,9 +1642,14 @@ if(NOT HAVE_SDL_JOYSTICK)
   endif()
 endif()
 if(NOT HAVE_SDL_HAPTIC)
-  set(SDL_HAPTIC_DISABLED 1)
+  set(SDL_HAPTIC_DUMMY 1)
   file(GLOB HAPTIC_SOURCES ${SDL2_SOURCE_DIR}/src/haptic/dummy/*.c)
   set(SOURCE_FILES ${SOURCE_FILES} ${HAPTIC_SOURCES})
+endif()
+if(NOT HAVE_SDL_SENSORS)
+  set(SDL_SENSOR_DUMMY 1)
+  file(GLOB SENSORS_SOURCES ${SDL2_SOURCE_DIR}/src/sensor/dummy/*.c)
+  set(SOURCE_FILES ${SOURCE_FILES} ${SENSORS_SOURCES})
 endif()
 if(NOT HAVE_SDL_LOADSO)
   set(SDL_LOADSO_DISABLED 1)
@@ -1762,7 +1796,7 @@ set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${EXTRA_CFLAGS}")
 
 # Always build SDLmain
 add_library(SDL2main STATIC ${SDLMAIN_SOURCES})
-target_include_directories(SDL2main PUBLIC $<INSTALL_INTERFACE:include/SDL2>)
+target_include_directories(SDL2main PUBLIC "$<BUILD_INTERFACE:${SDL2_SOURCE_DIR}/include>" $<INSTALL_INTERFACE:include/SDL2>)
 set(_INSTALL_LIBS "SDL2main")
 if (NOT ANDROID)
   set_target_properties(SDL2main PROPERTIES DEBUG_POSTFIX ${SDL_CMAKE_DEBUG_POSTFIX})
@@ -1771,7 +1805,9 @@ endif()
 if(SDL_SHARED)
   add_library(SDL2 SHARED ${SOURCE_FILES} ${VERSION_SOURCES})
   if(APPLE)
-    set_target_properties(SDL2 PROPERTIES MACOSX_RPATH 1)
+    set_target_properties(SDL2 PROPERTIES
+      MACOSX_RPATH 1
+      OUTPUT_NAME "SDL2-${LT_RELEASE}")
   elseif(UNIX AND NOT ANDROID)
     set_target_properties(SDL2 PROPERTIES
       VERSION ${LT_VERSION}
@@ -1791,7 +1827,7 @@ if(SDL_SHARED)
   endif()
   set(_INSTALL_LIBS "SDL2" ${_INSTALL_LIBS})
   target_link_libraries(SDL2 ${EXTRA_LIBS} ${EXTRA_LDFLAGS})
-  target_include_directories(SDL2 PUBLIC $<INSTALL_INTERFACE:include/SDL2>)
+  target_include_directories(SDL2 PUBLIC "$<BUILD_INTERFACE:${SDL2_SOURCE_DIR}/include>" $<INSTALL_INTERFACE:include/SDL2>)
   if (NOT ANDROID)
     set_target_properties(SDL2 PROPERTIES DEBUG_POSTFIX ${SDL_CMAKE_DEBUG_POSTFIX})
   endif()
@@ -1817,7 +1853,7 @@ if(SDL_STATIC)
   # libraries - do we need to consider this?
   set(_INSTALL_LIBS "SDL2-static" ${_INSTALL_LIBS})
   target_link_libraries(SDL2-static ${EXTRA_LIBS} ${EXTRA_LDFLAGS})
-  target_include_directories(SDL2-static PUBLIC $<INSTALL_INTERFACE:include/SDL2>)
+  target_include_directories(SDL2-static PUBLIC "$<BUILD_INTERFACE:${SDL2_SOURCE_DIR}/include>" $<INSTALL_INTERFACE:include/SDL2>)
   if (NOT ANDROID)
     set_target_properties(SDL2-static PROPERTIES DEBUG_POSTFIX ${SDL_CMAKE_DEBUG_POSTFIX})
   endif()
@@ -1884,17 +1920,14 @@ endif()
 
 if(NOT (WINDOWS OR CYGWIN))
   if(SDL_SHARED)
-    if (APPLE)
-        set(SOEXT "dylib")
-    else()
-        set(SOEXT "so")
-    endif()
+    set(SOEXT ${CMAKE_SHARED_LIBRARY_SUFFIX}) # ".so", ".dylib", etc.
+    get_target_property(SONAME SDL2 OUTPUT_NAME)
     if(NOT ANDROID)
         install(CODE "
           execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink
-            \"libSDL2-2.0${SOPOSTFIX}.${SOEXT}\" \"libSDL2.${SOEXT}\")"
+            \"lib${SONAME}${SOPOSTFIX}${SOEXT}\" \"libSDL2${SOPOSTFIX}${SOEXT}\")"
             WORKING_DIR "${SDL2_BINARY_DIR}")
-        install(FILES ${SDL2_BINARY_DIR}/libSDL2.${SOEXT} DESTINATION "lib${LIB_SUFFIX}")
+        install(FILES ${SDL2_BINARY_DIR}/libSDL2${SOPOSTFIX}${SOEXT} DESTINATION "lib${LIB_SUFFIX}")
     endif()
   endif()
   if(FREEBSD)

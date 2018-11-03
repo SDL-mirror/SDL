@@ -31,11 +31,13 @@ LOCAL_SRC_FILES := \
 	$(wildcard $(LOCAL_PATH)/src/haptic/android/*.c) \
 	$(wildcard $(LOCAL_PATH)/src/joystick/*.c) \
 	$(wildcard $(LOCAL_PATH)/src/joystick/android/*.c) \
-	$(LOCAL_PATH)/src/joystick/steam/SDL_steamcontroller.c \
+	$(wildcard $(LOCAL_PATH)/src/joystick/hidapi/*.c) \
 	$(wildcard $(LOCAL_PATH)/src/loadso/dlopen/*.c) \
 	$(wildcard $(LOCAL_PATH)/src/power/*.c) \
 	$(wildcard $(LOCAL_PATH)/src/power/android/*.c) \
 	$(wildcard $(LOCAL_PATH)/src/filesystem/android/*.c) \
+	$(wildcard $(LOCAL_PATH)/src/sensor/*.c) \
+	$(wildcard $(LOCAL_PATH)/src/sensor/android/*.c) \
 	$(wildcard $(LOCAL_PATH)/src/render/*.c) \
 	$(wildcard $(LOCAL_PATH)/src/render/*/*.c) \
 	$(wildcard $(LOCAL_PATH)/src/stdlib/*.c) \
@@ -48,10 +50,30 @@ LOCAL_SRC_FILES := \
 	$(wildcard $(LOCAL_PATH)/src/video/yuv2rgb/*.c) \
 	$(wildcard $(LOCAL_PATH)/src/test/*.c))
 
+LOCAL_SHARED_LIBRARIES := hidapi
+
 LOCAL_CFLAGS += -DGL_GLEXT_PROTOTYPES
+LOCAL_CFLAGS += \
+	-Wall -Wextra \
+	-Wdocumentation \
+	-Wdocumentation-unknown-command \
+	-Wmissing-prototypes \
+	-Wunreachable-code-break \
+	-Wunneeded-internal-declaration \
+	-Wmissing-variable-declarations \
+	-Wfloat-conversion \
+	-Wshorten-64-to-32 \
+	-Wunreachable-code-return
+
+# Warnings we haven't fixed (yet)
+LOCAL_CFLAGS += -Wno-unused-parameter -Wno-sign-compare
+ 
+
 LOCAL_LDLIBS := -ldl -lGLESv1_CM -lGLESv2 -llog -landroid
 
-cmd-strip := 
+ifeq ($(NDK_DEBUG),1)
+    cmd-strip :=
+endif
 
 include $(BUILD_SHARED_LIBRARY)
 
@@ -86,4 +108,19 @@ LOCAL_MODULE_FILENAME := libSDL2main
 
 include $(BUILD_STATIC_LIBRARY)
 
+###########################
+#
+# hidapi library
+#
+###########################
 
+include $(CLEAR_VARS)
+
+LOCAL_CPPFLAGS += -std=c++11
+
+LOCAL_SRC_FILES := src/hidapi/android/hid.cpp
+
+LOCAL_MODULE := libhidapi
+LOCAL_LDLIBS := -llog
+
+include $(BUILD_SHARED_LIBRARY)

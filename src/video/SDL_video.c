@@ -64,9 +64,6 @@ static VideoBootStrap *bootstrap[] = {
 #if SDL_VIDEO_DRIVER_X11
     &X11_bootstrap,
 #endif
-#if SDL_VIDEO_DRIVER_MIR
-    &MIR_bootstrap,
-#endif
 #if SDL_VIDEO_DRIVER_WAYLAND
     &Wayland_bootstrap,
 #endif
@@ -649,7 +646,7 @@ SDL_GetNumVideoDisplays(void)
     return _this->num_displays;
 }
 
-static int
+int
 SDL_GetIndexOfDisplay(SDL_VideoDisplay *display)
 {
     int displayIndex;
@@ -745,6 +742,17 @@ SDL_GetDisplayDPI(int displayIndex, float * ddpi, float * hdpi, float * vdpi)
     }
 
     return -1;
+}
+
+SDL_DisplayOrientation
+SDL_GetDisplayOrientation(int displayIndex)
+{
+    SDL_VideoDisplay *display;
+
+    CHECK_DISPLAY_INDEX(displayIndex, SDL_ORIENTATION_UNKNOWN);
+
+    display = &_this->displays[displayIndex];
+    return display->orientation;
 }
 
 SDL_bool
@@ -1015,6 +1023,14 @@ SDL_SetDisplayModeForDisplay(SDL_VideoDisplay * display, const SDL_DisplayMode *
     }
     display->current_mode = display_mode;
     return 0;
+}
+
+SDL_VideoDisplay *
+SDL_GetDisplay(int displayIndex)
+{
+    CHECK_DISPLAY_INDEX(displayIndex, NULL);
+
+    return &_this->displays[displayIndex];
 }
 
 int
@@ -1301,8 +1317,15 @@ SDL_UpdateFullscreenMode(SDL_Window * window, SDL_bool fullscreen)
 
                 /* Generate a mode change event here */
                 if (resized) {
+#ifndef ANDROID
+                    // Android may not resize the window to exactly what our fullscreen mode is, especially on
+                    // windowed Android environments like the Chromebook or Samsung DeX.  Given this, we shouldn't
+                    // use fullscreen_mode.w and fullscreen_mode.h, but rather get our current native size.  As such,
+                    // Android's SetWindowFullscreen will generate the window event for us with the proper final size.
+
                     SDL_SendWindowEvent(other, SDL_WINDOWEVENT_RESIZED,
                                         fullscreen_mode.w, fullscreen_mode.h);
+#endif
                 } else {
                     SDL_OnWindowResized(other);
                 }
@@ -1343,9 +1366,43 @@ SDL_UpdateFullscreenMode(SDL_Window * window, SDL_bool fullscreen)
         (SDL_WINDOW_OPENGL | SDL_WINDOW_BORDERLESS | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_ALWAYS_ON_TOP | SDL_WINDOW_SKIP_TASKBAR | SDL_WINDOW_POPUP_MENU | SDL_WINDOW_UTILITY | SDL_WINDOW_TOOLTIP | SDL_WINDOW_VULKAN | SDL_WINDOW_MINIMIZED)
 #endif
 
+static SDL_INLINE SDL_bool
+IsAcceptingDragAndDrop(void)
+{
+    if ((SDL_GetEventState(SDL_DROPFILE) == SDL_ENABLE) ||
+        (SDL_GetEventState(SDL_DROPTEXT) == SDL_ENABLE)) {
+        return SDL_TRUE;
+    }
+    return SDL_FALSE;
+}
+
+/* prepare a newly-created window */
+static SDL_INLINE void
+PrepareDragAndDropSupport(SDL_Window *window)
+{
+    if (_this->AcceptDragAndDrop) {
+        _this->AcceptDragAndDrop(window, IsAcceptingDragAndDrop());
+    }
+}
+
+/* toggle d'n'd for all existing windows. */
+void
+SDL_ToggleDragAndDropSupport(void)
+{
+    if (_this && _this->AcceptDragAndDrop) {
+        const SDL_bool enable = IsAcceptingDragAndDrop();
+        SDL_Window *window;
+        for (window = _this->windows; window; window = window->next) {
+            _this->AcceptDragAndDrop(window, enable);
+        }
+    }
+}
+
 static void
 SDL_FinishWindowCreation(SDL_Window *window, Uint32 flags)
 {
+    PrepareDragAndDropSupport(window);
+
     if (flags & SDL_WINDOW_MAXIMIZED) {
         SDL_MaximizeWindow(window);
     }
@@ -1506,11 +1563,13 @@ on the backend side, after we know the screen size. */
         return NULL;
     }
 
-	// Clear minimized if not on windows, only windows handles it at create rather than FinishWindowCreation,
-	// but it's important or window focus will get broken on windows!
+    /* Clear minimized if not on windows, only windows handles it at create rather than FinishWindowCreation,
+     * but it's important or window focus will get broken on windows!
+     */
 #if !defined(__WIN32__)
-	if ( window->flags & SDL_WINDOW_MINIMIZED )
-		window->flags &= ~SDL_WINDOW_MINIMIZED;
+    if (window->flags & SDL_WINDOW_MINIMIZED) {
+        window->flags &= ~SDL_WINDOW_MINIMIZED;
+    }
 #endif
 
 #if __WINRT__ && (NTDDI_VERSION < NTDDI_WIN10)
@@ -1571,6 +1630,9 @@ SDL_CreateWindowFrom(const void *data)
         SDL_DestroyWindow(window);
         return NULL;
     }
+
+    PrepareDragAndDropSupport(window);
+
     return window;
 }
 
@@ -4090,11 +4152,14 @@ void SDL_Vulkan_UnloadLibrary(void)
 
 SDL_bool SDL_Vulkan_GetInstanceExtensions(SDL_Window *window, unsigned *count, const char **names)
 {
-    CHECK_WINDOW_MAGIC(window, SDL_FALSE);
+    if (window) {
+        CHECK_WINDOW_MAGIC(window, SDL_FALSE);
 
-    if (!(window->flags & SDL_WINDOW_VULKAN)) {
-        SDL_SetError(NOT_A_VULKAN_WINDOW);
-        return SDL_FALSE;
+        if (!(window->flags & SDL_WINDOW_VULKAN))
+        {
+            SDL_SetError(NOT_A_VULKAN_WINDOW);
+            return SDL_FALSE;
+        }
     }
 
     if (!count) {

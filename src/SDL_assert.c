@@ -120,6 +120,9 @@ static void SDL_GenerateAssertionReport(void)
 }
 
 
+#if defined(__WATCOMC__)
+#pragma aux SDL_ExitProcess aborts;
+#endif
 static void SDL_ExitProcess(int exitcode)
 {
 #ifdef __WIN32__
@@ -138,6 +141,9 @@ static void SDL_ExitProcess(int exitcode)
 }
 
 
+#if defined(__WATCOMC__)
+#pragma aux SDL_AbortAssertion aborts;
+#endif
 static void SDL_AbortAssertion(void)
 {
     SDL_Quit();
@@ -172,6 +178,7 @@ SDL_PromptAssertion(const SDL_assert_data *data, void *userdata)
 
     (void) userdata;  /* unused in default handler. */
 
+    /* !!! FIXME: why is this using SDL_stack_alloc and not just "char message[SDL_MAX_LOG_MESSAGE];" ? */
     message = SDL_stack_alloc(char, SDL_MAX_LOG_MESSAGE);
     if (!message) {
         /* Uh oh, we're in real trouble now... */
