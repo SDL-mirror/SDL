@@ -947,6 +947,31 @@ GL_QueueCopyEx(SDL_Renderer * renderer, SDL_RenderCommand *cmd, SDL_Texture * te
     return 0;
 }
 
+#ifdef __AMIGAOS4__
+static void
+MiniGlBlendModeHack(GL_RenderData * data, const SDL_BlendMode mode)
+{
+    switch (mode) {
+        case SDL_BLENDMODE_NONE:
+            data->glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+            data->glDisable(GL_BLEND);
+            break;
+
+        case SDL_BLENDMODE_ADD:
+            data->glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+            data->glEnable(GL_BLEND);
+            data->glBlendFunc(GL_SRC_ALPHA, GL_DST_COLOR);
+            break;
+
+        default:
+            data->glTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+            data->glEnable(GL_BLEND);
+            data->glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            break;
+    }
+}
+#endif
+
 static void
 SetDrawState(GL_RenderData *data, const SDL_RenderCommand *cmd, const GL_Shader shader)
 {
@@ -989,6 +1014,9 @@ SetDrawState(GL_RenderData *data, const SDL_RenderCommand *cmd, const GL_Shader 
     }
 
     if (blend != data->drawstate.blend) {
+#ifdef __AMIGAOS4__
+        MiniGlBlendModeHack(data, blend);
+#else
         if (blend == SDL_BLENDMODE_NONE) {
             data->glDisable(GL_BLEND);
         } else {
@@ -999,6 +1027,7 @@ SetDrawState(GL_RenderData *data, const SDL_RenderCommand *cmd, const GL_Shader 
                                       GetBlendFunc(SDL_GetBlendModeDstAlphaFactor(blend)));
             data->glBlendEquation(GetBlendEquation(SDL_GetBlendModeColorOperation(blend)));
         }
+#endif
         data->drawstate.blend = blend;
     }
 

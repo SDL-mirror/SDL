@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2016 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2018 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -35,7 +35,12 @@ typedef struct
     struct BitMap *target;
     struct BitMap *solidcolor;
     struct RastPort rastport;
+
     SDL_Rect cliprect;
+    SDL_bool cliprect_enabled;
+
+    SDL_Rect viewport;
+
 } OS4_RenderData;
 
 extern struct BitMap * OS4_ActivateRenderer(SDL_Renderer * renderer);

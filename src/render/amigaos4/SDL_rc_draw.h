@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2016 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2018 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -26,10 +26,10 @@
 #include "../SDL_sysrender.h"
 
 extern int OS4_RenderDrawPoints(SDL_Renderer * renderer,
-                               const SDL_FPoint * points, int count);
+    const SDL_Point * points, int count, SDL_BlendMode mode, Uint8 a, Uint8 r, Uint8 g, Uint8 b);
 
 extern int OS4_RenderDrawLines(SDL_Renderer * renderer,
-                              const SDL_FPoint * points, int count);
+    const SDL_Point * points, int count, SDL_BlendMode mode, Uint8 a, Uint8 r, Uint8 g, Uint8 b);
 
 #endif
 

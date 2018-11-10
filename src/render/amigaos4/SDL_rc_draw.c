@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2017 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2018 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -23,6 +23,7 @@
 #if SDL_VIDEO_RENDER_AMIGAOS4 && !SDL_RENDER_DISABLED
 
 #include "SDL_render_compositing.h"
+#include "SDL_rc_draw.h"
 
 #include <proto/graphics.h>
 
@@ -151,12 +152,11 @@ NopPoint(Uint32 old, Uint8 sr, Uint8 sg, Uint8 sb, Uint8 sa)
 }
 
 int
-OS4_RenderDrawPoints(SDL_Renderer * renderer, const SDL_FPoint * points,
-                    int count)
+OS4_RenderDrawPoints(SDL_Renderer * renderer, const SDL_Point * points,
+                    int count, SDL_BlendMode mode, Uint8 a, Uint8 r, Uint8 g, Uint8 b)
 {
     OS4_RenderData *data = (OS4_RenderData *) renderer->driverdata;
     struct BitMap *bitmap = OS4_ActivateRenderer(renderer);
-    SDL_Point *final_points;
     int i, status;
 
     int minx, miny, maxx, maxy;
@@ -165,47 +165,23 @@ OS4_RenderDrawPoints(SDL_Renderer * renderer, const SDL_FPoint * points,
         return -1;
     }
 
-    final_points = SDL_stack_alloc(SDL_Point, count);
-    if (!final_points) {
-        return SDL_OutOfMemory();
-    }
-
-    if (renderer->viewport.x || renderer->viewport.y) {
-        int x = renderer->viewport.x;
-        int y = renderer->viewport.y;
-
-        for (i = 0; i < count; ++i) {
-            final_points[i].x = (int)(x + points[i].x);
-            final_points[i].y = (int)(y + points[i].y);
-        }
-    } else {
-        for (i = 0; i < count; ++i) {
-            final_points[i].x = (int)points[i].x;
-            final_points[i].y = (int)points[i].y;
-        }
-    }
-
     minx = data->cliprect.x;
     miny = data->cliprect.y;
     maxx = data->cliprect.x + data->cliprect.w - 1;
     maxy = data->cliprect.y + data->cliprect.h - 1;
 
-    if (renderer->blendMode == SDL_BLENDMODE_NONE) {
+    if (mode == SDL_BLENDMODE_NONE) {
 
         int32 ret = 0;
 
-        Uint32 color =
-            renderer->a << 24 |
-            renderer->r << 16 |
-            renderer->g << 8 |
-            renderer->b;
+        const Uint32 color = a << 24 | r << 16 | g << 8 | b;
 
         for (i = 0; i < count; ++i) {
 
             int x, y;
 
-            x = final_points[i].x;
-            y = final_points[i].y;
+            x = points[i].x;
+            y = points[i].y;
 
             /* Clipping - is it possible clip with RastPort? */
             if (x < minx || x > maxx || y < miny || y > maxy) {
@@ -236,37 +212,37 @@ OS4_RenderDrawPoints(SDL_Renderer * renderer, const SDL_FPoint * points,
 
             Uint32 (*blendfp)(Uint32, Uint8, Uint8, Uint8, Uint8);
 
-            Uint32 width = bytesperrow / 4;
+            const Uint32 width = bytesperrow / 4;
             Uint8 sr, sg, sb, sa;
 
-            switch (renderer->blendMode) {
+            switch (mode) {
                 case SDL_BLENDMODE_BLEND:
-                    sr = MUL(renderer->a, renderer->r);
-                    sg = MUL(renderer->a, renderer->g);
-                    sb = MUL(renderer->a, renderer->b);
-                    sa = renderer->a;
+                    sr = MUL(a, r);
+                    sg = MUL(a, g);
+                    sb = MUL(a, b);
+                    sa = a;
                     blendfp = BlendPoint;
                     break;
                 case SDL_BLENDMODE_ADD:
-                    sr = MUL(renderer->a, renderer->r);
-                    sg = MUL(renderer->a, renderer->g);
-                    sb = MUL(renderer->a, renderer->b);
+                    sr = MUL(a, r);
+                    sg = MUL(a, g);
+                    sb = MUL(a, b);
                     sa = 0;
                     blendfp = AddPoint;
                     break;
                 case SDL_BLENDMODE_MOD:
-                    sr = renderer->r;
-                    sg = renderer->g;
-                    sb = renderer->b;
+                    sr = r;
+                    sg = g;
+                    sb = b;
                     sa = 0;
                     blendfp = ModPoint;
                     break;
                 default:
-                    dprintf("Unknown blend mode %d\n", renderer->blendMode);
-                    sr = renderer->r;
-                    sg = renderer->g;
-                    sb = renderer->b;
-                    sa = renderer->a;
+                    dprintf("Unknown blend mode %d\n", mode);
+                    sr = r;
+                    sg = g;
+                    sb = b;
+                    sa = a;
                     blendfp = NopPoint;
                     break;
             }
@@ -275,8 +251,8 @@ OS4_RenderDrawPoints(SDL_Renderer * renderer, const SDL_FPoint * points,
                 Uint32 newcolor, oldcolor;
                 int x, y;
 
-                x = final_points[i].x;
-                y = final_points[i].y;
+                x = points[i].x;
+                y = points[i].y;
 
                 /* Clipping */
                 if (x < minx || x > maxx || y < miny || y > maxy) {
@@ -298,8 +274,6 @@ OS4_RenderDrawPoints(SDL_Renderer * renderer, const SDL_FPoint * points,
             status = -1;
         }
     }
-
-    SDL_stack_free(final_points);
 
     return status;
 }
@@ -513,45 +487,21 @@ OS4_BlendLine(OS4_LineData * data)
 }
 
 int
-OS4_RenderDrawLines(SDL_Renderer * renderer, const SDL_FPoint * points,
-                   int count)
+OS4_RenderDrawLines(SDL_Renderer * renderer, const SDL_Point * points,
+                    int count, SDL_BlendMode mode, Uint8 a, Uint8 r, Uint8 g, Uint8 b)
 {
     OS4_RenderData *data = (OS4_RenderData *) renderer->driverdata;
     struct BitMap *bitmap = OS4_ActivateRenderer(renderer);
 
-    SDL_Point *final_points;
     int i, status;
 
     if (!bitmap) {
         return -1;
     }
 
-    final_points = SDL_stack_alloc(SDL_Point, count);
-    if (!final_points) {
-        return SDL_OutOfMemory();
-    }
-    if (renderer->viewport.x || renderer->viewport.y) {
-        int x = renderer->viewport.x;
-        int y = renderer->viewport.y;
+    if (mode == SDL_BLENDMODE_NONE) {
 
-        for (i = 0; i < count; ++i) {
-            final_points[i].x = (int)(x + points[i].x);
-            final_points[i].y = (int)(y + points[i].y);
-        }
-    } else {
-        for (i = 0; i < count; ++i) {
-            final_points[i].x = (int)points[i].x;
-            final_points[i].y = (int)points[i].y;
-        }
-    }
-
-    if (renderer->blendMode == SDL_BLENDMODE_NONE) {
-
-        Uint32 color =
-            renderer->a << 24 |
-            renderer->r << 16 |
-            renderer->g << 8 |
-            renderer->b;
+        const Uint32 color = a << 24 | r << 16 | g << 8 | b;
 
         data->iGraphics->SetRPAttrs(&data->rastport, RPTAG_APenColor, color, TAG_DONE);
 
@@ -559,10 +509,10 @@ OS4_RenderDrawLines(SDL_Renderer * renderer, const SDL_FPoint * points,
 
             int x1, y1, x2, y2;
 
-            x1 = final_points[i].x;
-            y1 = final_points[i].y;
-            x2 = final_points[i + 1].x;
-            y2 = final_points[i + 1].y;
+            x1 = points[i].x;
+            y1 = points[i].y;
+            x2 = points[i + 1].x;
+            y2 = points[i + 1].y;
 
             /* Clipping - is it possible to do with RastPort? */
             if (!SDL_IntersectRectAndLine(&data->cliprect, &x1, &y1, &x2, &y2)) {
@@ -599,44 +549,44 @@ OS4_RenderDrawLines(SDL_Renderer * renderer, const SDL_FPoint * points,
             ld.width = bytesperrow / 4;
             ld.last = SDL_FALSE;
 
-            switch (renderer->blendMode) {
+            switch (mode) {
                 case SDL_BLENDMODE_BLEND:
-                    ld.sr = MUL(renderer->a, renderer->r);
-                    ld.sg = MUL(renderer->a, renderer->g);
-                    ld.sb = MUL(renderer->a, renderer->b);
-                    ld.sa = renderer->a;
+                    ld.sr = MUL(a, r);
+                    ld.sg = MUL(a, g);
+                    ld.sb = MUL(a, b);
+                    ld.sa = a;
                     ld.blendfp = BlendPoint;
                     break;
                 case SDL_BLENDMODE_ADD:
-                    ld.sr = MUL(renderer->a, renderer->r);
-                    ld.sg = MUL(renderer->a, renderer->g);
-                    ld.sb = MUL(renderer->a, renderer->b);
+                    ld.sr = MUL(a, r);
+                    ld.sg = MUL(a, g);
+                    ld.sb = MUL(a, b);
                     ld.sa = 0;
                     ld.blendfp = AddPoint;
                     break;
                 case SDL_BLENDMODE_MOD:
-                    ld.sr = renderer->r;
-                    ld.sg = renderer->g;
-                    ld.sb = renderer->b;
-                    ld.sa = renderer->a;
+                    ld.sr = r;
+                    ld.sg = g;
+                    ld.sb = b;
+                    ld.sa = a;
                     ld.blendfp = ModPoint;
                     break;
                 default:
-                    dprintf("Unknown blend mode %d\n", renderer->blendMode);
-                    ld.sr = renderer->r;
-                    ld.sg = renderer->g;
-                    ld.sb = renderer->b;
-                    ld.sa = renderer->a;
+                    dprintf("Unknown blend mode %d\n", mode);
+                    ld.sr = r;
+                    ld.sg = g;
+                    ld.sb = b;
+                    ld.sa = a;
                     ld.blendfp = NopPoint;
                     break;
             }
 
             for (i = 0; i < count - 1; ++i) {
 
-                ld.x1 = final_points[i].x;
-                ld.y1 = final_points[i].y;
-                ld.x2 = final_points[i + 1].x;
-                ld.y2 = final_points[i + 1].y;
+                ld.x1 = points[i].x;
+                ld.y1 = points[i].y;
+                ld.x2 = points[i + 1].x;
+                ld.y2 = points[i + 1].y;
 
                 /* Clipping */
                 if (!SDL_IntersectRectAndLine(&data->cliprect, &ld.x1, &ld.y1, &ld.x2, &ld.y2)) {
@@ -659,8 +609,6 @@ OS4_RenderDrawLines(SDL_Renderer * renderer, const SDL_FPoint * points,
         }
 
     }
-
-    SDL_stack_free(final_points);
 
     return status;
 }
