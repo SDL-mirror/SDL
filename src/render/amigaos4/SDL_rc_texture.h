@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2016 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2018 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -38,12 +38,6 @@ extern int OS4_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture);
 
 extern int OS4_SetTextureColorMod(SDL_Renderer * renderer,
                                  SDL_Texture * texture);
-
-extern int OS4_SetTextureAlphaMod(SDL_Renderer * renderer,
-                                 SDL_Texture * texture);
-
-extern int OS4_SetTextureBlendMode(SDL_Renderer * renderer,
-                                  SDL_Texture * texture);
 
 extern int OS4_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                             const SDL_Rect * rect, const void *pixels,

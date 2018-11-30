@@ -218,22 +218,6 @@ OS4_SetTextureColorMod(SDL_Renderer * renderer, SDL_Texture * texture)
 }
 
 int
-OS4_SetTextureAlphaMod(SDL_Renderer * renderer, SDL_Texture * texture)
-{
-    if (texture->a) {
-        //dprintf("Texture alpha %d\n", texture->a);
-    }
-
-    return 0;
-}
-
-int
-OS4_SetTextureBlendMode(SDL_Renderer * renderer, SDL_Texture * texture)
-{
-    return OS4_IsBlendModeSupported(texture->blendMode) ? 0 : -1;
-}
-
-int
 OS4_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
                  const SDL_Rect * rect, const void *pixels, int pitch)
 {
@@ -257,6 +241,14 @@ OS4_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
     }
 
     if (OS4_IsColorModEnabled(texture)) {
+
+        if (!texturedata->finalbitmap) {
+            if (!(texturedata->finalbitmap = OS4_AllocBitMap(renderer, texture->w, texture->h, 32))) {
+                dprintf("Failed to allocate final bitmap\n");
+                return SDL_OutOfMemory();
+            }
+        }
+
         // This can be really slow, if done per frame
         if (!OS4_ModulateRGB(renderer, texture, (Uint8 *)pixels, pitch)) {
             return SDL_SetError("RGB modulation failed");

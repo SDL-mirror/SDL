@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2017 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2018 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -28,6 +28,7 @@
 #include "SDL_os4video.h"
 #include "SDL_os4window.h"
 
+#include "SDL_hints.h"
 #include "../../events/SDL_mouse_c.h"
 
 #define DEBUG
@@ -458,6 +459,7 @@ OS4_InitMouse(_THIS)
     //SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
 
     SDL_Mouse *mouse = SDL_GetMouse();
+    char buffer[16];
 
     mouse->CreateCursor = OS4_CreateCursor;
     mouse->CreateSystemCursor = OS4_CreateSystemCursor;
@@ -473,7 +475,8 @@ OS4_InitMouse(_THIS)
 
     hidden = OS4_CreateHiddenCursor();
 
-    SDL_SetDoubleClickTime( OS4_GetDoubleClickTimeInMillis(_this) );
+    SDL_SetHint(SDL_HINT_MOUSE_DOUBLE_CLICK_TIME,
+        SDL_uitoa(OS4_GetDoubleClickTimeInMillis(_this), buffer, 10));
 }
 
 void
