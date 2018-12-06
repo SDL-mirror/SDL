@@ -142,27 +142,24 @@ OS4_FindApplicationName(_THIS)
     SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
 
     size_t size;
+    const size_t maxPathLen = 255;
+    char pathBuffer[maxPathLen];
 
-    char pathBuffer[MAX_DOS_PATH];
-    char nameBuffer[MAX_DOS_FILENAME];
-
-    if (IDOS->GetCliProgramName(pathBuffer, MAX_DOS_PATH - 1)) {
-        CONST_STRPTR filePart = IDOS->FilePart(pathBuffer);
-
-        snprintf(nameBuffer, MAX_DOS_FILENAME, "%s", filePart);
+    if (IDOS->GetCliProgramName(pathBuffer, maxPathLen - 1)) {
+        dprintf("GetCliProgramName: '%s'\n", pathBuffer);
     } else {
         dprintf("Failed to get CLI program name, checking task node\n");
 
         struct Task* me = IExec->FindTask(NULL);
-        snprintf(nameBuffer, MAX_DOS_FILENAME, "%s", ((struct Node *)me)->ln_Name);
+        SDL_snprintf(pathBuffer, maxPathLen, "%s", ((struct Node *)me)->ln_Name);
     }
 
-    size = SDL_strlen(nameBuffer) + 1;
+    size = SDL_strlen(pathBuffer) + 1;
 
     data->appName = SDL_malloc(size);
 
     if (data->appName) {
-        snprintf(data->appName, size, nameBuffer);
+        SDL_snprintf(data->appName, size, pathBuffer);
     }
 
     dprintf("Application name: '%s'\n", data->appName);

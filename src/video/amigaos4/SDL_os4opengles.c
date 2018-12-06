@@ -144,7 +144,7 @@ OS4_GLES_CreateContext(_THIS, SDL_Window * window)
         dprintf("Depth buffer size %d, stencil buffer size %d\n",
             _this->gl_config.depth_size, _this->gl_config.stencil_size);
 
-        data->glContext = aglCreateContextTags(
+        data->glContext = aglCreateContextTags2(
             &errCode,
             OGLES2_CCT_WINDOW, (ULONG)data->syswin,
             OGLES2_CCT_VSYNC, 0,

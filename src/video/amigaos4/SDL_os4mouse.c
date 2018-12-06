@@ -43,6 +43,7 @@ typedef struct SDL_CursorData {
     int hot_y;
     ULONG type;
     Object *object;
+    Uint32 *imageData;
 } SDL_CursorData;
 
 static UWORD fallbackPointerData[2 * 16] = { 0 };
@@ -99,7 +100,7 @@ OS4_CreateDefaultCursor()
 {
     SDL_Cursor *cursor = OS4_CreateCursorInternal();
 
-    dprintf("Called\n");
+    dprintf("%p\n", cursor);
 
     if (cursor && cursor->driverdata) {
         SDL_CursorData *data = cursor->driverdata;
@@ -110,12 +111,47 @@ OS4_CreateDefaultCursor()
     return cursor;
 }
 
+static Uint32*
+OS4_CopyImageData(SDL_Surface * surface)
+{
+    const size_t bytesPerRow = surface->w * sizeof(Uint32);
+    Uint32* buffer = SDL_malloc(bytesPerRow * surface->h);
+
+    dprintf("Copying cursor data %d*%d from surface %p to buffer %p\n",
+        surface->w, surface->h, surface, buffer);
+
+    if (buffer) {
+
+        if (SDL_MUSTLOCK(surface)) {
+            SDL_LockSurface(surface);
+        }
+
+        Uint8* source = surface->pixels;
+        Uint32* destination = buffer;
+        int y;
+
+        for (y = 0; y < surface->h; y++) {
+            SDL_memcpy(destination, source, bytesPerRow);
+            destination += surface->w;
+            source += surface->pitch;
+        }
+
+        if (SDL_MUSTLOCK(surface)) {
+            SDL_UnlockSurface(surface);
+        }
+    } else {
+        dprintf("Failed to allocate memory\n");
+    }
+
+    return buffer;
+}
+
 static SDL_Cursor*
 OS4_CreateCursor(SDL_Surface * surface, int hot_x, int hot_y)
 {
     SDL_Cursor *cursor = OS4_CreateCursorInternal();
 
-    dprintf("Called %p %d %d\n", surface, hot_x, hot_y);
+    dprintf("Surface %p, cursor %p, hot_x %d, hot_y %d\n", surface, cursor, hot_x, hot_y);
 
     if (cursor && cursor->driverdata) {
 
@@ -126,6 +162,8 @@ OS4_CreateCursor(SDL_Surface * surface, int hot_x, int hot_y)
         } else {
             _THIS = SDL_GetVideoDevice();
 
+            Uint32* buffer = OS4_CopyImageData(surface);
+
             /* We need to pass some compatibility parameters
             even though we are going to use just ARGB pointer */
 
@@ -135,10 +173,10 @@ OS4_CreateCursor(SDL_Surface * surface, int hot_x, int hot_y)
                 POINTERA_BitMap, &fallbackPointerBitMap,
                 POINTERA_XOffset, hot_x,
                 POINTERA_YOffset, hot_y,
-                //POINTERA_WordWidth, 1,
-                //POINTERA_XResolution, POINTERXRESN_SCREENRES,
-                //POINTERA_YResolution, POINTERYRESN_SCREENRES,
-                POINTERA_ImageData, surface->pixels,
+                POINTERA_WordWidth, 1,
+                POINTERA_XResolution, POINTERXRESN_SCREENRES,
+                POINTERA_YResolution, POINTERYRESN_SCREENRES,
+                POINTERA_ImageData, buffer,
                 POINTERA_Width, surface->w,
                 POINTERA_Height, surface->h,
                 TAG_DONE);
@@ -146,6 +184,7 @@ OS4_CreateCursor(SDL_Surface * surface, int hot_x, int hot_y)
             if (object) {
                 SDL_CursorData *data = cursor->driverdata;
                 data->object = object;
+                data->imageData = buffer;
             } else {
                 dprintf("Failed to create pointer object\n");
             }
@@ -158,17 +197,16 @@ OS4_CreateCursor(SDL_Surface * surface, int hot_x, int hot_y)
 static SDL_Cursor*
 OS4_CreateHiddenCursor()
 {
+    dprintf("Called\n");
+
     /* Create invisible 1*1 cursor because system version (POINTERTYPE_NONE) has a shadow */
 
     SDL_Cursor *cursor = NULL;
     SDL_Surface *surface = SDL_CreateRGBSurface(0, 1, 1, 32,
         0xFF000000, 0x00FF0000, 0x0000FF00, 0x000000FF);
 
-    dprintf("Called\n");
-
     if (surface) {
-
-        SDL_FillRect(surface, NULL, 0);
+        SDL_FillRect(surface, NULL, 0x0);
 
         cursor = OS4_CreateCursor(surface, 0, 0);
 
@@ -295,12 +333,22 @@ OS4_FreeCursor(SDL_Cursor * cursor)
     dprintf("Called %p\n", cursor);
 
     if (data) {
-
         if (data->object) {
             _THIS = SDL_GetVideoDevice();
+            SDL_Mouse *mouse = SDL_GetMouse();
+
+            if (mouse->cur_cursor == cursor) {
+                dprintf("Reset to POINTERTYPE_NONE before object disposal\n");
+                OS4_SetPointerForEachWindow(POINTERTYPE_NONE, NULL);
+            }
 
             IIntuition->DisposeObject(data->object);
             data->object = NULL;
+        }
+
+        if (data->imageData) {
+            SDL_free(data->imageData);
+            data->imageData = NULL;
         }
 
         SDL_free(data);
@@ -487,13 +535,14 @@ OS4_QuitMouse(_THIS)
     if (mouse->def_cursor) {
         OS4_FreeCursor(mouse->def_cursor);
         mouse->def_cursor = NULL;
-        mouse->cur_cursor = NULL;
     }
 
     if (hidden) {
         OS4_FreeCursor(hidden);
         hidden = NULL;
     }
+
+    mouse->cur_cursor = NULL;
 }
 
 #endif /* SDL_VIDEO_DRIVER_AMIGAOS4 */
