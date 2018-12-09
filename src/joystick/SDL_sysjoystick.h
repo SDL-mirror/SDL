@@ -141,6 +141,7 @@ typedef struct _SDL_JoystickDriver
 } SDL_JoystickDriver;
 
 /* The available joystick drivers */
+extern SDL_JoystickDriver SDL_AMIGAINPUT_JoystickDriver;
 extern SDL_JoystickDriver SDL_ANDROID_JoystickDriver;
 extern SDL_JoystickDriver SDL_BSD_JoystickDriver;
 extern SDL_JoystickDriver SDL_DARWIN_JoystickDriver;
