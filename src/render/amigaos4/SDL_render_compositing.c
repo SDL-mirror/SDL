@@ -66,6 +66,12 @@ static const uint16 OS4_QuadIndices[] = {
     0, 1, 2, 2, 3, 0
 };
 
+typedef struct {
+    float srcAlpha;
+    float destAlpha;
+    uint32 flags;
+} OS4_CompositingParams;
+
 static SDL_bool
 OS4_IsVsyncEnabled()
 {
@@ -274,18 +280,35 @@ OS4_GetCompositeFlags(SDL_BlendMode mode)
     return flags;
 }
 
-static float
-OS4_GetCompositeAlpha(SDL_Texture * texture)
+static void
+OS4_SetupCompositing(SDL_Texture * src, SDL_Texture * dest, OS4_CompositingParams * params)
 {
-    float alpha;
+    params->flags = COMPFLAG_HardwareOnly;
 
-    if (texture->blendMode == SDL_BLENDMODE_NONE) {
-        alpha = 1.0f;
-    } else {
-        alpha = (float)texture->a / 255.0f;
+    if (OS4_GetScaleQuality()) {
+        params->flags |= COMPFLAG_SrcFilter;
     }
 
-    return alpha;
+    if (src->blendMode == SDL_BLENDMODE_NONE) {
+        params->flags |= COMPFLAG_SrcAlphaOverride;
+        params->srcAlpha = 1.0f;
+    } else {
+        params->srcAlpha = src->a / 255.0f;
+    }
+
+    if (dest) {
+        if (dest->blendMode == SDL_BLENDMODE_NONE) {
+            params->flags |= COMPFLAG_IgnoreDestAlpha | COMPFLAG_DestAlphaOverride;
+            params->destAlpha = 1.0f;
+        } else {
+            //if (dest->modMode & SDL_TEXTUREMODULATE_ALPHA) {
+                params->destAlpha = dest->a / 255.0f;
+            //}
+        }
+    } else {
+        params->flags |= COMPFLAG_IgnoreDestAlpha;
+        params->destAlpha = 1.0f;
+    }
 }
 
 static void
@@ -477,6 +500,7 @@ OS4_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
     struct BitMap *src = OS4_IsColorModEnabled(texture) ?
         texturedata->finalbitmap : texturedata->bitmap;
 
+    OS4_CompositingParams params;
     float scalex, scaley;
     uint32 ret_code;
 
@@ -486,6 +510,8 @@ OS4_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
         return -1;
     }
 
+    OS4_SetupCompositing(texture, renderer->target, &params);
+
     scalex = srcrect->w ? (float)dstrect->w / srcrect->w : 1.0f;
     scaley = srcrect->h ? (float)dstrect->h / srcrect->h : 1.0f;
 
@@ -493,7 +519,7 @@ OS4_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
         OS4_ConvertBlendMode(texture->blendMode),
         src,
         dst,
-        COMPTAG_SrcAlpha,   COMP_FLOAT_TO_FIX(OS4_GetCompositeAlpha(texture)),
+        COMPTAG_SrcAlpha,   COMP_FLOAT_TO_FIX(params.srcAlpha),
         COMPTAG_SrcX,       srcrect->x,
         COMPTAG_SrcY,       srcrect->y,
         COMPTAG_SrcWidth,   srcrect->w,
@@ -502,11 +528,12 @@ OS4_RenderCopy(SDL_Renderer * renderer, SDL_Texture * texture,
         COMPTAG_OffsetY,    dstrect->y,
         COMPTAG_ScaleX,     COMP_FLOAT_TO_FIX(scalex),
         COMPTAG_ScaleY,     COMP_FLOAT_TO_FIX(scaley),
+        COMPTAG_DestAlpha,  COMP_FLOAT_TO_FIX(params.destAlpha),
         COMPTAG_DestX,      data->cliprect.x,
         COMPTAG_DestY,      data->cliprect.y,
         COMPTAG_DestWidth,  data->cliprect.w,
         COMPTAG_DestHeight, data->cliprect.h,
-        COMPTAG_Flags,      OS4_GetCompositeFlags(texture->blendMode),
+        COMPTAG_Flags,      params.flags,
         TAG_END);
 
     if (ret_code) {
@@ -534,22 +561,26 @@ OS4_RenderCopyEx(SDL_Renderer * renderer, SDL_Texture * texture, const OS4_Verte
     struct BitMap *src = OS4_IsColorModEnabled(texture) ?
         texturedata->finalbitmap : texturedata->bitmap;
 
+    OS4_CompositingParams params;
     uint32 ret_code;
 
     if (!dst) {
         return -1;
     }
 
+    OS4_SetupCompositing(texture, renderer->target, &params);
+
     ret_code = data->iGraphics->CompositeTags(
         OS4_ConvertBlendMode(texture->blendMode),
         src,
         dst,
-        COMPTAG_SrcAlpha,   COMP_FLOAT_TO_FIX(OS4_GetCompositeAlpha(texture)),
+        COMPTAG_SrcAlpha,   COMP_FLOAT_TO_FIX(params.srcAlpha),
+        COMPTAG_DestAlpha,  COMP_FLOAT_TO_FIX(params.destAlpha),
         COMPTAG_DestX,      data->cliprect.x,
         COMPTAG_DestY,      data->cliprect.y,
         COMPTAG_DestWidth,  data->cliprect.w,
         COMPTAG_DestHeight, data->cliprect.h,
-        COMPTAG_Flags,      OS4_GetCompositeFlags(texture->blendMode),
+        COMPTAG_Flags,      params.flags,
         COMPTAG_VertexArray, vertices,
         COMPTAG_VertexFormat, COMPVF_STW0_Present,
         COMPTAG_NumTriangles, 2,
