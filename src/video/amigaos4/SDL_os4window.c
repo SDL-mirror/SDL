@@ -82,6 +82,8 @@ static void
 OS4_RemoveAppWindow(_THIS, SDL_WindowData *data)
 {
     if (data->appWin) {
+        dprintf("Removing AppWindow\n");
+
         if (IWorkbench->RemoveAppWindow(data->appWin) == FALSE) {
             dprintf("Failed to remove AppWindow\n");
         }
@@ -93,6 +95,8 @@ static void
 OS4_RemoveAppIcon(_THIS, SDL_WindowData *data)
 {
     if (data->appIcon) {
+        dprintf("Removing AppIcon\n");
+
         if (IWorkbench->RemoveAppIcon(data->appIcon) == FALSE) {
             dprintf("Failed to remove AppIcon\n");
         }
@@ -596,6 +600,11 @@ OS4_HideWindow(_THIS, SDL_Window * window)
 {
     SDL_WindowData *data = window->driverdata;
 
+    if (window->is_destroying) {
+        dprintf("Ignore hide request, window '%s' is destroying\n", window->title);
+        return;
+    }
+
     if (data && data->syswin) {
         BOOL result;
 
@@ -651,12 +660,14 @@ OS4_CloseWindow(_THIS, SDL_Window * sdlwin)
         if (data->syswin) {
 
             if (data->gadget) {
+                dprintf("Removing gadget and disposing it\n");
                 IIntuition->RemoveGadget(data->syswin, data->gadget);
                 IIntuition->DisposeObject((Object *)data->gadget);
                 data->gadget = NULL;
             }
 
             if (data->image) {
+                dprintf("Disposing gadget image\n");
                 IIntuition->DisposeObject((Object *)data->image);
                 data->image = NULL;
             }

@@ -99,6 +99,8 @@ OS4_LockPubScreen(_THIS)
 {
     SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
 
+    dprintf("Locking public screen\n");
+
     data->publicScreen = IIntuition->LockPubScreen(NULL);
 
     if (data->publicScreen) {
@@ -116,7 +118,7 @@ OS4_UnlockPubScreen(_THIS)
     SDL_VideoData *data = (SDL_VideoData *) _this->driverdata;
 
     if (data->publicScreen) {
-        dprintf("Called\n");
+        dprintf("Unlocking public screen %p\n", data->publicScreen);
 
         IIntuition->UnlockPubScreen(NULL, data->publicScreen);
         data->publicScreen = NULL;

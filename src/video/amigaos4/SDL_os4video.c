@@ -49,23 +49,16 @@
 
 #define OS4VID_DRIVER_NAME "os4"
 
-/* Initialization/Query functions */
 static int OS4_VideoInit(_THIS);
 static void OS4_VideoQuit(_THIS);
 
 SDL_bool (*OS4_ResizeGlContext)(_THIS, SDL_Window * window) = NULL;
-
-/* OS4 driver bootstrap functions */
 
 static int
 OS4_Available(void)
 {
     return (1);
 }
-
-/*
- * Libraries required by OS4 video driver
- */
 
 #define MIN_LIB_VERSION 51
 
@@ -242,35 +235,41 @@ OS4_FreeSystemResources(_THIS)
     OS4_DropInterface((void *)&IInput);
 
     if (data->inputReq) {
-        dprintf("Deleting input.device\n");
+        dprintf("Closing input.device\n");
         //IExec->AbortIO((struct IORequest *)data->inputReq);
         //IExec->WaitIO((struct IORequest *)data->inputReq);
         IExec->CloseDevice((struct IORequest *)data->inputReq);
 
-        dprintf("Deleting IORequest\n");
+        dprintf("Freeing IORequest\n");
         IExec->FreeSysObject(ASOT_IOREQUEST, (void *)data->inputReq);
     }
 
     if (data->inputPort) {
-        dprintf("Deleting MsgPort\n");
+        dprintf("Freeing MsgPort\n");
         IExec->FreeSysObject(ASOT_PORT, (void *)data->inputPort);
     }
 
     if (data->pool) {
+        dprintf("Freeing memory pool\n");
         IExec->FreeSysObject(ASOT_MEMPOOL, data->pool);
     }
 
     if (data->appMsgPort) {
         struct Message *msg;
 
+        dprintf("Replying app messages\n");
+
         while ((msg = IExec->GetMsg(data->appMsgPort))) {
             IExec->ReplyMsg((struct Message *) msg);
         }
+
+        dprintf("Freeing app message port\n");
 
         IExec->FreeSysObject(ASOT_PORT, data->appMsgPort);
     }
 
     if (data->userPort) {
+        dprintf("Freeing user port\n");
         IExec->FreeSysObject(ASOT_PORT, data->userPort);
     }
 
@@ -517,9 +516,9 @@ OS4_VideoQuit(_THIS)
 {
     dprintf("Called\n");
 
-    OS4_QuitModes(_this);
-    OS4_QuitKeyboard(_this);
     OS4_QuitMouse(_this);
+    OS4_QuitKeyboard(_this);
+    OS4_QuitModes(_this);
 }
 
 void *
