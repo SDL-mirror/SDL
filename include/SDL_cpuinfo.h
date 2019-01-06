@@ -50,15 +50,26 @@
 #elif defined(__MINGW64_VERSION_MAJOR)
 #include <intrin.h>
 #else
-#ifdef __ALTIVEC__
-#if defined(HAVE_ALTIVEC_H) && !defined(__APPLE_ALTIVEC__) && !defined(SDL_DISABLE_ALTIVEC_H)
+/* altivec.h redefining bool causes a number of problems, see bugs 3993 and 4392, so you need to explicitly define SDL_ENABLE_ALTIVEC_H to have it included. */
+#if defined(HAVE_ALTIVEC_H) && defined(__ALTIVEC__) && !defined(__APPLE_ALTIVEC__) && defined(SDL_ENABLE_ALTIVEC_H)
 #include <altivec.h>
-#undef pixel
-#undef bool
 #endif
-#endif
-#if defined(__ARM_NEON__) && !defined(SDL_DISABLE_ARM_NEON_H)
-#include <arm_neon.h>
+#if !defined(SDL_DISABLE_ARM_NEON_H)
+#  if defined(__ARM_NEON)
+#    include <arm_neon.h>
+#  elif defined(__WINDOWS__) || defined(__WINRT__)
+/* Visual Studio doesn't define __ARM_ARCH, but _M_ARM (if set, always 7), and _M_ARM64 (if set, always 1). */
+#    if defined(_M_ARM)
+#      include <armintr.h>
+#      include <arm_neon.h>
+#    endif
+#    if defined (_M_ARM64)
+#      include <armintr.h>
+#      include <arm_neon.h>
+#    endif
+/* Set __ARM_NEON so that it can be used elsewhere, at compile time */
+#    define __ARM_NEON 1
+#  endif
 #endif
 #if defined(__3dNOW__) && !defined(SDL_DISABLE_MM3DNOW_H)
 #include <mm3dnow.h>
