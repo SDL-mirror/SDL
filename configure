@@ -15786,6 +15786,14 @@ find_lib()
             return
         fi
     done
+    # Try again, this time allowing more than one version digit after the .so
+    for path in $env_lib_path $gcc_bin_path $gcc_lib_path $host_lib_path; do
+        lib=`ls -- $path/$1 2>/dev/null | sed -e 's,.*/,,' | sort | tail -1`
+        if test x$lib != x; then
+            echo $lib
+            return
+        fi
+    done
 }
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for an ANSI C-conforming const" >&5
@@ -19418,6 +19426,7 @@ _ACEOF
     fi
 }
 
+
 CheckNativeClient()
 {
         cat confdefs.h - <<_ACEOF >conftest.$ac_ext
@@ -21780,6 +21789,7 @@ $as_echo_n "checking for EGL support... " >&6; }
 
           #define LINUX
           #define EGL_API_FB
+          #define MESA_EGL_NO_X11_HEADERS
           #include <EGL/egl.h>
           #include <EGL/eglext.h>
 
@@ -24247,6 +24257,7 @@ $as_echo "#define SDL_TIMER_UNIX 1" >>confdefs.h
             SOURCES="$SOURCES $srcdir/src/core/linux/SDL_evdev*.c"
         fi
         # Set up other core UNIX files
+        SOURCES="$SOURCES $srcdir/src/core/linux/SDL_threadprio.c"
         SOURCES="$SOURCES $srcdir/src/core/unix/*.c"
         ;;
     *-*-cygwin* | *-*-mingw32*)
@@ -25005,7 +25016,7 @@ DEPENDS=`echo $SOURCES | tr ' ' '\n'`
 for EXT in asm cc m c S; do
     OBJECTS=`echo "$OBJECTS" | sed 's,[^ ]*/\([^ ]*\)\.'$EXT',$(objects)/\1.lo,g'`
     DEPENDS=`echo "$DEPENDS" | sed "s,^\\([^ ]*\\)/\\([^ ]*\\)\\.$EXT\\$,\\\\
-\\$(objects)/\\2.lo: \\1/\\2.$EXT\\\\
+\\$(objects)/\\2.lo: \\1/\\2.$EXT \\$(objects)/.created\\\\
 	\\$(RUN_CMD_CC)\\$(LIBTOOL) --tag=CC --mode=compile \\$(CC) \\$(CFLAGS) \\$(EXTRA_CFLAGS) $DEPENDENCY_TRACKING_OPTIONS -c \\$< -o \\$@,g"`
 done
 
@@ -25022,14 +25033,14 @@ SDLMAIN_OBJECTS=`echo $SDLMAIN_SOURCES`
 SDLMAIN_DEPENDS=`echo $SDLMAIN_SOURCES`
 SDLMAIN_OBJECTS=`echo "$SDLMAIN_OBJECTS" | sed 's,[^ ]*/\([^ ]*\)\.c,$(objects)/\1.lo,g'`
 SDLMAIN_DEPENDS=`echo "$SDLMAIN_DEPENDS" | sed "s,\\([^ ]*\\)/\\([^ ]*\\)\\.c,\\\\
-\\$(objects)/\\2.lo: \\1/\\2.c\\\\
+\\$(objects)/\\2.lo: \\1/\\2.c \\$(objects)/.created\\\\
 	\\$(RUN_CMD_CC)\\$(LIBTOOL) --tag=CC --mode=compile \\$(CC) \\$(CFLAGS) \\$(EXTRA_CFLAGS) $DEPENDENCY_TRACKING_OPTIONS -c \\$< -o \\$@,g"`
 
 SDLTEST_OBJECTS=`echo $SDLTEST_SOURCES`
 SDLTEST_DEPENDS=`echo $SDLTEST_SOURCES`
 SDLTEST_OBJECTS=`echo "$SDLTEST_OBJECTS" | sed 's,[^ ]*/\([^ ]*\)\.c,$(objects)/\1.lo,g'`
 SDLTEST_DEPENDS=`echo "$SDLTEST_DEPENDS" | sed "s,\\([^ ]*\\)/\\([^ ]*\\)\\.c,\\\\
-\\$(objects)/\\2.lo: \\1/\\2.c\\\\
+\\$(objects)/\\2.lo: \\1/\\2.c \\$(objects)/.created\\\\
 	\\$(RUN_CMD_CC)\\$(LIBTOOL) --tag=CC --mode=compile \\$(CC) \\$(CFLAGS) \\$(EXTRA_CFLAGS) $DEPENDENCY_TRACKING_OPTIONS -c \\$< -o \\$@,g"`
 
 # Set runtime shared library paths as needed

@@ -26,6 +26,7 @@
 
 #include "../SDL_sysvideo.h"
 #include "SDL_syswm.h"
+#include "../../events/SDL_touch_c.h"
 
 #include "SDL_waylandvideo.h"
 
@@ -62,11 +63,21 @@ typedef struct {
     struct SDL_WaylandInput *keyboard_device;
     EGLSurface egl_surface;
     struct zwp_locked_pointer_v1 *locked_pointer;
+    struct zxdg_toplevel_decoration_v1 *server_decoration;
     struct org_kde_kwin_server_decoration *kwin_server_decoration;
 
 #ifdef SDL_VIDEO_DRIVER_WAYLAND_QT_TOUCH
     struct qt_extended_surface *extended_surface;
-#endif /* SDL_VIDEO_DRIVER_WAYLAND_QT_TOUCH */    
+#endif /* SDL_VIDEO_DRIVER_WAYLAND_QT_TOUCH */
+
+    struct {
+        SDL_bool pending;
+        uint32_t serial;
+        int width, height;
+    } resize;
+
+    SDL_bool finger_touching;  /* for mapping touch events to mice */
+    SDL_FingerID first_finger;
 } SDL_WindowData;
 
 extern void Wayland_ShowWindow(_THIS, SDL_Window *window);
