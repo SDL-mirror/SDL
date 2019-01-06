@@ -11,13 +11,13 @@ OpenGL ES 2.0 (optional)
 Building SDL 2.0 library
 ================================================================================
 
-    sh configure --disable-altivec --prefix=/SDK/local/newlib/
+    sh configure --disable-altivec --prefix=/SDK/local/newlib
     make
 
 After building, "make install" should work. Optionally you can also build tests:
 
     cd test
-    sh configure
+    sh configure --prefix=/SDK/local/newlib
     make
 
 ================================================================================
@@ -83,6 +83,21 @@ also the default setup.
 
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 1);
     SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 3);
+
+================================================================================
+About Joysticks
+================================================================================
+
+Joysticks that are compatible with AmigaInput can be used with SDL2. In addition
+to legacy joystick API, SDL supports new game controller API which uses a
+predefined database to map joystick axes and buttons. At the moment
+game controller database contains only one entry:
+
+- Speedlink Competition Pro
+
+Joysticks can be tested using testjoystick tool. New game controller mappings
+can be generated using controllermap tool. New mappings can be then added to
+the game controller database.
 
 ================================================================================
 WinUAE
