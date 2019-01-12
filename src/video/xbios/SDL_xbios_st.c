@@ -158,6 +158,10 @@ static void getScreenFormat(_THIS, int bpp, Uint32 *rmask, Uint32 *gmask, Uint32
 
 static int getLineWidth(_THIS, xbiosmode_t *new_video_mode, int width, int bpp)
 {
+	if (bpp==4) {
+		return (width >> 1);
+	}
+
 	return (width * (((bpp==15) ? 16 : bpp)>>3));
 }
 
