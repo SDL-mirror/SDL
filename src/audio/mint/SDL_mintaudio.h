@@ -121,6 +121,10 @@ void SDL_MintAudio_WaitThread(void);
 extern volatile unsigned long SDL_MintAudio_clocktics;
 extern volatile unsigned long SDL_MintAudio_num_its;
 
+extern volatile void *SDL_MintAudio_itbuffer;
+extern volatile unsigned long SDL_MintAudio_itbuflen;
+extern volatile unsigned long SDL_MintAudio_itsilence;
+
 /* Functions */
 void SDL_MintAudio_XbiosInterruptMeasureClock(void);
 void SDL_MintAudio_XbiosInterrupt(void);

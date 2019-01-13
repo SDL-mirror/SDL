@@ -71,22 +71,47 @@ SDL_MintAudio_EndIntMeasure:
 
 _SDL_MintAudio_XbiosInterrupt:
 _SDL_MintAudio_Dma8Interrupt:
+#if defined(__mcoldfire__)
+	lea	sp@(-12),sp
+	moveml	d0-d1/a0,sp@
+#else
+	moveml	d0-d1/a0,sp@-
+#endif
 
 	/* Clear service bit, so other MFP interrupts can work */
 #if defined(__mcoldfire__)
-	movel	d0,sp@-
-
 	moveql	#5,d0
 	bclr	d0,0xfffffa0f:w
-
-	movel	sp@+,d0
 #else
 	bclr	#5,0xfffffa0f:w
 #endif
 
 _SDL_MintAudio_StfaInterrupt:
-	addql	#1,_SDL_MintAudio_num_its
+	move.l	_SDL_MintAudio_num_its,d0
+	addql	#1,d0
+	move.l	d0,_SDL_MintAudio_num_its
+ 
+	cmp.l	#5,d0
+	bmi.s	_SDL_MintAudio_nosilence
 
+	move.l	_SDL_MintAudio_itbuffer,d1
+	beq.s	_SDL_MintAudio_nosilence
+	move.l	d1,a0
+
+	move.l	_SDL_MintAudio_itbuflen,d0
+	move.l	_SDL_MintAudio_itsilence,d1
+_SDL_MintAudio_fillsilence:
+	move.l	d1,a0@+
+	subq.l	#1,d0
+	bpl.s	_SDL_MintAudio_fillsilence
+
+_SDL_MintAudio_nosilence:
+#if defined(__mcoldfire__)
+	moveml	sp@,d0-d1/a0
+	lea	sp@(12),sp
+#else
+	moveml	sp@+,d0-d1/a0
+#endif
 	rte
 
 	.bss
@@ -94,3 +119,7 @@ _SDL_MintAudio_StfaInterrupt:
 	.even
 	.comm	_SDL_MintAudio_clocktics,4
 	.comm	_SDL_MintAudio_num_its,4
+
+	.comm	_SDL_MintAudio_itbuffer,4	/* Audio DMA buffer */
+	.comm	_SDL_MintAudio_itbuflen,4	/* Length in longword */
+	.comm	_SDL_MintAudio_itsilence,4	/* Silence value */
