@@ -75,6 +75,7 @@ long SDL_MintAudio_thread_pid;
 
 int SDL_MintAudio_InitBuffers(SDL_AudioSpec *spec)
 {
+	int dmabuflen;
 	SDL_AudioDevice *this = SDL_MintAudio_device;
 
 	SDL_CalculateAudioSpec(spec);
@@ -87,13 +88,14 @@ int SDL_MintAudio_InitBuffers(SDL_AudioSpec *spec)
 	}
 
 	/* Allocate audio buffers memory for hardware in DMA-able RAM */
-	MINTAUDIO_audiobuf[0] = Atari_SysMalloc(2 * MINTAUDIO_audiosize, MX_STRAM);
+	dmabuflen = ((2 * MINTAUDIO_audiosize) | 3)+1;
+	MINTAUDIO_audiobuf[0] = Atari_SysMalloc(dmabuflen, MX_STRAM);
 	if (MINTAUDIO_audiobuf[0]==NULL) {
 		SDL_SetError("SDL_MintAudio_OpenAudio: Not enough memory for audio buffer");
 		return (0);
 	}
 	MINTAUDIO_audiobuf[1] = MINTAUDIO_audiobuf[0] + MINTAUDIO_audiosize;
-	SDL_memset(MINTAUDIO_audiobuf[0], spec->silence, 2 * MINTAUDIO_audiosize);
+	SDL_memset(MINTAUDIO_audiobuf[0], spec->silence, dmabuflen);
 
 	DEBUG_PRINT((DEBUG_NAME "buffer 0 at 0x%p\n", MINTAUDIO_audiobuf[0]));
 	DEBUG_PRINT((DEBUG_NAME "buffer 1 at 0x%p\n", MINTAUDIO_audiobuf[1]));
