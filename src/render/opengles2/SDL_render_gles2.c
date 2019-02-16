@@ -2091,7 +2091,7 @@ GLES2_CreateRenderer(SDL_Window *window, Uint32 flags)
     data->myglEnableVertexAttribArray(GLES2_ATTRIBUTE_POSITION);
     data->myglDisableVertexAttribArray(GLES2_ATTRIBUTE_TEXCOORD);
 
-    data->glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+    data->myglClearColor(1.0f, 1.0f, 1.0f, 1.0f);
 
     data->drawstate.blend = SDL_BLENDMODE_INVALID;
     data->drawstate.color = 0xFFFFFFFF;
