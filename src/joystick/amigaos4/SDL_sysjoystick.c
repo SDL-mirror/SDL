@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2018 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2019 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -218,13 +218,11 @@ AMIGAINPUT_JoystickInit(void)
             };
 
 #if OLDSDK
-            dprintf("ENUM RETURNED: %ld\n",
-                (int32)SDL_IAIN->AIN_EnumDevices(joystickContext, AMIGAINPUT_EnumerateJoysticks, &packet));
+            BOOL result = SDL_IAIN->AIN_EnumDevices(joystickContext, AMIGAINPUT_EnumerateJoysticks, &packet);
 #else
-            dprintf("ENUM RETURNED: %ld\n",
-                (int32)SDL_IAIN->EnumDevices(joystickContext, AMIGAINPUT_EnumerateJoysticks, &packet));
+            BOOL result = SDL_IAIN->EnumDevices(joystickContext, AMIGAINPUT_EnumerateJoysticks, &packet);
 #endif
-
+            dprintf("EnumDevices returned %d\n", result);
             dprintf("Found %d joysticks\n", joystickCount);
         }
 

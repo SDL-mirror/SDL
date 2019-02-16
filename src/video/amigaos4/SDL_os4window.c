@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2018 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2019 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -321,6 +321,19 @@ OS4_CreateIconifyGadget(_THIS, SDL_Window * window)
     }
 }
 
+static void
+OS4_CreateIconifyGadgetForWindow(_THIS, SDL_Window * window)
+{
+    if (!OS4_IsFullscreen(window) && !(window->flags & SDL_WINDOW_BORDERLESS)) {
+        if (window->w > 99 && window->h > 99) {
+            OS4_CreateIconifyGadget(_this, window);
+        } else {
+            dprintf("Don't add gadget for too small window %d*%d (OS4 bug)\n",
+                window->w, window->h);
+        }
+    }
+}
+
 static struct Window *
 OS4_CreateSystemWindow(_THIS, SDL_Window * window, SDL_VideoDisplay * display)
 {
@@ -411,14 +424,7 @@ OS4_CreateWindow(_THIS, SDL_Window * window)
         return SDL_SetError("Failed to setup window data");
     }
 
-    if (!OS4_IsFullscreen(window) && !(window->flags & SDL_WINDOW_BORDERLESS)) {
-        if (window->w > 99 && window->h > 99) {
-            OS4_CreateIconifyGadget(_this, window);
-        } else {
-            dprintf("Don't add gadget for too small window %d*%d (OS4 bug)\n",
-                window->w, window->h);
-        }
-    }
+    OS4_CreateIconifyGadgetForWindow(_this, window);
 
     return 0;
 }
@@ -727,6 +733,9 @@ OS4_SetWindowFullscreen(_THIS, SDL_Window * window, SDL_VideoDisplay * display, 
             data->syswin = OS4_CreateSystemWindow(_this, window, fullscreen ? display : NULL);
 
             if (data->syswin) {
+
+                OS4_CreateIconifyGadgetForWindow(_this, window);
+
                 // Make sure the new window is active
                 OS4_ShowWindow(_this, window);
 
@@ -992,7 +1001,9 @@ OS4_GetDiskObject(_THIS)
     struct DiskObject *diskObject = NULL;
 
     if (videodata->appName) {
+        BPTR oldDir = IDOS->SetCurrentDir(IDOS->GetProgramDir());
         diskObject = IIcon->GetDiskObject(videodata->appName);
+        IDOS->SetCurrentDir(oldDir);
     }
 
     if (!diskObject) {
