@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2018 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2019 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -455,6 +455,8 @@ GL_CreateTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 
     GL_ActivateRenderer(renderer);
 
+    renderdata->drawstate.texture = NULL;  /* we trash this state. */
+
     if (texture->access == SDL_TEXTUREACCESS_TARGET &&
         !renderdata->GL_EXT_framebuffer_object_supported) {
         return SDL_SetError("Render targets not supported by OpenGL");
@@ -653,6 +655,8 @@ GL_UpdateTexture(SDL_Renderer * renderer, SDL_Texture * texture,
 
     GL_ActivateRenderer(renderer);
 
+    renderdata->drawstate.texture = NULL;  /* we trash this state. */
+
     renderdata->glEnable(textype);
     renderdata->glBindTexture(textype, data->texture);
     renderdata->glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
@@ -713,6 +717,8 @@ GL_UpdateTextureYUV(SDL_Renderer * renderer, SDL_Texture * texture,
     GL_TextureData *data = (GL_TextureData *) texture->driverdata;
 
     GL_ActivateRenderer(renderer);
+
+    renderdata->drawstate.texture = NULL;  /* we trash this state. */
 
     renderdata->glEnable(textype);
     renderdata->glBindTexture(textype, data->texture);
@@ -1429,6 +1435,13 @@ GL_DestroyTexture(SDL_Renderer * renderer, SDL_Texture * texture)
 
     GL_ActivateRenderer(renderer);
 
+    if (renderdata->drawstate.texture == texture) {
+        renderdata->drawstate.texture = NULL;
+    }
+    if (renderdata->drawstate.target == texture) {
+        renderdata->drawstate.target = NULL;
+    }
+
     if (!data) {
         return;
     }
@@ -1503,6 +1516,9 @@ GL_BindTexture (SDL_Renderer * renderer, SDL_Texture *texture, float *texw, floa
     }
     data->glBindTexture(textype, texturedata->texture);
 
+    data->drawstate.texturing = SDL_TRUE;
+    data->drawstate.texture = texture;
+
     if(texw) *texw = (float)texturedata->texw;
     if(texh) *texh = (float)texturedata->texh;
 
@@ -1529,6 +1545,9 @@ GL_UnbindTexture (SDL_Renderer * renderer, SDL_Texture *texture)
     }
 
     data->glDisable(textype);
+
+    data->drawstate.texturing = SDL_FALSE;
+    data->drawstate.texture = NULL;
 
     return 0;
 }
