@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2018 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2019 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -236,6 +236,9 @@ OS4_GLES_SwapWindow(_THIS, SDL_Window * window)
 #endif
 
             glFinish();
+
+            // TODO: this would be actually necessary only when window pointer has changed
+            aglSetParamsTags2(OGLES2_CCT_WINDOW, (ULONG)data->syswin, TAG_DONE);
 
             if (videodata->vsyncEnabled) {
                 IGraphics->WaitTOF();
