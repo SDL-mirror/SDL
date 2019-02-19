@@ -174,7 +174,7 @@
 /* #undef HAVE_POLL */
 
 
-#define HAVE_ALTIVEC_H 1
+/*#define HAVE_ALTIVEC_H 1*/
 /* #undef HAVE_DBUS_DBUS_H */
 /* #undef HAVE_FCITX_FRONTEND_H */
 /* #undef HAVE_IBUS_IBUS_H */
@@ -389,7 +389,7 @@
 
 /* Enable assembly routines */
 #define SDL_ASSEMBLY_ROUTINES 1
-#define SDL_ALTIVEC_BLITTERS 1
+/*#define SDL_ALTIVEC_BLITTERS 1*/
 
 /* Enable ime support */
 /* #undef SDL_USE_IME */

@@ -6,7 +6,7 @@ CC = ppc-amigaos-gcc
 CXX = ppc-amigaos-g++
 STRIP = ppc-amigaos-strip
 
-CFLAGS  = -Wall -fPIC -I./include -maltivec
+CFLAGS  = -g -O2 -Wall -fPIC -I./include
 
 TARGET_STATIC  = libSDL2.a
 TARGET_SHARED  = libSDL2-2.0.so
