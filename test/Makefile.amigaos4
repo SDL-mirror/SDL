@@ -1,0 +1,282 @@
+# Makefile to build the AmigaOS4 SDL tests
+
+CC		= ppc-amigaos-gcc
+CFLAGS	= -g -O2 -Wall -g -I../include
+LIBS	= -L.. -lSDL2 -lpthread -lGL -lm
+
+TARGETS = \
+	checkkeys \
+	controllermap \
+	helloworld \
+	loopwave \
+	loopwavequeue \
+	sdl2benchmark \
+	testatomic \
+	testaudiocapture \
+	testaudiohotplug \
+	testaudioinfo \
+	testautomation \
+	testbounds \
+	testcustomcursor \
+	testdisplayinfo \
+	testdraw2 \
+	testdrawchessboard \
+	testdropfile \
+	testerror \
+	testfile \
+	testfilesystem \
+	testgamecontroller \
+	testgesture \
+	testgl2 \
+	testgles \
+	testgles2 \
+	testhaptic \
+	testhittesting \
+	testhotplug \
+	testiconv \
+	testime \
+	testintersections \
+	testjoystick \
+	testkeys \
+	testloadso \
+	testlock \
+	testmessage \
+	testmultiaudio \
+	testnative \
+	testoverlay2 \
+	testplatform \
+	testpower \
+	testqsort \
+	testrelative \
+	testrendercopyex \
+	testrendertarget \
+	testresample \
+	testrumble \
+	testscale \
+	testsem \
+	testsensor \
+	testshader \
+	testshape \
+	testsprite2 \
+	testspriteminimal \
+	teststreaming \
+	testthread \
+	testtimer \
+	testver \
+	testviewport \
+	testvulkan \
+	testwm2 \
+	testyuv \
+	torturethread \
+	
+all: $(TARGETS)
+
+checkkeys: checkkeys.o
+	$(CC) -o $@ $^ $(LIBS)
+
+helloworld: helloworld.o
+	$(CC) -o $@ $^ $(LIBS)
+
+loopwave: loopwave.o
+	$(CC) -o $@ $^ $(LIBS)
+
+loopwavequeue: loopwavequeue.o
+	$(CC) -o $@ $^ $(LIBS)
+
+sdl2benchmark: sdl2benchmark.o
+	$(CC) -o $@ $^ $(LIBS)
+
+testresample: testresample.o
+	$(CC) -o $@ $^ $(LIBS)
+
+testaudioinfo: testaudioinfo.o
+	$(CC) -o $@ $^ $(LIBS)
+
+testautomation: testautomation.o \
+		      testautomation_audio.o \
+		      testautomation_clipboard.o \
+		      testautomation_events.o \
+		      testautomation_keyboard.o \
+		      testautomation_main.o \
+		      testautomation_mouse.o \
+		      testautomation_pixels.o \
+		      testautomation_platform.o \
+		      testautomation_rect.o \
+		      testautomation_render.o \
+		      testautomation_rwops.o \
+		      testautomation_sdltest.o \
+		      testautomation_stdlib.o \
+		      testautomation_surface.o \
+		      testautomation_syswm.o \
+		      testautomation_timer.o \
+		      testautomation_video.o \
+		      testautomation_hints.o
+	$(CC) -o $@ $^ $(LIBS) 
+
+testmultiaudio: testmultiaudio.o
+	$(CC) -o $@ $^ $(LIBS)
+
+testaudiohotplug: testaudiohotplug.o
+	$(CC) -o $@ $^ $(LIBS)
+
+testaudiocapture: testaudiocapture.o
+	$(CC) -o $@ $^ $(LIBS)
+
+testatomic: testatomic.o
+	$(CC) -o $@ $^ $(LIBS)
+
+testintersections: testintersections.o
+	$(CC) -o $@ $^ $(LIBS)
+
+testrelative: testrelative.o
+	$(CC) -o $@ $^ $(LIBS)
+
+testhittesting: testhittesting.o
+	$(CC) -o $@ $^ $(LIBS)
+
+testdraw2: testdraw2.o
+	$(CC) -o $@ $^ $(LIBS)
+
+testdrawchessboard: testdrawchessboard.o
+	$(CC) -o $@ $^ $(LIBS)
+
+testdropfile: testdropfile.o
+	$(CC) -o $@ $^ $(LIBS)
+
+testerror: testerror.o
+	$(CC) -o $@ $^ $(LIBS)
+
+testfile: testfile.o
+	$(CC) -o $@ $^ $(LIBS)
+
+testgamecontroller: testgamecontroller.o
+	$(CC) -o $@ $^ $(LIBS)
+ 
+testgesture: testgesture.o
+	$(CC) -o $@ $^ $(LIBS)
+ 
+testgl2: testgl2.o
+	$(CC) -o $@ $^ $(LIBS)
+
+testgles: testgles.o
+	$(CC) -o $@ $^ $(LIBS)
+
+testgles2: testgles2.o
+	$(CC) -o $@ $^ $(LIBS)
+
+testhaptic: testhaptic.o
+	$(CC) -o $@ $^ $(LIBS)
+
+testhotplug: testhotplug.o
+	$(CC) -o $@ $^ $(LIBS)
+
+testrumble: testrumble.o
+	$(CC) -o $@ $^ $(LIBS)
+
+testthread: testthread.o
+	$(CC) -o $@ $^ $(LIBS)
+
+testiconv: testiconv.o
+	$(CC) -o $@ $^ $(LIBS)
+
+testime: testime.o
+	$(CC) -o $@ $^ $(LIBS)
+
+testjoystick: testjoystick.o
+	$(CC) -o $@ $^ $(LIBS)
+
+testkeys: testkeys.o
+	$(CC) -o $@ $^ $(LIBS)
+
+testloadso: testloadso.o
+	$(CC) -o $@ $^ $(LIBS)
+
+testlock: testlock.o
+	$(CC) -o $@ $^ $(LIBS)
+
+testnative: testnative.o testnativeamigaos4.o
+	$(CC) -o $@ $^ $(LIBS)
+
+testoverlay2: testoverlay2.o testyuv_cvt.o
+	$(CC) -o $@ $^ $(LIBS)
+
+testplatform: testplatform.o
+	$(CC) -o $@ $^ $(LIBS)
+
+testpower: testpower.o
+	$(CC) -o $@ $^ $(LIBS)
+
+testfilesystem: testfilesystem.o
+	$(CC) -o $@ $^ $(LIBS)
+
+testrendertarget: testrendertarget.o
+	$(CC) -o $@ $^ $(LIBS)
+
+testscale: testscale.o
+	$(CC) -o $@ $^ $(LIBS)
+
+testsem: testsem.o
+	$(CC) -o $@ $^ $(LIBS)
+
+testsensor: testsensor.o
+	$(CC) -o $@ $^ $(LIBS)
+
+testshader: testshader.o
+	$(CC) -o $@ $^ $(LIBS)
+
+testshape: testshape.o
+	$(CC) -o $@ $^ $(LIBS)
+
+testsprite2: testsprite2.o
+	$(CC) -o $@ $^ $(LIBS)
+
+testspriteminimal: testspriteminimal.o
+	$(CC) -o $@ $^ $(LIBS)
+
+teststreaming: teststreaming.o
+	$(CC) -o $@ $^ $(LIBS)
+
+testtimer: testtimer.o
+	$(CC) -o $@ $^ $(LIBS)
+
+testver: testver.o
+	$(CC) -o $@ $^ $(LIBS)
+
+testviewport: testviewport.o
+	$(CC) -o $@ $^ $(LIBS)
+
+testwm2: testwm2.o
+	$(CC) -o $@ $^ $(LIBS)
+
+testyuv: testyuv.o testyuv_cvt.o
+	$(CC) -o $@ $^ $(LIBS)
+
+torturethread: torturethread.o
+	$(CC) -o $@ $^ $(LIBS)
+
+testrendercopyex: testrendercopyex.o
+	$(CC) -o $@ $^ $(LIBS)
+
+testmessage: testmessage.o
+	$(CC) -o $@ $^ $(LIBS)
+
+testdisplayinfo: testdisplayinfo.o
+	$(CC) -o $@ $^ $(LIBS)
+
+testqsort: testqsort.o
+	$(CC) -o $@ $^ $(LIBS)
+
+testbounds: testbounds.o
+	$(CC) -o $@ $^ $(LIBS)
+
+testcustomcursor: testcustomcursor.o
+	$(CC) -o $@ $^ $(LIBS)
+
+controllermap: controllermap.o
+	$(CC) -o $@ $^ $(LIBS)
+
+testvulkan: testvulkan.o
+	$(CC) -o $@ $^ $(LIBS)
+
+clean:
+	rm -f $(TARGETS) *.o
