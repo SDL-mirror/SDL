@@ -24,6 +24,10 @@ SOURCES = \
 	./src/joystick/*.c \
 	./src/joystick/amigaos4/*.c \
 	./src/loadso/amigaos4/*.c \
+	./src/render/*.c \
+	./src/render/amigaos4/*.c \
+	./src/render/opengl/*.c \
+	./src/render/software/*.c \
 	./src/sensor/*.c \
 	./src/sensor/dummy/*.c \
 	./src/stdlib/*.c \
