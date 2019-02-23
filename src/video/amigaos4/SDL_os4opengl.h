@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2017 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2019 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -40,6 +40,7 @@ extern void OS4_GL_DeleteContext(_THIS, SDL_GLContext context);
 extern SDL_bool OS4_GL_AllocateBuffers(_THIS, int width, int height, int depth, SDL_WindowData * data);
 extern void OS4_GL_FreeBuffers(_THIS, SDL_WindowData * data);
 extern SDL_bool OS4_GL_ResizeContext(_THIS, SDL_Window * window);
+extern void OS4_GL_UpdateWindowPointer(_THIS, SDL_Window * window);
 
 #endif /* _SDL_os4opengl_h */
 

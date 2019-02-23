@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2018 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2019 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -53,6 +53,7 @@ static int OS4_VideoInit(_THIS);
 static void OS4_VideoQuit(_THIS);
 
 SDL_bool (*OS4_ResizeGlContext)(_THIS, SDL_Window * window) = NULL;
+void (*OS4_UpdateGlWindowPointer)(_THIS, SDL_Window * window) = NULL;
 
 static int
 OS4_Available(void)
@@ -305,6 +306,7 @@ OS4_SetMiniGLFunctions(SDL_VideoDevice * device)
     device->GL_DeleteContext = OS4_GL_DeleteContext;
 
     OS4_ResizeGlContext = OS4_GL_ResizeContext;
+    OS4_UpdateGlWindowPointer = OS4_GL_UpdateWindowPointer;
 }
 
 #if SDL_VIDEO_OPENGL_ES2
@@ -323,6 +325,7 @@ OS4_SetGLESFunctions(SDL_VideoDevice * device)
     device->GL_DeleteContext = OS4_GLES_DeleteContext;
 
     OS4_ResizeGlContext = OS4_GLES_ResizeContext;
+    OS4_UpdateGlWindowPointer = OS4_GLES_UpdateWindowPointer;
 }
 #endif
 
