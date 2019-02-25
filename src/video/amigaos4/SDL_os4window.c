@@ -740,7 +740,7 @@ OS4_SetWindowFullscreen(_THIS, SDL_Window * window, SDL_VideoDisplay * display, 
                 // Make sure the new window is active
                 OS4_ShowWindow(_this, window);
 
-                if (window->flags & SDL_WINDOW_OPENGL) {
+                if ((window->flags & SDL_WINDOW_OPENGL) && data->glContext) {
                     OS4_UpdateGlWindowPointer(_this, window);
                 }
 
