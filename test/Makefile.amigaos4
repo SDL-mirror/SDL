@@ -2,7 +2,7 @@
 
 CC		= ppc-amigaos-gcc
 CFLAGS	= -g -O2 -Wall -g -I../include
-LIBS	= -L.. -lSDL2 -lpthread -lGL -lm
+LIBS	= -L.. -lSDL2 -lpthread
 
 TARGETS = \
 	checkkeys \
