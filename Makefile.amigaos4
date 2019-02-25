@@ -28,7 +28,6 @@ SOURCES = \
 	./src/loadso/amigaos4/*.c \
 	./src/render/*.c \
 	./src/power/*.c \
-	./src/power/*.c \
 	./src/render/amigaos4/*.c \
 	./src/render/opengl/*.c \
 	./src/render/opengles2/*.c \
