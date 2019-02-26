@@ -237,9 +237,6 @@ OS4_GLES_SwapWindow(_THIS, SDL_Window * window)
 
             glFinish();
 
-            // TODO: this would be actually necessary only when window pointer has changed
-            aglSetParamsTags2(OGLES2_CCT_WINDOW, (ULONG)data->syswin, TAG_DONE);
-
             if (videodata->vsyncEnabled) {
                 IGraphics->WaitTOF();
             }
@@ -361,6 +358,19 @@ OS4_GLES_ResizeContext(_THIS, SDL_Window * window)
     }
 
     return SDL_FALSE;
+}
+
+void
+OS4_GLES_UpdateWindowPointer(_THIS, SDL_Window * window)
+{
+    if (IOGLES2) {
+        SDL_WindowData *data = window->driverdata;
+
+        dprintf("Updating GLES2 window pointer %p\n", data->syswin);
+        aglSetParamsTags2(OGLES2_CCT_WINDOW, (ULONG)data->syswin, TAG_DONE);
+    } else {
+        OS4_GLES_LogLibraryError();
+    }
 }
 
 #endif /* SDL_VIDEO_OPENGL_ES2 */

@@ -42,6 +42,7 @@
 #include "../../main/amigaos4/SDL_os4debug.h"
 
 extern SDL_bool (*OS4_ResizeGlContext)(_THIS, SDL_Window * window);
+extern void (*OS4_UpdateGlWindowPointer)(_THIS, SDL_Window * window);
 
 static void OS4_CloseSystemWindow(_THIS, struct Window * window);
 static void OS4_CloseWindow(_THIS, SDL_Window * sdlwin);
@@ -738,6 +739,10 @@ OS4_SetWindowFullscreen(_THIS, SDL_Window * window, SDL_VideoDisplay * display, 
 
                 // Make sure the new window is active
                 OS4_ShowWindow(_this, window);
+
+                if ((window->flags & SDL_WINDOW_OPENGL) && data->glContext) {
+                    OS4_UpdateGlWindowPointer(_this, window);
+                }
 
                 if (oldWidth && oldHeight) {
                     int width, height;
