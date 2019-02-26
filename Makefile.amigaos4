@@ -1,0 +1,75 @@
+# Makefile to build the AmigaOS4 SDL library
+
+AR = ppc-amigaos-ar
+RANLIB = ppc-amigaos-ranlib
+CC = ppc-amigaos-gcc
+CXX = ppc-amigaos-g++
+STRIP = ppc-amigaos-strip
+
+CFLAGS  = -g -O2 -Wall -fPIC -I./include
+
+TARGET_STATIC  = libSDL2.a
+TARGET_SHARED  = libSDL2-2.0.so
+
+SOURCES = \
+	./src/*.c \
+	./src/atomic/*.c \
+	./src/audio/*.c \
+	./src/audio/amigaos4/*.c \
+	./src/audio/dummy/*.c \
+	./src/cpuinfo/*.c \
+	./src/events/*.c \
+	./src/file/*.c \
+	./src/filesystem/amigaos4/*.c \
+	./src/haptic/*.c \
+	./src/haptic/dummy/*.c \
+	./src/joystick/*.c \
+	./src/joystick/amigaos4/*.c \
+	./src/loadso/amigaos4/*.c \
+	./src/render/*.c \
+	./src/power/*.c \
+	./src/render/amigaos4/*.c \
+	./src/render/opengl/*.c \
+	./src/render/opengles2/*.c \
+	./src/render/software/*.c \
+	./src/sensor/*.c \
+	./src/sensor/dummy/*.c \
+	./src/stdlib/*.c \
+	./src/thread/*.c \
+	./src/thread/generic/SDL_syssem.c \
+	./src/thread/pthread/SDL_syscond.c \
+	./src/thread/pthread/SDL_sysmutex.c \
+	./src/thread/pthread/SDL_systhread.c \
+	./src/thread/pthread/SDL_systls.c \
+	./src/test/*.c \
+	./src/timer/*.c \
+	./src/timer/unix/*.c \
+	./src/video/*.c \
+	./src/video/dummy/*.c \
+	./src/video/amigaos4/*.c \
+	./src/video/yuv2rgb/*.c \
+	
+
+OBJECTS = $(shell echo $(SOURCES) | sed -e 's,\.c,\.o,g')
+
+all: config_copy $(TARGET_STATIC) $(TARGET_SHARED)
+
+$(TARGET_STATIC): $(OBJECTS)
+	$(AR) crv $@ $^
+	$(RANLIB) $@
+
+$(TARGET_SHARED):
+	$(CC) -shared -Wl,-soname,$(TARGET_SHARED) -o $(TARGET_SHARED)  $(OBJECTS)
+
+config_copy:
+	cp include/SDL_config_amigaos4.h include/SDL_config.h
+
+clean:
+	rm -f $(TARGET_STATIC) $(TARGET_SHARED)* $(OBJECTS)
+
+install:
+	mkdir -p /SDK/local/newlib/lib
+	mkdir -p /SDK/local/newlib/include/SDL2
+	cp -f $(TARGET_STATIC) /SDK/local/newlib/lib
+	cp -f $(TARGET_SHARED) /SDK/local/newlib/lib
+	cp -f include/*.h /SDK/local/newlib/include/SDL2/
