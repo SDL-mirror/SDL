@@ -284,6 +284,7 @@ static jmethodID midHapticStop;
 static jfieldID fidSeparateMouseAndTouch;
 
 /* Accelerometer data storage */
+static SDL_DisplayOrientation displayOrientation;
 static float fLastAccelerometer[3];
 static SDL_bool bHasNewData;
 
@@ -399,7 +400,7 @@ Android_JNI_ThreadDestroyed(void *value)
 
 /* Creation of local storage mThreadKey */
 static void
-Android_JNI_CreateKey()
+Android_JNI_CreateKey(void)
 {
     int status = pthread_key_create(&mThreadKey, Android_JNI_ThreadDestroyed);
     if (status < 0) {
@@ -408,7 +409,7 @@ Android_JNI_CreateKey()
 }
 
 static void
-Android_JNI_CreateKey_once()
+Android_JNI_CreateKey_once(void)
 {
     int status = pthread_once(&key_once, Android_JNI_CreateKey);
     if (status < 0) {
@@ -423,7 +424,7 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *vm, void *reserved)
     return JNI_VERSION_1_4;
 }
 
-void checkJNIReady()
+void checkJNIReady(void)
 {
     if (!mActivityClass || !mAudioManagerClass || !mControllerManagerClass) {
         /* We aren't fully initialized, let's just return. */
@@ -738,6 +739,8 @@ JNIEXPORT void JNICALL SDL_JAVA_INTERFACE(onNativeOrientationChanged)(
                                     jint orientation)
 {
     SDL_LockMutex(Android_ActivityMutex);
+
+    displayOrientation = (SDL_DisplayOrientation)orientation;
 
     if (Android_Window)
     {
@@ -1416,6 +1419,11 @@ int Android_JNI_OpenAudioDevice(int iscapture, SDL_AudioSpec *spec)
         }
     }
     return 0;
+}
+
+SDL_DisplayOrientation Android_JNI_GetDisplayOrientation(void)
+{
+    return displayOrientation;
 }
 
 int Android_JNI_GetDisplayDPI(float *ddpi, float *xdpi, float *ydpi)
@@ -2263,7 +2271,7 @@ void Android_JNI_HideTextInput(void)
     Android_JNI_SendMessage(COMMAND_TEXTEDIT_HIDE, 0);
 }
 
-SDL_bool Android_JNI_IsScreenKeyboardShown()
+SDL_bool Android_JNI_IsScreenKeyboardShown(void)
 {
     JNIEnv *env = Android_JNI_GetEnv();
     jboolean is_shown = 0;
@@ -2595,7 +2603,7 @@ SDL_bool Android_JNI_SetSystemCursor(int cursorID)
     return (*env)->CallStaticBooleanMethod(env, mActivityClass, midSetSystemCursor, cursorID);
 }
 
-SDL_bool Android_JNI_SupportsRelativeMouse()
+SDL_bool Android_JNI_SupportsRelativeMouse(void)
 {
     JNIEnv *env = Android_JNI_GetEnv();
     return (*env)->CallStaticBooleanMethod(env, mActivityClass, midSupportsRelativeMouse);
