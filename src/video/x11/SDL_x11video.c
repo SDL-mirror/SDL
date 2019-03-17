@@ -1225,6 +1225,10 @@ SDL_Surface *X11_SetVideoMode(_THIS, SDL_Surface *current,
 		current->w = width;
 		current->h = height;
 		current->pitch = SDL_CalculatePitch(current);
+		if (!current->pitch) {
+			current = NULL;
+			goto done;
+		}
 		if (X11_ResizeImage(this, current, flags) < 0) {
 			current = NULL;
 			goto done;

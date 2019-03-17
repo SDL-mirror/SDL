@@ -378,6 +378,10 @@ SDL_Surface * NX_SetVideoMode (_THIS, SDL_Surface * current,
         current -> w = width ;
         current -> h = height ;
         current -> pitch = SDL_CalculatePitch (current) ;
+        if (!current->pitch) {
+            current = NULL;
+            goto done;
+        }
         NX_ResizeImage (this, current, flags) ;
     }
 

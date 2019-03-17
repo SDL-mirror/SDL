@@ -479,6 +479,9 @@ static SDL_Surface *GS_SetVideoMode(_THIS, SDL_Surface *current,
 	current->w = width;
 	current->h = height;
 	current->pitch = SDL_CalculatePitch(current);
+	if (!current->pitch) {
+		return(NULL);
+	}
 
 	/* Memory map the DMA area for block memory transfer */
 	if ( ! mapped_mem ) {

@@ -675,6 +675,9 @@ SDL_Surface *DIB_SetVideoMode(_THIS, SDL_Surface *current,
 	video->w = width;
 	video->h = height;
 	video->pitch = SDL_CalculatePitch(video);
+	if (!current->pitch) {
+		return(NULL);
+	}
 
 	/* Small fix for WinCE/Win32 - when activating window
 	   SDL_VideoSurface is equal to zero, so activating code

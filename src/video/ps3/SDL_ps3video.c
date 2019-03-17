@@ -339,6 +339,9 @@ static SDL_Surface *PS3_SetVideoMode(_THIS, SDL_Surface * current, int width, in
 	current->w = width;
 	current->h = height;
 	current->pitch = SDL_CalculatePitch(current);
+	if (!current->pitch) {
+		return(NULL);
+	}
 
 	/* Alloc aligned mem for current->pixels */
 	s_pixels = memalign(16, current->h * current->pitch);
