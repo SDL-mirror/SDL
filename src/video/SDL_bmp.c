@@ -163,6 +163,14 @@ SDL_Surface * SDL_LoadBMP_RW (SDL_RWops *src, int freesrc)
 			ExpandBMP = biBitCount;
 			biBitCount = 8;
 			break;
+		case 2:
+		case 3:
+		case 5:
+		case 6:
+		case 7:
+			SDL_SetError("%d-bpp BMP images are not supported", biBitCount);
+			was_error = SDL_TRUE;
+			goto done;
 		default:
 			ExpandBMP = 0;
 			break;
