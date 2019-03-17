@@ -222,6 +222,14 @@ SDL_Surface * SDL_LoadBMP_RW (SDL_RWops *src, int freesrc)
 					break;
 			}
 			break;
+		case 2:
+		case 3:
+		case 5:
+		case 6:
+		case 7:
+			SDL_SetError("%d-bpp BMP images are not supported", biBitCount);
+			was_error = SDL_TRUE;
+			goto done;
 		default:
 			SDL_SetError("Compressed BMP files not supported");
 			was_error = SDL_TRUE;
