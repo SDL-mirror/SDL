@@ -457,6 +457,10 @@ OS4_CreateDevice(int devindex)
     dprintf("*** SDL %d.%d.%d video initialization starts ***\n",
         version.major, version.minor, version.patch);
 
+#ifdef __AMIGADATE__
+    dprintf("Build date: " __AMIGADATE__ "\n");
+#endif
+
     /* Initialize all variables that we clean on shutdown */
     device = (SDL_VideoDevice *) SDL_calloc(1, sizeof(SDL_VideoDevice));
 

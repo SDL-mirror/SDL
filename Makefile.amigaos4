@@ -6,7 +6,9 @@ CC = ppc-amigaos-gcc
 CXX = ppc-amigaos-g++
 STRIP = ppc-amigaos-strip
 
-CFLAGS  = -g -O2 -Wall -fPIC -I./include
+AMIGADATE = $(shell date +"%-d.%-m.%Y")
+
+CFLAGS  = -g -O2 -Wall -fPIC -I./include -D__AMIGADATE__=\"$(AMIGADATE)\"
 
 TARGET_STATIC  = libSDL2.a
 TARGET_SHARED  = libSDL2-2.0.so
@@ -51,6 +53,7 @@ SOURCES = \
 	
 
 OBJECTS = $(shell echo $(SOURCES) | sed -e 's,\.c,\.o,g')
+VERSION_OBJECT = src/main/amigaos4/SDL_os4version.o
 
 all: config_copy $(TARGET_STATIC) $(TARGET_SHARED)
 
@@ -58,8 +61,8 @@ $(TARGET_STATIC): $(OBJECTS)
 	$(AR) crv $@ $^
 	$(RANLIB) $@
 
-$(TARGET_SHARED):
-	$(CC) -shared -Wl,-soname,$(TARGET_SHARED) -o $(TARGET_SHARED)  $(OBJECTS)
+$(TARGET_SHARED): $(OBJECTS) $(VERSION_OBJECT)
+	$(CC) -shared -Wl,-soname,$(TARGET_SHARED) -o $(TARGET_SHARED) $(OBJECTS) $(VERSION_OBJECT)
 
 config_copy:
 	cp include/SDL_config_amigaos4.h include/SDL_config.h
