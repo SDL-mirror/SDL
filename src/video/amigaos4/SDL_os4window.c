@@ -295,6 +295,9 @@ OS4_CreateIconifyGadget(_THIS, SDL_Window * window)
             TAG_DONE);
 
         if (data->image) {
+
+            dprintf("Image %p for gadget created\n", data->image);
+
             data->gadget = (struct Gadget *)IIntuition->NewObject(NULL, BUTTONGCLASS,
                 GA_Image, data->image,
                 GA_ID, GID_ICONIFY,
@@ -308,6 +311,8 @@ OS4_CreateIconifyGadget(_THIS, SDL_Window * window)
                 struct Window *syswin = data->syswin;
 
                 IIntuition->AddGadget(syswin, data->gadget, -1);
+
+                dprintf("Gadget %p created and added\n", data->gadget);
             } else {
                 dprintf("Failed to create button class\n");
             }
@@ -667,22 +672,21 @@ OS4_CloseWindow(_THIS, SDL_Window * sdlwin)
 
         if (data->syswin) {
 
+            OS4_CloseSystemWindow(_this, data->syswin);
+            data->syswin = NULL;
+
             if (data->gadget) {
-                dprintf("Removing gadget and disposing it\n");
-                IIntuition->RemoveGadget(data->syswin, data->gadget);
+                dprintf("Disposing gadget %p\n", data->gadget);
+                //IIntuition->RemoveGadget(data->syswin, data->gadget);
                 IIntuition->DisposeObject((Object *)data->gadget);
                 data->gadget = NULL;
             }
 
             if (data->image) {
-                dprintf("Disposing gadget image\n");
+                dprintf("Disposing gadget image %p\n", data->image);
                 IIntuition->DisposeObject((Object *)data->image);
                 data->image = NULL;
             }
-
-            OS4_CloseSystemWindow(_this, data->syswin);
-
-            data->syswin = NULL;
         }
     } else {
         dprintf("NULL pointer\n");
