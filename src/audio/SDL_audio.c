@@ -899,8 +899,6 @@ SDL_CaptureAudio(void *devicep)
         }
     }
 
-    current_audio.impl.PrepareToClose(device);
-
     current_audio.impl.FlushCapture(device);
 
     current_audio.impl.ThreadDeinit(device);
