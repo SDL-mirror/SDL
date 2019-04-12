@@ -280,9 +280,6 @@ static jmethodID midPollHapticDevices;
 static jmethodID midHapticRun;
 static jmethodID midHapticStop;
 
-/* static fields */
-static jfieldID fidSeparateMouseAndTouch;
-
 /* Accelerometer data storage */
 static SDL_DisplayOrientation displayOrientation;
 static float fLastAccelerometer[3];
@@ -535,12 +532,6 @@ JNIEXPORT void JNICALL SDL_JAVA_INTERFACE(nativeSetupJNI)(JNIEnv *env, jclass cl
        !midCreateCustomCursor || !midSetCustomCursor || !midSetSystemCursor || !midSupportsRelativeMouse || !midSetRelativeMouseEnabled ||
        !midIsChromebook || !midIsDeXMode || !midManualBackButton) {
         __android_log_print(ANDROID_LOG_WARN, "SDL", "Missing some Java callbacks, do you have the latest version of SDLActivity.java?");
-    }
-
-    fidSeparateMouseAndTouch = (*env)->GetStaticFieldID(env, mActivityClass, "mSeparateMouseAndTouch", "Z");
-
-    if (!fidSeparateMouseAndTouch) {
-        __android_log_print(ANDROID_LOG_WARN, "SDL", "Missing some Java static fields, do you have the latest version of SDLActivity.java?");
     }
 
     checkJNIReady();
@@ -1165,7 +1156,7 @@ JNIEXPORT void JNICALL SDL_JAVA_INTERFACE(nativeSetenv)(
              Functions called by SDL into Java
 *******************************************************************************/
 
-static int s_active = 0;
+static SDL_atomic_t s_active;
 struct LocalReferenceHolder
 {
     JNIEnv *m_env;
@@ -1190,7 +1181,7 @@ static SDL_bool LocalReferenceHolder_Init(struct LocalReferenceHolder *refholder
         SDL_SetError("Failed to allocate enough JVM local references");
         return SDL_FALSE;
     }
-    ++s_active;
+    SDL_AtomicIncRef(&s_active);
     refholder->m_env = env;
     return SDL_TRUE;
 }
@@ -1203,8 +1194,13 @@ static void LocalReferenceHolder_Cleanup(struct LocalReferenceHolder *refholder)
     if (refholder->m_env) {
         JNIEnv *env = refholder->m_env;
         (*env)->PopLocalFrame(env, NULL);
-        --s_active;
+        SDL_AtomicDecRef(&s_active);
     }
+}
+
+static SDL_bool LocalReferenceHolder_IsActive(void)
+{
+    return (SDL_AtomicGet(&s_active) > 0);
 }
 
 ANativeWindow* Android_JNI_GetNativeWindow(void)
@@ -1610,7 +1606,7 @@ static SDL_bool Android_JNI_ExceptionOccurred(SDL_bool silent)
     jthrowable exception;
 
     /* Detect mismatch LocalReferenceHolder_Init/Cleanup */
-    SDL_assert((s_active > 0));
+    SDL_assert(LocalReferenceHolder_IsActive());
 
     exception = (*env)->ExceptionOccurred(env);
     if (exception != NULL) {
@@ -2204,13 +2200,6 @@ int Android_JNI_GetPowerInfo(int *plugged, int *charged, int *battery, int *seco
 void Android_JNI_InitTouch() {
      JNIEnv *env = Android_JNI_GetEnv();
     (*env)->CallStaticVoidMethod(env, mActivityClass, midInitTouch);
-}
-
-/* sets the mSeparateMouseAndTouch field */
-void Android_JNI_SetSeparateMouseAndTouch(SDL_bool new_value)
-{
-    JNIEnv *env = Android_JNI_GetEnv();
-    (*env)->SetStaticBooleanField(env, mActivityClass, fidSeparateMouseAndTouch, new_value ? JNI_TRUE : JNI_FALSE);
 }
 
 void Android_JNI_PollInputDevices(void)
