@@ -1039,6 +1039,9 @@ OS4_IconifyWindow(_THIS, SDL_Window * window)
             struct DiskObject *diskObject = OS4_GetDiskObject(_this);
 
             if (diskObject) {
+                diskObject->do_CurrentX = NO_ICON_POSITION;
+                diskObject->do_CurrentY = NO_ICON_POSITION;
+
                 data->appIcon = IWorkbench->AddAppIcon(
                     0,
                     (ULONG)window,
