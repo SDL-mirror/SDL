@@ -292,10 +292,11 @@ void SDL_DitherColors(SDL_Color *colors, int bpp)
 Uint16 SDL_CalculatePitch(SDL_Surface *surface)
 {
 	unsigned int pitch = 0;
+	Uint8 byte;
 
 	/* Surface should be 4-byte aligned for speed */
 	/* The code tries to prevent from an Uint16 overflow. */;
-	for (Uint8 byte = surface->format->BytesPerPixel; byte; byte--) {
+	for (byte = surface->format->BytesPerPixel; byte; byte--) {
 		pitch += (unsigned int)surface->w;
 		if (pitch < surface->w) {
 			SDL_SetError("A scanline is too wide");
