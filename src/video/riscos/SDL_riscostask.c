@@ -330,9 +330,7 @@ void RISCOS_RestoreWimpMode()
     stored_mode = -1;
 
     /* Flush keyboard buffer to dump the keystrokes we've already polled */
-    regs.r[0] = 21;
-    regs.r[1] = 0; /* Keyboard buffer number */
-    _kernel_swi(OS_Byte, &regs, &regs);
+    _kernel_osbyte(21, 0, 0);
 
     mouseInWindow = 0;
 

@@ -39,7 +39,9 @@
 
 #include "kernel.h"
 
-#define JOYSTICK_READ 0x43F40
+#ifndef Joystick_Read
+#define Joystick_Read 0x43F40
+#endif
 
 struct joystick_hwdata 
 {
@@ -58,7 +60,7 @@ int SDL_SYS_JoystickInit(void)
 
 	 /* Try to read joystick 0 */
 	regs.r[0] = 0;
-	if (_kernel_swi(JOYSTICK_READ, &regs, &regs) == NULL)
+	if (_kernel_swi(Joystick_Read, &regs, &regs) == NULL)
 	{
 		/* Switch works so assume we've got a joystick */
 		return 1;
@@ -116,7 +118,7 @@ void SDL_SYS_JoystickUpdate(SDL_Joystick *joystick)
 	_kernel_swi_regs regs;
 	regs.r[0] = joystick->index;
 
-	if (_kernel_swi(JOYSTICK_READ, &regs, &regs) == NULL)
+	if (_kernel_swi(Joystick_Read, &regs, &regs) == NULL)
 	{
 		int newstate = regs.r[0];
 		int oldstate = joystick->hwdata->joystate;

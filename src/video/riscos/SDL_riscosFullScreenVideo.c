@@ -359,16 +359,13 @@ void FULLSCREEN_BuildModeList(_THIS)
 
 static int FULLSCREEN_FlipHWSurface(_THIS, SDL_Surface *surface)
 {
-   _kernel_swi_regs regs;
-   regs.r[0] = 19;
-
    FULLSCREEN_SetDisplayBank(this->hidden->current_bank);
    this->hidden->current_bank ^= 1;
    FULLSCREEN_SetWriteBank(this->hidden->current_bank);
    surface->pixels = this->hidden->bank[this->hidden->current_bank];
 
    /* Wait for Vsync */
-   _kernel_swi(OS_Byte, &regs, &regs);
+   _kernel_osbyte(19, 0, 0);
 
 	return(0);
 }
@@ -618,41 +615,25 @@ static int FULLSCREEN_AddMode(_THIS, int bpp, int w, int h)
 
 void FULLSCREEN_SetWriteBank(int bank)
 {
-   _kernel_swi_regs regs;
-   regs.r[0] = 112;
-   regs.r[1] = bank+1;
-   _kernel_swi(OS_Byte, &regs, &regs);
+	_kernel_osbyte(112, bank+1, 0);
 }
 
 void FULLSCREEN_SetDisplayBank(int bank)
 {
-   _kernel_swi_regs regs;
-   regs.r[0] = 113;
-   regs.r[1] = bank+1;
-   _kernel_swi(OS_Byte, &regs, &regs);
+	_kernel_osbyte(113, bank+1, 0);
 }
 
 
 /** Disable special escape key processing */
 static void FULLSCREEN_DisableEscape()
 {
-   _kernel_swi_regs regs;
-   regs.r[0] = 229;
-   regs.r[1] = 1;
-   regs.r[2] = 0;
-   _kernel_swi(OS_Byte, &regs, &regs);
-  
+	_kernel_osbyte(229, 1, 0);
 }
 
 /** Enable special escape key processing */
 static void FULLSCREEN_EnableEscape()
 {
-   _kernel_swi_regs regs;
-   regs.r[0] = 229;
-   regs.r[1] = 0;
-   regs.r[2] = 0;
-   _kernel_swi(OS_Byte, &regs, &regs);
-  
+	_kernel_osbyte(229, 0, 0);
 }
 
 /** Store caption in case this is called before we create a window */

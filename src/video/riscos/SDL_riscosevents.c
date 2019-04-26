@@ -329,9 +329,7 @@ void RISCOS_PollMouseHelper(_THIS, int fullscreen)
                       block[3] = last_y & 0xFF;
                       block[4] = (last_y >> 8) & 0xFF;
                        
-                      regs.r[0] = 21; /* OSWORD pointer stuff code */
-                      regs.r[1] = (int)block;
-                      _kernel_swi(OS_Word, &regs, &regs);
+                      _kernel_osword(21, (int *)block);
                	   }
                 }
              } else

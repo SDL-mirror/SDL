@@ -242,9 +242,7 @@ void WIMP_WarpWMCursor(_THIS, Uint16 x, Uint16 y)
 	block[3] = osY & 0xFF;
 	block[4] = (osY >> 8) & 0xFF;
 
-	regs.r[0] = 21;
-	regs.r[1] = (int)block;
-	_kernel_swi(OS_Word, &regs, &regs);
+	_kernel_osword(21, (int *)block);
 	SDL_PrivateMouseMotion(0, 0, x, y);
 }
 
@@ -296,9 +294,7 @@ SDL_GrabMode RISCOS_GrabInput(_THIS, SDL_GrabMode mode)
 
       }
 
-      regs.r[0] = 21; /* OS word code */
-      regs.r[1] = (int)block;
-      _kernel_swi(OS_Word, &regs, &regs);
+      _kernel_osword(21, (int *)block);
    }
 
    return mode;
@@ -317,7 +313,7 @@ void WIMP_SaveCursorPalette()
       regs.r[0] = (int)wimp_cursor_palette[colour][0];
       regs.r[1] = 25;
       /* Read settings with OS_ReadPalette */
-      if (_kernel_swi(0x2f, &regs, &regs) == NULL)
+      if (_kernel_swi(OS_ReadPalette, &regs, &regs) == NULL)
       {
         wimp_cursor_palette[colour][2] = (unsigned char)((regs.r[2] >> 8) & 0xFF);
         wimp_cursor_palette[colour][3] = (unsigned char)((regs.r[2] >> 16) & 0xFF);
