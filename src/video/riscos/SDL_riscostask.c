@@ -101,8 +101,8 @@ int RISCOS_InitTask()
    messages[0] = 9;       /* Palette changed */
    messages[1] = 0x400c1; /* Mode changed */
    messages[2] = 8;       /* Pre quit */
-   messages[2] = 0;
-   
+   messages[3] = 0;
+
 	regs.r[0] = (unsigned int)360; /* Minimum version 3.6 */
 	regs.r[1] = (unsigned int)0x4b534154;
 	regs.r[2] = (unsigned int)task_name;
