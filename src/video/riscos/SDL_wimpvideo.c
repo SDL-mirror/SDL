@@ -30,6 +30,7 @@
 
 #include "SDL_video.h"
 #include "SDL_mouse.h"
+#include "SDL_timer.h"
 #include "../SDL_sysvideo.h"
 #include "../SDL_pixels_c.h"
 #include "../../events/SDL_events_c.h"
@@ -84,7 +85,7 @@ SDL_Surface *WIMP_SetVideoMode(_THIS, SDL_Surface *current,
    Uint32 Rmask = 0;
    Uint32 Gmask = 0;
    Uint32 Bmask = 0;
-   char *buffer = NULL;
+   unsigned char *buffer = NULL;
    int bytesPerPixel = 1;
 
    /* Don't support double buffering in Wimp mode */
@@ -437,9 +438,9 @@ int WIMP_ToggleFromFullScreen(_THIS)
    int width = this->screen->w;
    int height = this->screen->h;
    int bpp = this->screen->format->BitsPerPixel;
-   char *buffer = NULL;
-   char *old_bank[2];
-   char *old_alloc_bank;
+   unsigned char *buffer = NULL;
+   unsigned char *old_bank[2];
+   unsigned char *old_alloc_bank;
 
    /* Ensure flags are OK */
    this->screen->flags &= ~(SDL_DOUBLEBUF|SDL_HWSURFACE);
@@ -447,7 +448,7 @@ int WIMP_ToggleFromFullScreen(_THIS)
    if (this->hidden->bank[0] == this->hidden->alloc_bank || riscos_backbuffer == 0)
    {
       /* Need to create a sprite for the screen and copy the data to it */
-      char *data;
+      unsigned char *data;
       buffer = WIMP_CreateBuffer(width, height, bpp);
       data = buffer + 60;         /* Start of sprite data */
       if (bpp == 8) data += 2048;  /* 8bpp sprite have palette first */

@@ -311,7 +311,7 @@ void FULLSCREEN_BuildModeList(_THIS)
 	/* Video memory should be in r[5] */
 	this->info.video_mem = regs.r[5]/1024;
 
-	enumInfo = (unsigned char *)SDL_malloc(-regs.r[7]);
+	enumInfo = (char *)SDL_malloc(-regs.r[7]);
 	if (enumInfo == NULL)
 	{
 		SDL_OutOfMemory();
@@ -379,7 +379,7 @@ static void FULLSCREEN_UpdateRects(_THIS, int numrects, SDL_Rect *rects)
 static void FULLSCREEN_UpdateRectsMemCpy(_THIS, int numrects, SDL_Rect *rects)
 {
       int j;
-      char *to, *from;
+      unsigned char *to, *from;
       int pitch = this->screen->pitch;
       int row;
       int xmult = this->screen->format->BytesPerPixel;
@@ -402,7 +402,7 @@ static void FULLSCREEN_UpdateRectsMemCpy(_THIS, int numrects, SDL_Rect *rects)
 static void FULLSCREEN_UpdateRects8bpp(_THIS, int numrects, SDL_Rect *rects)
 {
    int j;
-   char *to, *from;
+   unsigned char *to, *from;
    int pitch = this->screen->pitch;
    int width_bytes;
    int src_skip_bytes;
@@ -432,7 +432,7 @@ static void FULLSCREEN_UpdateRects8bpp(_THIS, int numrects, SDL_Rect *rects)
 static void FULLSCREEN_UpdateRects16bpp(_THIS, int numrects, SDL_Rect *rects)
 {
    int j;
-   char *to, *from;
+   unsigned char *to, *from;
    int pitch = this->screen->pitch;
    int width_bytes;
    int src_skip_bytes;
@@ -460,7 +460,7 @@ static void FULLSCREEN_UpdateRects16bpp(_THIS, int numrects, SDL_Rect *rects)
 static void FULLSCREEN_UpdateRects32bpp(_THIS, int numrects, SDL_Rect *rects)
 {
    int j;
-   char *to, *from;
+   unsigned char *to, *from;
    int pitch = this->screen->pitch;
    int width;
 
@@ -734,7 +734,7 @@ int FULLSCREEN_ToggleFromWimp(_THIS)
    RISCOS_StoreWimpMode();
    if (FULLSCREEN_SetMode(width, height, bpp))
    {
-       char *buffer = this->hidden->alloc_bank; /* This is start of sprite data */
+       unsigned char *buffer = this->hidden->alloc_bank; /* This is start of sprite data */
        /* Support back buffer mode only */
        if (riscos_backbuffer == 0) riscos_backbuffer = 1;
 

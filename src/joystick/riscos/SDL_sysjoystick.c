@@ -89,12 +89,8 @@ const char *SDL_SYS_JoystickName(int index)
  */
 int SDL_SYS_JoystickOpen(SDL_Joystick *joystick)
 {
-	_kernel_swi_regs regs;
-
 	if(!(joystick->hwdata=SDL_malloc(sizeof(struct joystick_hwdata))))
 		return -1;
-
-	regs.r[0] = joystick->index;
 
 	/* Don't know how to get exact count of buttons so assume max of 4 for now */
 	joystick->nbuttons=4;
