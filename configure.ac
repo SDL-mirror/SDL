@@ -335,7 +335,7 @@ if test x$enable_libc = xyes; then
         AC_DEFINE(HAVE_MPROTECT, 1, [ ])
         ]),
     )
-    AC_CHECK_FUNCS(malloc calloc realloc free getenv setenv putenv unsetenv qsort abs bcopy memset memcpy memmove wcslen wcscmp strlen strlcpy strlcat _strrev _strupr _strlwr strchr strrchr strstr itoa _ltoa _uitoa _ultoa strtol strtoul _i64toa _ui64toa strtoll strtoull atoi atof strcmp strncmp _stricmp strcasecmp _strnicmp strncasecmp vsscanf vsnprintf fopen64 fseeko fseeko64 sigaction setjmp nanosleep sysconf sysctlbyname getauxval poll)
+    AC_CHECK_FUNCS(malloc calloc realloc free getenv setenv putenv unsetenv qsort abs bcopy memset memcpy memmove wcslen wcscmp strlen strlcpy strlcat _strrev _strupr _strlwr strchr strrchr strstr itoa _ltoa _uitoa _ultoa strtol strtoul _i64toa _ui64toa strtoll strtoull atoi atof strcmp strncmp _stricmp strcasecmp _strnicmp strncasecmp vsscanf vsnprintf fopen64 fseeko fseeko64 sigaction setjmp nanosleep sysconf sysctlbyname getauxval poll _Exit)
 
     AC_CHECK_LIB(m, pow, [LIBS="$LIBS -lm"; EXTRA_LDFLAGS="$EXTRA_LDFLAGS -lm"])
     AC_CHECK_FUNCS(acos acosf asin asinf atan atanf atan2 atan2f ceil ceilf copysign copysignf cos cosf exp expf fabs fabsf floor floorf fmod fmodf log logf log10 log10f pow powf scalbn scalbnf sin sinf sqrt sqrtf tan tanf)
@@ -3019,9 +3019,6 @@ XINPUT_STATE_EX s1;
             AC_DEFINE(HAVE_XINPUT_STATE_EX, 1, [ ])
         fi
 
-        SUMMARY_video="${SUMMARY_video} directx"
-        SUMMARY_audio="${SUMMARY_audio} directx"
-
         # FIXME: latest Cygwin finds dinput headers, but we die on other win32 headers.
         # FIXME:  ...so force it off for now.
         case "$host" in
@@ -3560,17 +3557,21 @@ AS_HELP_STRING([--enable-render-d3d], [enable the Direct3D render driver [[defau
                                 , enable_render_d3d=yes)
             if test x$enable_render_d3d = xyes -a x$have_d3d = xyes; then
                 AC_DEFINE(SDL_VIDEO_RENDER_D3D, 1, [ ])
+                SUMMARY_video="${SUMMARY_video} d3d9"
             fi
             if test x$enable_render_d3d = xyes -a x$have_d3d11 = xyes; then
                 AC_DEFINE(SDL_VIDEO_RENDER_D3D11, 1, [ ])
+                SUMMARY_video="${SUMMARY_video} d3d11"
             fi
         fi
         # Set up files for the audio library
         if test x$enable_audio = xyes; then
             AC_DEFINE(SDL_AUDIO_DRIVER_WINMM, 1, [ ])
+            SUMMARY_audio="${SUMMARY_audio} winmm"
             SOURCES="$SOURCES $srcdir/src/audio/winmm/*.c"
             if test x$have_dsound = xyes; then
                 AC_DEFINE(SDL_AUDIO_DRIVER_DSOUND, 1, [ ])
+                SUMMARY_audio="${SUMMARY_audio} directsound"
                 SOURCES="$SOURCES $srcdir/src/audio/directsound/*.c"
             fi
             if test x$have_wasapi = xyes -a x$enable_wasapi = xyes; then
@@ -4023,6 +4024,22 @@ AS_HELP_STRING([--enable-render-d3d], [enable the Direct3D render driver [[defau
         ])
         ;;
 esac
+
+# Check whether to install sdl2-config
+AC_MSG_CHECKING(whether to install sdl2-config)
+AC_ARG_ENABLE([sdl2-config],
+    AS_HELP_STRING([--enable-sdl2-config], [Install sdl2-config [default=yes]]),
+    [case "${enableval}" in
+        yes) enable_sdl2_config="TRUE" ;;
+        no) enable_sdl2_config="FALSE" ;;
+        *) AC_MSG_ERROR([bad value '${enableval}' for --enable-sdl2-config]) ;;
+    esac], [enable_sdl2_config="TRUE"])
+if test "$enable_sdl2_config" = "TRUE"; then
+    AC_MSG_RESULT(yes)
+else
+    AC_MSG_RESULT(no)
+fi
+AC_SUBST([INSTALL_SDL2_CONFIG], [$enable_sdl2_config])
 
 # Verify that we have all the platform specific files we need
 
