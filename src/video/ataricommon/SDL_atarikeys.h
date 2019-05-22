@@ -27,7 +27,7 @@
  */
 
 #ifndef _SDL_ATARIKEYS_H_
-#define _SDL_ATARIKEYS_H_ 
+#define _SDL_ATARIKEYS_H_
 
 /* --- Keyboard scancodes --- */
 /* taken from svgalib/vgakeyboard.h */
@@ -106,6 +106,17 @@
 #define SCANCODE_F8		0x42
 #define SCANCODE_F9		0x43
 #define SCANCODE_F10	0x44
+
+#define SCANCODE_SHIFT_F1	0x54
+#define SCANCODE_SHIFT_F2	0x55
+#define SCANCODE_SHIFT_F3	0x56
+#define SCANCODE_SHIFT_F4	0x57
+#define SCANCODE_SHIFT_F5	0x58
+#define SCANCODE_SHIFT_F6	0x59
+#define SCANCODE_SHIFT_F7	0x5a
+#define SCANCODE_SHIFT_F8	0x5b
+#define SCANCODE_SHIFT_F9	0x5c
+#define SCANCODE_SHIFT_F10	0x5d
 
 /* Numeric keypad */
 #define SCANCODE_KP0			0x70

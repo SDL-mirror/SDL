@@ -140,8 +140,11 @@ void SDL_Atari_InitInternalKeymap(_THIS)
 		keymap[i] = SDLK_UNKNOWN;
 
 	/* Functions keys */
-	for ( i = 0; i<10; i++ )
+	for ( i = 0; i<10; i++ ) {
 		keymap[SCANCODE_F1 + i] = SDLK_F1+i;
+		/* Shift state is handled separately */
+		keymap[SCANCODE_SHIFT_F1 + i] = SDLK_F1+i;
+	}
 
 	/* Cursor keypad */
 	keymap[SCANCODE_HELP] = SDLK_HELP;
@@ -229,7 +232,7 @@ SDL_keysym *SDL_Atari_TranslateKey(int scancode, SDL_keysym *keysym,
 	keysym->unicode = 0;
 
 	if (keysym->sym == SDLK_UNKNOWN) {
-		keysym->sym = asciicode = keytab_normal[scancode];		
+		keysym->sym = asciicode = keytab_normal[scancode];
 	}
 
 	if (SDL_TranslateUNICODE && pressed) {
