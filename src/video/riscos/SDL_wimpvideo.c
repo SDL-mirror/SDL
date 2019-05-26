@@ -249,19 +249,17 @@ unsigned int WIMP_SetupWindow(_THIS, SDL_Surface *surface)
 	_kernel_swi_regs regs;
 	int window_data[23];
     int	*window_block = window_data+1;
-	int x = (this->hidden->screen_width - surface->w) / 2;
-	int y = (this->hidden->screen_height - surface->h) / 2;
-	int xeig = this->hidden->xeig;
-	int yeig = this->hidden->yeig;
-    
+	int x = ((this->hidden->screen_width << this->hidden->xeig) - (surface->w << 1)) / 2;
+	int y = ((this->hidden->screen_height << this->hidden->yeig) - (surface->h << 1)) / 2;    
+
 	/* Always delete the window and recreate on a change */
 	if (this->hidden->window_handle) WIMP_DeleteWindow(this);
 
 	/* Setup window co-ordinates */
-   window_block[0] = x << xeig;
-   window_block[1] = y << yeig;
-   window_block[2] = window_block[0] + (surface->w << xeig);
-   window_block[3] = window_block[1] + (surface->h << yeig);
+   window_block[0] = x;
+   window_block[1] = y;
+   window_block[2] = window_block[0] + (surface->w << 1);
+   window_block[3] = window_block[1] + (surface->h << 1);
 
    
    window_block[4] = 0;				  /* Scroll offsets */
@@ -276,8 +274,8 @@ unsigned int WIMP_SetupWindow(_THIS, SDL_Surface *surface)
    window_block[8] = 0xff070207;      /* Window colours */
    window_block[9] = 0x000c0103;
    window_block[10] = 0;                    /* Work area minimum */
-   window_block[11] = -surface->h << yeig;
-   window_block[12] = surface->w << xeig;   /* Work area maximum */
+   window_block[11] = -surface->h << 1;
+   window_block[12] = surface->w << 1;   /* Work area maximum */
    window_block[13] = 0;
    window_block[14] = 0x2700013d;    /* Title icon flags */
    window_block[15] = 0x00003000;	 /* Work area flags - Mouse click down reported */
@@ -324,17 +322,15 @@ void WIMP_UpdateRects(_THIS, int numrects, SDL_Rect *rects)
 {
 	_kernel_swi_regs regs;
 	int update_block[12];
-	int xeig = this->hidden->xeig;
-	int yeig = this->hidden->yeig;
 	int j;
 	update_block[0] = this->hidden->window_handle;
 
 	for (j = 0; j < numrects; j++)
 	{
-		update_block[1] = rects[j].x << xeig; /* Min X */
-		update_block[4] = -(rects[j].y << yeig);
-		update_block[3] = update_block[1] + (rects[j].w << xeig);
-		update_block[2] = update_block[4] - (rects[j].h << yeig);
+		update_block[1] = rects[j].x << 1; /* Min X */
+		update_block[4] = -(rects[j].y << 1);
+		update_block[3] = update_block[1] + (rects[j].w << 1);
+		update_block[2] = update_block[4] - (rects[j].h << 1);
 
 		regs.r[1] = (int)update_block;
 		/* Update window can fail if called before first poll */
@@ -417,19 +413,6 @@ void WIMP_SetWMCaption(_THIS, const char *title, const char *icon)
 		regs.r[2] = 3; /* Redraw title */
 		_kernel_swi(Wimp_ForceRedraw, &regs, &regs);
 	}
-}
-
-void WIMP_RefreshDesktop(_THIS)
-{
-   int width = this->hidden->screen_width << this->hidden->xeig;
-   int height = this->hidden->screen_height << this->hidden->yeig;
-   _kernel_swi_regs regs;
-   regs.r[0] = -1; /* Whole screen */
-   regs.r[1] = 0;
-   regs.r[2] = 0;
-   regs.r[3] = width;
-   regs.r[4] = height;
-   _kernel_swi(Wimp_ForceRedraw, &regs, &regs);
 }
 
 /* Toggle to window from full screen */

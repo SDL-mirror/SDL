@@ -36,9 +36,6 @@
 
 extern void WIMP_ReadModeInfo(_THIS);
 
-void WIMP_PaletteChanged(_THIS);
-
-
 /* Create sprite buffer for screen */
 
 unsigned char *WIMP_CreateBuffer(int width, int height, int bpp)
@@ -168,6 +165,20 @@ void WIMP_SetupPlotInfo(_THIS)
       /* Actually read the buffer */
       _kernel_swi(ColourTrans_GenerateTable, &regs, &regs);
    }
+
+   if (this->hidden->scale) SDL_free(this->hidden->scale);
+   this->hidden->scale = 0; /* No scale factors i.e. 1:1 */
+
+   if (this->hidden->xeig != 1 || this->hidden->yeig != 1) {
+      int eig_mul[4] = { 2, 1, 1, 1 };
+      int eig_div[4] = { 1, 1, 2, 4 };
+
+      this->hidden->scale = SDL_malloc(16);
+      this->hidden->scale[0] = eig_mul[this->hidden->xeig];
+      this->hidden->scale[1] = eig_mul[this->hidden->yeig];
+      this->hidden->scale[2] = eig_div[this->hidden->xeig];
+      this->hidden->scale[3] = eig_div[this->hidden->yeig];
+   }
 }
 
 /* Plot the sprite in the given context */
@@ -182,7 +193,7 @@ void WIMP_PlotSprite(_THIS, int x, int y)
    regs.r[3] = x;
    regs.r[4] = y;
    regs.r[5] = 0|32; /* Overwrite screen and pixtrans contains wide colour entries */
-   regs.r[6] = 0; /* No scale factors i.e. 1:1 */
+   regs.r[6] = (int)this->hidden->scale;
    regs.r[7] = (int)this->hidden->pixtrans;
 
    if ((err = _kernel_swi(OS_SpriteOp, &regs, &regs)) != 0)
@@ -194,72 +205,3 @@ void WIMP_PlotSprite(_THIS, int x, int y)
    }
 }
 
-
-/* Wimp mode has changes so update colour mapping and pixel sizes 
-   of windows and the sprites they plot */
-
-void WIMP_ModeChanged(_THIS)
-{
-	int oldXeig = this->hidden->xeig;
-	int oldYeig = this->hidden->yeig;
-
-	WIMP_ReadModeInfo(this);
-
-	if (oldXeig == this->hidden->xeig && oldYeig == this->hidden->yeig)
-	{
-		/* Only need to update the palette */
-		WIMP_PaletteChanged(this);
-	} else
-	{
-		_kernel_swi_regs regs;
-		int window_state[9];
-		int extent[4];
-		int currWidth, currHeight;
-		int newWidth, newHeight;
-		
-		/* Need to resize windows and update the palette */
-		WIMP_SetupPlotInfo(this);
-
-
-		window_state[0] = this->hidden->window_handle;
-		regs.r[1] = (unsigned int)window_state;
-		_kernel_swi(Wimp_GetWindowState, &regs, &regs);
-						
-		currWidth = window_state[3] - window_state[1];
-		currHeight = window_state[4] - window_state[2];
-		
-		newWidth = (currWidth >> oldXeig) << this->hidden->xeig;
-		newHeight = (currHeight >> oldYeig) << this->hidden->yeig;
-		/* Need to avoid extent getting too small for visible part
-		of window */
-		extent[0] = 0;
-		if (currHeight <= newHeight)
-		{
-			extent[1] = -newHeight;
-		} else
-		{
-			extent[1] = -currHeight;
-		}
-		if (currWidth <= newWidth)
-		{
-			extent[2] = newWidth;
-		} else
-		{
-			extent[2] = currWidth;
-		}
-		extent[3] = 0;
-		
-		regs.r[0] = this->hidden->window_handle;
-		regs.r[1] = (int)extent;
-		_kernel_swi(Wimp_SetExtent, &regs, &regs);
-
-		/*TODO: May need to set flag to resize window on next open */
-	}
-}
-
-/* Palette has changed so update palettes used for windows sprites */
-
-void WIMP_PaletteChanged(_THIS)
-{
-	WIMP_SetupPlotInfo(this);
-}

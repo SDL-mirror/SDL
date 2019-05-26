@@ -55,8 +55,6 @@ void WIMP_SetFocus(int win);
 
 /* SDL_riscossprite functions */
 void WIMP_PlotSprite(_THIS, int x, int y);
-void WIMP_ModeChanged(_THIS);
-void WIMP_PaletteChanged(_THIS);
 
 
 extern void WIMP_PollMouse(_THIS);
@@ -165,8 +163,8 @@ void WIMP_Poll(_THIS, int waitTime)
 		   {
 		      /* Ensure window is correct size */
 		      resizeOnOpen = 0;
-		      message[3] = message[1] + (this->screen->w << this->hidden->xeig);
-		      message[4] = message[2] + (this->screen->h << this->hidden->yeig);       
+		      message[3] = message[1] + (this->screen->w << 1);
+		      message[4] = message[2] + (this->screen->h << 1);       
 		   }
         	_kernel_swi(Wimp_OpenWindow, &regs, &regs);
        	    break;
@@ -254,7 +252,7 @@ void WIMP_Poll(_THIS, int waitTime)
 			case 0: /* Quit Event */
 				/* No choice - have to quit */
 			   SDL_Quit();
-        	   exit(0);
+			   exit(0);
 			   break;
 
 			case 8: /* Pre Quit */
@@ -262,12 +260,13 @@ void WIMP_Poll(_THIS, int waitTime)
 				break;
 
 			case 0x400c1: /* Mode change */
-				WIMP_ModeChanged(this);
+				WIMP_ReadModeInfo(this);
+				WIMP_SetupPlotInfo(this);
 				resizeOnOpen = 1;
 				break;
 
 			case 9:      /* Palette changed */
-				WIMP_PaletteChanged(this);
+				WIMP_SetupPlotInfo(this);
 				break;
 			}
 			break;

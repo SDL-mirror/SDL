@@ -233,8 +233,8 @@ void WIMP_WarpWMCursor(_THIS, Uint16 x, Uint16 y)
 	regs.r[1] = (unsigned int)window_state;
 	_kernel_swi(Wimp_GetWindowState, &regs, &regs);
 
-	 osX = (x << this->hidden->xeig) + window_state[1];
-	 osY = window_state[4] - (y << this->hidden->yeig);
+	 osX = (x << 1) + window_state[1];
+	 osY = window_state[4] - (y << 1);
 
 	block[0] = 3;
 	block[1] = osX & 0xFF;

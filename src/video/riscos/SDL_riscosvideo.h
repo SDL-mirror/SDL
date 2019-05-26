@@ -45,6 +45,7 @@ struct SDL_PrivateVideoData {
 	int screen_width;
 	int screen_height;
 	char *pixtrans;
+	int *scale;
 
 	/* Wimp variables */
 	unsigned int window_handle;

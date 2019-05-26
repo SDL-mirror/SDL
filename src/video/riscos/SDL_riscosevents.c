@@ -295,13 +295,13 @@ void RISCOS_PollMouseHelper(_THIS, int fullscreen)
              topLeftY = window_state[4];
           }
 
-		  /* Convert co-ordinates to workspace */
-		  x = new_x - topLeftX;
+          /* Convert co-ordinates to workspace */
+          x = new_x - topLeftX;
           y = topLeftY - new_y; /* Y goes from top of window/screen */
 
-	 	  /* Convert OS units to pixels */
-	      x >>= this->hidden->xeig;
-		  y >>= this->hidden->yeig;
+          /* Convert OS units to pixels */
+          x >>= 1;
+          y >>= 1;
 
           if (last_x != new_x || last_y != new_y)
           {
