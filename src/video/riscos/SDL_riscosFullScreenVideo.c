@@ -41,7 +41,6 @@
 
 #include "kernel.h"
 #include "swis.h"
-#include "unixlib/os.h"
 #include "unixlib/local.h"
 
 /* Private structures */

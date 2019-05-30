@@ -43,7 +43,6 @@
 
 #include "kernel.h"
 #include "swis.h"
-#include "unixlib/os.h"
 
 #if !SDL_THREADS_DISABLED
 #include <pthread.h>
