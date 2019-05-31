@@ -1930,7 +1930,6 @@ SDL_SetWindowPosition(SDL_Window * window, int x, int y)
         if (_this->SetWindowPosition) {
             _this->SetWindowPosition(_this, window);
         }
-        SDL_SendWindowEvent(window, SDL_WINDOWEVENT_MOVED, x, y);
     }
 }
 

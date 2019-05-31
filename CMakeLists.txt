@@ -3,7 +3,7 @@ if(${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
 endif()
 
 cmake_minimum_required(VERSION 2.8.11)
-project(SDL2 C)
+project(SDL2 C CXX)
 
 # !!! FIXME: this should probably do "MACOSX_RPATH ON" as a target property
 # !!! FIXME:  for the SDL2 shared library (so you get an
@@ -925,6 +925,8 @@ if(ANDROID)
     endif()
   endif()
 
+  file(GLOB ANDROID_HIDAPI_SOURCES ${SDL2_SOURCE_DIR}/src/hidapi/android/*.cpp)
+
   CheckPTHREAD()
 
 endif()
@@ -1843,6 +1845,17 @@ if(SDL_SHARED)
   endif()
 endif()
 
+if(ANDROID)
+  add_library(hidapi SHARED ${ANDROID_HIDAPI_SOURCES})
+  if(MSVC AND NOT LIBC)
+    # Don't try to link with the default set of libraries.
+    set_target_properties(hidapi PROPERTIES LINK_FLAGS_RELEASE "/NODEFAULTLIB")
+    set_target_properties(hidapi PROPERTIES LINK_FLAGS_DEBUG "/NODEFAULTLIB")
+    set_target_properties(hidapi PROPERTIES STATIC_LIBRARY_FLAGS "/NODEFAULTLIB")
+  endif()
+  target_link_libraries(hidapi log)
+endif()
+
 if(SDL_STATIC)
   set (BUILD_SHARED_LIBS FALSE)
   add_library(SDL2-static STATIC ${SOURCE_FILES})
@@ -1935,8 +1948,8 @@ if(NOT (WINDOWS OR CYGWIN))
     if(NOT ANDROID)
         install(CODE "
           execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink
-            \"lib${SONAME}${SOPOSTFIX}${SOEXT}\" \"libSDL2${SOPOSTFIX}${SOEXT}\")"
-            WORKING_DIR "${SDL2_BINARY_DIR}")
+            \"lib${SONAME}${SOPOSTFIX}${SOEXT}\" \"libSDL2${SOPOSTFIX}${SOEXT}\"
+            WORKING_DIRECTORY \"${SDL2_BINARY_DIR}\")")
         install(FILES ${SDL2_BINARY_DIR}/libSDL2${SOPOSTFIX}${SOEXT} DESTINATION "lib${LIB_SUFFIX}")
     endif()
   endif()
