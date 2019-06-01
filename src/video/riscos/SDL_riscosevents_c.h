@@ -23,12 +23,14 @@
 
 #include "SDL_riscosvideo.h"
 
-/* Variables and functions exported by SDL_sysevents.c to other parts 
-   of the native video subsystem (SDL_sysvideo.c)
+/* Variables and functions exported by SDL_riscosevents.c to other parts 
+   of the native video subsystem
 */
 extern void RISCOS_InitOSKeymap(_THIS);
 extern void FULLSCREEN_PumpEvents(_THIS);
-extern void WIMP_PumpEvents(_THIS);
+extern void RISCOS_PollKeyboard();
+extern void RISCOS_CheckMouseMode(_THIS);
+extern void WIMP_PollMouse(_THIS);
 
-/* end of SDL_nullevents_c.h ... */
+/* end of SDL_riscosevents_c.h ... */
 

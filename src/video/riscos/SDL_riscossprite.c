@@ -23,7 +23,7 @@
 
 /*
      File added by Alan Buckley (alan_baa@hotmail.com) for RISC OS compatability
-	 27 March 2003
+     27 March 2003
 
      Implements Sprite plotting code for wimp display.window
 */
@@ -34,73 +34,107 @@
 #include "SDL_stdinc.h"
 #include "SDL_riscosvideo.h"
 
-extern void WIMP_ReadModeInfo(_THIS);
+/* Check if the given pixel format is supported as a sprite */
+int WIMP_IsSupportedSpriteFormat(const RISCOS_PixelFormat *fmt)
+{
+    _kernel_swi_regs r;
+    int c;
+
+    /* HACK: Mode 28 won't report as having a full palette. Just assume it's supported */
+    if (fmt->sprite_mode_word == 28) return 0;
+
+    /* OS_ReadModeVariable supports sprite mode words, so we can use that to sanity check things */
+    r.r[0] = fmt->sprite_mode_word;
+    r.r[1] = 3; /* NColour */
+    _kernel_swi_c(OS_ReadModeVariable,&r,&r,&c);
+    if (c || (r.r[2] != fmt->ncolour)) return -1;
+    r.r[1] = 0; /* ModeFlags */
+    _kernel_swi_c(OS_ReadModeVariable,&r,&r,&c);
+    if (c || ((r.r[2] & 0xf280) != fmt->modeflags)) return -1;
+    r.r[1] = 9; /* Log2BPP */
+    _kernel_swi_c(OS_ReadModeVariable,&r,&r,&c);
+    if (c || (r.r[2] != fmt->log2bpp)) return -1;
+
+    /* Looks good */
+    return 0;
+}
+
+/* Find a supported sprite format in the given BPP */
+const RISCOS_SDL_PixelFormat *WIMP_FindSupportedSpriteFormat(int bpp)
+{
+   int pass;
+   const RISCOS_SDL_PixelFormat *fmt;
+
+   for(pass=0;pass<2;pass++)
+   {
+      for (fmt = RISCOS_SDL_PixelFormats;fmt->sdl_bpp;fmt++)
+      {
+         if (fmt->sdl_bpp != bpp)
+         {
+            continue;
+         }
+         
+         if (!WIMP_IsSupportedSpriteFormat(&fmt->ro))
+         {
+            return fmt;
+         }
+      }
+
+      /* Fuzzy matching for 15bpp & 16bpp */
+      if (bpp == 15) { bpp = 16; }
+      else if (bpp == 16) { bpp = 15; }
+      else { break; }
+   }
+   return NULL;   
+}
 
 /* Create sprite buffer for screen */
 
-unsigned char *WIMP_CreateBuffer(int width, int height, int bpp)
+unsigned char *WIMP_CreateBuffer(int width, int height, const RISCOS_PixelFormat *format)
 {
-	int size;
-	char sprite_name[12] = "display";
-	unsigned char *buffer;
-	_kernel_swi_regs regs;
-	int bytesPerPixel;
-	int bytesPerRow;
-	int offsetToSpriteData = 60;
+   int size;
+   char sprite_name[12] = "display";
+   unsigned char *buffer;
+   _kernel_swi_regs regs;
+   int bytesPerPixel = 1 << (format->log2bpp-3);
+   int bytesPerRow;
+   int offsetToSpriteData = 60;
 
-	switch(bpp)
-	{
-	case 32: bytesPerPixel = 4; break;
-	case 16: bytesPerPixel = 2; break;
-	case 8:
-	    bytesPerPixel = 1;
-	    offsetToSpriteData += 2048; /* Add in size of palette */
-	    break;
-	default:
-		return NULL;
-		break;
-	}
+   if (format->log2bpp == 3)
+   {
+      offsetToSpriteData += 2048; /* Add in size of palette */
+   }
 
-	bytesPerRow = bytesPerPixel * width;
+   bytesPerRow = bytesPerPixel * width;
 
-	if ((bytesPerRow & 3) != 0)
-	{
-		bytesPerRow += 4 - (bytesPerRow & 3);
-	}
-	size = bytesPerRow * height;
+   if ((bytesPerRow & 3) != 0)
+   {
+      bytesPerRow += 4 - (bytesPerRow & 3);
+   }
+   size = bytesPerRow * height;
 
-	buffer = SDL_malloc( (size_t) size + offsetToSpriteData );
-	if (!buffer) return NULL;
+   buffer = SDL_malloc( (size_t) size + offsetToSpriteData );
+   if (!buffer) return NULL;
 
    /* Initialise a sprite area */
 
-	*(unsigned int *)buffer		= size + offsetToSpriteData;
-	*(unsigned int *)(buffer + 8)	= 16;
+   *(unsigned int *)buffer         = size + offsetToSpriteData;
+   *(unsigned int *)(buffer + 8)   = 16;
 
-	regs.r[0] = 256+9;
-	regs.r[1] = (unsigned int)buffer;
+   regs.r[0] = 256+9;
+   regs.r[1] = (unsigned int)buffer;
    _kernel_swi(OS_SpriteOp, &regs, &regs);
 
-	regs.r[0] = 256+15;
-	regs.r[1] = (unsigned int)buffer;
-	regs.r[2] = (unsigned int)&sprite_name;
-	regs.r[3] = 0; /* Palette flag: 0 = no palette */
-	regs.r[4] = width;
-	regs.r[5] = height;
-	if (bpp == 8)
-	{
-		/* Use old style mode number */
-		regs.r[6] = 28; /* 8bpp 90x90dpi */
-	} else
-	{
-		regs.r[6] = (((bpp == 16) ? 5 : 6) << 27) /* Type 6 = 32bpp sprite, 5 = 16bpp sprite */
-					| (90 << 14) /* Vertical dpi */
-					| (90 << 1)  /* Horizontal dpi */
-					| 1; /* Marker to distinguish between mode selectors and sprite modes */
-	}
+   regs.r[0] = 256+15;
+   regs.r[1] = (unsigned int)buffer;
+   regs.r[2] = (unsigned int)&sprite_name;
+   regs.r[3] = 0; /* Palette flag: 0 = no palette */
+   regs.r[4] = width;
+   regs.r[5] = height;
+   regs.r[6] = format->sprite_mode_word;
    if (_kernel_swi(OS_SpriteOp, &regs, &regs) == NULL)
    {
-       if (bpp == 8)
+       if (format->log2bpp == 3)
        {
           /* Modify sprite to take into account 256 colour palette */
           int *sprite = (int *)(buffer + 16);

@@ -26,6 +26,9 @@
 	26 March 2003
 */
 
+extern int riscos_backbuffer; /* Create a back buffer in system memory for full screen mode */
+extern int riscos_closeaction; /* Close icon action */
+
 /* Task initialisation/Clean up */
 
 extern int RISCOS_InitTask();

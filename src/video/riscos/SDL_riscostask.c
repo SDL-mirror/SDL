@@ -37,6 +37,8 @@
 
 #include "SDL_stdinc.h"
 #include "SDL_riscostask.h"
+#include "SDL_riscosvideo.h"
+#include "SDL_riscosmouse_c.h"
 
 #if !SDL_THREADS_DISABLED
 #include <pthread.h>
@@ -53,8 +55,6 @@ int riscos_backbuffer = 0; /* Create a back buffer in system memory for full scr
 int riscos_closeaction = 1; /* Close icon action */
 
 static int stored_mode = -1; /* -1 when in desktop, mode number or pointer when full screen */
-
-extern int mouseInWindow; /* Mouse is in WIMP window */
 
 /* Local function */
 

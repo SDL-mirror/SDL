@@ -51,20 +51,17 @@ typedef struct tagScreenModeBlock
    int y_pixels;
    int pixel_depth;  // 2^pixel_depth = bpp,i.e. 0 = 1, 1 = 2, 4 = 16, 5 = 32
    int frame_rate;   // -1 use first match
-   int mode_vars[5]; // array of index, value pairs terminated by -1
+   int mode_vars[7]; // array of index, value pairs terminated by -1
 } SCREENMODEBLOCK;
 
 
 /* Helper functions */
-void FULLSCREEN_SetDeviceMode(_THIS);
-int FULLSCREEN_SetMode(int width, int height, int bpp);
-void FULLSCREEN_SetupBanks(_THIS);
+static void FULLSCREEN_SetupBanks(_THIS);
 
 /* SDL video device functions for fullscreen mode */
 static int FULLSCREEN_SetColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors);
 static int FULLSCREEN_FlipHWSurface(_THIS, SDL_Surface *surface);
-void FULLSCREEN_SetWMCaption(_THIS, const char *title, const char *icon);
-extern int RISCOS_GetWmInfo(_THIS, SDL_SysWMinfo *info);
+static void FULLSCREEN_SetWMCaption(_THIS, const char *title, const char *icon);
 
 /* UpdateRects variants */
 static void FULLSCREEN_UpdateRects(_THIS, int numrects, SDL_Rect *rects);
@@ -77,56 +74,19 @@ static void FULLSCREEN_UpdateRectsOS(_THIS, int numrects, SDL_Rect *rects);
 /* Local helper functions */
 static int cmpmodes(const void *va, const void *vb);
 static int FULLSCREEN_AddMode(_THIS, int bpp, int w, int h);
-void FULLSCREEN_SetWriteBank(int bank);
-void FULLSCREEN_SetDisplayBank(int bank);
+static void FULLSCREEN_SetWriteBank(int bank);
+static void FULLSCREEN_SetDisplayBank(int bank);
 static void FULLSCREEN_DisableEscape();
 static void FULLSCREEN_EnableEscape();
-void FULLSCREEN_BuildModeList(_THIS);
-
-/* Following variable is set up in riskosTask.c */
-extern int riscos_backbuffer; /* Create a back buffer in system memory for full screen mode */
-
-/* Following is used to create a sprite back buffer */
-extern unsigned char *WIMP_CreateBuffer(int width, int height, int bpp);
-
-/* Fast assembler copy */
-extern void RISCOS_Put32(void *to, int pixels, int pitch, int rows, void *from, int src_skip_bytes);
 
 SDL_Surface *FULLSCREEN_SetVideoMode(_THIS, SDL_Surface *current,
 				int width, int height, int bpp, Uint32 flags)
 {
    _kernel_swi_regs regs;
-   Uint32 Rmask = 0;
-   Uint32 Gmask = 0;
-   Uint32 Bmask = 0;
    int create_back_buffer = riscos_backbuffer;
 
-   switch(bpp)
-   {
-	case 8:
-		flags |= SDL_HWPALETTE;
-		break;
-
-	case 15:
-	case 16:
-		Bmask = 0x00007c00;
-		Gmask = 0x000003e0;
-		Rmask = 0x0000001f;
-		break;
-
-	case 32:
-		Bmask = 0x00ff0000;
-		Gmask = 0x0000ff00;
-		Rmask = 0x000000ff;
-		break;
-
-	default:
-		SDL_SetError("Pixel depth not supported");
-		return NULL;
-		break;
-   }
-
-   if (FULLSCREEN_SetMode(width, height, bpp) == 0)
+   const RISCOS_SDL_PixelFormat *fmt = FULLSCREEN_SetMode(width, height, bpp);
+   if (fmt == NULL)
    {
 	   SDL_SetError("Couldn't set requested mode");
 	   return (NULL);
@@ -135,7 +95,7 @@ SDL_Surface *FULLSCREEN_SetVideoMode(_THIS, SDL_Surface *current,
 /* 	printf("Setting mode %dx%d\n", width, height); */
 
 	/* Allocate the new pixel format for the screen */
-	if ( ! SDL_ReallocFormat(current, bpp, Rmask, Gmask, Bmask, 0) ) {
+	if ( ! SDL_ReallocFormat(current, fmt->sdl_bpp, fmt->rmask, fmt->gmask, fmt->bmask, 0) ) {
 	    RISCOS_RestoreWimpMode();
 		SDL_SetError("Couldn't allocate new pixel format for requested mode");
 		return(NULL);
@@ -167,6 +127,11 @@ SDL_Surface *FULLSCREEN_SetVideoMode(_THIS, SDL_Surface *current,
 		   flags &= ~SDL_DOUBLEBUF;
 	   }
    }
+
+   if (fmt->sdl_bpp == 8)
+   {
+      flags |= SDL_HWPALETTE;
+   }
    
   	current->flags = flags | SDL_FULLSCREEN | SDL_HWSURFACE | SDL_PREALLOC;
 	
@@ -190,7 +155,7 @@ SDL_Surface *FULLSCREEN_SetVideoMode(_THIS, SDL_Surface *current,
          ** SDL$<name>$BackBuffer >= 1
          */
        if (riscos_backbuffer == 3)
-          this->hidden->bank[0] = WIMP_CreateBuffer(width, height, bpp);
+          this->hidden->bank[0] = WIMP_CreateBuffer(width, height, &fmt->ro);
        else
           this->hidden->bank[0] = SDL_malloc(height * current->pitch);
        if (this->hidden->bank[0] == 0)
@@ -222,6 +187,7 @@ SDL_Surface *FULLSCREEN_SetVideoMode(_THIS, SDL_Surface *current,
 
  	   this->hidden->current_bank = 0;
 	   current->pixels = this->hidden->bank[0];
+	   this->hidden->format = fmt;
 
     /* Have to set the screen here, so SetDeviceMode will pick it up */
     this->screen = current;
@@ -288,6 +254,46 @@ void FULLSCREEN_SetDeviceMode(_THIS)
 	this->PumpEvents = FULLSCREEN_PumpEvents;	
 }
 
+static void FULLSCREEN_CheckModeListEntry(_THIS, const int *blockInfo)
+{
+	if ((blockInfo[1] & 255) == 1) /* Old format mode entry */
+	{
+		switch(blockInfo[4])
+		{
+		case 3: /* 8 bits per pixel */
+			FULLSCREEN_AddMode(this, 8, blockInfo[2], blockInfo[3]);
+			break;
+		case 4: /* 15 bits per pixel */
+			FULLSCREEN_AddMode(this, 15, blockInfo[2], blockInfo[3]);
+			break;
+		case 5: /* 32 bits per pixel */
+			FULLSCREEN_AddMode(this, 32, blockInfo[2], blockInfo[3]);
+			break;
+		}
+	}
+	else if ((blockInfo[1] & 255) == 3) /* Newer format mode entry */
+	{
+		/* Check it's RGB colourspace */
+		if ((blockInfo[5] & 0x3000) != 0)
+		{
+			return;
+		}
+
+		switch(blockInfo[6])
+		{
+		case 3: /* 8 bits per pixel */
+			FULLSCREEN_AddMode(this, 8, blockInfo[2], blockInfo[3]);
+			break;
+		case 4: /* 12, 15 or 16 bits per pixel */
+			FULLSCREEN_AddMode(this, 15, blockInfo[2], blockInfo[3]);
+			break;
+		case 5: /* 32 bits per pixel */
+			FULLSCREEN_AddMode(this, 32, blockInfo[2], blockInfo[3]);
+			break;
+		}
+	}
+}
+
 /* Query for the list of available video modes */
 void FULLSCREEN_BuildModeList(_THIS)
 {
@@ -327,21 +333,7 @@ void FULLSCREEN_BuildModeList(_THIS)
 	for (j =0; j < num_modes;j++)
 	{
 		blockInfo = (int *)enum_ptr;
-		if ((blockInfo[1] & 255) == 1) /* We understand this format */
-		{
-			switch(blockInfo[4])
-			{
-			case 3: /* 8 bits per pixel */
-				FULLSCREEN_AddMode(this, 8, blockInfo[2], blockInfo[3]);
-				break;
-			case 4: /* 15 bits per pixel */
-				FULLSCREEN_AddMode(this, 15, blockInfo[2], blockInfo[3]);
-				break;
-			case 5: /* 32 bits per pixel */
-				FULLSCREEN_AddMode(this, 32, blockInfo[2], blockInfo[3]);
-				break;
-			}
-		}
+		FULLSCREEN_CheckModeListEntry(this, blockInfo);
 
 		enum_ptr += blockInfo[0];
 	}
@@ -641,64 +633,79 @@ void FULLSCREEN_SetWMCaption(_THIS, const char *title, const char *icon)
 	SDL_strlcpy(this->hidden->title, title, SDL_arraysize(this->hidden->title));
 }
 
-/* Set screen mode
-*
-*  Returns 1 if mode is set ok, otherwise 0
-*/
-
-int FULLSCREEN_SetMode(int width, int height, int bpp)
+/* Try and set the exact screen mode specified */
+static int FULLSCREEN_TrySetMode(int width,int height,const RISCOS_PixelFormat *fmt)
 {
    SCREENMODEBLOCK smb;
    _kernel_swi_regs regs;
 
+   /* To cope with dodgy validation by the OS or video drivers, check that the OS understands the corresponding sprite format */
+   if (WIMP_IsSupportedSpriteFormat(fmt))
+   {
+      return -1;
+   }
+
    smb.flags = 1;
    smb.x_pixels = width;
    smb.y_pixels = height;
-   smb.mode_vars[0] = -1;
-
-   switch(bpp)
-   {
-	case 8:
-		smb.pixel_depth = 3;
-		/* Note: Need to set ModeFlags to 128 and NColour variables to 255 get full 8 bit palette */
-		smb.mode_vars[0] = 0; smb.mode_vars[1] = 128; /* Mode flags */
-		smb.mode_vars[2] = 3; smb.mode_vars[3] = 255; /* NColour (number of colours -1) */
-		smb.mode_vars[4] = -1; /* End of list */
-		break;
-
-	case 15:
-	case 16:
-		smb.pixel_depth = 4;
-		break;
-
-	case 32:
-		smb.pixel_depth = 5;
-		break;
-
-	default:
-		SDL_SetError("Pixel depth not supported");
-		return 0;
-		break;
-   }
-   
+   smb.pixel_depth = fmt->log2bpp;
    smb.frame_rate = -1;
+   smb.mode_vars[0] = 3; /* NColour */
+   smb.mode_vars[1] = fmt->ncolour;
+   smb.mode_vars[2] = 0; /* ModeFlags */
+   smb.mode_vars[3] = fmt->modeflags;
+   smb.mode_vars[4] = -1;
 
    regs.r[0] = 0;
    regs.r[1] = (int)&smb;
 
-   if (_kernel_swi(OS_ScreenMode, &regs, &regs) != 0)
+   if (_kernel_swi(OS_ScreenMode, &regs, &regs) == 0)
    {
-	   SDL_SetError("Couldn't set requested mode");
-	   return 0;
+      /* Turn cursor off*/
+      _kernel_oswrch(23);_kernel_oswrch(1);_kernel_oswrch(0);
+      _kernel_oswrch(0);_kernel_oswrch(0);_kernel_oswrch(0);
+      _kernel_oswrch(0);_kernel_oswrch(0);_kernel_oswrch(0);
+      _kernel_oswrch(0);_kernel_oswrch(0);
+
+      return 0;
+   }
+   
+   return -1;
+}
+
+/* Set screen mode
+*
+*  Returns ptr to pixel format if mode is set ok, otherwise 0
+*/
+
+const RISCOS_SDL_PixelFormat *FULLSCREEN_SetMode(int width, int height, int bpp)
+{
+   int pass;
+   const RISCOS_SDL_PixelFormat *fmt;
+
+   for(pass=0;pass<2;pass++)
+   {
+      for (fmt = RISCOS_SDL_PixelFormats;fmt->sdl_bpp;fmt++)
+      {
+         if (fmt->sdl_bpp != bpp)
+         {
+            continue;
+         }
+         
+         if (!FULLSCREEN_TrySetMode(width,height,&fmt->ro))
+         {
+            return fmt;
+         }
+      }
+
+      /* Fuzzy matching for 15bpp & 16bpp */
+      if (bpp == 15) { bpp = 16; }
+      else if (bpp == 16) { bpp = 15; }
+      else { break; }
    }
 
-    /* Turn cursor off*/
-    _kernel_oswrch(23);_kernel_oswrch(1);_kernel_oswrch(0);
-    _kernel_oswrch(0);_kernel_oswrch(0);_kernel_oswrch(0);
-    _kernel_oswrch(0);_kernel_oswrch(0);_kernel_oswrch(0);
-    _kernel_oswrch(0);_kernel_oswrch(0);
-
-   return 1;
+   SDL_SetError("Couldn't set requested mode");
+   return NULL;
 }
 
 /* Get Start addresses for the screen banks */
@@ -731,7 +738,7 @@ int FULLSCREEN_ToggleFromWimp(_THIS)
    int bpp = this->screen->format->BitsPerPixel;
 
    RISCOS_StoreWimpMode();
-   if (FULLSCREEN_SetMode(width, height, bpp))
+   if (!FULLSCREEN_TrySetMode(width, height, &this->hidden->format->ro))
    {
        unsigned char *buffer = this->hidden->alloc_bank; /* This is start of sprite data */
        /* Support back buffer mode only */
@@ -740,7 +747,19 @@ int FULLSCREEN_ToggleFromWimp(_THIS)
        FULLSCREEN_SetupBanks(this);
 
        this->hidden->bank[0] = buffer + 60; /* Start of sprite data */
-       if (bpp == 8) this->hidden->bank[0] += 2048; /* 8bpp sprite have palette first */
+       if (bpp == 8)
+       {
+           /* Retain the SDL palette */
+           _kernel_swi_regs regs;
+           regs.r[0] = -1;
+           regs.r[1] = -1;
+           regs.r[2] = (int) this->hidden->bank[0];
+           regs.r[3] = 0;
+           regs.r[4] = 2; /* Flashing colours provided (source is sprite palette) */
+           _kernel_swi(ColourTrans_WritePalette,&regs,&regs);
+
+           this->hidden->bank[0] += 2048;
+       }
 
 	   this->hidden->current_bank = 0;
 	   this->screen->pixels = this->hidden->bank[0];

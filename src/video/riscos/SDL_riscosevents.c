@@ -48,6 +48,11 @@
 #include <pthread.h>
 #endif
 
+#if SDL_THREADS_DISABLED
+/* Timer running function */
+extern void RISCOS_CheckTimer();
+#endif
+
 /* The translation table from a RISC OS internal key numbers to a SDL keysym */
 static SDLKey RO_keymap[SDLK_LAST];
 
@@ -76,20 +81,11 @@ static char RO_pressed[ROKEYBD_ARRAYSIZE];
 
 static SDL_keysym *TranslateKey(int intkey, SDL_keysym *keysym, int pressed);
 
-void RISCOS_PollMouse(_THIS);
-void RISCOS_PollKeyboard();
+static void RISCOS_PollMouse(_THIS);
+static void RISCOS_PollMouseHelper(_THIS, int fullscreen);
 
-void RISCOS_PollMouseHelper(_THIS, int fullscreen);
-
-#if SDL_THREADS_DISABLED
-extern void DRenderer_FillBuffers();
-
-/* Timer running function */
-extern void RISCOS_CheckTimer();
-
-#else
+#if !SDL_THREAD_DISABLED
 extern int riscos_using_threads;
-
 #endif
 
 void FULLSCREEN_PumpEvents(_THIS)
@@ -98,7 +94,6 @@ void FULLSCREEN_PumpEvents(_THIS)
 	RISCOS_PollKeyboard();
 	RISCOS_PollMouse(this);
 #if SDL_THREADS_DISABLED
-//	DRenderer_FillBuffers();
 	if (SDL_timer_running) RISCOS_CheckTimer();
 #else
 	/* Stop thread starvation, which will occur if the main loop
@@ -254,8 +249,6 @@ void RISCOS_PollMouse(_THIS)
 {
    RISCOS_PollMouseHelper(this, 1);
 }
-
-extern int mouseInWindow;
 
 void WIMP_PollMouse(_THIS)
 {

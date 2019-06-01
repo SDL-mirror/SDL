@@ -39,8 +39,6 @@
 static WMcursor *current_cursor = NULL;
 static WMcursor *defined_cursor = NULL;
 
-extern int mouseInWindow;
-
 /* Area to save cursor palette colours changed by SDL.
    Actual values will be read before we change to the SDL cursor */
 static Uint8 wimp_cursor_palette[2][5] = {
@@ -50,9 +48,8 @@ static Uint8 wimp_cursor_palette[2][5] = {
 
 static int cursor_palette_saved = 0;
 
-void WIMP_SaveCursorPalette();
-void WIMP_RestoreWimpCursor();
-void WIMP_SetSDLCursorPalette();
+static void WIMP_SaveCursorPalette();
+static void WIMP_SetSDLCursorPalette();
 
 
 void RISCOS_FreeWMCursor(_THIS, WMcursor *cursor)
@@ -188,7 +185,6 @@ int RISCOS_ShowWMCursor(_THIS, WMcursor *cursor)
 void FULLSCREEN_WarpWMCursor(_THIS, Uint16 x, Uint16 y)
 {
 	Uint8 move_block[5];
-	_kernel_swi_regs regs;
 	int os_x, os_y;
 	int topLeftY;
 

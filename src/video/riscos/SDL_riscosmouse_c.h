@@ -33,13 +33,16 @@ struct WMcursor {
 };
 
 /* Functions to be exported */
-void RISCOS_FreeWMCursor(_THIS, WMcursor *cursor);
-WMcursor *RISCOS_CreateWMCursor(_THIS, Uint8 *data, Uint8 *mask, int w, int h, int hot_x, int hot_y);
+extern void RISCOS_FreeWMCursor(_THIS, WMcursor *cursor);
+extern WMcursor *RISCOS_CreateWMCursor(_THIS, Uint8 *data, Uint8 *mask, int w, int h, int hot_x, int hot_y);
 
-int RISCOS_ShowWMCursor(_THIS, WMcursor *cursor);
-void FULLSCREEN_WarpWMCursor(_THIS, Uint16 x, Uint16 y);
+extern int RISCOS_ShowWMCursor(_THIS, WMcursor *cursor);
+extern void FULLSCREEN_WarpWMCursor(_THIS, Uint16 x, Uint16 y);
 
-int WIMP_ShowWMCursor(_THIS, WMcursor *cursor);
-void WIMP_WarpWMCursor(_THIS, Uint16 x, Uint16 y);
+extern int WIMP_ShowWMCursor(_THIS, WMcursor *cursor);
+extern void WIMP_WarpWMCursor(_THIS, Uint16 x, Uint16 y);
 
-void WIMP_RestoreWimpCursor();
+extern void WIMP_RestoreWimpCursor();
+extern SDL_GrabMode RISCOS_GrabInput(_THIS, SDL_GrabMode mode);
+
+extern void WIMP_ReshowCursor(_THIS);

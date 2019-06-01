@@ -31,6 +31,23 @@
 /* Hidden "this" pointer for the video functions */
 #define _THIS	SDL_VideoDevice *this
 
+/* Information that RISC OS uses to identify/describe pixel formats */
+typedef struct {
+	int ncolour,modeflags,log2bpp;
+	Uint32 sprite_mode_word;
+} RISCOS_PixelFormat;
+
+/* RISC OS information combined with SDL information */
+typedef struct {
+	RISCOS_PixelFormat ro;
+	int sdl_bpp;
+	Uint32 rmask;
+	Uint32 gmask;
+	Uint32 bmask;
+} RISCOS_SDL_PixelFormat;
+
+extern const RISCOS_SDL_PixelFormat *RISCOS_SDL_PixelFormats; /* Table of known formats */
+
 
 /* Private display data */
 
@@ -41,7 +58,6 @@ struct SDL_PrivateVideoData {
     int height;
     int xeig;
     int yeig;
-	int screen_bpp;
 	int screen_width;
 	int screen_height;
 	char *pixtrans;
@@ -51,6 +67,8 @@ struct SDL_PrivateVideoData {
 	unsigned int window_handle;
 	char title[256];
 
+    const RISCOS_SDL_PixelFormat *format; /* Format of current SDL display */
+
 #define NUM_MODELISTS	4		/* 8, 16, 24, and 32 bits-per-pixel */
     int SDL_nummodes[NUM_MODELISTS];
     SDL_Rect **SDL_modelist[NUM_MODELISTS];
@@ -59,5 +77,41 @@ struct SDL_PrivateVideoData {
 /* Old variable names */
 #define SDL_nummodes		(this->hidden->SDL_nummodes)
 #define SDL_modelist		(this->hidden->SDL_modelist)
+
+/* SDL_riscosvideo.c */
+extern const RISCOS_SDL_PixelFormat *RISCOS_CurrentPixelFormat(); /* Find the current format */
+extern int RISCOS_ToggleFullScreen(_THIS, int fullscreen);
+extern int RISCOS_GetWmInfo(_THIS, SDL_SysWMinfo *info);
+
+/* SDL_riscossprite.c */
+extern int WIMP_IsSupportedSpriteFormat(const RISCOS_PixelFormat *fmt);
+extern const RISCOS_SDL_PixelFormat *WIMP_FindSupportedSpriteFormat(int bpp);
+extern unsigned char *WIMP_CreateBuffer(int width, int height, const RISCOS_PixelFormat *format);
+extern void WIMP_SetupPlotInfo(_THIS);
+extern void WIMP_PlotSprite(_THIS, int x, int y);
+
+/* SDL_wimpvideo.c */
+extern void WIMP_PumpEvents(_THIS);
+extern void WIMP_SetFocus(int win);
+extern void WIMP_ReadModeInfo(_THIS);
+extern void WIMP_DeleteWindow(_THIS);
+extern SDL_Surface *WIMP_SetVideoMode(_THIS, SDL_Surface *current, int width, int height, int bpp, Uint32 flags);
+extern int WIMP_ToggleFromFullScreen(_THIS);
+
+/* SDL_riscosFullScreenVideo.c */
+extern void FULLSCREEN_SetDeviceMode(_THIS);
+extern const RISCOS_SDL_PixelFormat *FULLSCREEN_SetMode(int width, int height, int bpp);
+extern void FULLSCREEN_BuildModeList(_THIS);
+extern SDL_Surface *FULLSCREEN_SetVideoMode(_THIS, SDL_Surface *current, int width, int height, int bpp, Uint32 flags);
+extern int FULLSCREEN_ToggleFromWimp(_THIS);
+
+/* SDL_riscosASM.S */
+extern void RISCOS_Put32(void *to, int pixels, int pitch, int rows, void *from, int src_skip_bytes); /* Fast assembler copy */
+
+/* SDL_wimppoll.c */
+extern int mouseInWindow; /* Mouse is in WIMP window */
+extern int hasFocus;
+extern void WIMP_Poll(_THIS, int waitTime);
+
 
 #endif /* _SDL_risosvideo_h */

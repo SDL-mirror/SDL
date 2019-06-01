@@ -48,16 +48,7 @@
 #include <pthread.h>
 #endif
 
-/* Local functions */
-void WIMP_Poll(_THIS, int waitTime);
-void WIMP_SetFocus(int win);
 
-/* SDL_riscossprite functions */
-void WIMP_PlotSprite(_THIS, int x, int y);
-
-
-extern void WIMP_PollMouse(_THIS);
-extern void RISCOS_PollKeyboard();
 
 #if SDL_THREADS_DISABLED
 /* Timer running function */
@@ -65,10 +56,6 @@ extern void RISCOS_CheckTimer();
 #else
 extern int riscos_using_threads;
 #endif
-
-/* Mouse cursor handling */
-extern void WIMP_ReshowCursor(_THIS);
-extern void WIMP_RestoreWimpCursor();
 
 int hasFocus = 0;
 int mouseInWindow = 0;
