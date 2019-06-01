@@ -299,7 +299,7 @@ void RISCOS_PollMouseHelper(_THIS, int fullscreen)
           x = new_x - topLeftX;
           y = topLeftY - new_y; /* Y goes from top of window/screen */
 
-          /* Convert OS units to pixels */
+          /* Convert OS units to pixels (with 90 DPI mapping from OS units to SDL pixels) */
           x >>= 1;
           y >>= 1;
 
@@ -313,8 +313,8 @@ void RISCOS_PollMouseHelper(_THIS, int fullscreen)
                 if (centre_x != x || centre_y != y)
                 {
                    if (SDL_VideoSurface) SDL_PrivateMouseMotion(0,1,x - centre_x, y - centre_y);
-                   last_x = topLeftX + (centre_x << this->hidden->xeig);
-                   last_y = topLeftY - (centre_y << this->hidden->yeig);
+                   last_x = topLeftX + (centre_x << 1);
+                   last_y = topLeftY - (centre_y << 1);
 
                    /* Re-centre the mouse pointer, so we still get relative
                       movement when the mouse is at the edge of the window

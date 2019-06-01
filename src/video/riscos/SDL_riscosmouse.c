@@ -188,20 +188,14 @@ int RISCOS_ShowWMCursor(_THIS, WMcursor *cursor)
 void FULLSCREEN_WarpWMCursor(_THIS, Uint16 x, Uint16 y)
 {
 	Uint8 move_block[5];
-	int eig_block[3];
 	_kernel_swi_regs regs;
 	int os_x, os_y;
+	int topLeftY;
 
-	eig_block[0] = 4;  /* X eig factor */
-	eig_block[1] = 5;  /* Y eig factor */
-	eig_block[2] = -1;  /* End of list of variables to request */
+	topLeftY = (this->hidden->height << this->hidden->yeig) - 1; /* As per RISCOS_PollMouseHelper */
 
-    regs.r[0] = (int)eig_block;
-    regs.r[1] = (int)eig_block;
-    _kernel_swi(OS_ReadVduVariables, &regs, &regs);
-
-	os_x = x << eig_block[0];
-	os_y = y << eig_block[1];
+	os_x = x << this->hidden->xeig;
+	os_y = topLeftY - (y << this->hidden->yeig);
 
 	move_block[0] = 3; /* Move cursor */
 	move_block[1] = os_x & 0xFF;
@@ -233,6 +227,7 @@ void WIMP_WarpWMCursor(_THIS, Uint16 x, Uint16 y)
 	regs.r[1] = (unsigned int)window_state;
 	_kernel_swi(Wimp_GetWindowState, &regs, &regs);
 
+	/* 90 DPI mapping from SDL pixels to OS units */
 	 osX = (x << 1) + window_state[1];
 	 osY = window_state[4] - (y << 1);
 
