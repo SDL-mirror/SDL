@@ -264,6 +264,14 @@ static Sint32 IMA_ADPCM_nibble(struct IMA_ADPCM_decodestate *state,Uint8 nybble)
 	};
 	Sint32 delta, step;
 
+	/* Clamp index value. The inital value can be invalid. */
+	if ( state->index > 88 ) {
+		state->index = 88;
+	} else
+	if ( state->index < 0 ) {
+		state->index = 0;
+	}
+
 	/* Compute difference and new sample value */
 	step = step_table[state->index];
 	delta = step >> 3;
@@ -275,12 +283,6 @@ static Sint32 IMA_ADPCM_nibble(struct IMA_ADPCM_decodestate *state,Uint8 nybble)
 
 	/* Update index value */
 	state->index += index_table[nybble];
-	if ( state->index > 88 ) {
-		state->index = 88;
-	} else
-	if ( state->index < 0 ) {
-		state->index = 0;
-	}
 
 	/* Clamp output sample */
 	if ( state->sample > max_audioval ) {
