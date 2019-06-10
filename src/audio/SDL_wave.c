@@ -44,12 +44,13 @@ static struct MS_ADPCM_decoder {
 	struct MS_ADPCM_decodestate state[2];
 } MS_ADPCM_state;
 
-static int InitMS_ADPCM(WaveFMT *format)
+static int InitMS_ADPCM(WaveFMT *format, int length)
 {
-	Uint8 *rogue_feel;
+	Uint8 *rogue_feel, *rogue_feel_end;
 	int i;
 
 	/* Set the rogue pointer to the MS_ADPCM specific data */
+	if (length < sizeof(*format)) goto too_short;
 	MS_ADPCM_state.wavefmt.encoding = SDL_SwapLE16(format->encoding);
 	MS_ADPCM_state.wavefmt.channels = SDL_SwapLE16(format->channels);
 	MS_ADPCM_state.wavefmt.frequency = SDL_SwapLE32(format->frequency);
@@ -58,9 +59,11 @@ static int InitMS_ADPCM(WaveFMT *format)
 	MS_ADPCM_state.wavefmt.bitspersample =
 					 SDL_SwapLE16(format->bitspersample);
 	rogue_feel = (Uint8 *)format+sizeof(*format);
+	rogue_feel_end = (Uint8 *)format + length;
 	if ( sizeof(*format) == 16 ) {
 		rogue_feel += sizeof(Uint16);
 	}
+	if (rogue_feel + 4 > rogue_feel_end) goto too_short;
 	MS_ADPCM_state.wSamplesPerBlock = ((rogue_feel[1]<<8)|rogue_feel[0]);
 	rogue_feel += sizeof(Uint16);
 	MS_ADPCM_state.wNumCoef = ((rogue_feel[1]<<8)|rogue_feel[0]);
@@ -70,12 +73,16 @@ static int InitMS_ADPCM(WaveFMT *format)
 		return(-1);
 	}
 	for ( i=0; i<MS_ADPCM_state.wNumCoef; ++i ) {
+		if (rogue_feel + 4 > rogue_feel_end) goto too_short;
 		MS_ADPCM_state.aCoeff[i][0] = ((rogue_feel[1]<<8)|rogue_feel[0]);
 		rogue_feel += sizeof(Uint16);
 		MS_ADPCM_state.aCoeff[i][1] = ((rogue_feel[1]<<8)|rogue_feel[0]);
 		rogue_feel += sizeof(Uint16);
 	}
 	return(0);
+too_short:
+	SDL_SetError("Unexpected length of a chunk with a MS ADPCM format");
+	return(-1);
 }
 
 static Sint32 MS_ADPCM_nibble(struct MS_ADPCM_decodestate *state,
@@ -495,7 +502,7 @@ SDL_AudioSpec * SDL_LoadWAV_RW (SDL_RWops *src, int freesrc,
 			break;
 		case MS_ADPCM_CODE:
 			/* Try to understand this */
-			if ( InitMS_ADPCM(format) < 0 ) {
+			if ( InitMS_ADPCM(format, lenread) < 0 ) {
 				was_error = 1;
 				goto done;
 			}
