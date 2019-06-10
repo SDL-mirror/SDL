@@ -331,7 +331,7 @@ static void Fill_IMA_ADPCM_block(Uint8 *decoded, Uint8 *encoded,
 static int IMA_ADPCM_decode(Uint8 **audio_buf, Uint32 *audio_len)
 {
 	struct IMA_ADPCM_decodestate *state;
-	Uint8 *freeable, *encoded, *decoded;
+	Uint8 *freeable, *encoded, *encoded_end, *decoded;
 	Sint32 encoded_len, samplesleft;
 	unsigned int c, channels;
 
@@ -347,6 +347,7 @@ static int IMA_ADPCM_decode(Uint8 **audio_buf, Uint32 *audio_len)
 	/* Allocate the proper sized output buffer */
 	encoded_len = *audio_len;
 	encoded = *audio_buf;
+	encoded_end = encoded + encoded_len;
 	freeable = *audio_buf;
 	*audio_len = (encoded_len/IMA_ADPCM_state.wavefmt.blockalign) * 
 				IMA_ADPCM_state.wSamplesPerBlock*
@@ -362,6 +363,7 @@ static int IMA_ADPCM_decode(Uint8 **audio_buf, Uint32 *audio_len)
 	while ( encoded_len >= IMA_ADPCM_state.wavefmt.blockalign ) {
 		/* Grab the initial information for this block */
 		for ( c=0; c<channels; ++c ) {
+			if (encoded + 4 > encoded_end) goto invalid_size;
 			/* Fill the state information for this block */
 			state[c].sample = ((encoded[1]<<8)|encoded[0]);
 			encoded += 2;
@@ -384,6 +386,7 @@ static int IMA_ADPCM_decode(Uint8 **audio_buf, Uint32 *audio_len)
 		samplesleft = (IMA_ADPCM_state.wSamplesPerBlock-1)*channels;
 		while ( samplesleft > 0 ) {
 			for ( c=0; c<channels; ++c ) {
+				if (encoded + 4 > encoded_end) goto invalid_size;
 				Fill_IMA_ADPCM_block(decoded, encoded,
 						c, channels, &state[c]);
 				encoded += 4;
@@ -395,6 +398,10 @@ static int IMA_ADPCM_decode(Uint8 **audio_buf, Uint32 *audio_len)
 	}
 	SDL_free(freeable);
 	return(0);
+invalid_size:
+	SDL_SetError("Unexpected chunk length for an IMA ADPCM decoder");
+	SDL_free(freeable);
+	return(-1);
 }
 
 SDL_AudioSpec * SDL_LoadWAV_RW (SDL_RWops *src, int freesrc,
