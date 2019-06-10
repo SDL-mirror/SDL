@@ -115,7 +115,7 @@ static Sint32 MS_ADPCM_nibble(struct MS_ADPCM_decodestate *state,
 static int MS_ADPCM_decode(Uint8 **audio_buf, Uint32 *audio_len)
 {
 	struct MS_ADPCM_decodestate *state[2];
-	Uint8 *freeable, *encoded, *decoded;
+	Uint8 *freeable, *encoded, *encoded_end, *decoded;
 	Sint32 encoded_len, samplesleft;
 	Sint8 nybble, stereo;
 	Sint16 *coeff[2];
@@ -124,6 +124,7 @@ static int MS_ADPCM_decode(Uint8 **audio_buf, Uint32 *audio_len)
 	/* Allocate the proper sized output buffer */
 	encoded_len = *audio_len;
 	encoded = *audio_buf;
+	encoded_end = encoded + encoded_len;
 	freeable = *audio_buf;
 	*audio_len = (encoded_len/MS_ADPCM_state.wavefmt.blockalign) * 
 				MS_ADPCM_state.wSamplesPerBlock*
@@ -141,6 +142,7 @@ static int MS_ADPCM_decode(Uint8 **audio_buf, Uint32 *audio_len)
 	state[1] = &MS_ADPCM_state.state[stereo];
 	while ( encoded_len >= MS_ADPCM_state.wavefmt.blockalign ) {
 		/* Grab the initial information for this block */
+		if (encoded + 7 + (stereo ? 7 : 0) > encoded_end) goto too_short;
 		state[0]->hPredictor = *encoded++;
 		if ( stereo ) {
 			state[1]->hPredictor = *encoded++;
@@ -188,6 +190,8 @@ static int MS_ADPCM_decode(Uint8 **audio_buf, Uint32 *audio_len)
 		samplesleft = (MS_ADPCM_state.wSamplesPerBlock-2)*
 					MS_ADPCM_state.wavefmt.channels;
 		while ( samplesleft > 0 ) {
+			if (encoded + 1 > encoded_end) goto too_short;
+
 			nybble = (*encoded)>>4;
 			new_sample = MS_ADPCM_nibble(state[0],nybble,coeff[0]);
 			decoded[0] = new_sample&0xFF;
@@ -209,6 +213,10 @@ static int MS_ADPCM_decode(Uint8 **audio_buf, Uint32 *audio_len)
 	}
 	SDL_free(freeable);
 	return(0);
+too_short:
+	SDL_SetError("Too short chunk for a MS ADPCM decoder");
+	SDL_free(freeable);
+	return(-1);
 }
 
 struct IMA_ADPCM_decodestate {
