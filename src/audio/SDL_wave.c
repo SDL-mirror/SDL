@@ -346,7 +346,7 @@ static void Fill_IMA_ADPCM_block(Uint8 *decoded, Uint8 *encoded,
 static int IMA_ADPCM_decode(Uint8 **audio_buf, Uint32 *audio_len)
 {
 	struct IMA_ADPCM_decodestate *state;
-	Uint8 *freeable, *encoded, *encoded_end, *decoded;
+	Uint8 *freeable, *encoded, *encoded_end, *decoded, *decoded_end;
 	Sint32 encoded_len, samplesleft;
 	unsigned int c, channels;
 
@@ -373,6 +373,7 @@ static int IMA_ADPCM_decode(Uint8 **audio_buf, Uint32 *audio_len)
 		return(-1);
 	}
 	decoded = *audio_buf;
+	decoded_end = decoded + *audio_len;
 
 	/* Get ready... Go! */
 	while ( encoded_len >= IMA_ADPCM_state.wavefmt.blockalign ) {
@@ -392,6 +393,7 @@ static int IMA_ADPCM_decode(Uint8 **audio_buf, Uint32 *audio_len)
 			}
 
 			/* Store the initial sample we start with */
+			if (decoded + 2 > decoded_end) goto invalid_size;
 			decoded[0] = (Uint8)(state[c].sample&0xFF);
 			decoded[1] = (Uint8)(state[c].sample>>8);
 			decoded += 2;
@@ -402,6 +404,8 @@ static int IMA_ADPCM_decode(Uint8 **audio_buf, Uint32 *audio_len)
 		while ( samplesleft > 0 ) {
 			for ( c=0; c<channels; ++c ) {
 				if (encoded + 4 > encoded_end) goto invalid_size;
+				if (decoded + 4 * 4 * channels > decoded_end)
+					goto invalid_size;
 				Fill_IMA_ADPCM_block(decoded, encoded,
 						c, channels, &state[c]);
 				encoded += 4;
