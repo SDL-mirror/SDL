@@ -60,22 +60,27 @@ static int RISCOS_LockHWSurface(_THIS, SDL_Surface *surface);
 static void RISCOS_UnlockHWSurface(_THIS, SDL_Surface *surface);
 static void RISCOS_FreeHWSurface(_THIS, SDL_Surface *surface);
 
+#define MODE_350(type, xdpi, ydpi) \
+	(1 | (xdpi << 1) | (ydpi << 13) | (type << 27))
+#define MODE_521(type, xeig, yeig, flags) \
+	(0x78000001 | (xeig << 4) | (yeig << 6) | (flags & 0xFF00) | (type << 20))
+
 /* Table of known pixel formats */
 const RISCOS_SDL_PixelFormat *RISCOS_SDL_PixelFormats = (const RISCOS_SDL_PixelFormat[]) {
 /* 8bpp palettized */
-{ { 255,   0x0080, 3,         28 }, 8, 0, 0, 0 },
+{ { 255,   0x0080, 3,                      28 }, 8, 0, 0, 0 },
 /* 12bpp true colour */
-{ { 4095,  0x0000, 4, 0x79004051 }, 12, 0x0f,     0x0f<<4, 0x0f<<8  },
-{ { 4095,  0x4000, 4, 0x79004051 }, 12, 0x0f<<8,  0x0f<<4, 0x0f     },
+{ { 4095,  0x0000, 4, MODE_521(16,1,1,0)      }, 12, 0x0f,     0x0f<<4, 0x0f<<8  },
+{ { 4095,  0x4000, 4, MODE_521(16,1,1,0x4000) }, 12, 0x0f<<8,  0x0f<<4, 0x0f     },
 /* 15bpp true colour */
-{ { 65535, 0x0000, 4, 0x28168003 }, 15, 0x1f,     0x1f<<5, 0x1f<<10 },
-{ { 65535, 0x4000, 4, 0x78504051 }, 15, 0x1f<<10, 0x1f<<5, 0x1f     },
+{ { 65535, 0x0000, 4, MODE_350(5,90,90)       }, 15, 0x1f,     0x1f<<5, 0x1f<<10 },
+{ { 65535, 0x4000, 4, MODE_521(5,1,1,0x4000)  }, 15, 0x1f<<10, 0x1f<<5, 0x1f     },
 /* 16bpp true colour */
-{ { 65535, 0x0080, 4, 0x50168003 }, 16, 0x1f,     0x3f<<5, 0x1f<<11 },
-{ { 65535, 0x4080, 4, 0x78A04051 }, 16, 0x1f<<11, 0x3f<<5, 0x1f     },
+{ { 65535, 0x0080, 4, MODE_350(10,90,90)      }, 16, 0x1f,     0x3f<<5, 0x1f<<11 },
+{ { 65535, 0x4080, 4, MODE_521(10,1,1,0x4000) }, 16, 0x1f<<11, 0x3f<<5, 0x1f     },
 /* 32bpp true colour */
-{ { -1,    0x0000, 5, 0x30168003 }, 32, 0xff,     0xff<<8, 0xff<<16 },
-{ { -1,    0x4000, 5, 0x78604051 }, 32, 0xff<<16, 0xff<<8, 0xff     },
+{ { -1,    0x0000, 5, MODE_350(6,90,90)       }, 32, 0xff,     0xff<<8, 0xff<<16 },
+{ { -1,    0x4000, 5, MODE_521(6,1,1,0x4000)  }, 32, 0xff<<16, 0xff<<8, 0xff     },
 /* Terminator */
 { },
 };
