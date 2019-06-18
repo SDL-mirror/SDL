@@ -89,8 +89,10 @@ const char *SDL_SYS_JoystickName(int index)
  */
 int SDL_SYS_JoystickOpen(SDL_Joystick *joystick)
 {
-	if(!(joystick->hwdata=SDL_malloc(sizeof(struct joystick_hwdata))))
+	if(!(joystick->hwdata=SDL_malloc(sizeof(struct joystick_hwdata)))) {
+		SDL_OutOfMemory();
 		return -1;
+	}
 
 	/* Don't know how to get exact count of buttons so assume max of 4 for now */
 	joystick->nbuttons=4;

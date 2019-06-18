@@ -58,7 +58,7 @@ static int stored_mode = -1; /* -1 when in desktop, mode number or pointer when 
 
 /* Local function */
 
-static int RISCOS_GetTaskName(char *task_name, size_t maxlen);
+static void RISCOS_GetTaskName(char *task_name, size_t maxlen);
 
 /* Uncomment next line to copy mode changes/restores to stderr */
 /* #define DUMP_MODE */
@@ -94,9 +94,10 @@ int RISCOS_InitTask()
 {
    char task_name[32];
    _kernel_swi_regs regs;
+   _kernel_oserror *error;
    int messages[4];
 
-   if (RISCOS_GetTaskName(task_name, SDL_arraysize(task_name)) == 0) return 0;
+   RISCOS_GetTaskName(task_name, SDL_arraysize(task_name));
 
    messages[0] = 9;       /* Palette changed */
    messages[1] = 0x400c1; /* Mode changed */
@@ -108,7 +109,8 @@ int RISCOS_InitTask()
 	regs.r[2] = (unsigned int)task_name;
 	regs.r[3] = (unsigned int)messages;
 
-   if (_kernel_swi(Wimp_Initialise, &regs, &regs) == 0)
+   error = _kernel_swi(Wimp_Initialise, &regs, &regs);
+   if (error == 0)
    {
 	   wimp_version = regs.r[0];
 	   task_handle = regs.r[1];
@@ -119,6 +121,7 @@ int RISCOS_InitTask()
    main_thread = pthread_self();
 #endif
 
+   SDL_SetError("Unable to start task: %s (%i)", error->errmess, error->errnum);
    return 0;
 }
 
@@ -182,7 +185,7 @@ void RISCOS_ExitTask()
 
 ***************************************************************************/
 
-int RISCOS_GetTaskName(char *task_name, size_t maxlen)
+void RISCOS_GetTaskName(char *task_name, size_t maxlen)
 {
 	_kernel_swi_regs regs;
 
@@ -262,8 +265,6 @@ int RISCOS_GetTaskName(char *task_name, size_t maxlen)
    }
 
    if (task_name[0] == 0) SDL_strlcpy(task_name, "SDL Task", maxlen);
-
-   return 1;
 }
 
 /*****************************************************************

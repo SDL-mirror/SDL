@@ -88,7 +88,6 @@ SDL_Surface *FULLSCREEN_SetVideoMode(_THIS, SDL_Surface *current,
    const RISCOS_SDL_PixelFormat *fmt = FULLSCREEN_SetMode(width, height, bpp);
    if (fmt == NULL)
    {
-	   SDL_SetError("Couldn't set requested mode");
 	   return (NULL);
    }
 
@@ -96,8 +95,7 @@ SDL_Surface *FULLSCREEN_SetVideoMode(_THIS, SDL_Surface *current,
 
 	/* Allocate the new pixel format for the screen */
 	if ( ! SDL_ReallocFormat(current, fmt->sdl_bpp, fmt->rmask, fmt->gmask, fmt->bmask, 0) ) {
-	    RISCOS_RestoreWimpMode();
-		SDL_SetError("Couldn't allocate new pixel format for requested mode");
+		RISCOS_RestoreWimpMode();
 		return(NULL);
 	}
 
@@ -154,14 +152,16 @@ SDL_Surface *FULLSCREEN_SetVideoMode(_THIS, SDL_Surface *current,
          ** This is turned on by setting the enviromental variable
          ** SDL$<name>$BackBuffer >= 1
          */
-       if (riscos_backbuffer == 3)
+       if (riscos_backbuffer == 3) {
           this->hidden->bank[0] = WIMP_CreateBuffer(width, height, &fmt->ro);
-       else
+       } else {
           this->hidden->bank[0] = SDL_malloc(height * current->pitch);
+          if (this->hidden->bank[0] == 0)
+             SDL_OutOfMemory();
+       }
        if (this->hidden->bank[0] == 0)
        {
- 	       RISCOS_RestoreWimpMode();
-           SDL_SetError("Couldnt allocate memory for back buffer");
+           RISCOS_RestoreWimpMode();
            return (NULL);
        }
        /* Surface updated in programs is now a software surface */

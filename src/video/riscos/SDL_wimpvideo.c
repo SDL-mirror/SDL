@@ -72,7 +72,7 @@ SDL_Surface *WIMP_SetVideoMode(_THIS, SDL_Surface *current,
 		fmt = WIMP_FindSupportedSpriteFormat(bpp);
 		if (fmt == NULL)
 		{
-			SDL_SetError("Pixel depth not supported");
+			SDL_SetError("Pixel depth %d not supported", bpp);
 			return NULL;
 		}
 	}
@@ -88,7 +88,6 @@ SDL_Surface *WIMP_SetVideoMode(_THIS, SDL_Surface *current,
 
 	/* Allocate the new pixel format for the screen */
 	if ( ! SDL_ReallocFormat(current, fmt->sdl_bpp, fmt->rmask, fmt->gmask, fmt->bmask, 0) ) {
-		SDL_SetError("Couldn't allocate new pixel format for requested mode");
 		return(NULL);
 	}
 
@@ -100,7 +99,6 @@ SDL_Surface *WIMP_SetVideoMode(_THIS, SDL_Surface *current,
 	buffer = WIMP_CreateBuffer(width, height, &fmt->ro);
 	if (buffer == NULL)
 	{
-		SDL_SetError("Couldn't create sprite for video memory");
 		return (NULL);
 	}
 
@@ -133,7 +131,6 @@ SDL_Surface *WIMP_SetVideoMode(_THIS, SDL_Surface *current,
 
 	if (WIMP_SetupWindow(this, current) == 0)
 	{
-		SDL_SetError("Unable to create window to display surface");
 		return NULL;
 	}
 
@@ -213,6 +210,7 @@ void WIMP_SetDeviceMode(_THIS)
 unsigned int WIMP_SetupWindow(_THIS, SDL_Surface *surface)
 {
 	_kernel_swi_regs regs;
+	_kernel_oserror *error;
 	int window_data[23];
     int	*window_block = window_data+1;
 	int x = ((this->hidden->screen_width << this->hidden->xeig) - (surface->w << 1)) / 2;
@@ -255,7 +253,8 @@ unsigned int WIMP_SetupWindow(_THIS, SDL_Surface *surface)
    regs.r[1] = (unsigned int)(window_block);
    
    /* Create the window */
-   if (_kernel_swi(Wimp_CreateWindow, &regs, &regs) == NULL)
+   error = _kernel_swi(Wimp_CreateWindow, &regs, &regs);
+   if (error == NULL)
    {
 	   this->hidden->window_handle = window_data[0] = regs.r[0];
 
@@ -268,8 +267,10 @@ unsigned int WIMP_SetupWindow(_THIS, SDL_Surface *surface)
        {
 		  WIMP_DeleteWindow(this);
 	   }
+   } else {
+       SDL_SetError("Unable to create window: %s (%i)", error->errmess, error->errnum);
    }
-   
+
    return this->hidden->window_handle;
 }
 

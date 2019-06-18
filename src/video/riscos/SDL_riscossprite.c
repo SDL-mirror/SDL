@@ -96,6 +96,7 @@ unsigned char *WIMP_CreateBuffer(int width, int height, const RISCOS_PixelFormat
    char sprite_name[12] = "display";
    unsigned char *buffer;
    _kernel_swi_regs regs;
+   _kernel_oserror *error;
    int bytesPerPixel = 1 << (format->log2bpp-3);
    int bytesPerRow;
    int offsetToSpriteData = 60;
@@ -114,7 +115,10 @@ unsigned char *WIMP_CreateBuffer(int width, int height, const RISCOS_PixelFormat
    size = bytesPerRow * height;
 
    buffer = SDL_malloc( (size_t) size + offsetToSpriteData );
-   if (!buffer) return NULL;
+   if (!buffer) {
+      SDL_OutOfMemory();
+      return NULL;
+   }
 
    /* Initialise a sprite area */
 
@@ -132,7 +136,8 @@ unsigned char *WIMP_CreateBuffer(int width, int height, const RISCOS_PixelFormat
    regs.r[4] = width;
    regs.r[5] = height;
    regs.r[6] = format->sprite_mode_word;
-   if (_kernel_swi(OS_SpriteOp, &regs, &regs) == NULL)
+   error = _kernel_swi(OS_SpriteOp, &regs, &regs);
+   if (error == NULL)
    {
        if (format->log2bpp == 3)
        {
@@ -162,6 +167,7 @@ unsigned char *WIMP_CreateBuffer(int width, int height, const RISCOS_PixelFormat
        }
    } else
    {
+      SDL_SetError("Unable to create sprite: %s (%i)", error->errmess, error->errnum);
       SDL_free(buffer);
       buffer = NULL;
    }

@@ -69,14 +69,14 @@ WMcursor *RISCOS_CreateWMCursor(_THIS,
 
 	/* Check to make sure the cursor size is okay */
 	if ( (w > 32) || (h > 32) ) {
-		SDL_SetError("Only with width and height <= 32 pixels are allowed");
+		SDL_SetError("Only cursors with width and height <= 32 pixels are allowed");
 		return(NULL);
 	}
 
 	/* Allocate the cursor */
 	cursor = (WMcursor *)SDL_malloc(sizeof(*cursor));
 	if ( cursor == NULL ) {
-		SDL_SetError("Out of memory");
+		SDL_OutOfMemory();
 		return(NULL);
 	}
 
@@ -85,7 +85,7 @@ WMcursor *RISCOS_CreateWMCursor(_THIS,
 	if (cursor_data == NULL)
 	{
 		SDL_free(cursor);
-		SDL_SetError("Out of memory");
+		SDL_OutOfMemory();
 		return(NULL);
 	}
 
@@ -160,7 +160,7 @@ int RISCOS_ShowWMCursor(_THIS, WMcursor *cursor)
 
 			if (_kernel_osword(21, (int *)cursor_def) != 0)
 			{
-				SDL_SetError("RISCOS couldn't create the cursor to show");
+				SDL_SetError("RISC OS couldn't create the cursor to show");
 				return(0);
 			}
 			defined_cursor = cursor;

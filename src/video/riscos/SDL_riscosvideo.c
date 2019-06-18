@@ -201,7 +201,6 @@ int RISCOS_VideoInit(_THIS, SDL_PixelFormat *vformat)
 
 	if (RISCOS_InitTask() == 0)
 	{
-		SDL_SetError("Unable to start task");
 		return 0;
 	}
 
