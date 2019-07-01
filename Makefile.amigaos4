@@ -12,6 +12,7 @@ CFLAGS  = -g -O2 -Wall -fPIC -I./include -D__AMIGADATE__=\"$(AMIGADATE)\"
 
 TARGET_STATIC  = libSDL2.a
 TARGET_SHARED  = libSDL2-2.0.so
+TESTLIB_STATIC = libSDL2_test.a
 
 SOURCES = \
 	./src/*.c \
@@ -43,19 +44,24 @@ SOURCES = \
 	./src/thread/pthread/SDL_sysmutex.c \
 	./src/thread/pthread/SDL_systhread.c \
 	./src/thread/pthread/SDL_systls.c \
-	./src/test/*.c \
 	./src/timer/*.c \
 	./src/timer/unix/*.c \
 	./src/video/*.c \
 	./src/video/dummy/*.c \
 	./src/video/amigaos4/*.c \
 	./src/video/yuv2rgb/*.c \
-	
+
+TESTLIB_SOURCES =./src/test/*.c
 
 OBJECTS = $(shell echo $(SOURCES) | sed -e 's,\.c,\.o,g')
+TESTLIB_OBJECTS = $(shell echo $(TESTLIB_SOURCES) | sed -e 's,\.c,\.o,g')
 VERSION_OBJECT = src/main/amigaos4/SDL_os4version.o
 
-all: config_copy $(TARGET_STATIC) $(TARGET_SHARED)
+all: config_copy $(TARGET_STATIC) $(TARGET_SHARED) $(TESTLIB_STATIC)
+
+$(TESTLIB_STATIC): $(TESTLIB_OBJECTS)
+	$(AR) crv $@ $^
+	$(RANLIB) $@
 
 $(TARGET_STATIC): $(OBJECTS)
 	$(AR) crv $@ $^
@@ -68,11 +74,12 @@ config_copy:
 	cp include/SDL_config_amigaos4.h include/SDL_config.h
 
 clean:
-	rm -f $(TARGET_STATIC) $(TARGET_SHARED)* $(OBJECTS)
+	rm -f $(TARGET_STATIC) $(TARGET_SHARED)* $(TESTLIB_STATIC) $(OBJECTS)
 
 install:
 	mkdir -p /SDK/local/newlib/lib
 	mkdir -p /SDK/local/newlib/include/SDL2
 	cp -f $(TARGET_STATIC) /SDK/local/newlib/lib
 	cp -f $(TARGET_SHARED) /SDK/local/newlib/lib
+	cp -f $(TESTLIB_STATIC) /SDK/local/newlib/lib
 	cp -f include/*.h /SDK/local/newlib/include/SDL2/
