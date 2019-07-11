@@ -67,24 +67,17 @@
 
 @implementation SDL_uikitwindow
 
-- (void)didAddSubview:(UIView *)subview
-{
-	[super didAddSubview:subview];
-	// We need to pach the enabled state in subviews as a Metal view gets added and covers up the SDL_uikitview that handles touch.
-	// So set needs layout so that the layout gets done (which is where we patch the flags) Johna.
-    NSArray<UIView*>* subviews = self.subviews;
-	for (int i=0; i<[subviews count]; i++)
-	{
-		UIView *view = [subviews objectAtIndex:i];
-		// NSLog( @"View %p enabled %d\n", view, view.userInteractionEnabled );
-		[view setNeedsLayout];  // force the subviews to layout.
-	}
-}
-
 - (void)layoutSubviews
 {
-    /* Workaround to fix window orientation issues in iOS 8+. */
-    self.frame = self.screen.bounds;
+    /* Workaround to fix window orientation issues in iOS 8. */
+    /* As of July 1 2019, I haven't been able to reproduce any orientation
+     * issues with this disabled on iOS 12. The issue this is meant to fix might
+     * only happen on iOS 8, or it might have been fixed another way with other
+     * code... This code prevents split view (iOS 9+) from working on iPads, so
+     * we want to avoid using it if possible. */
+    if (!UIKit_IsSystemVersionAtLeast(9.0)) {
+        self.frame = self.screen.bounds;
+    }
     [super layoutSubviews];
 }
 
