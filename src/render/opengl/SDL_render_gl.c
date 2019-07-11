@@ -248,7 +248,6 @@ GL_LoadFunctions(GL_RenderData * data)
         } \
     } while ( 0 );
 #endif /* __SDL_NOGETPROCADDR__ */
-#endif
 
 #include "SDL_glfuncs.h"
 #undef SDL_PROC
