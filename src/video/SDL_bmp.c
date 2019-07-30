@@ -143,6 +143,11 @@ SDL_Surface * SDL_LoadBMP_RW (SDL_RWops *src, int freesrc)
 	(void) biYPelsPerMeter;
 	(void) biClrImportant;
 
+	if (biWidth <= 0 || biHeight == 0) {
+		SDL_SetError("BMP file with bad dimensions (%dx%d)", biWidth, biHeight);
+		was_error = SDL_TRUE;
+		goto done;
+	}
 	if (biHeight < 0) {
 		topDown = SDL_TRUE;
 		biHeight = -biHeight;
