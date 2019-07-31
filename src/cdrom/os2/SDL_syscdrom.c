@@ -83,14 +83,14 @@ SDL_CDcaps.Close = SDL_SYS_CDClose;
 SDL_memset(&msp, 0x00, sizeof(MCI_SYSINFO_PARMS));
 /* Prepare structure to Ask Numer of Audio CDs */
 msp.usDeviceType = MCI_DEVTYPE_CD_AUDIO;	/* CD Audio Type */
-msp.pszReturn = (PSZ)&SysInfoRet; 	/* Return Structure */
+msp.pszReturn = SysInfoRet;		/* Return Structure */
 msp.ulRetSize = MCI_CMDRETBUFSIZE; 	/* Size of ret struct */
 if (LOUSHORT(mciSendCommand(0,MCI_SYSINFO, MCI_SYSINFO_QUANTITY | MCI_WAIT, (PVOID)&msp, 0)) != MCIERR_SUCCESS) return(CD_ERROR);
 SDL_numcds = atoi(SysInfoRet);
 if (SDL_numcds > MAX_DRIVES) SDL_numcds = MAX_DRIVES; /* Limit maximum CD number */
 
 /* Get and Add their system name to the SDL_cdlist */
-msp.pszReturn = (PSZ)&SysInfoRet; 				/* Return Structure */
+msp.pszReturn = SysInfoRet;				/* Return Structure */
 msp.ulRetSize = MCI_CMDRETBUFSIZE; 			/* Size of ret struct */
 msp.usDeviceType = MCI_DEVTYPE_CD_AUDIO;		/* CD Audio Type */
 for (i=0; i<SDL_numcds; i++)
