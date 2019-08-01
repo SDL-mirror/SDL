@@ -1127,7 +1127,7 @@ SDL_Surface *DX5_SetVideoMode(_THIS, SDL_Surface *current,
 		video->w = width;
 		video->h = height;
 		video->pitch = SDL_CalculatePitch(video);
-		if (!current->pitch) {
+		if (!video->pitch) {
 			return(NULL);
 		}
 

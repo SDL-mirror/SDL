@@ -733,7 +733,7 @@ SDL_Surface *GAPI_SetVideoMode(_THIS, SDL_Surface *current,
 	video->w = gapi->w = width;
 	video->h = gapi->h = height;
 	video->pitch = SDL_CalculatePitch(video); 
-	if (!current->pitch) {
+	if (!video->pitch) {
 		return(NULL);
 	}
 
