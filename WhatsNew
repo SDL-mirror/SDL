@@ -3,6 +3,33 @@ This is a list of API changes in SDL's version history.
 
 Version 1.0:
 
+1.2.15:  This is a minor bug fix release:
+
+General Notes:
+- Fixed assembly register clobbering in CPU info routines.
+- Fixed memory stomp when using stretch blit on large images.
+- Fixed pixel corruption with overlapping blits.
+- SDL_JOYSTICK_DEVICE can be a colon separated list of joystick devices.
+- Disabled MMX blitters since they don't compile on modern compilers.
+
+Unix Notes:
+- Fixed crash in joystick code on newer Linux kernels.
+- Fixed channel swizzling for ALSA target with 6-channel output.
+- Use the OpenGL GLX_EXT_swap_control extension if available.
+- XRandR support is disabled by default because it causes desktop
+  reconfiguring. It can be enabled with the SDL_VIDEO_X11_XRANDR=1
+  environment variable.
+
+Windows Notes:
+- Fixed SDL_GL_ACCELERATED_VISUAL handling.
+- Fixed application state handling with ALT-Tab.
+- Fixed occasional crash handling WM_ACTIVATEAPP in Direct X code.
+- Fixed UTF-8 decoding of Russian characters.
+
+Mac OS X Notes:
+- Fixed building and running on Mac OS X 10.7 (Lion).
+
+
 1.2.14:
 	Added cast macros for correct usage with C++:
 		SDL_reinterpret_cast(type, expression)
