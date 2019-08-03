@@ -4,7 +4,6 @@ autom4te*
 config.cache
 config.log
 config.status
-configure
 libtool
 Makefile
 sdl-config
@@ -20,7 +19,6 @@ test/autom4te*
 test/config.cache
 test/config.log
 test/config.status
-test/configure
 test/Makefile
 test/SDL.dll
 test/stdout.txt
