@@ -41,7 +41,7 @@ extern "C" {
 /*@{*/
 #define SDL_MAJOR_VERSION	1
 #define SDL_MINOR_VERSION	2
-#define SDL_PATCHLEVEL		15
+#define SDL_PATCHLEVEL		16
 /*@}*/
 
 typedef struct SDL_version {
