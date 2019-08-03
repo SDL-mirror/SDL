@@ -3,6 +3,99 @@ This is a list of API changes in SDL's version history.
 
 Version 1.0:
 
+1.2.16:  This is mostly multiple bug fixes since the previous version.
+Changes include:
+- Audio, wav loader: security fixes for ADPCM decoding (CVE-2019-7572,
+  CVE-2019-7573, CVE-2019-7574, CVE-2019-7575, CVE-2019-7576,
+  CVE-2019-7577, CVE-2019-7578 -- bugs 4490, 4491, 4492, 4493, 4494,
+  4495, 4496, and 4522.)
+- Video, bmp loader:  security fixes for CVE-2019-7635, CVE-2019-7636,
+  CVE-2019-7637, CVE-2019-7638, CVE-2019-13616 (bugs 4498, 4499, 4500,
+  4517, and 4538.)
+- Video, blit: fix handling of alpha channel in Altivec accelerated
+  blit functions (bug 1424.)
+- Video, blit: use fast path for RGB 565 -> 32-bit XRGB 8888
+- Video, blit: fix RGBA<->RGBA blit broken with the optimization from
+  bug 11 (bug 2976.)
+- Mouse: fix SDL_ResetMouse() using a bogus mouse button causing a
+  negative shift (bug 3593.)
+- Cdrom: fix SDL_CDResume() and SDL_CDStop() not returning failure
+  when they should (bug 4108.)
+- Unix, pthread: Fix SDL_SemWaitTimeout() returning -1 instead of
+  SDL_MUTEX_TIMEDOUT upon timeout (bug 1426.)
+- NetBSD: wscons support.
+- NetBSD, audio: use AUDIO_GETBUFINFO when available.
+- OpenBSD, audio: add sndio support.
+- Haiku/BeOS, audio: fix error in buffer size setting (bug 1679.)
+- OpenBSD: fix dynamic loading of X libs (bug 1434.)
+- X11video: fix missing symbol X11_KeyToUnicode in .so file (bug 1390.
+  not being an official SDL function, the use of X11_KeyToUnicode() is
+  discouraged.)
+- X11video: fix compilation with libX11 >= 1.5.99.902 (bug 1769.)
+- X11video: fix for XChangeProperty() crash (bug 1427.)
+- X11video: fix SDL_EnableUNICODE sometimes dropping keyboard events
+  completely (bug 2325.)
+- X11video: fixed no SDL_VIDEORESIZE event being generated when the
+  window manager sets the window size (bug 1859.)
+- X11video: fix X11_SetGammaRamp not checking the return value of
+  XStoreColors (bugs 1979, 3770.)
+- X11video: fix SDL_VIDEORESIZE events not received when resizing
+  window from the corner (inverted logic in X11 ConfigureNotify, i.e.
+  resize handling - bug 1430.)
+- X11video: unblock SDL_WM_GrabInput() GrabNotViewable case (bug 1155.)
+- Mac OS X: fixed crash on any input in Quartz code (bug 2560.)
+- Mac OS X: fixed crash in Quartz gamma ramp code.
+- Mac OS X: fixed build for 10.9 Mavericks or newer (bug 2085.)
+- Mac OS X, joystick: update to support Saitek p2500 gamepad (bug 2025)
+- Mac OS X, main: updates for -psn_XXX command line arg for Finder
+  launches in new macOS versions.
+- Mac OS X, main: replace deprecated CPS apis in new OSX versions
+  (bug 4114.)
+- Windows, video: fix other window positions/sizes when exiting
+  fullscreen (bug 3315.)
+- Windows, keyboard: reset deadkeys upon SDL_EnableUNICODE() or upon
+  quit (bug 3332.)
+- Windows: Visual Studio project file updates.
+- OS/2: Watcom makefile updates.
+- FreeBSD, joystick: compile fixes.
+- BSD, joystick: increase the number of uhid devices to scan (bug 1561)
+- Linux, evdev: ignore joystick axis events if they aren't in a sane
+  range.
+- Linux, joystick: fix Dualshock 3's motion sensors overwrite analog
+  stick: protect against any axis that isn't reported by EVIOCGBIT but
+  still sending EV_ABS events (bug 3193.)
+- FreeBSD, cdrom: fix CDROM detection misbehaviour for 7.x and newer
+  (bug 1529.)
+- Solaris, audio: fix pulseaudio dynamic linking.
+- Solaris, cpuinfo: fix asm syntax error causing build failures.
+- Atari: multiple platform code updates.
+- RiscOS: cleanups to platform code.
+- RiscOS: fix thread starvation in fullscreen mode.
+- RiscOS: fix returning from full-screen to 16M colour modes.
+- RiscOS: fix receiving PreQuit messages.
+- RiscOS: ensure the window size is consistent at different DPIs.
+- RiscOS, video: add support for more pixel formats.
+- RiscOS: mouse fixes. restore mouse palette when exiting while mouse
+  is in focus. don't reset mouse focus when recreating the window.
+- RiscOS: support Windows and Menu key input.
+- Configuration: fix library detection selecting wrong lib (bug 2795.)
+- Configuration: fix detecting dynamic library support on powerpc64le
+  (bug 3481.)
+- SDL error: string formatting fixes to deal with nasty corner cases
+  (bug 2049.)
+- SDL_error: handle %lu, %li and %ld in format string (bug 3739.)
+- stdlib: updated SDL_qsort() code.
+- stdlib: use _strtoi64() and _strtoui64() when available for windows.
+- headers, close_code.h: fix unbalanced #pragma pack(pop) for watcom
+  builds (bug 3781.)
+- headers, begin_code.h, close_code.h: updates to SDLCALL and DECLSPEC
+  macros for OS/2.
+- headers, endian: add Watcom inline asm for SDL_Swap16 and SDL_Swap32
+- headers, config: updates to default windows and os2 config files.
+- headers, SDL_syswm.h, SDL_stdinc.h: include system headers before
+  packing alignment changes (bug 4149.)
+
+
 1.2.15:  This is a minor bug fix release:
 
 General Notes:
