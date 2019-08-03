@@ -55,7 +55,7 @@ WMcursor*    QZ_CreateWMCursor   (_THIS, Uint8 *data, Uint8 *mask,
     
     /* copy data and mask, extending the mask to all black pixels because the inversion effect doesn't work with Cocoa's alpha-blended cursors */
     for (i = 0; i < (w+7)/8*h; i++) {
-        planes[0][i] = data[i] ^ 0xFF;
+        planes[0][i] = ~data[i] & mask[i];
         planes[1][i] = mask[i] | data[i];
     }
 
