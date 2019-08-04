@@ -35,7 +35,7 @@ Changes include:
 - X11video: fix for XChangeProperty() crash (bug 1427.)
 - X11video: fix SDL_EnableUNICODE sometimes dropping keyboard events
   completely (bug 2325.)
-- X11video: fixed no SDL_VIDEORESIZE event being generated when the
+- X11video: fix no SDL_VIDEORESIZE event being generated when the
   window manager sets the window size (bug 1859.)
 - X11video: fix X11_SetGammaRamp not checking the return value of
   XStoreColors (bugs 1979, 3770.)
@@ -43,9 +43,10 @@ Changes include:
   window from the corner (inverted logic in X11 ConfigureNotify, i.e.
   resize handling - bug 1430.)
 - X11video: unblock SDL_WM_GrabInput() GrabNotViewable case (bug 1155.)
-- Mac OS X: fixed crash on any input in Quartz code (bug 2560.)
-- Mac OS X: fixed crash in Quartz gamma ramp code.
-- Mac OS X: fixed build for 10.9 Mavericks or newer (bug 2085.)
+- Mac OS X: fix crash on any input in Quartz code (bug 2560.)
+- Mac OS X: fix crash in Quartz gamma ramp code.
+- Mac OS X: fix build for 10.9 Mavericks or newer (bug 2085.)
+- Mac OS X, Quartz: fix cursor transparency (bug 4076.)
 - Mac OS X, joystick: update to support Saitek p2500 gamepad (bug 2025)
 - Mac OS X, main: updates for -psn_XXX command line arg for Finder
   launches in new macOS versions.
