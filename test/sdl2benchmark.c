@@ -17,14 +17,14 @@ TODO:
 
 #include "SDL2/SDL.h"
 
-#define BENCHMARK_VERSION "0.5"
+#define BENCHMARK_VERSION "0.6"
 
 #define WIDTH 800
 #define HEIGHT 600
 
 #define RECTSIZE 100
 
-#define ITERATIONS 100
+#define DURATION 1.0
 #define OBJECTS 100
 
 #define SLEEP 0
@@ -45,7 +45,7 @@ typedef struct {
     Uint32 texturewidth;
     Uint32 textureheight;
     Uint64 frequency;
-    Uint32 iterations;
+    double duration;
     Uint32 objects;
     Uint32 sleep;
     Uint32 frames;
@@ -78,7 +78,7 @@ static SDL_bool testUpdateTexture(Context *);
 static SDL_bool testReadPixels(Context *);
 
 /* Insert here new tests */
-static Test tests[] = {
+static const Test tests[] = {
     { "Points", testPoints, SDL_FALSE },
     { "Lines", testLines, SDL_FALSE },
     { "FillRects", testFillRects, SDL_FALSE },
@@ -90,7 +90,7 @@ static Test tests[] = {
     { "ReadPixels", testReadPixels, SDL_TRUE }
 };
 
-static BlendMode modes[] = {
+static const BlendMode modes[] = {
     { "None", SDL_BLENDMODE_NONE },
     { "Blend", SDL_BLENDMODE_BLEND },
     { "Add", SDL_BLENDMODE_ADD },
@@ -161,10 +161,12 @@ static SDL_bool clearDisplay(Context *ctx)
     return SDL_TRUE;
 }
 
+/*
 static float interpolate(float min, float max, float percentage)
 {
     return min + percentage * (max - min);
 }
+*/
 
 static Uint32 getRand(Uint32 max)
 {
@@ -234,7 +236,7 @@ static SDL_bool prepareTexture(Context *ctx)
     return SDL_TRUE;
 }
 
-static SDL_bool prepareTest(Context *ctx, Test *test)
+static SDL_bool prepareTest(Context *ctx, const Test *test)
 {
     if (!clearDisplay(ctx)) {
         return SDL_FALSE;
@@ -269,7 +271,7 @@ static void afterTest(Context *ctx)
     }
 }
 
-static SDL_bool runTest(Context *ctx, Test *test)
+static SDL_bool runTest(Context *ctx, const Test *test)
 {
     Uint64 start, finish;
     double duration;
@@ -281,14 +283,16 @@ static SDL_bool runTest(Context *ctx, Test *test)
 
     start = SDL_GetPerformanceCounter();
 
-    if (!test->testfp(ctx)) {
-        afterTest(ctx);
-        return SDL_FALSE;
-    }
+    do {
+        if (!test->testfp(ctx)) {
+            afterTest(ctx);
+            return SDL_FALSE;
+        }
 
-    finish = SDL_GetPerformanceCounter();
+        finish = SDL_GetPerformanceCounter();
 
-    duration = (finish - start) / (double)ctx->frequency;
+        duration = (finish - start) / (double)ctx->frequency;
+    } while (duration < ctx->duration);
 
     if (duration == 0.0) {
         SDL_Log("Division by zero!\n");
@@ -329,45 +333,37 @@ static SDL_bool setRandomColor(Context *ctx)
 
 static SDL_bool testPointsInner(Context *ctx, SDL_bool linemode)
 {
-    int iteration, result;
-
-    result = SDL_SetRenderDrawBlendMode(ctx->renderer, ctx->mode);
+    int result = SDL_SetRenderDrawBlendMode(ctx->renderer, ctx->mode);
 
     if (result) {
         SDL_Log("[%s]Failed to set blend mode: %s\n", __FUNCTION__, SDL_GetError());
         return SDL_FALSE;
     }
 
-    for (iteration = 0; iteration < ctx->iterations; iteration++) {
+    SDL_Point points[ctx->objects];
+    int object;
 
-        SDL_Point points[ctx->objects];
-        int object;
-
-        if (!setRandomColor(ctx)) {
-            return SDL_FALSE;
-        }
-
-        for (object = 0; object < ctx->objects; object++) {
-            points[object].x = getRand(ctx->width);
-            points[object].y = getRand(ctx->height);
-        }
-
-        if (linemode) {
-            result = SDL_RenderDrawLines(ctx->renderer, points, ctx->objects);
-        } else {
-            result = SDL_RenderDrawPoints(ctx->renderer, points, ctx->objects);
-        }
-
-        ctx->operations++;
-
-        if (result) {
-            SDL_Log("[%s]Failed to draw lines/points: %s\n", __FUNCTION__, SDL_GetError());
-            return SDL_FALSE;
-        }
-
-
-        render(ctx);
+    if (!setRandomColor(ctx)) {
+        return SDL_FALSE;
     }
+
+    for (object = 0; object < ctx->objects; object++) {
+        points[object].x = getRand(ctx->width);
+        points[object].y = getRand(ctx->height);
+    }
+
+    result = linemode ?
+        SDL_RenderDrawLines(ctx->renderer, points, ctx->objects) :
+        SDL_RenderDrawPoints(ctx->renderer, points, ctx->objects);
+
+    ctx->operations++;
+
+    if (result) {
+        SDL_Log("[%s]Failed to draw lines/points: %s\n", __FUNCTION__, SDL_GetError());
+        return SDL_FALSE;
+    }
+
+    render(ctx);
 
     return SDL_TRUE;
 }
@@ -384,95 +380,84 @@ static SDL_bool testLines(Context *ctx)
 
 static SDL_bool testFillRects(Context *ctx)
 {
-    int iteration, result;
-
-    result = SDL_SetRenderDrawBlendMode(ctx->renderer, ctx->mode);
+    int result = SDL_SetRenderDrawBlendMode(ctx->renderer, ctx->mode);
 
     if (result) {
         SDL_Log("[%s]Failed to set blend mode: %s\n", __FUNCTION__, SDL_GetError());
         return SDL_FALSE;
     }
 
-    for (iteration = 0; iteration < ctx->iterations; iteration++) {
+    SDL_Rect rects[ctx->objects];
+    int object;
 
-        SDL_Rect rects[ctx->objects];
-        int object;
-        int rectsize;
-
-        if (!setRandomColor(ctx)) {
-            return SDL_FALSE;
-        }
-
-        rectsize = ctx->rectsize + iteration;
-
-        for (object = 0; object < ctx->objects; object++) {
-            rects[object].x = getRand(ctx->width - rectsize);
-            rects[object].y = getRand(ctx->height - rectsize);
-            rects[object].w = rectsize;
-            rects[object].h = rectsize;
-        }
-
-        result = SDL_RenderFillRects(ctx->renderer, rects, ctx->objects);
-
-        if (result) {
-            SDL_Log("[%s]Failed to draw filled rectangles: %s\n", __FUNCTION__, SDL_GetError());
-            return SDL_FALSE;
-        }
-
-        ctx->operations++;
-
-        render(ctx);
+    if (!setRandomColor(ctx)) {
+        return SDL_FALSE;
     }
+
+    const int rectsize = ctx->rectsize + getRand(100); // + iteration
+
+    for (object = 0; object < ctx->objects; object++) {
+        rects[object].x = getRand(ctx->width - rectsize);
+        rects[object].y = getRand(ctx->height - rectsize);
+        rects[object].w = rectsize;
+        rects[object].h = rectsize;
+    }
+
+    result = SDL_RenderFillRects(ctx->renderer, rects, ctx->objects);
+
+    if (result) {
+        SDL_Log("[%s]Failed to draw filled rectangles: %s\n", __FUNCTION__, SDL_GetError());
+        return SDL_FALSE;
+    }
+
+    ctx->operations++;
+
+    render(ctx);
 
     return SDL_TRUE;
 }
 
-static SDL_bool testRenderCopyInner(Context *ctx, SDL_bool ex) {
-    int iteration;
+static SDL_bool testRenderCopyInner(Context *ctx, SDL_bool ex)
+{
+    int result;
 
-    for (iteration = 0; iteration < ctx->iterations; iteration++) {
+    //int object;
+    //const float scale = interpolate(0.5f, 2.0f, (float)ctx->iteration / ctx->iterations);
+    const float scale = (getRand(4) + 1) / 2.0f;
 
-        int result;
-        int w, h;
-        float scale;
+    int w = ctx->texturewidth * scale;
+    int h = ctx->textureheight * scale;
 
-        //int object;
-        scale = interpolate(0.5f, 2.0f, (float)iteration / ctx->iterations);
+    //for (object = 0; object < ctx->objects; object++) {
+        SDL_Rect rect;
 
-        w = ctx->texturewidth * scale;
-        h = ctx->textureheight * scale;
+        rect.x = getRand(ctx->width - w);
+        rect.y = getRand(ctx->height - h);
+        rect.w = w;
+        rect.h = h;
 
-        //for (object = 0; object < ctx->objects; object++) {
-            SDL_Rect rect;
+        if (!ex) {
+            result = SDL_RenderCopy(ctx->renderer, ctx->texture, NULL, &rect);
+        } else {
+            result = SDL_RenderCopyEx(
+                ctx->renderer,
+                ctx->texture,
+                NULL,
+                &rect,
+                getRand(360),
+                NULL,
+                SDL_FLIP_NONE);
+        }
 
-            rect.x = getRand(ctx->width - w);
-            rect.y = getRand(ctx->height - h);
-            rect.w = w;
-            rect.h = h;
+        if (result) {
+            SDL_Log("[%s]Failed to draw texture: %s\n", __FUNCTION__, SDL_GetError());
+            return SDL_FALSE;
+        }
 
-            if (!ex) {
-                result = SDL_RenderCopy(ctx->renderer, ctx->texture, NULL, &rect);
-            } else {
-                result = SDL_RenderCopyEx(
-                    ctx->renderer,
-                    ctx->texture,
-                    NULL,
-                    &rect,
-                    getRand(360),
-                    NULL,
-                    SDL_FLIP_NONE);
-            }
+        ctx->operations++;
+    //}
 
-            if (result) {
-                SDL_Log("[%s]Failed to draw texture: %s\n", __FUNCTION__, SDL_GetError());
-                return SDL_FALSE;
-            }
-
-            ctx->operations++;
-        //}
-
-        render(ctx);
-    }
+    render(ctx);
 
     return SDL_TRUE;
 }
@@ -487,39 +472,27 @@ static SDL_bool testRenderCopyEx(Context *ctx)
     return testRenderCopyInner(ctx, SDL_TRUE);
 }
 
+static const SDL_Color colors[] = {
+    {255, 0, 0, 255},
+    {0, 255, 0, 255},
+    {0, 0, 255, 255},
+    {127, 127, 127, 255}
+};
+
+static const size_t count = sizeof(colors) / sizeof(colors[0]);
+
 static SDL_bool testColorModulation(Context *ctx)
 {
-    SDL_bool result = SDL_TRUE;
+    static int i = 0;
 
-    SDL_Color colors[] = {
-        {255, 0, 0, 255},
-        {0, 255, 0, 255},
-        {0, 0, 255, 255},
-        {127, 127, 127, 255}
-    };
+    const int c = i++ % count;
 
-    size_t count = sizeof(colors) / sizeof(colors[0]);
-
-    int iterations = ctx->iterations;
-    int i;
-
-    ctx->iterations = 1;
-
-    for (i = 0; i < iterations; i++) {
-        int c = i % count;
-
-        if (SDL_SetTextureColorMod(ctx->texture, colors[c].r, colors[c].g, colors[c].b)) {
-            SDL_Log("[%s]Failed to set color modulation: %s\n", __FUNCTION__, SDL_GetError());
-            result = SDL_FALSE;
-            break;
-        }
-
-        result = testRenderCopyInner(ctx, SDL_FALSE);
+    if (SDL_SetTextureColorMod(ctx->texture, colors[c].r, colors[c].g, colors[c].b)) {
+        SDL_Log("[%s]Failed to set color modulation: %s\n", __FUNCTION__, SDL_GetError());
+        return SDL_FALSE;
     }
 
-    ctx->iterations = iterations;
-
-    return result;
+    return testRenderCopyInner(ctx, SDL_FALSE);
 }
 
 static SDL_bool testAlphaModulation(Context *ctx)
@@ -534,76 +507,48 @@ static SDL_bool testAlphaModulation(Context *ctx)
 
 static SDL_bool testUpdateTexture(Context *ctx)
 {
-    SDL_bool result = SDL_TRUE;
+    static int i = 0;
 
-    SDL_Color colors[] = {
-        {255, 0, 0, 255},
-        {0, 255, 0, 255},
-        {0, 0, 255, 255},
-        {127, 127, 127, 255}
-    };
+    const int c = i++ % count;
 
-    size_t count = sizeof(colors) / sizeof(colors[0]);
-
-    int iterations = ctx->iterations;
-    int i;
-
-    /* Divide our test so that total execution time doesn't take much longer than other tests */
-    ctx->iterations /= count;
-
-    for (i = 0; i < count; i++) {
-
-        if (SDL_SetTextureColorMod(ctx->texture, colors[i].r, colors[i].g, colors[i].b)) {
-            SDL_Log("[%s]Failed to set color modulation: %s\n", __FUNCTION__, SDL_GetError());
-            result = SDL_FALSE;
-            break;
-        }
-
-        if (SDL_UpdateTexture(ctx->texture, NULL, ctx->buffer, ctx->texturewidth * sizeof(Uint32))) {
-            SDL_Log("[%s]Failed to update texture: %s\n", __FUNCTION__, SDL_GetError());
-            result = SDL_FALSE;
-            break;
-        }
-
-        ctx->operations++;
-
-        result = testRenderCopyInner(ctx, SDL_FALSE);
+    if (SDL_SetTextureColorMod(ctx->texture, colors[c].r, colors[c].g, colors[c].b)) {
+        SDL_Log("[%s]Failed to set color modulation: %s\n", __FUNCTION__, SDL_GetError());
+        return SDL_FALSE;
     }
 
-    ctx->iterations = iterations;
+    if (SDL_UpdateTexture(ctx->texture, NULL, ctx->buffer, ctx->texturewidth * sizeof(Uint32))) {
+        SDL_Log("[%s]Failed to update texture: %s\n", __FUNCTION__, SDL_GetError());
+        return SDL_FALSE;
+    }
 
-    return result;
+    ctx->operations++;
+
+    return testRenderCopyInner(ctx, SDL_FALSE);
 }
 
 static SDL_bool testReadPixels(Context *ctx)
 {
     SDL_bool result = SDL_TRUE;
 
-    int i;
+    SDL_Rect rect;
+    rect.x = getRand(ctx->width - ctx->texturewidth);
+    rect.y = getRand(ctx->height - ctx->textureheight);
+    rect.w = ctx->texturewidth;
+    rect.h = ctx->textureheight;
 
-    for (i = 0; i < ctx->iterations; i++) {
+    if (SDL_RenderReadPixels(
+        ctx->renderer,
+        &rect,
+        SDL_PIXELFORMAT_ARGB8888,
+        ctx->buffer,
+        ctx->texturewidth * sizeof(Uint32)) != 0) {
 
-        SDL_Rect rect;
-        rect.x = getRand(ctx->width - ctx->texturewidth);
-        rect.y = getRand(ctx->height - ctx->textureheight);
-        rect.w = ctx->texturewidth;
-        rect.h = ctx->textureheight;
+        SDL_Log("[%s]Failed to read pixels: %s\n", __FUNCTION__, SDL_GetError());
 
-        if (SDL_RenderReadPixels(
-            ctx->renderer,
-            &rect,
-            SDL_PIXELFORMAT_ARGB8888,
-            ctx->buffer,
-            ctx->texturewidth * sizeof(Uint32)) != 0) {
-
-            SDL_Log("[%s]Failed to read pixels: %s\n", __FUNCTION__, SDL_GetError());
-
-            result = SDL_FALSE;
-            break;
-        }
-
-        ctx->operations++;
+        result = SDL_FALSE;
     }
+
+    ctx->operations++;
 
     return result;
 }
@@ -651,7 +596,7 @@ static void checkParameters(Context *ctx, int argc, char **argv)
     }
 
     if (argc > 2) {
-        ctx->iterations = atoi(argv[2]);
+        ctx->duration = atof(argv[2]);
     }
 
     if (argc > 1) {
@@ -661,22 +606,22 @@ static void checkParameters(Context *ctx, int argc, char **argv)
 
 static void initContext(Context *ctx, int argc, char **argv)
 {
-    SDL_memset(ctx, 0, sizeof(*ctx));
+    SDL_memset(ctx, 0, sizeof(Context));
 
     ctx->frequency = SDL_GetPerformanceFrequency();
 
     ctx->width = WIDTH;
     ctx->height = HEIGHT;
     ctx->rectsize = RECTSIZE;
-    ctx->iterations = ITERATIONS;
+    ctx->duration = DURATION;
     ctx->objects = OBJECTS;
     ctx->sleep = SLEEP;
     ctx->running = SDL_TRUE;
 
     checkParameters(ctx, argc, argv);
 
-    SDL_Log("Parameters: width %d, height %d, renderer name '%s', iterations %d, objects %d, sleep %d\n",
-        ctx->width, ctx->height, ctx->rendname, ctx->iterations, ctx->objects, ctx->sleep);
+    SDL_Log("Parameters: width %d, height %d, renderer name '%s', duration %.3f s, objects %u, sleep %u\n",
+        ctx->width, ctx->height, ctx->rendname, ctx->duration, ctx->objects, ctx->sleep);
 }
 
 static void checkPixelFormat(Context *ctx)
