@@ -30,8 +30,8 @@ Changes include:
 </P>
 <P>
   Video, bmp loader:  security fixes for CVE-2019-7635, CVE-2019-7636,
-  CVE-2019-7637, CVE-2019-7638, CVE-2019-13616 (bugs <a href="https://bugzilla.libsdl.org/show_bug.cgi?id=4498">4498</a>, <a href="https://bugzilla.libsdl.org/show_bug.cgi?id=4499">4499</a>, <a href="https://bugzilla.libsdl.org/show_bug.cgi?id=4500">4500</a>,
-  <a href="https://bugzilla.libsdl.org/show_bug.cgi?id=4517">4517</a>, and <a href="https://bugzilla.libsdl.org/show_bug.cgi?id=4538">4538</a>.)
+  CVE-2019-7638, CVE-2019-13616 (bugs <a href="https://bugzilla.libsdl.org/show_bug.cgi?id=4498">4498</a>, <a href="https://bugzilla.libsdl.org/show_bug.cgi?id=4499">4499</a>, <a href="https://bugzilla.libsdl.org/show_bug.cgi?id=4500">4500</a>,
+  <a href="https://bugzilla.libsdl.org/show_bug.cgi?id=4517">4517</a> and <a href="https://bugzilla.libsdl.org/show_bug.cgi?id=4538">4538</a>.)
 </P>
 <P>
   Video, blit: fix handling of alpha channel in Altivec accelerated
@@ -43,6 +43,10 @@ Changes include:
 <P>
   Video, blit: fix RGBA<->RGBA blit broken with the optimization from
   <a href="https://bugzilla.libsdl.org/show_bug.cgi?id=11">bug 11</a> (bug <a href="https://bugzilla.libsdl.org/show_bug.cgi?id=2976">2976</a>.)
+</P>
+<P>
+  Video: fix integer overflow in SDL_CalculatePitch (CVE-2019-7637,
+  bug <a href="https://bugzilla.libsdl.org/show_bug.cgi?id=4497">4497</a>.)
 </P>
 <P>
   Mouse: fix SDL_ResetMouse() using a bogus mouse button causing a
@@ -74,7 +78,7 @@ Changes include:
 <P>
   X11video: fix missing symbol X11_KeyToUnicode in .so file (bug <a href="https://bugzilla.libsdl.org/show_bug.cgi?id=1390">1390</a>.
   not being an official SDL function, the use of X11_KeyToUnicode() is
-  discouraged.)
+  strongly discouraged.)
 </P>
 <P>
   X11video: fix compilation with libX11 >= 1.5.99.902 (bug <a href="https://bugzilla.libsdl.org/show_bug.cgi?id=1769">1769</a>.)

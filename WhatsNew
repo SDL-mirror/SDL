@@ -10,13 +10,14 @@ Changes include:
   CVE-2019-7577, CVE-2019-7578 -- bugs 4490, 4491, 4492, 4493, 4494,
   4495, 4496, and 4522.)
 - Video, bmp loader:  security fixes for CVE-2019-7635, CVE-2019-7636,
-  CVE-2019-7637, CVE-2019-7638, CVE-2019-13616 (bugs 4498, 4499, 4500,
-  4517, and 4538.)
+  CVE-2019-7638, CVE-2019-13616 (bugs 4498, 4499, 4500, 4517 and 4538.)
 - Video, blit: fix handling of alpha channel in Altivec accelerated
   blit functions (bug 1424.)
 - Video, blit: use fast path for RGB 565 -> 32-bit XRGB 8888
 - Video, blit: fix RGBA<->RGBA blit broken with the optimization from
   bug 11 (bug 2976.)
+- Video: fix integer overflow in SDL_CalculatePitch (CVE-2019-7637,
+  bug 4497.)
 - Mouse: fix SDL_ResetMouse() using a bogus mouse button causing a
   negative shift (bug 3593.)
 - Cdrom: fix SDL_CDResume() and SDL_CDStop() not returning failure
@@ -30,7 +31,7 @@ Changes include:
 - OpenBSD: fix dynamic loading of X libs (bug 1434.)
 - X11video: fix missing symbol X11_KeyToUnicode in .so file (bug 1390.
   not being an official SDL function, the use of X11_KeyToUnicode() is
-  discouraged.)
+  strongly discouraged.)
 - X11video: fix compilation with libX11 >= 1.5.99.902 (bug 1769.)
 - X11video: fix for XChangeProperty() crash (bug 1427.)
 - X11video: fix SDL_EnableUNICODE sometimes dropping keyboard events
