@@ -284,6 +284,38 @@ void *SDL_memcpy(void *dst, const void *src, size_t len)
 }
 #endif
 
+#ifdef SDL_revcpy /* so that the export won't be missing in the dll */
+#if defined(__GNUC__) && defined(__i386__)
+#undef SDL_revcpy
+DECLSPEC void* SDLCALL SDL_revcpy(void *dst, const void *src, size_t len) {
+/* EXACT MATCH to macro in SDL_stdinc.h */
+    int u0, u1, u2;
+    char *dstp = SDL_static_cast(char *, dst);
+    char *srcp = SDL_static_cast(char *, src);
+    int n = (len);
+    if (n >= 4) {
+        __asm__ __volatile__ (
+            "std\n\t"
+            "rep ; movsl\n\t"
+            "cld\n\t"
+            : "=&c" (u0), "=&D" (u1), "=&S" (u2)
+            : "0" (n >> 2),
+              "1" (dstp+(n-4)), "2" (srcp+(n-4))
+            : "memory" );
+    }
+    switch (n & 3) {
+    case 3: dstp[2] = srcp[2];
+    case 2: dstp[1] = srcp[1];
+    case 1: dstp[0] = srcp[0];
+        break;
+    default:
+        break;
+    }
+    return dst;
+}
+#define SDL_revcpy SDL_revcpy
+#endif
+#endif
 #ifndef SDL_revcpy
 void *SDL_revcpy(void *dst, const void *src, size_t len)
 {
