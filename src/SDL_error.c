@@ -28,7 +28,7 @@
 
 /* Routine to get the thread-specific error variable */
 #if SDL_THREADS_DISABLED
-/* The  SDL_arraysize(The ),default (non-thread-safe) global error variable */
+/* The  default (non-thread-safe) global error variable */
 static SDL_error SDL_global_error;
 #define SDL_GetErrBuf()	(&SDL_global_error)
 #else
@@ -59,21 +59,21 @@ void SDL_SetError (const char *fmt, ...)
 
 	va_start(ap, fmt);
 	error->argc = 0;
-	while ( *fmt ) {
-		if ( *fmt++ == '%' ) {
-			while ( *fmt == '.' || (*fmt >= '0' && *fmt <= '9') ) {
+	while (*fmt) {
+		if (*fmt++ == '%') {
+			while (*fmt == '.' || (*fmt >= '0' && *fmt <= '9')) {
 				++fmt;
 			}
 			switch (*fmt++) {
-			    case 0:  /* Malformed format string.. */
+			    case 0: /* Malformed format string.. */
 				--fmt;
 				break;
 			    case 'l':
 				switch (*fmt++) {
-				case 0:  /* Malformed format string.. */
+				case 0: /* Malformed format string.. */
 					--fmt;
 					break;
-				case 'i': case 'd': case 'u':
+				case 'i': case 'd': case 'u': case 'x': case 'X':
 					error->args[error->argc++].value_l =
 								va_arg(ap, long);
 					break;
@@ -110,7 +110,7 @@ void SDL_SetError (const char *fmt, ...)
 			    default:
 				break;
 			}
-			if ( error->argc >= ERR_MAX_ARGS ) {
+			if (error->argc >= ERR_MAX_ARGS) {
 				break;
 			}
 		}
@@ -135,7 +135,7 @@ char *SDL_GetErrorMsg(char *errstr, int maxlen)
 
 	/* Get the thread-safe error, and print it out */
 	error = SDL_GetErrBuf();
-	if ( error->error ) {
+	if (error->error) {
 		const char *fmt;
 		char *msg = errstr;
 		int len;
@@ -143,11 +143,11 @@ char *SDL_GetErrorMsg(char *errstr, int maxlen)
 
 		fmt = SDL_LookupString(error->key);
 		argi = 0;
-		while ( *fmt && (maxlen > 0) ) {
-			if ( *fmt == '%' ) {
+		while (*fmt && (maxlen > 0)) {
+			if (*fmt == '%') {
 				char tmp[32], *spot = tmp;
 				*spot++ = *fmt++;
-				while ( (*fmt == '.' || (*fmt >= '0' && *fmt <= '9')) && spot < (tmp+SDL_arraysize(tmp)-2) ) {
+				while ((*fmt == '.' || (*fmt >= '0' && *fmt <= '9')) && spot < (tmp+SDL_arraysize(tmp)-2)) {
 					*spot++ = *fmt++;
 				}
 				if (*fmt == 'l') {
@@ -155,7 +155,7 @@ char *SDL_GetErrorMsg(char *errstr, int maxlen)
 					*spot++ = *fmt++;
 					*spot++ = '\0';
 					switch (spot[-2]) {
-					case 'i': case 'd': case 'u':
+					case 'i': case 'd': case 'u': case 'x': case 'X':
 						len = SDL_snprintf(msg, maxlen, tmp, error->args[argi++].value_l);
 						if (len > 0) {
 						    msg += len;
@@ -174,9 +174,9 @@ char *SDL_GetErrorMsg(char *errstr, int maxlen)
 					break;
 				    case 'c':
 				    case 'i':
-			            case 'd':
-			            case 'u':
-			            case 'o':
+				    case 'd':
+				    case 'u':
+				    case 'o':
 				    case 'x':
 				    case 'X':
 					len = SDL_snprintf(msg, maxlen, tmp, error->args[argi++].value_i);
