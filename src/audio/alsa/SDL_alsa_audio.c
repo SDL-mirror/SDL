@@ -61,7 +61,6 @@ static int (*SDL_NAME(snd_pcm_close))(snd_pcm_t *pcm);
 static snd_pcm_sframes_t (*SDL_NAME(snd_pcm_writei))(snd_pcm_t *pcm, const void *buffer, snd_pcm_uframes_t size);
 static int (*SDL_NAME(snd_pcm_resume))(snd_pcm_t *pcm);
 static int (*SDL_NAME(snd_pcm_prepare))(snd_pcm_t *pcm);
-static int (*SDL_NAME(snd_pcm_drain))(snd_pcm_t *pcm);
 static const char *(*SDL_NAME(snd_strerror))(int errnum);
 static size_t (*SDL_NAME(snd_pcm_hw_params_sizeof))(void);
 static size_t (*SDL_NAME(snd_pcm_sw_params_sizeof))(void);
@@ -100,7 +99,6 @@ static struct {
 	{ "snd_pcm_writei",	(void**)(char*)&SDL_NAME(snd_pcm_writei)	},
 	{ "snd_pcm_resume",	(void**)(char*)&SDL_NAME(snd_pcm_resume)	},
 	{ "snd_pcm_prepare",	(void**)(char*)&SDL_NAME(snd_pcm_prepare)	},
-	{ "snd_pcm_drain",	(void**)(char*)&SDL_NAME(snd_pcm_drain)	},
 	{ "snd_strerror",	(void**)(char*)&SDL_NAME(snd_strerror)		},
 	{ "snd_pcm_hw_params_sizeof",		(void**)(char*)&SDL_NAME(snd_pcm_hw_params_sizeof)		},
 	{ "snd_pcm_sw_params_sizeof",		(void**)(char*)&SDL_NAME(snd_pcm_sw_params_sizeof)		},
@@ -366,7 +364,11 @@ static void ALSA_CloseAudio(_THIS)
 		mixbuf = NULL;
 	}
 	if ( pcm_handle ) {
-		SDL_NAME(snd_pcm_drain)(pcm_handle);
+		/* Wait for the submitted audio to drain
+		   snd_pcm_drop() can hang, so don't use that.
+		 */
+		Uint32 delay = ((this->spec.samples * 1000) / this->spec.freq) * 2;
+		SDL_Delay(delay);
 		SDL_NAME(snd_pcm_close)(pcm_handle);
 		pcm_handle = NULL;
 	}
