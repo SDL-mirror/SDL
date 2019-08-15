@@ -59,7 +59,7 @@ static int alsa_loaded = 0;
 static int (*SDL_NAME(snd_pcm_open))(snd_pcm_t **pcm, const char *name, snd_pcm_stream_t stream, int mode);
 static int (*SDL_NAME(snd_pcm_close))(snd_pcm_t *pcm);
 static snd_pcm_sframes_t (*SDL_NAME(snd_pcm_writei))(snd_pcm_t *pcm, const void *buffer, snd_pcm_uframes_t size);
-static int (*SDL_NAME(snd_pcm_recover))(snd_pcm_t *pcm, int err, int silent);
+static int (*SDL_NAME(snd_pcm_resume))(snd_pcm_t *pcm);
 static int (*SDL_NAME(snd_pcm_prepare))(snd_pcm_t *pcm);
 static int (*SDL_NAME(snd_pcm_drain))(snd_pcm_t *pcm);
 static const char *(*SDL_NAME(snd_strerror))(int errnum);
@@ -86,9 +86,9 @@ static int (*SDL_NAME(snd_pcm_sw_params_current))(snd_pcm_t *pcm, snd_pcm_sw_par
 static int (*SDL_NAME(snd_pcm_sw_params_set_start_threshold))(snd_pcm_t *pcm, snd_pcm_sw_params_t *params, snd_pcm_uframes_t val);
 static int (*SDL_NAME(snd_pcm_sw_params))(snd_pcm_t *pcm, snd_pcm_sw_params_t *params);
 static int (*SDL_NAME(snd_pcm_nonblock))(snd_pcm_t *pcm, int nonblock);
-static int (*SDL_NAME(snd_pcm_wait))(snd_pcm_t *pcm, int timeout);
 #define snd_pcm_hw_params_sizeof SDL_NAME(snd_pcm_hw_params_sizeof)
 #define snd_pcm_sw_params_sizeof SDL_NAME(snd_pcm_sw_params_sizeof)
+
 
 /* cast funcs to char* first, to please GCC's strict aliasing rules. */
 static struct {
@@ -98,7 +98,7 @@ static struct {
 	{ "snd_pcm_open",	(void**)(char*)&SDL_NAME(snd_pcm_open)		},
 	{ "snd_pcm_close",	(void**)(char*)&SDL_NAME(snd_pcm_close)	},
 	{ "snd_pcm_writei",	(void**)(char*)&SDL_NAME(snd_pcm_writei)	},
-	{ "snd_pcm_recover",	(void**)(char*)&SDL_NAME(snd_pcm_recover)	},
+	{ "snd_pcm_resume",	(void**)(char*)&SDL_NAME(snd_pcm_resume)	},
 	{ "snd_pcm_prepare",	(void**)(char*)&SDL_NAME(snd_pcm_prepare)	},
 	{ "snd_pcm_drain",	(void**)(char*)&SDL_NAME(snd_pcm_drain)	},
 	{ "snd_strerror",	(void**)(char*)&SDL_NAME(snd_strerror)		},
@@ -123,7 +123,6 @@ static struct {
 	{ "snd_pcm_sw_params_set_start_threshold",	(void**)(char*)&SDL_NAME(snd_pcm_sw_params_set_start_threshold)	},
 	{ "snd_pcm_sw_params",	(void**)(char*)&SDL_NAME(snd_pcm_sw_params)	},
 	{ "snd_pcm_nonblock",	(void**)(char*)&SDL_NAME(snd_pcm_nonblock)	},
-	{ "snd_pcm_wait",	(void**)(char*)&SDL_NAME(snd_pcm_wait)	},
 };
 
 static void UnloadALSALibrary(void) {
@@ -303,6 +302,25 @@ static __inline__ void swizzle_alsa_channels(_THIS)
 }
 
 
+/* snd_pcm_recover() is available in alsa-lib >= 1.0.11 */
+static int ALSA_pcm_recover(snd_pcm_t *handle, int err, int silent)
+{
+	(void) silent;
+	if (err == -EINTR) return 0;
+	if (err == -EPIPE) {		/* under-run */
+		err = SDL_NAME(snd_pcm_prepare)(handle);
+		return (err < 0)? err : 0;
+	}
+	if (err == -ESTRPIPE) {
+		/* wait until suspend flag is released */
+		while ((err = SDL_NAME(snd_pcm_resume)(handle)) == -EAGAIN)
+			SDL_Delay(100);
+		if (err < 0) err = SDL_NAME(snd_pcm_prepare)(handle);
+		return (err < 0)? err : 0;
+	}
+	return err;
+}
+
 static void ALSA_PlayAudio(_THIS)
 {
 	int status;
@@ -315,17 +333,14 @@ static void ALSA_PlayAudio(_THIS)
 	frames_left = ((snd_pcm_uframes_t) this->spec.samples);
 
 	while ( frames_left > 0 && this->enabled ) {
-		/* This works, but needs more testing before going live */
-		/*SDL_NAME(snd_pcm_wait)(pcm_handle, -1);*/
-
 		status = SDL_NAME(snd_pcm_writei)(pcm_handle, sample_buf, frames_left);
 		if ( status < 0 ) {
 			if ( status == -EAGAIN ) {
-				/* Apparently snd_pcm_recover() doesn't handle this case - does it assume snd_pcm_wait() above? */
+				/* Apparently snd_pcm_recover() doesn't handle this case. Foo. */
 				SDL_Delay(1);
 				continue;
 			}
-			status = SDL_NAME(snd_pcm_recover)(pcm_handle, status, 0);
+			status = ALSA_pcm_recover(pcm_handle, status, 0);
 			if ( status < 0 ) {
 				/* Hmm, not much we can do - abort */
 				fprintf(stderr, "ALSA write failed (unrecoverable): %s\n", SDL_NAME(snd_strerror)(status));
