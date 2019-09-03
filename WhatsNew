@@ -71,15 +71,15 @@ Changes include:
 - Solaris, audio: fix pulseaudio dynamic linking.
 - Solaris, cpuinfo: fix asm syntax error causing build failures.
 - Atari: multiple platform code updates.
-- RiscOS: cleanups to platform code.
-- RiscOS: fix thread starvation in fullscreen mode.
-- RiscOS: fix returning from full-screen to 16M colour modes.
-- RiscOS: fix receiving PreQuit messages.
-- RiscOS: ensure the window size is consistent at different DPIs.
-- RiscOS, video: add support for more pixel formats.
-- RiscOS: mouse fixes. restore mouse palette when exiting while mouse
+- RISC OS: cleanups to platform code.
+- RISC OS: fix thread starvation in fullscreen mode.
+- RISC OS: fix returning from full-screen to 16M colour modes.
+- RISC OS: fix receiving PreQuit messages.
+- RISC OS: ensure the window size is consistent at different DPIs.
+- RISC OS, video: add support for more pixel formats.
+- RISC OS: mouse fixes. restore mouse palette when exiting while mouse
   is in focus. don't reset mouse focus when recreating the window.
-- RiscOS: support Windows and Menu key input.
+- RISC OS: support Windows and Menu key input.
 - Configuration: fix library detection selecting wrong lib (bug 2795.)
 - Configuration: fix detecting dynamic library support on powerpc64le
   (bug 3481.)
