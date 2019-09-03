@@ -81,7 +81,7 @@ Current level of implementation
 The following list is an overview of how much of the SDL is implemented. The areas match the main areas of the SDL.
 
 video - Mostly done. Doesn't cover gamma, YUV-overlay or OpenGL.
-Window Manager - Mostly done. SetIcon/IconifyWindow not implemented.
+Window Manager - Mostly done. SetIcon not implemented.
 Events - Mostly done. Resize and some joystick events missing.
 Joystick - Currently assumes a single joystick with 4 buttons.
 Audio - Done

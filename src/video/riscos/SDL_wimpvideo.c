@@ -45,6 +45,7 @@
 
 static int WIMP_SetColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors);
 static void WIMP_SetWMCaption(_THIS, const char *title, const char *icon);
+static int WIMP_IconifyWindow(_THIS);
 static void WIMP_UpdateRects(_THIS, int numrects, SDL_Rect *rects);
 
 /* RISC OS Wimp handling helpers */
@@ -194,7 +195,7 @@ void WIMP_SetDeviceMode(_THIS)
 
 	this->SetCaption = WIMP_SetWMCaption;
 	this->SetIcon = NULL;
-	this->IconifyWindow = NULL;
+	this->IconifyWindow = WIMP_IconifyWindow;
 	
 	this->ShowWMCursor = WIMP_ShowWMCursor;
 	this->WarpWMCursor = WIMP_WarpWMCursor;
@@ -380,6 +381,29 @@ void WIMP_SetWMCaption(_THIS, const char *title, const char *icon)
 		regs.r[2] = 3; /* Redraw title */
 		_kernel_swi(Wimp_ForceRedraw, &regs, &regs);
 	}
+}
+
+int WIMP_IconifyWindow(_THIS)
+{
+	_kernel_swi_regs regs;
+
+	int block[12];
+	block[0] = 48;
+	block[1] = RISCOS_GetTaskHandle();
+	block[2] = 0;
+	block[3] = 0;
+	block[4] = 0x400ca; /* Message_Iconize */
+	block[5] = this->hidden->window_handle;
+	block[6] = RISCOS_GetTaskHandle();
+
+	SDL_strlcpy((char *)&block[7], this->hidden->title, 20);
+
+	regs.r[0] = 17; /* User_Message */
+	regs.r[1] = (int)block;
+	regs.r[2] = 0;
+	_kernel_swi(Wimp_SendMessage, &regs, &regs);
+
+	return 1;
 }
 
 /* Toggle to window from full screen */

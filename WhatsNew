@@ -80,6 +80,7 @@ Changes include:
 - RISC OS: mouse fixes. restore mouse palette when exiting while mouse
   is in focus. don't reset mouse focus when recreating the window.
 - RISC OS: support Windows and Menu key input.
+- RISC OS: implement SDL_WM_IconifyWindow()
 - Configuration: fix library detection selecting wrong lib (bug 2795.)
 - Configuration: fix detecting dynamic library support on powerpc64le
   (bug 3481.)
