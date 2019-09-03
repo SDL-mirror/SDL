@@ -95,14 +95,15 @@ int RISCOS_InitTask()
    char task_name[32];
    _kernel_swi_regs regs;
    _kernel_oserror *error;
-   int messages[4];
+   int messages[5];
 
    RISCOS_GetTaskName(task_name, SDL_arraysize(task_name));
 
    messages[0] = 9;       /* Palette changed */
    messages[1] = 0x400c1; /* Mode changed */
-   messages[2] = 8;       /* Pre quit */
-   messages[3] = 0;
+   messages[2] = 0x400ca; /* Iconize window */
+   messages[3] = 8;       /* Pre quit */
+   messages[4] = 0;
 
 	regs.r[0] = (unsigned int)360; /* Minimum version 3.6 */
 	regs.r[1] = (unsigned int)0x4b534154;

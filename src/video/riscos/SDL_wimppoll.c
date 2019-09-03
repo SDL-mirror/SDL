@@ -145,15 +145,17 @@ void WIMP_Poll(_THIS, int waitTime)
           break;
         	
 		case 2:		/* Open window */
-		   if ( resizeOnOpen && message[0] == sdlWindow)
-		   {
-		      /* Ensure window is correct size */
-		      resizeOnOpen = 0;
-		      message[3] = message[1] + (this->screen->w << 1);
-		      message[4] = message[2] + (this->screen->h << 1);       
-		   }
-        	_kernel_swi(Wimp_OpenWindow, &regs, &regs);
-       	    break;
+			if (message[0] == sdlWindow) {
+				SDL_PrivateAppActive(1, SDL_APPACTIVE);
+				if (resizeOnOpen) {
+					/* Ensure window is correct size */
+					resizeOnOpen = 0;
+					message[3] = message[1] + (this->screen->w << 1);
+					message[4] = message[2] + (this->screen->h << 1);
+				}
+			}
+			_kernel_swi(Wimp_OpenWindow, &regs, &regs);
+			break;
         	
 		case 3:		/* Close window */
 			if (message[0] == sdlWindow)
@@ -249,6 +251,10 @@ void WIMP_Poll(_THIS, int waitTime)
 				WIMP_ReadModeInfo(this);
 				WIMP_SetupPlotInfo(this);
 				resizeOnOpen = 1;
+				break;
+
+			case 0x400ca: /* Iconize window */
+				if (message[5] == sdlWindow) SDL_PrivateAppActive(0, SDL_APPACTIVE);
 				break;
 
 			case 9:      /* Palette changed */
