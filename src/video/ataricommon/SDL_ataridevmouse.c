@@ -57,7 +57,7 @@ int SDL_AtariDevMouse_Open(void)
 
 	/* First, try SDL_MOUSEDEV device */
 	mousedev = SDL_getenv("SDL_MOUSEDEV");
-	if (!mousedev) {
+	if (mousedev) {
 		handle = open(mousedev, 0);
 	}
 
