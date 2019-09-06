@@ -13,6 +13,8 @@ Changes include:
   CVE-2019-7638, CVE-2019-13616 (bugs 4498, 4499, 4500, 4517 and 4538.)
 - Video, blit: fix handling of alpha channel in Altivec accelerated
   blit functions (bug 1424.)
+- Video, blit: correct vec_perm() application on little-endian 64-bit
+  PowerPC (bug 4791. cf.: RedHat bug 1392465.)
 - Video, blit: use fast path for RGB 565 -> 32-bit XRGB 8888
 - Video, blit: fix RGBA<->RGBA blit broken with the optimization from
   bug 11 (bug 2976.)
