@@ -23111,122 +23111,6 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
             { $as_echo "$as_me:$LINENO: result: $have_gcc_altivec" >&5
 $as_echo "$have_gcc_altivec" >&6; }
         fi
-
-        if test x$have_gcc_altivec = xno; then
-            { $as_echo "$as_me:$LINENO: checking for Altivec with GCC altivec.h and -faltivec option" >&5
-$as_echo_n "checking for Altivec with GCC altivec.h and -faltivec option... " >&6; }
-            altivec_CFLAGS="-faltivec"
-            CFLAGS="$save_CFLAGS $altivec_CFLAGS"
-            cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-
-            #include <altivec.h>
-            vector unsigned int vzero() {
-                return vec_splat_u32(0);
-            }
-
-int
-main ()
-{
-
-
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext
-if { (ac_try="$ac_compile"
-case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
-$as_echo "$ac_try_echo") >&5
-  (eval "$ac_compile") 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } && {
-	 test -z "$ac_c_werror_flag" ||
-	 test ! -s conftest.err
-       } && test -s conftest.$ac_objext; then
-
-            have_gcc_altivec=yes
-            have_altivec_h_hdr=yes
-
-else
-  $as_echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-
-fi
-
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-            { $as_echo "$as_me:$LINENO: result: $have_gcc_altivec" >&5
-$as_echo "$have_gcc_altivec" >&6; }
-        fi
-
-        if test x$have_gcc_altivec = xno; then
-            { $as_echo "$as_me:$LINENO: checking for Altivec with GCC -faltivec option" >&5
-$as_echo_n "checking for Altivec with GCC -faltivec option... " >&6; }
-            cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-
-            vector unsigned int vzero() {
-                return vec_splat_u32(0);
-            }
-
-int
-main ()
-{
-
-
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext
-if { (ac_try="$ac_compile"
-case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
-$as_echo "$ac_try_echo") >&5
-  (eval "$ac_compile") 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } && {
-	 test -z "$ac_c_werror_flag" ||
-	 test ! -s conftest.err
-       } && test -s conftest.$ac_objext; then
-
-            have_gcc_altivec=yes
-
-else
-  $as_echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-
-fi
-
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-            { $as_echo "$as_me:$LINENO: result: $have_gcc_altivec" >&5
-$as_echo "$have_gcc_altivec" >&6; }
-        fi
         CFLAGS="$save_CFLAGS"
 
         if test x$have_gcc_altivec = xyes; then
@@ -23241,6 +23125,89 @@ _ACEOF
 
             fi
             EXTRA_CFLAGS="$EXTRA_CFLAGS $altivec_CFLAGS"
+        fi
+    fi
+}
+
+CheckAltivecApple()
+{
+    # Check whether --enable-altivec was given.
+if test "${enable_altivec+set}" = set; then
+  enableval=$enable_altivec;
+else
+  enable_altivec=yes
+fi
+
+    if test x$enable_video = xyes -a x$enable_assembly = xyes -a x$enable_altivec = xyes; then
+        save_CFLAGS="$CFLAGS"
+        have_gcc_altivec=no
+        altivec_CFLAGS="-faltivec"
+        CFLAGS="$save_CFLAGS $altivec_CFLAGS"
+
+                        { $as_echo "$as_me:$LINENO: checking for Altivec with GCC -faltivec option" >&5
+$as_echo_n "checking for Altivec with GCC -faltivec option... " >&6; }
+        cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+        vector unsigned int vzero() {
+            return vec_splat_u32(0);
+        }
+
+int
+main ()
+{
+
+
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext
+if { (ac_try="$ac_compile"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
+$as_echo "$ac_try_echo") >&5
+  (eval "$ac_compile") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest.$ac_objext; then
+
+        have_gcc_altivec=yes
+
+else
+  $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+        { $as_echo "$as_me:$LINENO: result: $have_gcc_altivec" >&5
+$as_echo "$have_gcc_altivec" >&6; }
+
+        CFLAGS="$save_CFLAGS"
+
+        if test x$have_gcc_altivec = xyes; then
+            cat >>confdefs.h <<\_ACEOF
+#define SDL_ALTIVEC_BLITTERS 1
+_ACEOF
+
+            EXTRA_CFLAGS="$EXTRA_CFLAGS $altivec_CFLAGS"
+        else
+                    CheckAltivec
         fi
     fi
 }
@@ -31124,7 +31091,7 @@ _ACEOF
         CheckMacGL
         CheckOpenGLX11
         CheckPTHREAD
-        CheckAltivec
+        CheckAltivecApple
 
         # Need this or things might misbuild on a G3.
         EXTRA_CFLAGS="$EXTRA_CFLAGS -force_cpusubtype_ALL"

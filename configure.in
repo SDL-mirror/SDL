@@ -844,36 +844,6 @@ AC_HELP_STRING([--enable-altivec], [use altivec assembly blitters on PPC [[defau
             ])
             AC_MSG_RESULT($have_gcc_altivec)
         fi
-
-        if test x$have_gcc_altivec = xno; then
-            AC_MSG_CHECKING(for Altivec with GCC altivec.h and -faltivec option)
-            altivec_CFLAGS="-faltivec"
-            CFLAGS="$save_CFLAGS $altivec_CFLAGS"
-            AC_TRY_COMPILE([
-            #include <altivec.h>
-            vector unsigned int vzero() {
-                return vec_splat_u32(0);
-            }
-            ],[
-            ],[
-            have_gcc_altivec=yes
-            have_altivec_h_hdr=yes
-            ])
-            AC_MSG_RESULT($have_gcc_altivec)
-        fi
-
-        if test x$have_gcc_altivec = xno; then
-            AC_MSG_CHECKING(for Altivec with GCC -faltivec option)
-            AC_TRY_COMPILE([
-            vector unsigned int vzero() {
-                return vec_splat_u32(0);
-            }
-            ],[
-            ],[
-            have_gcc_altivec=yes
-            ])
-            AC_MSG_RESULT($have_gcc_altivec)
-        fi
         CFLAGS="$save_CFLAGS"
 
         if test x$have_gcc_altivec = xyes; then
@@ -882,6 +852,43 @@ AC_HELP_STRING([--enable-altivec], [use altivec assembly blitters on PPC [[defau
               AC_DEFINE(HAVE_ALTIVEC_H)
             fi
             EXTRA_CFLAGS="$EXTRA_CFLAGS $altivec_CFLAGS"
+        fi
+    fi
+}
+
+dnl Check for altivec instruction support - APPLE extensions
+CheckAltivecApple()
+{
+    AC_ARG_ENABLE(altivec,
+AC_HELP_STRING([--enable-altivec], [use altivec assembly blitters on PPC [[default=yes]]]),
+                  , enable_altivec=yes)
+    if test x$enable_video = xyes -a x$enable_assembly = xyes -a x$enable_altivec = xyes; then
+        save_CFLAGS="$CFLAGS"
+        have_gcc_altivec=no
+        altivec_CFLAGS="-faltivec"
+        CFLAGS="$save_CFLAGS $altivec_CFLAGS"
+
+        dnl -faltivec doesn't need altivec.h and actually
+        dnl  emits a warning if included..
+        AC_MSG_CHECKING(for Altivec with GCC -faltivec option)
+        AC_TRY_COMPILE([
+        vector unsigned int vzero() {
+            return vec_splat_u32(0);
+        }
+        ],[
+        ],[
+        have_gcc_altivec=yes
+        ])
+        AC_MSG_RESULT($have_gcc_altivec)
+
+        CFLAGS="$save_CFLAGS"
+
+        if test x$have_gcc_altivec = xyes; then
+            AC_DEFINE(SDL_ALTIVEC_BLITTERS)
+            EXTRA_CFLAGS="$EXTRA_CFLAGS $altivec_CFLAGS"
+        else
+        dnl Check standart gcc altivec options
+            CheckAltivec
         fi
     fi
 }
@@ -2785,7 +2792,7 @@ case "$host" in
         CheckMacGL
         CheckOpenGLX11
         CheckPTHREAD
-        CheckAltivec
+        CheckAltivecApple
 
         # Need this or things might misbuild on a G3.
         EXTRA_CFLAGS="$EXTRA_CFLAGS -force_cpusubtype_ALL"
