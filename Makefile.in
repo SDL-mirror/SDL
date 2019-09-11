@@ -49,7 +49,7 @@ LT_AGE      = @LT_AGE@
 LT_CURRENT  = @LT_CURRENT@
 LT_RELEASE  = @LT_RELEASE@
 LT_REVISION = @LT_REVISION@
-LT_LDFLAGS  = -no-undefined -rpath $(DESTDIR)$(libdir) -release $(LT_RELEASE) -version-info $(LT_CURRENT):$(LT_REVISION):$(LT_AGE)
+LT_LDFLAGS  = -no-undefined -rpath $(libdir) -release $(LT_RELEASE) -version-info $(LT_CURRENT):$(LT_REVISION):$(LT_AGE)
 
 all: $(srcdir)/configure Makefile $(objects) $(objects)/$(TARGET) $(objects)/$(SDLMAIN_TARGET)
 
