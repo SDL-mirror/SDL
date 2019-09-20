@@ -8,7 +8,7 @@ STRIP = ppc-amigaos-strip
 
 AMIGADATE = $(shell date +"%-d.%-m.%Y")
 
-CFLAGS  = -g -O2 -Wall -fPIC -I./include -D__AMIGADATE__=\"$(AMIGADATE)\"
+CFLAGS  = -gstabs -O2 -Wall -fPIC -I./include -D__AMIGADATE__=\"$(AMIGADATE)\"
 
 TARGET_STATIC  = libSDL2.a
 TARGET_SHARED  = libSDL2-2.0.so
