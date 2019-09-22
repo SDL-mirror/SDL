@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2018 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2019 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -456,8 +456,8 @@ OS4_WarpMouse(SDL_Window * window, int x, int y)
             syswin->WScreen : NULL;
 
         OS4_WarpMouseInternal(screen,
-            x + syswin->BorderTop + syswin->TopEdge,
-            y + syswin->BorderLeft + syswin->LeftEdge);
+            x + syswin->BorderLeft + syswin->LeftEdge,
+            y + syswin->BorderTop + syswin->TopEdge);
 
     } else {
         /* Just warp SDL's notion of the pointer position */
