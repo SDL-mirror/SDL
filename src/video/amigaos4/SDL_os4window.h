@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2018 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2019 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -76,7 +76,9 @@ extern void OS4_MaximizeWindow(_THIS, SDL_Window * window);
 extern void OS4_MinimizeWindow(_THIS, SDL_Window * window);
 extern void OS4_RestoreWindow(_THIS, SDL_Window * window);
 
-extern void OS4_SetWindowBordered(_THIS, SDL_Window * window, SDL_bool bordered);
+extern void OS4_SetWindowResizable (_THIS, SDL_Window * window, SDL_bool resizable);
+
+//extern void OS4_SetWindowBordered(_THIS, SDL_Window * window, SDL_bool bordered);
 extern void OS4_SetWindowFullscreen(_THIS, SDL_Window * window, SDL_VideoDisplay * display, SDL_bool fullscreen);
 //extern int OS4_SetWindowGammaRamp(_THIS, SDL_Window * window, const Uint16 * ramp);
 //extern int OS4_GetWindowGammaRamp(_THIS, SDL_Window * window, Uint16 * ramp);
