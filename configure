@@ -963,6 +963,8 @@ enable_dummyaudio
 enable_mintaudio
 enable_nasm
 enable_altivec
+enable_arm_simd
+enable_arm_neon
 enable_ipod
 enable_video_nanox
 enable_nanox_debug
@@ -1692,6 +1694,8 @@ Optional Features:
   --enable-mintaudio      support Atari audio driver [default=yes]
   --enable-nasm           use nasm assembly blitters on x86 [default=yes]
   --enable-altivec        use altivec assembly blitters on PPC [default=yes]
+  --enable-arm-simd       use SIMD assembly blitters on ARM [default=yes]
+  --enable-arm-neon       use NEON assembly blitters on ARM [default=yes]
   --enable-ipod           configure SDL to work with iPodLinux [default=no]
   --enable-video-nanox    use nanox video driver [default=no]
   --enable-nanox-debug    print debug messages [default=no]
@@ -4632,13 +4636,13 @@ if test "${lt_cv_nm_interface+set}" = set; then
 else
   lt_cv_nm_interface="BSD nm"
   echo "int some_variable = 0;" > conftest.$ac_ext
-  (eval echo "\"\$as_me:4635: $ac_compile\"" >&5)
+  (eval echo "\"\$as_me:4639: $ac_compile\"" >&5)
   (eval "$ac_compile" 2>conftest.err)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:4638: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
+  (eval echo "\"\$as_me:4642: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
   (eval "$NM \"conftest.$ac_objext\"" 2>conftest.err > conftest.out)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:4641: output\"" >&5)
+  (eval echo "\"\$as_me:4645: output\"" >&5)
   cat conftest.out >&5
   if $GREP 'External.*some_variable' conftest.out > /dev/null; then
     lt_cv_nm_interface="MS dumpbin"
@@ -5848,7 +5852,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 5851 "configure"' > conftest.$ac_ext
+  echo '#line 5855 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -7518,11 +7522,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7521: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7525: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:7525: \$? = $ac_status" >&5
+   echo "$as_me:7529: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -7857,11 +7861,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7860: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7864: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:7864: \$? = $ac_status" >&5
+   echo "$as_me:7868: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -7962,11 +7966,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:7965: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:7969: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:7969: \$? = $ac_status" >&5
+   echo "$as_me:7973: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -8017,11 +8021,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8020: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8024: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:8024: \$? = $ac_status" >&5
+   echo "$as_me:8028: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -10819,7 +10823,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 10822 "configure"
+#line 10826 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -10915,7 +10919,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 10918 "configure"
+#line 10922 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -15082,11 +15086,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:15085: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:15089: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:15089: \$? = $ac_status" >&5
+   echo "$as_me:15093: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -15181,11 +15185,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:15184: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:15188: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:15188: \$? = $ac_status" >&5
+   echo "$as_me:15192: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -15233,11 +15237,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:15236: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:15240: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:15240: \$? = $ac_status" >&5
+   echo "$as_me:15244: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -23212,6 +23216,162 @@ _ACEOF
     fi
 }
 
+CheckARM()
+{
+    # Check whether --enable-arm-simd was given.
+if test "${enable_arm_simd+set}" = set; then
+  enableval=$enable_arm_simd; enable_arm_simd=$enableval
+else
+  enable_arm_simd=yes
+fi
+
+    if test x$enable_video = xyes -a x$enable_assembly = xyes -a x$enable_arm_simd = xyes; then
+        save_CFLAGS="$CFLAGS"
+        have_arm_simd=no
+        CFLAGS="-x assembler-with-cpp $CFLAGS"
+
+        { $as_echo "$as_me:$LINENO: checking for ARM SIMD" >&5
+$as_echo_n "checking for ARM SIMD... " >&6; }
+        cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+        .text
+        .arch armv6
+        .object_arch armv4
+        .arm
+        .altmacro
+        #ifndef __ARM_EABI__
+        #error EABI is required (to be sure that calling conventions are compatible)
+        #endif
+        pld [r0]
+        uqadd8 r0, r0, r0
+
+_ACEOF
+rm -f conftest.$ac_objext
+if { (ac_try="$ac_compile"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
+$as_echo "$ac_try_echo") >&5
+  (eval "$ac_compile") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest.$ac_objext; then
+  have_arm_simd=yes
+else
+  $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+        { $as_echo "$as_me:$LINENO: result: $have_arm_simd" >&5
+$as_echo "$have_arm_simd" >&6; }
+
+        CFLAGS="$save_CFLAGS"
+
+        if test x$have_arm_simd = xyes; then
+            cat >>confdefs.h <<\_ACEOF
+#define SDL_ARM_SIMD_BLITTERS 1
+_ACEOF
+
+            SOURCES="$SOURCES $srcdir/src/video/arm/pixman-arm-simd*.S"
+        fi
+    fi
+}
+
+CheckNEON()
+{
+    # Check whether --enable-arm-neon was given.
+if test "${enable_arm_neon+set}" = set; then
+  enableval=$enable_arm_neon; enable_arm_neon=$enableval
+else
+  enable_arm_neon=yes
+fi
+
+    if test x$enable_video = xyes -a x$enable_assembly = xyes -a x$enable_arm_neon = xyes; then
+        save_CFLAGS="$CFLAGS"
+        have_arm_neon=no
+        CFLAGS="-x assembler-with-cpp $CFLAGS"
+
+        { $as_echo "$as_me:$LINENO: checking for ARM NEON" >&5
+$as_echo_n "checking for ARM NEON... " >&6; }
+        cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+        .text
+        .fpu neon
+        .arch armv7a
+        .object_arch armv4
+        .eabi_attribute 10, 0
+        .arm
+        .altmacro
+        #ifndef __ARM_EABI__
+        #error EABI is required (to be sure that calling conventions are compatible)
+        #endif
+        pld [r0]
+        vmovn.u16 d0, q0
+
+_ACEOF
+rm -f conftest.$ac_objext
+if { (ac_try="$ac_compile"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
+$as_echo "$ac_try_echo") >&5
+  (eval "$ac_compile") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_c_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest.$ac_objext; then
+  have_arm_neon=yes
+else
+  $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+        { $as_echo "$as_me:$LINENO: result: $have_arm_neon" >&5
+$as_echo "$have_arm_neon" >&6; }
+
+        CFLAGS="$save_CFLAGS"
+
+        if test x$have_arm_neon = xyes; then
+            cat >>confdefs.h <<\_ACEOF
+#define SDL_ARM_NEON_BLITTERS 1
+_ACEOF
+
+            SOURCES="$SOURCES $srcdir/src/video/arm/pixman-arm-neon*.S"
+        fi
+    fi
+}
+
 CheckVisibilityHidden()
 {
     { $as_echo "$as_me:$LINENO: checking for GCC -fvisibility=hidden option" >&5
@@ -30633,6 +30793,8 @@ _ACEOF
         CheckDLOPEN
         CheckNASM
         CheckAltivec
+        CheckARM
+        CheckNEON
         CheckOSS
         CheckDMEDIA
         CheckMME
