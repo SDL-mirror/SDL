@@ -46,6 +46,7 @@
 #define CPU_HAS_SSE2	0x00000080
 #define CPU_HAS_ALTIVEC	0x00000100
 #define CPU_HAS_ARM_SIMD 0x00000200
+#define CPU_HAS_ARM_NEON 0x00000400
 
 #if SDL_ALTIVEC_BLITTERS && HAVE_SETJMP && !__MACOSX__ && !__OpenBSD__
 /* This is the brute force way of detecting instruction sets...
@@ -422,9 +423,33 @@ static __inline__ int CPU_haveARMSIMD(void)
 	return arm_simd;
 }
 
+static __inline__ int CPU_haveARMNEON(void)
+{
+	int arm_neon = 0;
+	int fd;
+
+	fd = open("/proc/self/auxv", O_RDONLY);
+	if (fd >= 0)
+	{
+		Elf32_auxv_t aux;
+		while (read(fd, &aux, sizeof aux) == sizeof aux)
+		{
+			if (aux.a_type == AT_HWCAP)
+				arm_neon = (aux.a_un.a_val & 4096) != 0;
+		}
+		close(fd);
+	}
+	return arm_neon;
+}
+
 #else
 
 static __inline__ int CPU_haveARMSIMD(void)
+{
+	return 0;
+}
+
+static __inline__ int CPU_haveARMNEON(void)
 {
 	return 0;
 }
@@ -463,6 +488,9 @@ static Uint32 SDL_GetCPUFeatures(void)
 		}
 		if ( CPU_haveARMSIMD() ) {
 			SDL_CPUFeatures |= CPU_HAS_ARM_SIMD;
+		}
+		if ( CPU_haveARMNEON() ) {
+			SDL_CPUFeatures |= CPU_HAS_ARM_NEON;
 		}
 	}
 	return SDL_CPUFeatures;
@@ -540,6 +568,14 @@ SDL_bool SDL_HasARMSIMD(void)
 	return SDL_FALSE;
 }
 
+SDL_bool SDL_HasARMNEON(void)
+{
+	if ( SDL_GetCPUFeatures() & CPU_HAS_ARM_NEON ) {
+		return SDL_TRUE;
+	}
+	return SDL_FALSE;
+}
+
 #ifdef TEST_MAIN
 
 #include <stdio.h>
@@ -555,6 +591,7 @@ int main()
 	printf("SSE2: %d\n", SDL_HasSSE2());
 	printf("AltiVec: %d\n", SDL_HasAltiVec());
 	printf("ARM SIMD: %d\n", SDL_HasARMSIMD());
+	printf("ARM NEON: %d\n", SDL_HasARMNEON());
 	return 0;
 }
 
