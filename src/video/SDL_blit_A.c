@@ -1464,6 +1464,20 @@ static void BlitRGBtoRGBPixelAlphaARMSIMD(SDL_BlitInfo *info)
 #endif
 
 #if SDL_ARM_NEON_BLITTERS
+void BlitARGBto565PixelAlphaARMNEONAsm(int32_t w, int32_t h, uint16_t *dst, int32_t dst_stride, uint32_t *src, int32_t src_stride);
+
+static void BlitARGBto565PixelAlphaARMNEON(SDL_BlitInfo *info)
+{
+    int32_t width = info->d_width;
+    int32_t height = info->d_height;
+    uint16_t *dstp = (uint16_t *)info->d_pixels;
+    int32_t dststride = width + (info->d_skip >> 1);
+    uint32_t *srcp = (uint32_t *)info->s_pixels;
+    int32_t srcstride = width + (info->s_skip >> 2);
+
+    BlitARGBto565PixelAlphaARMNEONAsm(width, height, dstp, dststride, srcp, srcstride);
+}
+
 void BlitRGBtoRGBPixelAlphaARMNEONAsm(int32_t w, int32_t h, uint32_t *dst, int32_t dst_stride, uint32_t *src, int32_t src_stride);
 
 static void BlitRGBtoRGBPixelAlphaARMNEON(SDL_BlitInfo *info)
@@ -2862,14 +2876,21 @@ SDL_loblit SDL_CalculateAlphaBlit(SDL_Surface *surface, int blit_index)
             return Blit32to565PixelAlphaAltivec;
         else
 #endif
-#if SDL_ARM_SIMD_BLITTERS
+#if SDL_ARM_NEON_BLITTERS || SDL_ARM_SIMD_BLITTERS
 		if(sf->BytesPerPixel == 4 && sf->Amask == 0xff000000
 		   && sf->Gmask == 0xff00 && df->Gmask == 0x7e0
 		   && ((sf->Rmask == 0xff && df->Rmask == 0x1f)
-		   || (sf->Bmask == 0xff && df->Bmask == 0x1f))
-		   && SDL_HasARMSIMD())
-			return BlitARGBto565PixelAlphaARMSIMD;
-		else
+		   || (sf->Bmask == 0xff && df->Bmask == 0x1f)))
+		{
+#if SDL_ARM_NEON_BLITTERS
+		    if(SDL_HasARMNEON())
+		        return BlitARGBto565PixelAlphaARMNEON;
+#endif
+#if SDL_ARM_SIMD_BLITTERS
+		    if(SDL_HasARMSIMD())
+		        return BlitARGBto565PixelAlphaARMSIMD;
+#endif
+		}
 #endif
 	    if(sf->BytesPerPixel == 4 && sf->Amask == 0xff000000
 	       && sf->Gmask == 0xff00
