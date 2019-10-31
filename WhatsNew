@@ -18,6 +18,8 @@ Changes include:
 - Video, blit: use fast path for RGB 565 -> 32-bit XRGB 8888
 - Video, blit: fix RGBA<->RGBA blit broken with the optimization from
   bug 11 (bug 2976.)
+- Video, blit, Linux: ARM assembly to address performance of blit and
+  fill routines, thanks to Ben Avison (bug 4365.)
 - Video: fix integer overflow in SDL_CalculatePitch (CVE-2019-7637,
   bug 4497.)
 - Mouse: fix SDL_ResetMouse() using a bogus mouse button causing a
