@@ -312,5 +312,6 @@
 #undef SDL_ASSEMBLY_ROUTINES
 #undef SDL_HERMES_BLITTERS
 #undef SDL_ALTIVEC_BLITTERS
+#undef SDL_ARM_SIMD_BLITTERS
 
 #endif /* _SDL_config_h */

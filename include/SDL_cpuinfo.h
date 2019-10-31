@@ -60,6 +60,9 @@ extern DECLSPEC SDL_bool SDLCALL SDL_HasSSE2(void);
 /** This function returns true if the CPU has AltiVec features */
 extern DECLSPEC SDL_bool SDLCALL SDL_HasAltiVec(void);
 
+/** This function returns true if the CPU has ARM SIMD (ARMv6) features */
+extern DECLSPEC SDL_bool SDLCALL SDL_HasARMSIMD(void);
+
 /* Ends C function definitions when using C++ */
 #ifdef __cplusplus
 }
