@@ -911,6 +911,20 @@ static void Blit_BGR888_RGB888ARMSIMD(SDL_BlitInfo *info)
 
 	Blit_BGR888_RGB888ARMSIMDAsm(width, height, dstp, dststride, srcp, srcstride);
 }
+
+void Blit_RGB444_RGB888ARMSIMDAsm(int32_t w, int32_t h, uint32_t *dst, int32_t dst_stride, uint16_t *src, int32_t src_stride);
+
+static void Blit_RGB444_RGB888ARMSIMD(SDL_BlitInfo *info)
+{
+	int32_t width = info->d_width;
+	int32_t height = info->d_height;
+	uint32_t *dstp = (uint32_t *)info->d_pixels;
+	int32_t dststride = width + (info->d_skip >> 2);
+	uint16_t *srcp = (uint16_t *)info->s_pixels;
+	int32_t srcstride = width + (info->s_skip >> 1);
+
+	Blit_RGB444_RGB888ARMSIMDAsm(width, height, dstp, dststride, srcp, srcstride);
+}
 #endif
 
 /* This is now endian dependent */
@@ -2393,6 +2407,10 @@ static const struct blit_table normal_blit_2[] = {
       BLIT_FEATURE_HAS_ALTIVEC, NULL, Blit_RGB565_32Altivec, NO_ALPHA | COPY_ALPHA | SET_ALPHA },
     { 0x00007C00,0x000003E0,0x0000001F, 4, 0x00000000,0x00000000,0x00000000,
       BLIT_FEATURE_HAS_ALTIVEC, NULL, Blit_RGB555_32Altivec, NO_ALPHA | COPY_ALPHA | SET_ALPHA },
+#endif
+#if SDL_ARM_SIMD_BLITTERS
+    { 0x00000F00,0x000000F0,0x0000000F, 4, 0x00FF0000,0x0000FF00,0x000000FF,
+      BLIT_FEATURE_HAS_ARM_SIMD, NULL, Blit_RGB444_RGB888ARMSIMD, NO_ALPHA | COPY_ALPHA },
 #endif
     { 0x0000F800,0x000007E0,0x0000001F, 4, 0x00FF0000,0x0000FF00,0x000000FF,
       0, NULL, Blit_RGB565_ARGB8888, NO_ALPHA | COPY_ALPHA | SET_ALPHA },
