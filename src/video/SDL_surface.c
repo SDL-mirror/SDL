@@ -28,6 +28,7 @@
 #include "SDL_RLEaccel_c.h"
 #include "SDL_pixels_c.h"
 #include "SDL_leaks.h"
+#include "SDL_cpuinfo.h"
 
 
 /* Public routines */
@@ -602,6 +603,27 @@ int SDL_FillRect(SDL_Surface *dst, SDL_Rect *dstrect, Uint32 color)
 	}
 	row = (Uint8 *)dst->pixels+dstrect->y*dst->pitch+
 			dstrect->x*dst->format->BytesPerPixel;
+#if SDL_ARM_SIMD_BLITTERS
+	if (SDL_HasARMSIMD() && dst->format->BytesPerPixel != 3) {
+		void FillRect8ARMSIMDAsm(int32_t w, int32_t h, uint8_t *dst, int32_t dst_stride, uint8_t src);
+		void FillRect16ARMSIMDAsm(int32_t w, int32_t h, uint16_t *dst, int32_t dst_stride, uint16_t src);
+		void FillRect32ARMSIMDAsm(int32_t w, int32_t h, uint32_t *dst, int32_t dst_stride, uint32_t src);
+		switch (dst->format->BytesPerPixel) {
+		case 1:
+			FillRect8ARMSIMDAsm(dstrect->w, dstrect->h, (uint8_t *) row, dst->pitch >> 0, color);
+			break;
+		case 2:
+			FillRect16ARMSIMDAsm(dstrect->w, dstrect->h, (uint16_t *) row, dst->pitch >> 1, color);
+			break;
+		case 4:
+			FillRect32ARMSIMDAsm(dstrect->w, dstrect->h, (uint32_t *) row, dst->pitch >> 2, color);
+			break;
+		}
+
+		SDL_UnlockSurface(dst);
+		return(0);
+	}
+#endif
 	if ( dst->format->palette || (color == 0) ) {
 		x = dstrect->w*dst->format->BytesPerPixel;
 		if ( !color && !((uintptr_t)row&3) && !(x&3) && !(dst->pitch&3) ) {
