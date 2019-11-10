@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2017 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2019 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -28,11 +28,11 @@
 #include <proto/elf.h>
 #include <proto/dos.h>
 
-static struct Library *ElfBase;
-struct Library *DOSBase;
+static struct Library *elfBase;
+static struct Library *dosBase;
 
-struct ElfIFace *IElf;
-struct DOSIFace *IDOS;
+static struct ElfIFace *iElf;
+static struct DOSIFace *iDOS;
 
 #include "SDL_loadso.h"
 #include "../../video/amigaos4/SDL_os4library.h"
@@ -48,11 +48,17 @@ typedef struct {
 static void
 OS4_CloseLibs()
 {
-    OS4_DropInterface((void *)&IElf);
-    OS4_DropInterface((void *)&IDOS);
+    OS4_DropInterface((void *)&iElf);
+    OS4_DropInterface((void *)&iDOS);
 
-    OS4_CloseLibrary(&ElfBase);
-    OS4_CloseLibrary(&DOSBase);
+    iElf = NULL;
+    iDOS = NULL;
+
+    OS4_CloseLibrary(&elfBase);
+    OS4_CloseLibrary(&dosBase);
+
+    elfBase = NULL;
+    dosBase = NULL;
 }
 
 static BOOL
@@ -60,23 +66,23 @@ OS4_OpenLibs()
 {
     BOOL result = FALSE;
 
-    if (!ElfBase) {
-        ElfBase = OS4_OpenLibrary("elf.library", 52);
+    if (!elfBase) {
+        elfBase = OS4_OpenLibrary("elf.library", 52);
 
-        if (ElfBase) {
-            IElf = (struct ElfIFace *) OS4_GetInterface(ElfBase);
+        if (elfBase) {
+            iElf = (struct ElfIFace *) OS4_GetInterface(elfBase);
         }
     }
 
-    if (!DOSBase) {
-        DOSBase = OS4_OpenLibrary("dos.library", 51);
+    if (!dosBase) {
+        dosBase = OS4_OpenLibrary("dos.library", 51);
 
-        if (DOSBase) {
-            IDOS = (struct DOSIFace *) OS4_GetInterface(DOSBase);
+        if (dosBase) {
+            iDOS = (struct DOSIFace *) OS4_GetInterface(dosBase);
         }
     }
 
-    if (IElf && IDOS)
+    if (iElf && iDOS)
     {
         result = TRUE;
     } else {
@@ -93,16 +99,17 @@ SDL_LoadObject(const char *sofile)
         OS4_ObjectHandle *handle = SDL_malloc(sizeof(OS4_ObjectHandle));
 
         if (handle) {
-            Elf32_Handle eh = NULL;
-            BPTR seglist = IDOS->GetProcSegList(NULL, GPSLF_RUN);
+            BPTR seglist = iDOS->GetProcSegList(NULL, GPSLF_RUN);
 
             if (seglist) {
-                IDOS->GetSegListInfoTags(seglist, GSLI_ElfHandle, &eh, TAG_DONE);
+                Elf32_Handle eh = NULL;
+
+                iDOS->GetSegListInfoTags(seglist, GSLI_ElfHandle, &eh, TAG_DONE);
 
                 dprintf("Elf handle %p\n", eh);
 
                 if (eh) {
-                    APTR so = IElf->DLOpen(eh, sofile, 0);
+                    APTR so = iElf->DLOpen(eh, sofile, 0);
                         
                     if (so) {
                         dprintf("'%s' loaded\n", sofile);
@@ -137,10 +144,10 @@ SDL_LoadFunction(void *handle, const char *name)
     void *symbol = NULL;
 
     if (OS4_OpenLibs() && handle) {
-        APTR address;
+        APTR address = NULL;
         OS4_ObjectHandle *oh = handle;
 
-        Elf32_Error result = IElf->DLSym(oh->elf_handle, oh->shared_object, name, &address);
+        Elf32_Error result = iElf->DLSym(oh->elf_handle, oh->shared_object, name, &address);
 
         if (result == ELF32_NO_ERROR) {
             symbol = address;
@@ -151,18 +158,16 @@ SDL_LoadFunction(void *handle, const char *name)
         }
     }
 
-    return (symbol);
+    return symbol;
 }
 
 void
 SDL_UnloadObject(void *handle)
 {
     if (OS4_OpenLibs() && handle) {
-
-        Elf32_Error result;
         OS4_ObjectHandle *oh = handle;
 
-        result = IElf->DLClose(oh->elf_handle, oh->shared_object);
+        Elf32_Error result = iElf->DLClose(oh->elf_handle, oh->shared_object);
 
         dprintf("DLClose %s\n", (result == ELF32_NO_ERROR) ? "OK" : "failed" );
 
