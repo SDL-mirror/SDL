@@ -55,8 +55,6 @@ Changes include:
 - Mac OS X, joystick: update to support Saitek p2500 gamepad (bug 2025)
 - Mac OS X, main: updates for -psn_XXX command line arg for Finder
   launches in new macOS versions.
-- Mac OS X, main: replace deprecated CPS apis in new OSX versions
-  (bug 4114.)
 - Windows, video: fix other window positions/sizes when exiting
   fullscreen (bug 3315.)
 - Windows, keyboard: reset deadkeys upon SDL_EnableUNICODE() or upon
