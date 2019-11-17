@@ -61,7 +61,7 @@ static void RISCOS_UnlockHWSurface(_THIS, SDL_Surface *surface);
 static void RISCOS_FreeHWSurface(_THIS, SDL_Surface *surface);
 
 #define MODE_350(type, xdpi, ydpi) \
-	(1 | (xdpi << 1) | (ydpi << 13) | (type << 27))
+	(1 | (xdpi << 1) | (ydpi << 14) | (type << 27))
 #define MODE_521(type, xeig, yeig, flags) \
 	(0x78000001 | (xeig << 4) | (yeig << 6) | (flags & 0xFF00) | (type << 20))
 
