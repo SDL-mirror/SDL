@@ -231,8 +231,11 @@ unsigned int WIMP_SetupWindow(_THIS, SDL_Surface *surface)
    window_block[5] = 0;
    window_block[6] = -1;			  /* Open on top of window stack */
 
-   window_block[7] = 0x85040042;      /* Window flags */
-   if (riscos_closeaction != 0) window_block[7] |= 0x2000000;
+   window_block[7] = 0x80040042;      /* Window flags */
+   if (!(surface->flags & SDL_NOFRAME)) {
+      window_block[7] |= 0x5000000;
+      if (riscos_closeaction != 0) window_block[7] |= 0x2000000;
+   }
 
    /* TODO: Take into account surface->flags */
 

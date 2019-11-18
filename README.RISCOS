@@ -99,7 +99,7 @@ This section contains additional notes on some specific commands.
 SDL_SetVideoMode
   On RISC OS a fullscreen mode directly accesses the screen. This can be modified by the environmental variable (SDL$<appname>$BackBuffer) or by using the SDL_SWSURFACE flag to write to an offscreen buffer that is updated using SDL_UpdateRects.
   Open GL is not supported so SDL_OPENGL and SDL_OPENGLBLIT flags fail.
-  SDL_RESIZEABLE and SDL_NOFRAME flags are not supported.
+  SDL_RESIZEABLE flag is not supported.
 
 SDL_SetColors
   In a wimp mode the screen colours are not changed for a hardware palette instead the RISC OS sprite colour mapping is used to get the best matching colours.

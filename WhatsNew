@@ -84,6 +84,7 @@ Changes include:
 - RISC OS: support Windows and Menu key input.
 - RISC OS: implement SDL_WM_IconifyWindow()
 - RISC OS: send SDL_APPACTIVE events when iconizing the window.
+- RISC OS: support creating windows with the SDL_NOFRAME flag set.
 - Configuration: fix library detection selecting wrong lib (bug 2795.)
 - Configuration: fix detecting dynamic library support on powerpc64le
   (bug 3481.)
