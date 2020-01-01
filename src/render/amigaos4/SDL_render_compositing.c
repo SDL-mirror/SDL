@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2018 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2020 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -71,18 +71,6 @@ typedef struct {
     float destAlpha;
     uint32 flags;
 } OS4_CompositingParams;
-
-static SDL_bool
-OS4_IsVsyncEnabled()
-{
-    const char *hint = SDL_GetHint(SDL_HINT_RENDER_VSYNC);
-
-    if (hint && *hint == '1') {
-        return SDL_TRUE;
-    }
-
-    return SDL_FALSE;
-}
 
 SDL_bool
 OS4_IsColorModEnabled(SDL_Texture * texture)
@@ -670,7 +658,7 @@ OS4_RenderPresent(SDL_Renderer * renderer)
             int32 ret;
             //dprintf("target %p\n", data->target);
 
-            if (OS4_IsVsyncEnabled()) {
+            if (data->vsyncEnabled) {
                 data->iGraphics->WaitTOF();
             }
 
@@ -1051,7 +1039,9 @@ OS4_CreateRenderer(SDL_Window * window, Uint32 flags)
 
     data->iGraphics->InitRastPort(&data->rastport);
 
-    dprintf("VSYNC: %s\n", OS4_IsVsyncEnabled() ? "on" : "off");
+    data->vsyncEnabled = flags & SDL_RENDERER_PRESENTVSYNC;
+
+    dprintf("VSYNC: %s\n", data->vsyncEnabled ? "on" : "off");
 
     return renderer;
 }
