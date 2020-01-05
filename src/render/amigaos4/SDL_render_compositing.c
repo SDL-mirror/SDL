@@ -27,7 +27,6 @@
 #include "SDL_rc_draw.h"
 
 #include "../SDL_sysrender.h"
-#include "SDL_hints.h"
 
 #include "../../video/SDL_sysvideo.h"
 #include "../../video/amigaos4/SDL_os4window.h"
@@ -221,18 +220,6 @@ OS4_SetSolidColor(SDL_Renderer * renderer, Uint32 color)
     return SDL_FALSE;
 }
 
-static int
-OS4_GetScaleQuality(void)
-{
-    const char *hint = SDL_GetHint(SDL_HINT_RENDER_SCALE_QUALITY);
-
-    if (!hint || *hint == '0' || SDL_strcasecmp(hint, "nearest") == 0) {
-        return 0;
-    } else {
-        return 1;
-    }
-}
-
 static uint32
 OS4_ConvertBlendMode(SDL_BlendMode mode)
 {
@@ -257,10 +244,6 @@ OS4_GetCompositeFlags(SDL_BlendMode mode)
 {
     uint32 flags = COMPFLAG_IgnoreDestAlpha | COMPFLAG_HardwareOnly;
 
-    if (OS4_GetScaleQuality()) {
-        flags |= COMPFLAG_SrcFilter;
-    }
-
     if (mode == SDL_BLENDMODE_NONE) {
         flags |= COMPFLAG_SrcAlphaOverride;
     }
@@ -273,7 +256,7 @@ OS4_SetupCompositing(SDL_Texture * src, SDL_Texture * dest, OS4_CompositingParam
 {
     params->flags = COMPFLAG_HardwareOnly;
 
-    if (OS4_GetScaleQuality()) {
+    if (src->scaleMode != SDL_ScaleModeNearest) {
         params->flags |= COMPFLAG_SrcFilter;
     }
 
