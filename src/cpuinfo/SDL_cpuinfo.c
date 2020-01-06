@@ -442,6 +442,42 @@ static __inline__ int CPU_haveARMNEON(void)
 	return arm_neon;
 }
 
+#elif defined(__RISCOS__)
+
+#include <kernel.h>
+#include <swis.h>
+
+static __inline__ int CPU_haveARMSIMD(void)
+{
+	_kernel_swi_regs regs;
+	regs.r[0] = 0;
+	if (_kernel_swi(OS_PlatformFeatures, &regs, &regs) != NULL)
+		return 0;
+
+	if (!(regs.r[0] & (1<<31)))
+		return 0;
+
+	regs.r[0] = 34;
+	regs.r[1] = 29;
+	if (_kernel_swi(OS_PlatformFeatures, &regs, &regs) != NULL)
+		return 0;
+
+	return regs.r[0];
+}
+
+static __inline__ int CPU_haveARMNEON(void)
+{
+	/* Use the VFPSupport_Features SWI to access the MVFR registers */
+	_kernel_swi_regs regs;
+	regs.r[0] = 0;
+	if (_kernel_swi(VFPSupport_Features, &regs, &regs) == NULL) {
+		if ((regs.r[2] & 0xFFF000) == 0x111000) {
+			return 1;
+		}
+	}
+	return 0;
+}
+
 #else
 
 static __inline__ int CPU_haveARMSIMD(void)
