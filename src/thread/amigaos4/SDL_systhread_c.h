@@ -1,53 +1,35 @@
 /*
-    SDL - Simple DirectMedia Layer
-    Copyright (C) 1997, 1998, 1999, 2000, 2001, 2002  Sam Lantinga
+  Simple DirectMedia Layer
+  Copyright (C) 1997-2019 Sam Lantinga <slouken@libsdl.org>
 
-    This library is free software; you can redistribute it and/or
-    modify it under the terms of the GNU Library General Public
-    License as published by the Free Software Foundation; either
-    version 2 of the License, or (at your option) any later version.
+  This software is provided 'as-is', without any express or implied
+  warranty.  In no event will the authors be held liable for any damages
+  arising from the use of this software.
 
-    This library is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    Library General Public License for more details.
+  Permission is granted to anyone to use this software for any purpose,
+  including commercial applications, and to alter it and redistribute it
+  freely, subject to the following restrictions:
 
-    You should have received a copy of the GNU Library General Public
-    License along with this library; if not, write to the Free
-    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-
-    Sam Lantinga
-    slouken@libsdl.org
+  1. The origin of this software must not be misrepresented; you must not
+     claim that you wrote the original software. If you use this software
+     in a product, an acknowledgment in the product documentation would be
+     appreciated but is not required.
+  2. Altered source versions must be plainly marked as such, and must not be
+     misrepresented as being the original software.
+  3. This notice may not be removed or altered from any source distribution.
 */
 
 #ifndef SDL_SYSTHREAD_C_H
 #define SDL_SYSTHREAD_C_H
 
-#include <dos/dos.h>
-#include <dos/dosextens.h>
-#include <exec/lists.h>
+#include "../../timer/amigaos4/SDL_os4timer_c.h"
 
-typedef struct Process * SYS_ThreadHandle;
+typedef struct Task* SYS_ThreadHandle;
 
-struct PList
-{
-	struct List list;
-	struct SignalSemaphore *sem;
-};
+void OS4_InitThreadSubSystem(void);
+void OS4_QuitThreadSubSystem(void);
 
-typedef int (*plistForEachFn)(struct Node *, struct Node *);
-
-#ifndef SIGNAL_CHILD_TERM
-#define SIGNAL_CHILD_TERM SIGBREAKF_CTRL_D
-#endif
-
-#ifndef SIGNAL_SEMAPHORE
-#define SIGNAL_SEMAPHORE SIGBREAKF_CTRL_E
-#endif
-
-//#include "../main/amigaos4/SDL_os4timer_c.h"
-
-
-//os4timer_Instance *os4thread_GetTimer(void);
+OS4_TimerInstance* OS4_ThreadGetTimer(void);
 
 #endif
+

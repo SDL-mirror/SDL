@@ -39,13 +39,11 @@ SOURCES = \
 	./src/sensor/dummy/*.c \
 	./src/stdlib/*.c \
 	./src/thread/*.c \
-	./src/thread/generic/SDL_syssem.c \
-	./src/thread/pthread/SDL_syscond.c \
-	./src/thread/pthread/SDL_sysmutex.c \
-	./src/thread/pthread/SDL_systhread.c \
-	./src/thread/pthread/SDL_systls.c \
+	./src/thread/amigaos4/*.c \
+	./src/thread/generic/SDL_syscond.c \
+	./src/thread/generic/SDL_systls.c \
 	./src/timer/*.c \
-	./src/timer/unix/*.c \
+	./src/timer/amigaos4/*.c \
 	./src/video/*.c \
 	./src/video/dummy/*.c \
 	./src/video/amigaos4/*.c \

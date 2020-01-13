@@ -1,393 +1,430 @@
 /*
-    SDL - Simple DirectMedia Layer
-    Copyright (C) 1997-2006 Sam Lantinga
+  Simple DirectMedia Layer
+  Copyright (C) 1997-2019 Sam Lantinga <slouken@libsdl.org>
 
-    This library is free software; you can redistribute it and/or
-    modify it under the terms of the GNU Lesser General Public
-    License as published by the Free Software Foundation; either
-    version 2.1 of the License, or (at your option) any later version.
+  This software is provided 'as-is', without any express or implied
+  warranty.  In no event will the authors be held liable for any damages
+  arising from the use of this software.
 
-    This library is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    Lesser General Public License for more details.
+  Permission is granted to anyone to use this software for any purpose,
+  including commercial applications, and to alter it and redistribute it
+  freely, subject to the following restrictions:
 
-    You should have received a copy of the GNU Lesser General Public
-    License along with this library; if not, write to the Free Software
-    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-
-    Sam Lantinga
-    slouken@libsdl.org
+  1. The origin of this software must not be misrepresented; you must not
+     claim that you wrote the original software. If you use this software
+     in a product, an acknowledgment in the product documentation would be
+     appreciated but is not required.
+  2. Altered source versions must be plainly marked as such, and must not be
+     misrepresented as being the original software.
+  3. This notice may not be removed or altered from any source distribution.
 */
-//#define DEBUG
-#include "../../main/amigaos4/SDL_os4debug.h"
+#include "../../SDL_internal.h"
 
-#include "SDL_platform.h"
+#if SDL_THREAD_AMIGAOS4
+
+/* AmigaOS 4 thread management routines for SDL */
+
 #include "SDL_thread.h"
 #include "../SDL_thread_c.h"
 #include "../SDL_systhread.h"
+#include "SDL_systhread_c.h"
 
-/* Thread management routines for SDL */
-#include "../../timer/amigaos4/SDL_os4timer_c.h"
+#define DEBUG
+#include "../../main/amigaos4/SDL_os4debug.h"
+#include "../../video/amigaos4/SDL_os4library.h"
 
 #include <proto/exec.h>
-#include <proto/utility.h>
 #include <proto/dos.h>
-#include <proto/timer.h>
 
-#include <exec/tasks.h>
-#include <exec/ports.h>
-#include <devices/timer.h>
+#define CHILD_SIGNAL SIGBREAKF_CTRL_D
+#define BREAK_SIGNAL SIGBREAKF_CTRL_C
 
-struct PList currentThreads;
-struct PList currentJoins;
+static struct DOSIFace* iDOS; // TODO: try to make centralized interface storage for SDL2 - now it's a mess with too many symbols all over the place
+static struct DOSBase* dosBase;
 
-struct ThreadNode
+typedef struct OS4_SafeList
 {
-	struct Node         Node;
-	SDL_Thread         *thread;
-	os4timer_Instance   timer;
-	uint32              env_vector;
-};
+    APTR mutex;
+    struct MinList list;
+} OS4_SafeList;
 
-struct ThreadNode PrimaryThread;
-
-struct JoinNode
+typedef struct OS4_ThreadNode
 {
-	struct Node Node;
-	struct Task *sigTask;
-};
+    struct MinNode node;
+    struct Task* task;
+    SDL_Thread* thread;
+    void* args; // Thread parameters
+    OS4_TimerInstance timer;
+} OS4_ThreadNode;
 
-void _INIT_thread_init(void) __attribute__((constructor));
-void _EXIT_thread_term(void) __attribute__((destructor));
-
-void plistInit(struct PList *list)
+typedef struct OS4_ThreadControl
 {
-	if (list)
-	{
-		list->sem = IExec->AllocSysObject(ASOT_SEMAPHORE, 0);
-		IExec->NewList(&list->list);
-	}
+    OS4_ThreadNode primary;
+    OS4_SafeList children;
+    OS4_SafeList waiters;
+} OS4_ThreadControl;
+
+static OS4_ThreadControl control;
+
+static BOOL initialized = FALSE;
+
+// NOTE: Init and Quit are called from SDL.c at the moment.
+void OS4_InitThreadSubSystem(void)
+{
+    if (initialized) {
+        dprintf("Already initialized\n");
+        return;
+    }
+
+    control.primary.task = IExec->FindTask(NULL);
+
+    dprintf("Main task %p\n", control.primary.task);
+
+    control.children.mutex = IExec->AllocSysObjectTags(ASOT_MUTEX, TAG_DONE);
+    control.waiters.mutex = IExec->AllocSysObjectTags(ASOT_MUTEX, TAG_DONE);
+
+    dprintf("Children mutex %p, waiters mutex %p\n", control.children.mutex, control.waiters.mutex);
+
+    IExec->NewMinList((struct MinList *)&control.children.list);
+    IExec->NewMinList((struct MinList *)&control.waiters.list);
+
+    dosBase = (struct DOSBase *)OS4_OpenLibrary(DOSNAME, 50);
+    iDOS = (struct DOSIFace *)OS4_GetInterface((struct Library *)dosBase);
+
+    dprintf("dosBase %p, iDos %p\n", dosBase, iDOS);
+
+    OS4_InitTimerSubSystem();
+    OS4_TimerCreate(&control.primary.timer);
+
+    control.primary.task->tc_UserData = &control.primary; // Timer lookup requires this
+
+    initialized = TRUE;
 }
 
-void plistTerm(struct PList *list)
+void OS4_QuitThreadSubSystem(void)
 {
-	if (list)
-	{
-		IExec->FreeSysObject(ASOT_SEMAPHORE, list->sem);
-	}
+    struct MinNode* iter;
+
+    if (!initialized) {
+        dprintf("Not initialized\n");
+        return;
+    }
+
+    dprintf("Called from task %p\n", IExec->FindTask(NULL));
+
+    do {
+        IExec->MutexObtain(control.children.mutex);
+
+        if (IsMinListEmpty(&control.children.list)) {
+            dprintf("No child threads left - proceed with SDL2 shutdown\n");
+            IExec->MutexRelease(control.children.mutex);
+            break;
+        } else {
+            for (iter = control.children.list.mlh_Head; iter->mln_Succ; iter = iter->mln_Succ) {
+                IExec->Signal(((OS4_ThreadNode *)iter)->task, SIGBREAKF_CTRL_C);
+            }
+        }
+
+        IExec->MutexRelease(control.children.mutex);
+    } while (TRUE);
+
+    OS4_TimerDestroy(&control.primary.timer);
+
+    OS4_QuitTimerSubSystem();
+
+    dprintf("Freeing mutexes\n");
+
+    IExec->FreeSysObject(ASOT_MUTEX, control.children.mutex);
+    IExec->FreeSysObject(ASOT_MUTEX, control.waiters.mutex);
+
+    control.children.mutex = NULL;
+    control.waiters.mutex = NULL;
+
+    dprintf("Dropping iDOS\n");
+
+    OS4_DropInterface((struct Interface **)&iDOS);
+    OS4_CloseLibrary((struct Library **)&dosBase);
+
+    initialized = FALSE;
+
+    dprintf("All done\n");
 }
 
-void plistAdd(struct PList *list, struct Node *node)
+static LONG
+OS4_RunThread(STRPTR args, int32 length, APTR execbase)
 {
-	IExec->ObtainSemaphore(list->sem);
-	IExec->AddHead(&list->list, node);
-	IExec->ReleaseSemaphore(list->sem);
+    struct Task* thisTask = IExec->FindTask(NULL);
+
+    OS4_ThreadNode* node = thisTask->tc_UserData;
+
+    node->task = thisTask;
+
+    dprintf("This task %p, node %p, args %p\n", thisTask, node, node->args);
+
+    OS4_TimerCreate(&node->timer);
+
+    IExec->MutexObtain(control.children.mutex);
+    IExec->AddTail((struct List *)&control.children.list, (struct Node *)node);
+    IExec->MutexRelease(control.children.mutex);
+
+	SDL_RunThread(node->args);
+
+    return RETURN_OK;
 }
 
-void plistRemove(struct PList *list, struct Node *node)
+static void
+OS4_ExitThread(int32 returnCode, int32 finalData)
 {
-	IExec->ObtainSemaphore(list->sem);
-	IExec->Remove(node);
-	IExec->ReleaseSemaphore(list->sem);
+    struct Task* thisTask = IExec->FindTask(NULL);
+	
+    OS4_ThreadNode *node = (OS4_ThreadNode *)finalData; // TODO: cannot use thisTask->tc_UserData if this is sometimes called from other process' context
+
+    dprintf("Called from task %p, finalData %p\n", thisTask, finalData);
+
+    IExec->MutexObtain(control.children.mutex);
+
+    dprintf("Removing node %p from children list\n", node);
+
+    IExec->Remove((struct Node *)node);
+
+    dprintf("Signalling waiters\n");
+
+    IExec->MutexObtain(control.waiters.mutex);
+
+    if (IsMinListEmpty(&control.waiters.list)) {
+        dprintf("Waiters list is empty\n");
+    } else {
+        struct MinNode* iter;
+
+        for (iter = control.waiters.list.mlh_Head; iter->mln_Succ; iter = iter->mln_Succ) {
+            //dprintf("iter %p, sending CHILD_SIGNAL\n", iter);
+            IExec->Signal(((OS4_ThreadNode *)iter)->task, CHILD_SIGNAL);
+        }
+    }
+
+    IExec->MutexRelease(control.waiters.mutex);
+
+    OS4_TimerDestroy(&node->timer);
+
+    IExec->FreeVec(node);
+
+    dprintf("Exiting\n");
+
+    // Hold the mutex until end, to prevent parent task shutting down the thread subsystem
+    IExec->MutexRelease(control.children.mutex);
 }
 
-struct Node *plistForEach(struct PList *list, plistForEachFn hook, struct Node *ref)
+int
+SDL_SYS_CreateThread(SDL_Thread * thread, void * args)
 {
-	struct Node *node;
-	struct Node *found = 0;
+    char nameBuffer[128];
+    struct Task* thisTask = IExec->FindTask(NULL);
 
-	IExec->ObtainSemaphoreShared(list->sem);
+    OS4_ThreadNode* node = IExec->AllocVecTags(sizeof(OS4_ThreadNode),
+        AVT_ClearWithValue, 0,
+        TAG_DONE);
 
-	for (node = list->list.lh_Head;
-		 node->ln_Succ;
-		 node = node->ln_Succ)
-	{
-		if (hook(node, ref))
-		{
-			found = node;
-			break;
-		}
-	}
+    if (!node) {
+        dprintf("Failed to allocated thread node\n");
+        return SDL_SetError("Not enough resources to create thread");
+    }
 
-	IExec->ReleaseSemaphore(list->sem);
+    dprintf("Node %p\n", node);
 
-	return found;
+    node->thread = thread;
+    node->args = args;
+
+    BPTR inputStream = iDOS->DupFileHandle(IDOS->Input());
+    BPTR outputStream = iDOS->DupFileHandle(IDOS->Output());
+    BPTR errorStream = iDOS->DupFileHandle(IDOS->ErrorOutput());
+
+    snprintf(nameBuffer, sizeof(nameBuffer), "SDL thread %s (%p)", thread->name, thread);
+
+    struct Process* child = iDOS->CreateNewProcTags(
+        NP_Child,       TRUE,
+        NP_Entry,       OS4_RunThread,
+        NP_FinalCode,   OS4_ExitThread,
+        // HACK: when running testthread, sometimes child process is calling exit() and SDL cleanup fails
+        // because ExitThread() is called from other context. By passing the node pointer, it can be removed
+        // from the list and quit doesn't hang.
+        NP_FinalData,   (int32)node,
+        NP_Input,       inputStream,
+        NP_CloseInput,  inputStream != ZERO,
+        NP_Output,      outputStream,
+        NP_CloseOutput, outputStream != ZERO,
+        NP_Error,       errorStream,
+        NP_CloseError,  errorStream != ZERO,
+        NP_Name,        nameBuffer,
+        NP_Priority,    thisTask->tc_Node.ln_Pri,
+        NP_StackSize,   thread->stacksize,
+        NP_UserData,    (APTR)node,
+        TAG_DONE);
+
+    if (!child) {
+        dprintf("Failed to create a new thread '%s'\n", thread->name);
+        return SDL_SetError("Not enough resources to create thread");
+    }
+
+    dprintf("Created new thread '%s' (task %p, args %p)\n", thread->name, child, args);
+
+    return 0;
 }
 
-struct Node *plistRemHead(struct PList *list)
+void
+SDL_SYS_SetupThread(const char * name)
 {
-	struct Node *node = 0;
-
-	IExec->ObtainSemaphore(list->sem);
-	node = IExec->RemHead(&list->list);
-	IExec->ReleaseSemaphore(list->sem);
-
-	return node;
+    //dprintf("Called for '%s'\n", name);
 }
 
-int plistIsListEmpty(struct PList *list)
+SDL_threadID
+SDL_ThreadID(void)
 {
-	int empty = 0;
-
-	IExec->ObtainSemaphoreShared(list->sem);
-
-	if (IsListEmpty(&list->list))
-		empty = 1;
-	else
-		empty = 0;
-
-	IExec->ReleaseSemaphore(list->sem);
-
-	return empty;
+    return (SDL_threadID) IExec->FindTask(NULL);
 }
 
-static inline __attribute__((always_inline)) uint32 get_r2(void)
+int
+SDL_SYS_SetThreadPriority(SDL_ThreadPriority priority)
 {
-	uint32 r2;
-	__asm volatile ("mr %0, 2" : "=r" (r2));
-	return r2;
+    int value;
+
+    switch (priority) {
+        case SDL_THREAD_PRIORITY_LOW:
+            value = -5;
+            break;
+        case SDL_THREAD_PRIORITY_HIGH:
+            value = 5;
+            break;
+        case SDL_THREAD_PRIORITY_TIME_CRITICAL:
+            value = 10;
+            break;
+        default:
+            value = 0;
+            break;
+    }
+
+    struct Task* task = IExec->FindTask(NULL);
+    const BYTE old = IExec->SetTaskPri(task, value);
+
+    dprintf("Changed task %p priority from %d to %d\n", task, old, value);
+
+    return 0;
 }
 
-static inline __attribute__((always_inline)) void set_r2(uint32 r2)
+static BOOL
+OS4_StartJoining(OS4_ThreadNode * waiterNode, SDL_Thread * thread)
 {
-	__asm volatile ("mr 2, %0" :: "r" (r2));
+    BOOL found = FALSE;
+
+    struct MinNode* iter;
+
+    //dprintf("Start\n");
+
+    IExec->MutexObtain(control.children.mutex);
+
+    if (IsMinListEmpty(&control.children.list)) {
+        dprintf("Children list is empty\n");
+    } else {
+        for (iter = control.children.list.mlh_Head; iter->mln_Succ; iter = iter->mln_Succ) {
+            if (((OS4_ThreadNode *)iter)->thread == thread) {
+                found = TRUE;
+                IExec->MutexObtain(control.waiters.mutex);
+                IExec->AddTail((struct List *)&control.waiters.list, (struct Node *)waiterNode);
+                IExec->MutexRelease(control.waiters.mutex);
+                break;
+            }
+        }
+    }
+
+    IExec->MutexRelease(control.children.mutex);
+
+    //dprintf("End\n");
+
+    return found;
 }
 
-os4timer_Instance *os4thread_GetTimer(void)
+static void
+OS4_StopJoining(OS4_ThreadNode * node)
 {
-	struct ThreadNode *node = (struct ThreadNode *)IExec->FindTask(NULL)->tc_UserData;
-
-	return &node->timer;
+    //dprintf("Start\n");
+    IExec->MutexObtain(control.waiters.mutex);
+    IExec->Remove((struct Node *)node);
+    IExec->MutexRelease(control.waiters.mutex);
+    //dprintf("End\n");
 }
 
-static LONG RunThread(STRPTR args, LONG length, APTR sysbase)
+void
+SDL_SYS_WaitThread(SDL_Thread * thread)
 {
-	struct ExecIFace  *iexec;
-	struct Process    *me;
-	struct ThreadNode *myThread;
+    dprintf("Waiting for '%s'\n", thread->name);
 
-	/* When compiled baserel, we must et a private copy of pointer to Exec iface
-	 * until r2 is set up. */
-	iexec = (struct ExecIFace *) ((struct ExecBase *)sysbase)->MainInterface;
+    OS4_ThreadNode node;
+    node.task = IExec->FindTask(NULL);
+    node.thread = ((OS4_ThreadNode *)node.task->tc_UserData)->thread;
 
-	/* Now find the thread node passed to us by our parent. */
-	me = (struct Process *)iexec->FindTask(0);
-	myThread = me->pr_Task.tc_UserData;
+    do {
+        const BOOL found = OS4_StartJoining(&node, thread);
 
-	/* We can now set up the pointer to the data segment and so
-	 * access global data when compiled in baserel - including IExec! */
-	set_r2(myThread->env_vector);
+        if (found) {
+            const ULONG signals = IExec->Wait(CHILD_SIGNAL | BREAK_SIGNAL);
 
-	dprintf("Running process=%p (SDL thread=%p)\n", me, myThread->thread);
+            OS4_StopJoining(&node);
 
-	/* Add ourself to the internal thread list. */
-	plistAdd(&currentThreads, (struct Node *)myThread);
+            if (signals & BREAK_SIGNAL) {
+                dprintf("Break signal\n");
+                return;
+            }
 
-	os4timer_Init(&myThread->timer);
+            dprintf("Some child thread terminated\n");
+        } else {
+            dprintf("Thread '%s' doesn't exist\n", thread->name);
+            return;
+        }
+    } while (TRUE);
 
-	/* Call the thready body. The args are passed to us via NP_EntryData. */
-	SDL_RunThread((void *)IDOS->GetEntryData());
-
-	return RETURN_OK;
+    dprintf("Waiting over\n");
 }
 
-static int signalJoins(struct Node *node, struct Node *dummy)
+void
+SDL_SYS_DetachThread(SDL_Thread * thread)
 {
-	IExec->Signal(((struct JoinNode *)node)->sigTask, SIGNAL_CHILD_TERM);
-	return 0;
+    dprintf("Called for '%s'\n", thread->name);
+
+    // NOTE: not removing from child thread list because child tasks should exit
+    // before their parent (NP_Child, TRUE)
+
+#if 0
+    IExec->MutexObtain(control.children.mutex);
+
+    if (IsMinListEmpty(&control.children.list)) {
+        dprintf("Children list is empty\n");
+    } else {
+        struct MinNode* iter;
+
+        for (iter = control.children.list.mlh_Head; iter->mln_Succ; iter = iter->mln_Succ) {
+            if (((OS4_ThreadNode *)iter)->thread == thread) {
+                IExec->Remove((struct Node *)iter);
+                IExec->FreeVec(iter);
+                break;
+            }
+        }
+    }
+
+    IExec->MutexRelease(control.children.mutex);
+#endif
 }
 
-static void ExitThread(LONG retVal, LONG finalCode)
+OS4_TimerInstance*
+OS4_ThreadGetTimer(void)
 {
-	struct Process    *me       = (struct Process *)IExec->FindTask(0);
-	struct ThreadNode *myThread = me->pr_Task.tc_UserData;
+    struct Task* task = IExec->FindTask(NULL);
+    OS4_ThreadNode* node = task->tc_UserData;
 
-	dprintf("Exitting process=%p (SDL thread=%p) with return value=%d\n", me, myThread, retVal);
+    //dprintf("Task %p, timer %p\n", task, &node->timer);
 
-	/* Remove ourself from the internal list. */
-	plistRemove(&currentThreads, (struct Node *)myThread);
-
-	/* Signal all joiners that we're done. */
-	plistForEach(&currentJoins, signalJoins, NULL);
-
-	os4timer_Destroy(&myThread->timer);
-
-	IExec->FreeVec(myThread);
+    return &node->timer;
 }
 
-int SDL_SYS_CreateThread(SDL_Thread *thread, void *args)
-{
-	struct Process *child;
-	struct Process *me = (struct Process *)IExec->FindTask(0);
-	struct ThreadNode *node;
-	char buffer[128];
+#endif /* SDL_THREAD_AMIGAOS4 */
 
-	BPTR inputStream, outputStream, errorStream;
+/* vi: set ts=4 sw=4 expandtab: */
 
-	dprintf("Creating child thread %p with args %p\n", thread, args);
-
-	/* Make a "meanignful" name */
-	SDL_snprintf(buffer, 128, "SDL thread %p", thread);
-
-	if (!(node = (struct ThreadNode *) IExec->AllocVecTags( sizeof( struct ThreadNode ),
-	    AVT_Type, MEMF_SHARED,
-	    AVT_ClearWithValue, 0,
-	    TAG_DONE ) ))
-	{
-		SDL_OutOfMemory();
-		return -1;
-	}
-
-	node->thread = thread;
-
-	/* When compiled baserel, the new thread needs a copy of the data
-	 * segment pointer. It doesn't hurt to do this when not baserel. */
-	node->env_vector = get_r2();
-
-	/* Try to clone parent streams */
-	inputStream  = IDOS->DupFileHandle(IDOS->Input());
-	outputStream = IDOS->DupFileHandle(IDOS->Output());
-	errorStream  = IDOS->DupFileHandle(IDOS->ErrorOutput());
-
-	/* Launch the child */
-	child = IDOS->CreateNewProcTags(
-					NP_Child,		TRUE,
-					NP_Entry,		RunThread,
-					NP_EntryData,	args,
-					NP_FinalCode,	ExitThread,
-					NP_Input,		inputStream,
-					NP_CloseInput,	inputStream != 0,
-					NP_Output,		outputStream,
-					NP_CloseOutput,	outputStream != 0,
-					NP_Error,		errorStream,
-					NP_CloseError,	errorStream != 0,
-					NP_Name, 		buffer,
-					NP_Priority,	me->pr_Task.tc_Node.ln_Pri,
-					NP_UserData,	(APTR)node,
-					TAG_DONE);
-
-	dprintf("Child creation returned %p\n", child);
-
-	if (!child)
-	{
-		SDL_SetError("Not enough resources to create thread\n");
-		return -1;
-	}
-
-	return 0;
-}
-
-void SDL_SYS_SetupThread(const char *name)
-{
-
-}
-
-Uint32 SDL_ThreadID(void)
-{
-	return (Uint32)IExec->FindTask(0);
-}
-
-
-int threadCmp(struct ThreadNode *node, struct ThreadNode *ref)
-{
-	if (node->thread == ref->thread)
-		return 1;
-	else
-		return 0;
-}
-
-void SDL_SYS_WaitThread(SDL_Thread *thread)
-{
-	uint32 sigRec;
-	struct JoinNode join;
-	struct ThreadNode ref;
-
-	/* Build reference and join nodes */
-	ref.thread = thread;
-	join.sigTask = IExec->FindTask(0);
-
-	dprintf("Waiting on %p to terminate\n", thread);
-
-	/* Check if the thread is still active */
-	while (plistForEach(&currentThreads, (plistForEachFn)threadCmp, (struct Node *)&ref))
-	{
-		/* Still there, join */
-		dprintf("Joining...\n");
-		plistAdd(&currentJoins, (struct Node *)&join);
-		sigRec = IExec->Wait(SIGNAL_CHILD_TERM|SIGBREAKF_CTRL_C);
-		plistRemove(&currentJoins, (struct Node *)&join);
-
-		if (sigRec & SIGBREAKF_CTRL_C)
-		{
-			dprintf("Wait terminated by BREAK_C\n");
-			return;
-		}
-
-		dprintf("Some thread has exited\n");
-	}
-
-	dprintf("child exited\n");
-}
-
-void SDL_SYS_KillThread(SDL_Thread *thread)
-{
-	struct Process *child;
-	char buffer[128];
-
-	/* Create the name to look for, and search the task */
-	SDL_snprintf(buffer, 128, "SDL thread %p", thread);
-
-	IExec->Forbid();
-
-	child = (struct Process *)IExec->FindTask(buffer);
-
-	if (child)
-		IExec->Signal((struct Task *)child, SIGBREAKF_CTRL_C);
-
-	IExec->Permit();
-	return;
-}
-
-int kill_thread(struct ThreadNode *node, struct ThreadNode *ref)
-{
-	SDL_SYS_KillThread(node->thread);
-
-	return 0;
-}
-
-void _INIT_thread_init(void)
-{
-	struct Process *me = (struct Process *)IExec->FindTask(0);
-
-	plistInit(&currentThreads);
-	plistInit(&currentJoins);
-
-	/* Initialize a node for the primary thread, but don't add
-	 * it to thread list */
-	PrimaryThread.thread    = NULL;
-	me->pr_Task.tc_UserData = &PrimaryThread;
-
-	os4timer_Init(&PrimaryThread.timer);
-
-	dprintf("Primary thread is %p\n", me);
-}
-
-void _EXIT_thread_term(void)
-{
-	dprintf("Killing all remaining threads\n");
-
-	do
-	{
-		plistForEach(&currentThreads, (plistForEachFn)kill_thread, 0);
-		dprintf("Done, next try ?\n");
-	} while (!plistIsListEmpty(&currentThreads));
-
-	dprintf("Terminating lists\n");
-	plistTerm(&currentThreads);
-	plistTerm(&currentJoins);
-
-	os4timer_Destroy(&PrimaryThread.timer);
-
-	dprintf("Done\n");
-}

@@ -284,17 +284,17 @@
 #define SDL_LOADSO_AMIGAOS4 1
 
 /* Enable various threading systems */
-#define SDL_THREAD_PTHREAD 1
-#define SDL_THREAD_PTHREAD_RECURSIVE_MUTEX 1
+/* #undef SDL_THREAD_PTHREAD */
+/* #undef SDL_THREAD_PTHREAD_RECURSIVE_MUTEX */
 /* #undef SDL_THREAD_PTHREAD_RECURSIVE_MUTEX_NP */
 /* #undef SDL_THREAD_WINDOWS */
-/* #undef SDL_THREAD_AMIGAOS4 */
+#define SDL_THREAD_AMIGAOS4 1
 
 /* Enable various timer systems */
 /* #undef SDL_TIMER_HAIKU */
-/* #undef SDL_TIMER_AMIGAOS4 */
+#define SDL_TIMER_AMIGAOS4 1
 /* #undef SDL_TIMER_DUMMY */
-#define SDL_TIMER_UNIX 1
+/* #undef SDL_TIMER_UNIX */
 /* #undef SDL_TIMER_WINDOWS */
 
 /* Enable various video drivers */

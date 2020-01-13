@@ -1,231 +1,221 @@
 /*
-    SDL - Simple DirectMedia Layer
-    Copyright (C) 1997-2006 Sam Lantinga
+  Simple DirectMedia Layer
+  Copyright (C) 1997-2019 Sam Lantinga <slouken@libsdl.org>
 
-    This library is free software; you can redistribute it and/or
-    modify it under the terms of the GNU Lesser General Public
-    License as published by the Free Software Foundation; either
-    version 2.1 of the License, or (at your option) any later version.
+  This software is provided 'as-is', without any express or implied
+  warranty.  In no event will the authors be held liable for any damages
+  arising from the use of this software.
 
-    This library is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    Lesser General Public License for more details.
+  Permission is granted to anyone to use this software for any purpose,
+  including commercial applications, and to alter it and redistribute it
+  freely, subject to the following restrictions:
 
-    You should have received a copy of the GNU Lesser General Public
-    License along with this library; if not, write to the Free Software
-    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
-
-    Sam Lantinga
-    slouken@libsdl.org
+  1. The origin of this software must not be misrepresented; you must not
+     claim that you wrote the original software. If you use this software
+     in a product, an acknowledgment in the product documentation would be
+     appreciated but is not required.
+  2. Altered source versions must be plainly marked as such, and must not be
+     misrepresented as being the original software.
+  3. This notice may not be removed or altered from any source distribution.
 */
 
-/*
-    timer.device support routines for AmigaOS4.0
+#include "../../SDL_internal.h"
 
-    These are collected here rather than in src/timer/amigaos4 since
-    they are used in both the timer and thread layers.
+#if defined(SDL_TIMER_AMIGAOS4) || defined(SDL_TIMERS_DISABLED)
 
-    Richard Drummond.
-    evilrich@rcdrummond.net
- */
 #include "SDL_types.h"
 
 #include <proto/exec.h>
 #include <proto/timer.h>
 #include <exec/execbase.h>
 #include <devices/timer.h>
+#include <libraries/dos.h>
 
 #include "SDL_os4timer_c.h"
 
-//#define DEBUG
+#include "../../thread/amigaos4/SDL_systhread_c.h"
+
+#define DEBUG
 #include "../../main/amigaos4/SDL_os4debug.h"
 
-/*
- * All SDL time is measured in milliseconds
- * relative to the time the library was initialized.
- *
- * This is initialized in th constructor below...
- */
-struct TimeVal os4timer_starttime;
+static struct TimeVal OS4_StartTime;
 
+static struct TimerIFace* SDL2_ITimer;
 
-/*
- * Management of interface to timer.device
- */
-struct TimerIFace *ITimer = 0;
+static ULONG OS4_TimerFrequency;
 
-void _INIT_os4timer_startup(void)  __attribute__((constructor));
-void _EXIT_os4timer_shutdown(void) __attribute__((destructor));
+typedef struct OS4_ClockVal {
+    union {
+        struct EClockVal cv;
+        Uint64 ticks;
+    } u;
+} OS4_ClockVal;
 
-void _INIT_os4timer_startup(void)
+// Initialized with the thread sub system
+void OS4_InitTimerSubSystem(void)
 {
-	struct ExecBase *sysbase = (struct ExecBase*) IExec->Data.LibBase;
+    dprintf("Called\n");
 
-	struct Library *timer = (struct Library *)IExec->FindName(&sysbase->DeviceList, "timer.device");
-	ITimer = (struct TimerIFace *)IExec->GetInterface(timer, "main", 1, 0);
+    struct ExecBase* sysbase = (struct ExecBase *)IExec->Data.LibBase;
+    struct Library* timerBase = (struct Library *)IExec->FindName(&sysbase->DeviceList, "timer.device");
 
-	dprintf("ITimer = %p\n", ITimer);
+    SDL2_ITimer = (struct TimerIFace *)IExec->GetInterface(timerBase, "main", 1, NULL);
 
-	/* Set up reference time. */
-	ITimer->GetSysTime(&os4timer_starttime);
+    dprintf("ITimer %p\n", SDL2_ITimer);
+
+    SDL2_ITimer->GetSysTime(&OS4_StartTime);
+
+    struct EClockVal cv;
+    OS4_TimerFrequency = SDL2_ITimer->ReadEClock(&cv);
+
+    dprintf("Timer frequency %u Hz\n", OS4_TimerFrequency);
 }
 
-void _EXIT_os4timer_shutdown(void)
+void OS4_QuitTimerSubSystem(void)
 {
-	IExec->DropInterface((struct Interface *)ITimer);
+    dprintf("Called\n");
+
+    IExec->DropInterface((struct Interface *)SDL2_ITimer);
+    SDL2_ITimer = NULL;
 }
 
-
-/*
- * Accessor to local timer instance.
- *
- * If we support multiple threads, then the thread layer instantiates
- * a timer for each thread. If we don't support threads, then we just
- * need a single timer instance.
- */
-#ifndef DISABLE_THREADS
-
-# include "../../thread/amigaos4/SDL_systhread_c.h"
-# define GetTimerInstance(x) os4thread_GetTimer(x)
-
-#else
-
-static os4timer_Instance timerInstance;
-# define GetTimerInstance(x) (&timerInstance)
-
-#endif
-
-
-/*
- * Allocate resources for a timer instance.
- */
-BOOL os4timer_Init(os4timer_Instance *timer)
+static void
+OS4_TimerCleanup(OS4_TimerInstance * timer)
 {
-	BOOL success = FALSE;
+    if (timer) {
+        if (timer->timerRequest) {
+            dprintf("Freeing timer request %p\n", timer->timerRequest);
+            IExec->FreeSysObject(ASOT_IOREQUEST, timer->timerRequest);
+            timer->timerRequest = NULL;
+        }
 
-	dprintf("Initializing timer for thread=%p.\n", IExec->FindTask(NULL));
-
-	timer->timerport = IExec->AllocSysObject(ASOT_PORT, NULL);
-
-	if (timer->timerport)
-	{
-		timer->timerrequest = IExec->AllocSysObjectTags(ASOT_IOREQUEST,
-														ASOIOR_ReplyPort, timer->timerport,
-														ASOIOR_Size,      sizeof(struct TimeRequest),
-														TAG_DONE);
-
-		if (timer->timerrequest)
-		{
-			if (!(IExec->OpenDevice("timer.device", UNIT_WAITUNTIL, (struct IORequest *)timer->timerrequest, 0)))
-				success = TRUE;
-			else
-			{
-				IExec->FreeSysObject(ASOT_IOREQUEST, timer->timerrequest);
-				timer->timerrequest = 0;
-	    	}
-		}
-		else
-		{
-			IExec->FreeSysObject(ASOT_PORT, timer->timerport);
-			timer->timerport = 0;
-		}
-	}
-
-	dprintf("%s\n", (success ? "Done.\n" : "Failed.\n"));
-
-	return success;
+        if (timer->timerPort) {
+            dprintf("Freeing timer port %p\n", timer->timerPort);
+            IExec->FreeSysObject(ASOT_PORT, timer->timerPort);
+            timer->timerPort = NULL;
+        }
+    }
 }
 
-/*
- * Free resources associated with a timer instance.
- */
-void os4timer_Destroy(os4timer_Instance *timer)
+BOOL
+OS4_TimerCreate(OS4_TimerInstance * timer)
 {
-	dprintf("Freeing timer for thread:%p.\n", IExec->FindTask(NULL));
+    BOOL success = FALSE;
 
-	if (timer->timerrequest)
-	{
-		/* Check for any pending timer requests and abort them */
-		if (!IExec->CheckIO((struct IORequest *)timer->timerrequest))
-		{
-			IExec->AbortIO((struct IORequest *)timer->timerrequest);
-			IExec->WaitIO((struct IORequest *)timer->timerrequest);
-		}
-		IExec->FreeSysObject(ASOT_IOREQUEST, timer->timerrequest);
-		timer->timerrequest = 0;
-	}
+    dprintf("Creating timer %p for task %p\n", timer, IExec->FindTask(NULL));
 
-	if (timer->timerport)
-	{
-		IExec->FreeSysObject(ASOT_PORT, timer->timerport);
-		timer->timerport = 0;
-	}
+    if (!timer) {
+        return FALSE;
+    }
+
+    timer->timerPort = IExec->AllocSysObject(ASOT_PORT, NULL);
+
+    if (timer->timerPort) {
+    	timer->timerRequest = IExec->AllocSysObjectTags(ASOT_IOREQUEST,
+                                                        ASOIOR_ReplyPort, timer->timerPort,
+                                                        ASOIOR_Size, sizeof(struct TimeRequest),
+                                                        TAG_DONE);
+
+        if (timer->timerRequest) {
+            if (!(IExec->OpenDevice("timer.device", UNIT_WAITUNTIL, (struct IORequest *)timer->timerRequest, 0))) {
+                success = TRUE;
+            } else {
+                dprintf("Failed to open timer.device\n");
+            }
+        } else {
+            dprintf("Failed to allocate timer request\n");
+        }
+    } else {
+        dprintf("Failed to allocate timer port\n");
+    }
+
+    if (!success) {
+        OS4_TimerCleanup(timer);
+    }
+
+    return success;
 }
 
-/*
- * Set up a timer device request to signal us at the specified time.
- *
- * timer:       The timer instance to use.
- * alarmTicks:  The time in milliseconds at which the alarm signal will be generated.
- * alarmSignal: An Exec signal mask which can be used with IExec->Wait() to wait for the
- *              alarm to occur.
- *
- * Returns: FALSE if the alarm could not be set, TRUE otherwise.
- */
-BOOL os4timer_SetAlarm(os4timer_Instance *timer, Uint32 alarmTicks, ULONG *alarmSignal)
+void
+OS4_TimerDestroy(OS4_TimerInstance * timer)
 {
-	/* Set up the timer request. */
-	timer->timerrequest->Request.io_Command = TR_ADDREQUEST;
-	timer->timerrequest->Time.Seconds       = alarmTicks / 1000;
-	timer->timerrequest->Time.Microseconds  = (alarmTicks - (timer->timerrequest->Time.Seconds * 1000)) * 1000;
-	ITimer->AddTime(&timer->timerrequest->Time, &os4timer_starttime);
+    dprintf("Destroying timer %p for task %p\n", timer, IExec->FindTask(NULL));
 
-	IExec->SetSignal(0, 1L << timer->timerport->mp_SigBit);
+    if (timer && timer->timerRequest) {
+        if (!IExec->CheckIO((struct IORequest *)timer->timerRequest)) {
+            IExec->AbortIO((struct IORequest *)timer->timerRequest);
+            IExec->WaitIO((struct IORequest *)timer->timerRequest);
+        }
+    }
 
-	/* Send the request. */
-	IExec->SendIO((struct IORequest *)timer->timerrequest);
-
-	/* Return alarm signal to caller. */
-	*alarmSignal = 1L << timer->timerport->mp_SigBit;
-
-	return TRUE;
+    OS4_TimerCleanup(timer);
 }
 
-/*
- * Clear a previous alarm request.
- *
- * timer: The timer instance to use.
- */
-VOID os4timer_ClearAlarm(os4timer_Instance *timer)
+ULONG
+OS4_TimerSetAlarm(OS4_TimerInstance * timer, Uint32 alarmTicks)
 {
-	/* If the timer request did not complete, abort the request. */
-	if (!IExec->CheckIO((struct IORequest *)timer->timerrequest))
-		IExec->AbortIO((struct IORequest *)timer->timerrequest);
+    const ULONG seconds = alarmTicks / 1000;
 
-	/* Remove the complete or aborted time request. */
-	IExec->WaitIO((struct IORequest *)timer->timerrequest);
+    //dprintf("Called for timer %p, ticks %u\n", timer, alarmTicks);
+
+    timer->timerRequest->Request.io_Command = TR_ADDREQUEST;
+    timer->timerRequest->Time.Seconds = seconds;
+    timer->timerRequest->Time.Microseconds  = (alarmTicks - (seconds * 1000)) * 1000;
+
+    SDL2_ITimer->AddTime(&timer->timerRequest->Time, &OS4_StartTime);
+
+    IExec->SetSignal(0, 1L << timer->timerPort->mp_SigBit);
+    IExec->SendIO((struct IORequest *)timer->timerRequest);
+
+    // Return the alarm signal for Wait() use
+    return 1L << timer->timerPort->mp_SigBit;
 }
 
-/*
- * Wait until specified time using local timer instance.
- *
- * ticks: the time in SDL time to wait until.
- *
- * Returns: FALSE if the timer was interrupted, TRUE otherwise.
- */
-BOOL os4timer_WaitUntil(Uint32 ticks)
+void
+OS4_TimerClearAlarm(OS4_TimerInstance * timer)
 {
-	ULONG alarmSig;
-	ULONG sigsReceived;
+    if (!IExec->CheckIO((struct IORequest *)timer->timerRequest)) {
+        IExec->AbortIO((struct IORequest *)timer->timerRequest);
+    }
 
-	os4timer_Instance *timer = (os4timer_Instance *)GetTimerInstance();
+    IExec->WaitIO((struct IORequest *)timer->timerRequest);
+}
 
-	os4timer_SetAlarm(timer, ticks, &alarmSig);
+BOOL
+OS4_TimerWaitUntil(Uint32 ticks)
+{
+	OS4_TimerInstance* timer = OS4_ThreadGetTimer();
 
-	sigsReceived = IExec->Wait(alarmSig | SIGBREAKF_CTRL_C);
+	const ULONG alarmSig = OS4_TimerSetAlarm(timer, ticks);
+	const ULONG sigsReceived = IExec->Wait(alarmSig | SIGBREAKF_CTRL_C);
 
-	os4timer_ClearAlarm(timer);
+	OS4_TimerClearAlarm(timer);
 
 	return (sigsReceived & alarmSig) == alarmSig;
 }
+
+void
+OS4_TimerGetTime(struct TimeVal * timeval)
+{
+    SDL2_ITimer->GetSysTime(timeval);
+    SDL2_ITimer->SubTime(timeval, &OS4_StartTime);
+}
+
+Uint64
+OS4_TimerGetCounter(void)
+{
+    OS4_ClockVal value;
+
+    SDL2_ITimer->ReadEClock(&value.u.cv);
+
+    return value.u.ticks;
+}
+
+Uint64
+OS4_TimerGetFrequency(void)
+{
+    return OS4_TimerFrequency;
+}
+
+#endif /* (SDL_TIMER_AMIGAOS4) || defined(SDL_TIMERS_DISABLED) */
+

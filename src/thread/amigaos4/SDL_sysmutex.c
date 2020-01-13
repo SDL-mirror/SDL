@@ -1,104 +1,128 @@
 /*
-    SDL - Simple DirectMedia Layer
-    Copyright (C) 1997, 1998, 1999, 2000, 2001, 2002  Sam Lantinga
+  Simple DirectMedia Layer
+  Copyright (C) 1997-2019 Sam Lantinga <slouken@libsdl.org>
 
-    This library is free software; you can redistribute it and/or
-    modify it under the terms of the GNU Library General Public
-    License as published by the Free Software Foundation; either
-    version 2 of the License, or (at your option) any later version.
+  This software is provided 'as-is', without any express or implied
+  warranty.  In no event will the authors be held liable for any damages
+  arising from the use of this software.
 
-    This library is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    Library General Public License for more details.
+  Permission is granted to anyone to use this software for any purpose,
+  including commercial applications, and to alter it and redistribute it
+  freely, subject to the following restrictions:
 
-    You should have received a copy of the GNU Library General Public
-    License along with this library; if not, write to the Free
-    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-
-    Sam Lantinga
-    slouken@libsdl.org
+  1. The origin of this software must not be misrepresented; you must not
+     claim that you wrote the original software. If you use this software
+     in a product, an acknowledgment in the product documentation would be
+     appreciated but is not required.
+  2. Altered source versions must be plainly marked as such, and must not be
+     misrepresented as being the original software.
+  3. This notice may not be removed or altered from any source distribution.
 */
+#include "../../SDL_internal.h"
 
+#if SDL_THREAD_AMIGAOS4
 
-#include <stdio.h>
-#include <stdlib.h>
+/* Mutex functions using the AmigaOS 4 API */
 
-#include "SDL_error.h"
-#include "SDL_thread.h"
-#include "SDL_systhread_c.h"
+#define DEBUG
+#include "../../main/amigaos4/SDL_os4debug.h"
+
+#include "SDL_mutex.h"
 
 #include <proto/exec.h>
-#include <exec/semaphores.h>
 
-struct SDL_mutex {
-	struct SignalSemaphore *sem;
+struct SDL_mutex
+{
+    APTR mtx;
 };
 
-/* Create a mutex */
-SDL_mutex *SDL_CreateMutex(void)
+SDL_mutex *
+SDL_CreateMutex(void)
 {
-	SDL_mutex *mutex;
+    SDL_mutex* mutex;
 
-	/* Allocate mutex memory */
-	mutex = (SDL_mutex *)SDL_malloc(sizeof(*mutex));
-	if ( mutex )
-	{
-		/* Create the mutex semaphore, with initial value 1 */
-		mutex->sem = (struct SignalSemaphore *)IExec->AllocSysObjectTags(ASOT_SEMAPHORE,
-														ASO_NoTrack,		TRUE,
-														TAG_DONE);
-		if (!mutex->sem)
-		{
-			SDL_free(mutex);
-			mutex = NULL;
-		}
-	}
-	else
-	{
-		SDL_OutOfMemory();
-	}
+    /* Allocate mutex memory */
+    mutex = (SDL_mutex *) SDL_malloc(sizeof(*mutex));
 
-	return mutex;
+    if (mutex) {
+        mutex->mtx = IExec->AllocSysObjectTags(ASOT_MUTEX,
+            ASOMUTEX_Recursive, TRUE,
+            TAG_DONE);
+
+        if (!mutex->mtx) {
+            dprintf("Failed to allocate mutex\n");
+            SDL_free(mutex);
+            SDL_OutOfMemory();
+            return NULL;
+        }
+
+        dprintf("Created mutex %p\n", mutex->mtx);
+    } else {
+        SDL_OutOfMemory();
+    }
+
+    return mutex;
 }
 
-/* Free the mutex */
-void SDL_DestroyMutex(SDL_mutex *mutex)
+void
+SDL_DestroyMutex(SDL_mutex * mutex)
 {
-	if (mutex)
-	{
-		if (mutex->sem)
-		{
-			IExec->FreeSysObject(ASOT_SEMAPHORE, mutex->sem);
-		}
-		SDL_free(mutex);
-	}
+    if (mutex) {
+        dprintf("Destroying mutex %p\n", mutex->mtx);
+        IExec->FreeSysObject(ASOT_MUTEX, mutex->mtx);
+        mutex->mtx = NULL;
+        SDL_free(mutex);
+    }
 }
 
-/* Lock the semaphore */
-int SDL_mutexP(SDL_mutex *mutex)
+int
+SDL_LockMutex(SDL_mutex * mutex)
 {
-	if (mutex == NULL)
-	{
-		SDL_SetError("Passed a NULL mutex");
-		return -1;
-	}
+    if (mutex == NULL) {
+        return SDL_SetError("Passed a NULL mutex");
+    }
 
-	IExec->ObtainSemaphore(mutex->sem);
+    //dprintf("Called\n");
 
-	return 0;
+    IExec->MutexObtain(mutex->mtx);
+
+    //dprintf("Locked mutex %p\n", mutex);
+
+    return 0;
+}
+
+int
+SDL_TryLockMutex(SDL_mutex * mutex)
+{
+    int retval = 0;
+    if (mutex == NULL) {
+        return SDL_SetError("Passed a NULL mutex");
+    }
+
+    //dprintf("Called\n");
+
+    if (!IExec->MutexAttempt(mutex->mtx)) {
+        retval = SDL_MUTEX_TIMEDOUT;
+    }
+    return retval;
 }
 
 /* Unlock the mutex */
-int SDL_mutexV(SDL_mutex *mutex)
+int
+SDL_UnlockMutex(SDL_mutex * mutex)
 {
-	if (mutex == NULL)
-	{
-		SDL_SetError("Passed a NULL mutex");
-		return -1;
-	}
+    if (mutex == NULL) {
+        return SDL_SetError("Passed a NULL mutex");
+    }
 
-	IExec->ReleaseSemaphore(mutex->sem);
+    //dprintf("Unlocking mutex %p\n", mutex);
 
-	return 0;
+    IExec->MutexRelease(mutex->mtx);
+
+    return 0;
 }
+
+#endif /* SDL_THREAD_AMIGAOS4 */
+
+/* vi: set ts=4 sw=4 expandtab: */
+

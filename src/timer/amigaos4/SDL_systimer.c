@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2014 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2019 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -22,67 +22,60 @@
 
 #if defined(SDL_TIMER_AMIGAOS4) || defined(SDL_TIMERS_DISABLED)
 
-#include "SDL_timer.h"
-
-#include <proto/exec.h>
-#include <proto/timer.h>
 #include <devices/timer.h>
 
+#include "SDL_timer.h"
 #include "SDL_os4timer_c.h"
 
 #undef DEBUG
 #include "../../main/amigaos4/SDL_os4debug.h"
 
-
-static SDL_bool ticks_started = SDL_FALSE;
+static SDL_bool started = SDL_FALSE;
 
 void
 SDL_TicksInit(void)
 {
-    if (ticks_started) {
+    if (started) {
         return;
     }
-    ticks_started = SDL_TRUE;
+    started = SDL_TRUE;
 }
 
 void
 SDL_TicksQuit(void)
 {
-    ticks_started = SDL_FALSE;
+    started = SDL_FALSE;
 }
 
 Uint32
 SDL_GetTicks(void)
 {
-    if (!ticks_started) {
+    if (!started) {
         SDL_TicksInit();
     }
 
-	extern struct TimeVal os4timer_starttime;
-	struct TimeVal cur;
+    struct TimeVal cur;
+    OS4_TimerGetTime(&cur);
 
-	ITimer->GetSysTime(&cur);
-	ITimer->SubTime(&cur, &os4timer_starttime);
-
-	return cur.Seconds * 1000 + cur.Microseconds / 1000;
+    return cur.Seconds * 1000 + cur.Microseconds / 1000;
 }
 
 Uint64
 SDL_GetPerformanceCounter(void)
 {
-    return SDL_GetTicks();
+    return OS4_TimerGetCounter();
 }
 
 Uint64
 SDL_GetPerformanceFrequency(void)
 {
-    return 1000;
+    return OS4_TimerGetFrequency();
 }
 
 void
 SDL_Delay(Uint32 ms)
 {
-	os4timer_WaitUntil(SDL_GetTicks() + ms);
+    OS4_TimerWaitUntil(SDL_GetTicks() + ms);
 }
 
 #endif /* SDL_TIMER_AMIGAOS4 || SDL_TIMERS_DISABLED */

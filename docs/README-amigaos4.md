@@ -28,7 +28,7 @@ Using SDL 2.0 in your projects
     ...do magical SDL2 things...
 
 
-    gcc helloworld.c -use-dynld -lSDL2 -lpthread
+    gcc helloworld.c -use-dynld -lSDL2
 
 ================================================================================
 About SDL_Renderers
