@@ -134,6 +134,10 @@ static void testPath(void)
     char * bp = SDL_GetBasePath();
     printf("'%s'\n", bp);
     SDL_free(bp);
+
+   char* pp = SDL_GetPrefPath("foo", "bar");
+   printf("'%s'\n", pp);
+   SDL_free(pp);
 }
 
 static void testWindow()
@@ -825,8 +829,8 @@ int main(void)
     //testInitEverything();
 
     if (SDL_Init(SDL_INIT_VIDEO|SDL_INIT_TIMER) == 0) {
-        //testPath();
-        testWindow();
+        testPath();
+        //testWindow();
         //testManyWindows();
         //testFullscreen();
         //testFullscreenOpenGL();
