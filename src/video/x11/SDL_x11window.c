@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2019 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2020 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -393,7 +393,27 @@ X11_CreateWindow(_THIS, SDL_Window * window)
     long fevent = 0;
 
 #if SDL_VIDEO_OPENGL_GLX || SDL_VIDEO_OPENGL_EGL
-    if ((window->flags & SDL_WINDOW_OPENGL) &&
+    const char *forced_visual_id = SDL_GetHint(SDL_HINT_VIDEO_X11_WINDOW_VISUALID);
+
+    if (forced_visual_id != NULL && forced_visual_id[0] != '\0')
+    {
+        XVisualInfo *vi, template;
+        int nvis;
+
+        SDL_zero(template);
+        template.visualid = SDL_strtol(forced_visual_id, NULL, 0);
+        vi = X11_XGetVisualInfo(display, VisualIDMask, &template, &nvis);
+        if (vi) {
+            visual = vi->visual;
+            depth = vi->depth;
+            X11_XFree(vi);
+        }
+        else
+        {
+            return -1;
+        }
+    }
+    else if ((window->flags & SDL_WINDOW_OPENGL) &&
         !SDL_getenv("SDL_VIDEO_X11_VISUALID")) {
         XVisualInfo *vinfo = NULL;
 
@@ -617,7 +637,6 @@ X11_CreateWindow(_THIS, SDL_Window * window)
     ) {
 #if SDL_VIDEO_OPENGL_EGL  
         if (!_this->egl_data) {
-            X11_XDestroyWindow(display, w);
             return -1;
         }
 
@@ -625,7 +644,6 @@ X11_CreateWindow(_THIS, SDL_Window * window)
         windowdata->egl_surface = SDL_EGL_CreateSurface(_this, (NativeWindowType) w);
 
         if (windowdata->egl_surface == EGL_NO_SURFACE) {
-            X11_XDestroyWindow(display, w);
             return SDL_SetError("Could not create GLES window surface");
         }
 #else
@@ -785,9 +803,24 @@ X11_SetWindowPosition(_THIS, SDL_Window * window)
 {
     SDL_WindowData *data = (SDL_WindowData *) window->driverdata;
     Display *display = data->videodata->display;
+    unsigned int childCount;
+    Window childReturn, root, parent;
+    Window* children;
+    XWindowAttributes attrs;
 
+    /*Attempt to move the window*/
     X11_XMoveWindow(display, data->xwindow, window->x - data->border_left, window->y - data->border_top);
     X11_XFlush(display);
+
+    /*If the window is not moved, then the coordinates on the window structure are out of sync, so we
+      update them here. */
+    X11_XQueryTree(display, data->xwindow, &root, &parent, &children, &childCount);
+    X11_XGetWindowAttributes(display, data->xwindow, &attrs);
+    X11_XTranslateCoordinates(display,
+                              parent, DefaultRootWindow(display),
+                              attrs.x, attrs.y,
+                              &window->x, &window->y,
+                              &childReturn);
 }
 
 void

@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2019 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2020 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -399,9 +399,14 @@ GetDeviceInfo(IOHIDDeviceRef hidDevice, recDevice *pDevice)
     Sint32 vendor = 0;
     Sint32 product = 0;
     Sint32 version = 0;
+    const char *name;
+    const char *manufacturer_remapped;
+    char manufacturer_string[256];
+    char product_string[256];
     CFTypeRef refCF = NULL;
     CFArrayRef array = NULL;
     Uint16 *guid16 = (Uint16 *)pDevice->guid.data;
+    int i;
 
     /* get usage page and usage */
     refCF = IOHIDDeviceGetProperty(hidDevice, CFSTR(kIOHIDPrimaryUsagePageKey));
@@ -425,16 +430,6 @@ GetDeviceInfo(IOHIDDeviceRef hidDevice, recDevice *pDevice)
 
     pDevice->deviceRef = hidDevice;
 
-    /* get device name */
-    refCF = IOHIDDeviceGetProperty(hidDevice, CFSTR(kIOHIDProductKey));
-    if (!refCF) {
-        /* Maybe we can't get "AwesomeJoystick2000", but we can get "Logitech"? */
-        refCF = IOHIDDeviceGetProperty(hidDevice, CFSTR(kIOHIDManufacturerKey));
-    }
-    if ((!refCF) || (!CFStringGetCString(refCF, pDevice->product, sizeof (pDevice->product), kCFStringEncodingUTF8))) {
-        SDL_strlcpy(pDevice->product, "Unidentified joystick", sizeof (pDevice->product));
-    }
-
     refCF = IOHIDDeviceGetProperty(hidDevice, CFSTR(kIOHIDVendorIDKey));
     if (refCF) {
         CFNumberGetValue(refCF, kCFNumberSInt32Type, &vendor);
@@ -450,8 +445,41 @@ GetDeviceInfo(IOHIDDeviceRef hidDevice, recDevice *pDevice)
         CFNumberGetValue(refCF, kCFNumberSInt32Type, &version);
     }
 
+    /* get device name */
+    name = SDL_GetCustomJoystickName(vendor, product);
+    if (name) {
+        SDL_strlcpy(pDevice->product, name, sizeof(pDevice->product));
+    } else {
+        refCF = IOHIDDeviceGetProperty(hidDevice, CFSTR(kIOHIDManufacturerKey));
+        if ((!refCF) || (!CFStringGetCString(refCF, manufacturer_string, sizeof(manufacturer_string), kCFStringEncodingUTF8))) {
+            manufacturer_string[0] = '\0';
+        }
+        refCF = IOHIDDeviceGetProperty(hidDevice, CFSTR(kIOHIDProductKey));
+        if ((!refCF) || (!CFStringGetCString(refCF, product_string, sizeof(product_string), kCFStringEncodingUTF8))) {
+            SDL_strlcpy(product_string, "Unidentified joystick", sizeof(product_string));
+        }
+        for (i = (int)SDL_strlen(manufacturer_string) - 1; i > 0; --i) {
+            if (SDL_isspace(manufacturer_string[i])) {
+                manufacturer_string[i] = '\0';
+            } else {
+                break;
+            }
+        }
+
+        manufacturer_remapped = SDL_GetCustomJoystickManufacturer(manufacturer_string);
+        if (manufacturer_remapped != manufacturer_string) {
+            SDL_strlcpy(manufacturer_string, manufacturer_remapped, sizeof(manufacturer_string));
+        }
+
+        if (SDL_strncasecmp(manufacturer_string, product_string, SDL_strlen(manufacturer_string)) == 0) {
+            SDL_strlcpy(pDevice->product, product_string, sizeof(pDevice->product));
+        } else {
+            SDL_snprintf(pDevice->product, sizeof(pDevice->product), "%s %s", manufacturer_string, product_string);
+        }
+    }
+
 #ifdef SDL_JOYSTICK_HIDAPI
-    if (HIDAPI_IsDevicePresent(vendor, product, version)) {
+    if (HIDAPI_IsDevicePresent(vendor, product, version, pDevice->product)) {
         /* The HIDAPI driver is taking care of this device */
         return 0;
     }
@@ -704,6 +732,11 @@ static int
 DARWIN_JoystickGetDevicePlayerIndex(int device_index)
 {
     return -1;
+}
+
+static void
+DARWIN_JoystickSetDevicePlayerIndex(int device_index, int player_index)
+{
 }
 
 static SDL_JoystickGUID
@@ -1005,6 +1038,7 @@ SDL_JoystickDriver SDL_DARWIN_JoystickDriver =
     DARWIN_JoystickDetect,
     DARWIN_JoystickGetDeviceName,
     DARWIN_JoystickGetDevicePlayerIndex,
+    DARWIN_JoystickSetDevicePlayerIndex,
     DARWIN_JoystickGetDeviceGUID,
     DARWIN_JoystickGetDeviceInstanceID,
     DARWIN_JoystickOpen,

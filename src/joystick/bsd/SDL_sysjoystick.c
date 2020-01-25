@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2019 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2020 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -274,6 +274,11 @@ static int
 BSD_JoystickGetDevicePlayerIndex(int device_index)
 {
     return -1;
+}
+
+static void
+BSD_JoystickSetDevicePlayerIndex(int device_index, int player_index)
+{
 }
 
 /* Function to perform the mapping from device index to the instance id for this index */
@@ -764,6 +769,7 @@ SDL_JoystickDriver SDL_BSD_JoystickDriver =
     BSD_JoystickDetect,
     BSD_JoystickGetDeviceName,
     BSD_JoystickGetDevicePlayerIndex,
+    BSD_JoystickSetDevicePlayerIndex,
     BSD_JoystickGetDeviceGUID,
     BSD_JoystickGetDeviceInstanceID,
     BSD_JoystickOpen,
