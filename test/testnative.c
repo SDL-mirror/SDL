@@ -55,7 +55,7 @@ quit(int rc)
     }
 
     SDL_VideoQuit();
-
+    SDL_Quit();
     exit(rc);
 }
 
