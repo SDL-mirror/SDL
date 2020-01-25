@@ -772,6 +772,7 @@ main(int argc, char *argv[])
         SDL_Log("\n\nUsage: ./controllermap number\nFor example: ./controllermap 0\nOr: ./controllermap 0 >> gamecontrollerdb.txt");
     }
     SDL_QuitSubSystem(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK);
+    SDL_Quit();
 
     return 0;
 }
