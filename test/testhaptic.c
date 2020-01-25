@@ -103,6 +103,7 @@ main(int argc, char **argv)
         HapticPrintSupported(haptic);
     } else {
         SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "No Haptic devices found!\n");
+        SDL_Quit();
         return 1;
     }
 
