@@ -266,6 +266,10 @@ main(int argc, char **argv)
     Uint32 then, now, i, iterations = 100;
     SDL_bool should_run_automated_tests = SDL_FALSE;
 
+    if (SDL_Init(SDL_INIT_VIDEO) < 0) {
+        return 1;
+    }
+
     while (argv[arg] && *argv[arg] == '-') {
         if (SDL_strcmp(argv[arg], "--jpeg") == 0) {
             SDL_SetYUVConversionMode(SDL_YUV_CONVERSION_JPEG);
