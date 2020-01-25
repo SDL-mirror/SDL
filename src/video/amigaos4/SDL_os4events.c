@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2018 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2020 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -73,7 +73,7 @@ struct QualifierItem
 
 extern OS4_GlobalMouseState globalMouseState;
 
-void
+static void
 OS4_SyncKeyModifiers(_THIS)
 {
     int i;
@@ -472,6 +472,8 @@ OS4_HandleActivation(_THIS, struct MyIntuiMessage * imsg, SDL_bool activated)
     if (sdlwin) {
         if (activated) {
             SDL_SendWindowEvent(sdlwin, SDL_WINDOWEVENT_SHOWN, 0, 0);
+            OS4_SyncKeyModifiers(_this);
+
             if (SDL_GetKeyboardFocus() != sdlwin) {
                 SDL_SetKeyboardFocus(sdlwin);
                 // TODO: do we want to set mouse colors as in SDL1?
