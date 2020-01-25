@@ -103,6 +103,7 @@ main(int argc, char **argv)
         SDL_Log("Device: %s\n", SDL_HapticName(i));
     } else {
         SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "No Haptic devices found!\n");
+        SDL_Quit();
         return 1;
     }
 
