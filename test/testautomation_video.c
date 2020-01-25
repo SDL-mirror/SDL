@@ -1244,7 +1244,7 @@ video_getSetWindowMinimumSize(void *arg)
   int wVariation, hVariation;
   int referenceW, referenceH;
   int currentW, currentH;
-  int desiredW, desiredH;
+  int desiredW = 0, desiredH = 0;
 
   /* Get display bounds for size range */
   result = SDL_GetDisplayBounds(0, &display);
