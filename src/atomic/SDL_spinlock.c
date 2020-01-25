@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2019 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2020 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -79,7 +79,8 @@ SDL_AtomicTryLock(SDL_SpinLock *lock)
     return (__sync_lock_test_and_set(lock, 1) == 0);
 
 #elif defined(__GNUC__) && defined(__arm__) && \
-        (defined(__ARM_ARCH_4__) || defined(__ARM_ARCH_4T__) || \
+        (defined(__ARM_ARCH_3__) || defined(__ARM_ARCH_3M__) || \
+         defined(__ARM_ARCH_4__) || defined(__ARM_ARCH_4T__) || \
          defined(__ARM_ARCH_5__) || defined(__ARM_ARCH_5TE__) || \
          defined(__ARM_ARCH_5TEJ__))
     int result;

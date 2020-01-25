@@ -259,7 +259,7 @@
     <ClInclude Include="..\..\src\haptic\windows\SDL_dinputhaptic_c.h" />
     <ClInclude Include="..\..\src\haptic\windows\SDL_windowshaptic_c.h" />
     <ClInclude Include="..\..\src\haptic\windows\SDL_xinputhaptic_c.h" />
-    <ClInclude Include="..\..\src\joystick\hidapi\controller_type.h" />
+    <ClInclude Include="..\..\src\joystick\controller_type.h" />
     <ClInclude Include="..\..\src\joystick\hidapi\SDL_hidapijoystick_c.h" />
     <ClInclude Include="..\..\src\joystick\SDL_joystick_c.h" />
     <ClInclude Include="..\..\src\joystick\SDL_sysjoystick.h" />
@@ -360,9 +360,11 @@
     <ClCompile Include="..\..\src\haptic\windows\SDL_windowshaptic.c" />
     <ClCompile Include="..\..\src\haptic\windows\SDL_xinputhaptic.c" />
     <ClCompile Include="..\..\src\hidapi\windows\hid.c" />
+    <ClCompile Include="..\..\src\joystick\hidapi\SDL_hidapi_gamecube.c" />
     <ClCompile Include="..\..\src\joystick\hidapi\SDL_hidapi_ps4.c" />
     <ClCompile Include="..\..\src\joystick\hidapi\SDL_hidapi_switch.c" />
     <ClCompile Include="..\..\src\joystick\hidapi\SDL_hidapi_xbox360.c" />
+    <ClCompile Include="..\..\src\joystick\hidapi\SDL_hidapi_xbox360w.c" />
     <ClCompile Include="..\..\src\joystick\hidapi\SDL_hidapi_xboxone.c" />
     <ClCompile Include="..\..\src\joystick\hidapi\SDL_hidapijoystick.c" />
     <ClCompile Include="..\..\src\joystick\SDL_gamecontroller.c" />
@@ -426,6 +428,7 @@
     <ClCompile Include="..\..\src\stdlib\SDL_qsort.c" />
     <ClCompile Include="..\..\src\stdlib\SDL_stdlib.c" />
     <ClCompile Include="..\..\src\stdlib\SDL_string.c" />
+    <ClCompile Include="..\..\src\stdlib\SDL_strtokr.c" />
     <ClCompile Include="..\..\src\thread\generic\SDL_syscond.c" />
     <ClCompile Include="..\..\src\thread\SDL_thread.c" />
     <ClCompile Include="..\..\src\thread\windows\SDL_sysmutex.c" />

@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2019 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2020 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -36,7 +36,7 @@
 /* IRIX doesn't have a GL library versioning system */
 #define DEFAULT_OPENGL  "libGL.so"
 #elif defined(__MACOSX__)
-#define DEFAULT_OPENGL  "/usr/X11R6/lib/libGL.1.dylib"
+#define DEFAULT_OPENGL  "/opt/X11/lib/libGL.1.dylib"
 #elif defined(__QNXNTO__)
 #define DEFAULT_OPENGL  "libGL.so.3"
 #else

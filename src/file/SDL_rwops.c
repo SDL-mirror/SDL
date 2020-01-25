@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2019 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2020 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -365,6 +365,22 @@ stdio_size(SDL_RWops * context)
 static Sint64 SDLCALL
 stdio_seek(SDL_RWops * context, Sint64 offset, int whence)
 {
+    int stdiowhence;
+
+    switch (whence) {
+    case RW_SEEK_SET:
+        stdiowhence = SEEK_SET;
+        break;
+    case RW_SEEK_CUR:
+        stdiowhence = SEEK_CUR;
+        break;
+    case RW_SEEK_END:
+        stdiowhence = SEEK_END;
+        break;
+    default:
+        return SDL_SetError("Unknown value for 'whence'");
+    }
+
 #if defined(FSEEK_OFF_MIN) && defined(FSEEK_OFF_MAX)
     if (offset < (Sint64)(FSEEK_OFF_MIN) || offset > (Sint64)(FSEEK_OFF_MAX)) {
         return SDL_SetError("Seek offset out of range");
@@ -377,7 +393,7 @@ stdio_seek(SDL_RWops * context, Sint64 offset, int whence)
     }
 #endif
 
-    if (fseek(context->hidden.stdio.fp, (fseek_off_t)offset, whence) == 0) {
+    if (fseek(context->hidden.stdio.fp, (fseek_off_t)offset, stdiowhence) == 0) {
         Sint64 pos = ftell(context->hidden.stdio.fp);
         if (pos < 0) {
             return SDL_SetError("Couldn't get stream offset");
@@ -472,7 +488,7 @@ mem_read(SDL_RWops * context, void *ptr, size_t size, size_t maxnum)
 
     total_bytes = (maxnum * size);
     if ((maxnum <= 0) || (size <= 0)
-        || ((total_bytes / maxnum) != (size_t) size)) {
+        || ((total_bytes / maxnum) != size)) {
         return 0;
     }
 
@@ -595,7 +611,7 @@ SDL_RWFromFile(const char *file, const char *mode)
         if (fp == NULL) {
             SDL_SetError("Couldn't open %s", file);
         } else {
-            rwops = SDL_RWFromFP(fp, 1);
+            rwops = SDL_RWFromFP(fp, SDL_TRUE);
         }
     }
 #else

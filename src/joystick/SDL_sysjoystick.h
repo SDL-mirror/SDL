@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2019 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2020 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -35,6 +35,7 @@ typedef struct _SDL_JoystickAxisInfo
     Sint16 value;               /* Current axis state */
     Sint16 zero;                /* Zero point on the axis (-32768 for triggers) */
     SDL_bool has_initial_value; /* Whether we've seen a value on the axis yet */
+    SDL_bool has_second_value;  /* Whether we've seen a second value on the axis yet */
     SDL_bool sent_initial_value; /* Whether we've sent the initial axis value */
 } SDL_JoystickAxisInfo;
 
@@ -42,7 +43,6 @@ struct _SDL_Joystick
 {
     SDL_JoystickID instance_id; /* Device instance, monotonically increasing from 0 */
     char *name;                 /* Joystick name - system dependent */
-    int player_index;           /* Joystick player index, or -1 if unavailable */
     SDL_JoystickGUID guid;      /* Joystick guid */
 
     int naxes;                  /* Number of axis controls on the joystick */
@@ -108,6 +108,9 @@ typedef struct _SDL_JoystickDriver
 
     /* Function to get the player index of a joystick */
     int (*GetDevicePlayerIndex)(int device_index);
+
+    /* Function to get the player index of a joystick */
+    void (*SetDevicePlayerIndex)(int device_index, int player_index);
 
     /* Function to return the stable GUID for a plugged in device */
     SDL_JoystickGUID (*GetDeviceGUID)(int device_index);

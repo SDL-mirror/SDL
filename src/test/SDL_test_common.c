@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2019 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2020 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -577,6 +577,9 @@ SDLTest_PrintPixelFormat(char *text, size_t maxlen, Uint32 format)
     case SDL_PIXELFORMAT_RGB444:
         SDL_snprintfcat(text, maxlen, "RGB444");
         break;
+    case SDL_PIXELFORMAT_BGR444:
+        SDL_snprintfcat(text, maxlen, "BGR444");
+        break;
     case SDL_PIXELFORMAT_RGB555:
         SDL_snprintfcat(text, maxlen, "RGB555");
         break;
@@ -1072,7 +1075,7 @@ SDLTest_CommonInit(SDLTest_CommonState * state)
                     SDL_GetError());
             return SDL_FALSE;
         }
-        if (state->verbose & VERBOSE_VIDEO) {
+        if (state->verbose & VERBOSE_AUDIO) {
             SDL_Log("Audio driver: %s\n",
                     SDL_GetCurrentAudioDriver());
         }

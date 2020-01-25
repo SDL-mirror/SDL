@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2019 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2020 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -37,9 +37,9 @@
 #include "SDL_opengl.h"
 #endif /* SDL_VIDEO_OPENGL */
 
-#if SDL_VIDEO_OPENGL_ES
+#if SDL_VIDEO_OPENGL_ES && !SDL_VIDEO_OPENGL
 #include "SDL_opengles.h"
-#endif /* SDL_VIDEO_OPENGL_ES */
+#endif /* SDL_VIDEO_OPENGL_ES && !SDL_VIDEO_OPENGL */
 
 /* GL and GLES2 headers conflict on Linux 32 bits */
 #if SDL_VIDEO_OPENGL_ES2 && !SDL_VIDEO_OPENGL
@@ -111,6 +111,9 @@ static VideoBootStrap *bootstrap[] = {
 #endif
 #if SDL_VIDEO_DRIVER_QNX
     &QNX_bootstrap,
+#endif
+#if SDL_VIDEO_DRIVER_OFFSCREEN
+    &OFFSCREEN_bootstrap,
 #endif
 #if SDL_VIDEO_DRIVER_DUMMY
     &DUMMY_bootstrap,
@@ -285,7 +288,7 @@ SDL_CreateWindowTexture(SDL_VideoDevice *unused, SDL_Window * window, Uint32 * f
                 }
             }
         }
-        
+
         if (!renderer) {
             for (i = 0; i < SDL_GetNumRenderDrivers(); ++i) {
                 SDL_RendererInfo info;
@@ -667,6 +670,12 @@ SDL_GetDisplayDriverData(int displayIndex)
     CHECK_DISPLAY_INDEX(displayIndex, NULL);
 
     return _this->displays[displayIndex].driverdata;
+}
+
+SDL_bool
+SDL_IsVideoContextExternal(void)
+{
+    return SDL_GetHintBoolean(SDL_HINT_VIDEO_EXTERNAL_CONTEXT, SDL_FALSE);
 }
 
 const char *
@@ -1211,7 +1220,7 @@ SDL_UpdateFullscreenMode(SDL_Window * window, SDL_bool fullscreen)
     if (SDL_strcmp(_this->name, "cocoa") == 0) {  /* don't do this for X11, etc */
         if (window->is_destroying && (window->last_fullscreen_flags & FULLSCREEN_MASK) == SDL_WINDOW_FULLSCREEN_DESKTOP)
             return 0;
-    
+
         /* If we're switching between a fullscreen Space and "normal" fullscreen, we need to get back to normal first. */
         if (fullscreen && ((window->last_fullscreen_flags & FULLSCREEN_MASK) == SDL_WINDOW_FULLSCREEN_DESKTOP) && ((window->flags & FULLSCREEN_MASK) == SDL_WINDOW_FULLSCREEN)) {
             if (!Cocoa_SetWindowFullscreenSpace(window, SDL_FALSE)) {
@@ -1453,7 +1462,7 @@ SDL_CreateWindow(const char *title, int x, int y, int w, int h, Uint32 flags)
 
     /* Some platforms have OpenGL enabled by default */
 #if (SDL_VIDEO_OPENGL && __MACOSX__) || __IPHONEOS__ || __ANDROID__ || __NACL__
-    if (!_this->is_dummy && !(flags & SDL_WINDOW_VULKAN)) {
+    if (!_this->is_dummy && !(flags & SDL_WINDOW_VULKAN) && !SDL_IsVideoContextExternal()) {
         flags |= SDL_WINDOW_OPENGL;
     }
 #endif
@@ -1947,7 +1956,7 @@ SDL_GetWindowPosition(SDL_Window * window, int *x, int *y)
     /* Fullscreen windows are always at their display's origin */
     if (window->flags & SDL_WINDOW_FULLSCREEN) {
         int displayIndex;
-        
+
         if (x) {
             *x = 0;
         }
@@ -2310,7 +2319,7 @@ SDL_SetWindowFullscreen(SDL_Window * window, Uint32 flags)
     if (SDL_UpdateFullscreenMode(window, FULLSCREEN_VISIBLE(window)) == 0) {
         return 0;
     }
-    
+
     window->flags &= ~FULLSCREEN_MASK;
     window->flags |= oldflags;
     return -1;
@@ -2455,11 +2464,11 @@ SDL_SetWindowModalFor(SDL_Window * modal_window, SDL_Window * parent_window)
     if (!_this->SetWindowModalFor) {
         return SDL_Unsupported();
     }
-    
+
     return _this->SetWindowModalFor(_this, modal_window, parent_window);
 }
 
-int 
+int
 SDL_SetWindowInputFocus(SDL_Window * window)
 {
     CHECK_WINDOW_MAGIC(window, -1);
@@ -2467,7 +2476,7 @@ SDL_SetWindowInputFocus(SDL_Window * window)
     if (!_this->SetWindowInputFocus) {
         return SDL_Unsupported();
     }
-    
+
     return _this->SetWindowInputFocus(_this, window);
 }
 
@@ -3071,7 +3080,7 @@ SDL_GL_ExtensionSupported(const char *extension)
 
 /* Deduce supported ES profile versions from the supported
    ARB_ES*_compatibility extensions. There is no direct query.
-   
+
    This is normally only called when the OpenGL driver supports
    {GLX,WGL}_EXT_create_context_es2_profile.
  */
@@ -3886,9 +3895,11 @@ SDL_IsScreenKeyboardShown(SDL_Window *window)
 #if SDL_VIDEO_DRIVER_AMIGAOS4
 #include "amigaos4/SDL_os4messagebox.h"
 #endif
+#if SDL_VIDEO_DRIVER_HAIKU
+#include "haiku/SDL_bmessagebox.h"
+#endif
 
-
-#if SDL_VIDEO_DRIVER_WINDOWS || SDL_VIDEO_DRIVER_WINRT || SDL_VIDEO_DRIVER_COCOA || SDL_VIDEO_DRIVER_UIKIT || SDL_VIDEO_DRIVER_X11 || SDL_VIDEO_DRIVER_AMIGAOS4
+#if SDL_VIDEO_DRIVER_WINDOWS || SDL_VIDEO_DRIVER_WINRT || SDL_VIDEO_DRIVER_COCOA || SDL_VIDEO_DRIVER_UIKIT || SDL_VIDEO_DRIVER_X11 || SDL_VIDEO_DRIVER_AMIGAOS4 || SDL_VIDEO_DRIVER_HAIKU
 static SDL_bool SDL_MessageboxValidForDriver(const SDL_MessageBoxData *messageboxdata, SDL_SYSWM_TYPE drivertype)
 {
     SDL_SysWMinfo info;
@@ -3985,6 +3996,13 @@ SDL_ShowMessageBox(const SDL_MessageBoxData *messageboxdata, int *buttonid)
     if (retval == -1 &&
         SDL_MessageboxValidForDriver(messageboxdata, SDL_SYSWM_OS4) &&
         OS4_ShowMessageBox(messageboxdata, buttonid) == 0) {
+        retval = 0;
+    }
+#endif
+#if SDL_VIDEO_DRIVER_HAIKU
+    if (retval == -1 &&
+        SDL_MessageboxValidForDriver(messageboxdata, SDL_SYSWM_HAIKU) &&
+        HAIKU_ShowMessageBox(messageboxdata, buttonid) == 0) {
         retval = 0;
     }
 #endif
@@ -4230,6 +4248,27 @@ void SDL_Vulkan_GetDrawableSize(SDL_Window * window, int *w, int *h)
         _this->Vulkan_GetDrawableSize(_this, window, w, h);
     } else {
         SDL_GetWindowSize(window, w, h);
+    }
+}
+
+SDL_MetalView
+SDL_Metal_CreateView(SDL_Window * window)
+{
+    CHECK_WINDOW_MAGIC(window, NULL);
+
+    if (_this->Metal_CreateView) {
+        return _this->Metal_CreateView(_this, window);
+    } else {
+        SDL_SetError("Metal is not supported.");
+        return NULL;
+    }
+}
+
+void
+SDL_Metal_DestroyView(SDL_MetalView view)
+{
+    if (_this && view && _this->Metal_DestroyView) {
+        _this->Metal_DestroyView(_this, view);
     }
 }
 

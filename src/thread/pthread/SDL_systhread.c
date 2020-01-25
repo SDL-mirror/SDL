@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2019 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2020 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -117,7 +117,7 @@ SDL_SYS_CreateThread(SDL_Thread * thread, void *args)
 
     /* Set caller-requested stack size. Otherwise: use the system default. */
     if (thread->stacksize) {
-        pthread_attr_setstacksize(&type, (size_t) thread->stacksize);
+        pthread_attr_setstacksize(&type, thread->stacksize);
     }
 
     /* Create the thread and go! */
