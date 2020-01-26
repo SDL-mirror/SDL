@@ -11,14 +11,9 @@ OpenGL ES 2.0 (optional)
 Building SDL 2.0 library
 ================================================================================
 
-    sh configure --disable-altivec --prefix=/SDK/local/newlib
-    make
+    gmake -f Makefile.amigaos4
 
-After building, "make install" should work. Optionally you can also build tests:
-
-    cd test
-    sh configure --prefix=/SDK/local/newlib
-    make
+    At the moment configure script and CMake are not supported.
 
 ================================================================================
 Using SDL 2.0 in your projects
@@ -34,15 +29,14 @@ Using SDL 2.0 in your projects
 About SDL_Renderers
 ================================================================================
 
-A renderer is a subsystem that can do 2D drawing. We have 4 renderers:
+A renderer is a subsystem that can do 2D drawing. There are 4 renderers:
 software, OpenGL, OpenGL ES 2.0 and compositing.
 
 Software renderer is always available. Pixels are plotted by the CPU so this is
 usually a slow option.
 
 OpenGL renderer uses MiniGL (and Warp3D) for accelerated drawing. Drawing is
-done in immediate mode, there is no batching. This should be fairly fast if
-textures are static.
+done in immediate mode. This should be fairly fast if textures are static.
 
 OpenGL ES 2.0 renderer uses ogles2.library (and Warp3D Nova).
 
@@ -65,11 +59,37 @@ There is a benchmark tool called sdl2benchmark which was written to test
 available renderers.
 
 ================================================================================
+About ENV variables
+================================================================================
+
+Advanced users may use ENV variables to control some things in SDL2.
+Some variables supported by the SDL_Renderer subsystem:
+
+Batch drawing:
+
+setenv SDL_RENDER_BATCHING 1 # Enable
+setenv SDL_RENDER_BATCHING 0 # Disable
+
+Driver selection:
+
+setenv SDL_RENDER_DRIVER "software"
+setenv SDL_RENDER_DRIVER "compositing"
+setenv SDL_RENDER_DRIVER "opengl"
+
+VSYNC:
+
+setenv SDL_RENDER_VSYNC 1 # Enable
+setenv SDL_RENDER_VSYNC 0 # Disable
+
+It must be noted that these variables apply only to those applications that
+actually use the SDL_Renderer subsystem, and not 3D games.
+
+================================================================================
 About OpenGL
 ================================================================================
 
 If you want to draw accelerated 3D graphics or use explicitly OpenGL functions,
-you have to create an OpenGL context, instead of a SDL_Renderer.
+you have to create an OpenGL context, instead of an SDL_Renderer.
 
 If you would like to create an OpenGL ES 2.0 context, you need to specify the
 version before window creation, for example:
@@ -133,6 +153,8 @@ AmigaOS either.
 
 OpenGL renderer doesn't support render targets and blend modes "ADD" or "MOD".
 This is due to missing features in MiniGL.
+
+OpenGL ES 2.0 renderer is still a work in progress and has some open issues.
 
 ================================================================================
 Project page and bug tracker
