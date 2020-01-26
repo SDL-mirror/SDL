@@ -1,8 +1,8 @@
 # Makefile to build the AmigaOS4 SDL tests
 
 CC		= ppc-amigaos-gcc
-CFLAGS	= -gstabs -O2 -Wall -g -I../include
-LIBS	= -L.. -use-dynld -lSDL2_test -lSDL2 -lpthread
+CFLAGS	= -gstabs -O2 -Wall -g -I../include -DHAVE_OPENGL
+LIBS	= -L.. -use-dynld -lSDL2_test -lSDL2 -athread=native
 
 TARGETS = \
 	checkkeys \
@@ -43,6 +43,7 @@ TARGETS = \
 	testmessage \
 	testmultiaudio \
 	testnative \
+	testoffscreen \
 	testoverlay2 \
 	testplatform \
 	testpower \
@@ -195,6 +196,9 @@ testlock: testlock.o
 	$(CC) -o $@ $^ $(LIBS)
 
 testnative: testnative.o testnativeamigaos4.o
+	$(CC) -o $@ $^ $(LIBS)
+
+testoffscreen: testoffscreen.o
 	$(CC) -o $@ $^ $(LIBS)
 
 testoverlay2: testoverlay2.o testyuv_cvt.o

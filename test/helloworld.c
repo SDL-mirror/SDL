@@ -213,6 +213,7 @@ static void testFullscreen()
 
         SDL_Delay(3000);
 
+#if 0
         SDL_DisplayMode dm;
         dm.format = SDL_PIXELFORMAT_ARGB8888;
         dm.w = 1280;
@@ -220,9 +221,9 @@ static void testFullscreen()
         dm.refresh_rate = 0;
         dm.driverdata = NULL;
 
-        //SDL_SetWindowDisplayMode(w, &dm);
-        //SDL_SetWindowFullscreen(w, SDL_WINDOW_FULLSCREEN);
-
+        SDL_SetWindowDisplayMode(w, &dm);
+        SDL_SetWindowFullscreen(w, SDL_WINDOW_FULLSCREEN);
+#endif
         eventLoop();
 
         SDL_DestroyWindow(w);
@@ -672,8 +673,6 @@ static void testHiddenCursor()
     SDL_Window * w = SDL_CreateWindow("Hidden cursor", 0, 0, 640, 480, SDL_WINDOW_FULLSCREEN);
 
     if (w) {
-        int c = 0;
-
         while (eventLoopInner()) {
             SDL_Delay(1000);
         }
@@ -826,39 +825,39 @@ static void testInitEverything()
 
 int main(void)
 {
-    //testInitEverything();
+    if (0) testInitEverything();
 
     if (SDL_Init(SDL_INIT_VIDEO|SDL_INIT_TIMER) == 0) {
-        testPath();
-        //testWindow();
-        //testManyWindows();
-        //testFullscreen();
-        //testFullscreenOpenGL();
-        //testDeleteContext();
-        //testOpenGL();
-        //testOpenGLES2();
-        //testOpenGLSwitching();
-        //testOpenGLVersion();
-        //testRenderer();
-        //testDraw();
-        //testMessageBox();
-        //testBmp();
-        //testAltivec()
-        //testFullscreenDesktop();
-        //testRenderVsync();
-        //testPC();
-        //testPC();
-        //testSystemCursors();
-        //testCustomCursor();
-        //testHiddenCursor();
-        //testClipboard();
-        //testHint();
-        //testGlobalMouseState();
-        //testGlobalMouseWarp();
-        //testOpaqueWindow();
-        //testWindowBordersSize();
-        //testHiddenWindow();
-        //testRelativeMouse();
+        if (1) testPath();
+        if (0) testWindow();
+        if (0) testManyWindows();
+        if (0) testFullscreen();
+        if (0) testFullscreenOpenGL();
+        if (0) testDeleteContext();
+        if (0) testOpenGL();
+        if (0) testOpenGLES2();
+        if (0) testOpenGLSwitching();
+        if (0) testOpenGLVersion();
+        if (0) testRenderer();
+        if (0) testDraw();
+        if (0) testMessageBox();
+        if (0) testBmp();
+        if (0) testAltivec();
+        if (0) testFullscreenDesktop();
+        if (0) testRenderVsync();
+        if (0) testPC();
+        if (0) testPC();
+        if (0) testSystemCursors();
+        if (0) testCustomCursor();
+        if (0) testHiddenCursor();
+        if (0) testClipboard();
+        if (0) testHint();
+        if (0) testGlobalMouseState();
+        if (0) testGlobalMouseWarp();
+        if (0) testOpaqueWindow();
+        if (0) testWindowBordersSize();
+        if (0) testHiddenWindow();
+        if (0) testRelativeMouse();
     } else {
         printf("%s\n", SDL_GetError());
     }

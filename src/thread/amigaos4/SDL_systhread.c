@@ -234,9 +234,9 @@ SDL_SYS_CreateThread(SDL_Thread * thread, void * args)
     node->thread = thread;
     node->args = args;
 
-    BPTR inputStream = iDOS->DupFileHandle(IDOS->Input());
-    BPTR outputStream = iDOS->DupFileHandle(IDOS->Output());
-    BPTR errorStream = iDOS->DupFileHandle(IDOS->ErrorOutput());
+    BPTR inputStream = iDOS->DupFileHandle(iDOS->Input());
+    BPTR outputStream = iDOS->DupFileHandle(iDOS->Output());
+    BPTR errorStream = iDOS->DupFileHandle(iDOS->ErrorOutput());
 
     snprintf(nameBuffer, sizeof(nameBuffer), "SDL thread %s (%p)", thread->name, thread);
 

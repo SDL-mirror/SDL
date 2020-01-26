@@ -711,6 +711,8 @@ static void RunFIFOTest(SDL_bool lock_free)
 int
 main(int argc, char *argv[])
 {
+    SDL_Init(0);
+
     /* Enable standard application logging */
     SDL_LogSetPriority(SDL_LOG_CATEGORY_APPLICATION, SDL_LOG_PRIORITY_INFO);
 
@@ -721,6 +723,9 @@ main(int argc, char *argv[])
     RunFIFOTest(SDL_FALSE);
 #endif
     RunFIFOTest(SDL_TRUE);
+
+    SDL_Quit();
+
     return 0;
 }
 

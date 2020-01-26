@@ -359,7 +359,7 @@ WatchJoystick(SDL_Joystick * joystick)
 {
     SDL_Window *window = NULL;
     SDL_Renderer *screen = NULL;
-    SDL_Texture *background, *button, *axis, *marker;
+    SDL_Texture *background, *button, *axis, *marker = NULL;
     const char *name = NULL;
     SDL_bool done = SDL_FALSE;
     SDL_Event event;
@@ -367,7 +367,7 @@ WatchJoystick(SDL_Joystick * joystick)
     Uint8 alpha=200, alpha_step = -1;
     Uint32 alpha_ticks = 0;
     SDL_JoystickID nJoystickID;
-    int iIndex;
+    //int iIndex;
 
     /* Create a window to display joystick axis position */
     window = SDL_CreateWindow("Game Controller Map", SDL_WINDOWPOS_CENTERED,
@@ -772,6 +772,7 @@ main(int argc, char *argv[])
         SDL_Log("\n\nUsage: ./controllermap number\nFor example: ./controllermap 0\nOr: ./controllermap 0 >> gamecontrollerdb.txt");
     }
     SDL_QuitSubSystem(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK);
+    SDL_Quit();
 
     return 0;
 }
