@@ -198,7 +198,7 @@ testlock: testlock.o
 testnative: testnative.o testnativeamigaos4.o
 	$(CC) -o $@ $^ $(LIBS)
 
-testoffscreen: testoffscreen.o testoffscreen.o
+testoffscreen: testoffscreen.o
 	$(CC) -o $@ $^ $(LIBS)
 
 testoverlay2: testoverlay2.o testyuv_cvt.o
