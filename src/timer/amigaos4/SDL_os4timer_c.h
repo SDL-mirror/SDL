@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2019 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2020 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -41,7 +41,7 @@ BOOL OS4_TimerCreate(OS4_TimerInstance * timer);
 void OS4_TimerDestroy(OS4_TimerInstance * timer);
 ULONG OS4_TimerSetAlarm(OS4_TimerInstance * timer, Uint32 alarmTicks);
 void OS4_TimerClearAlarm(OS4_TimerInstance * timer);
-BOOL OS4_TimerWaitUntil(Uint32 ticks);
+BOOL OS4_TimerDelay(Uint32 ticks);
 void OS4_TimerGetTime(struct TimeVal * timeval);
 Uint64 OS4_TimerGetCounter(void);
 Uint64 OS4_TimerGetFrequency(void);

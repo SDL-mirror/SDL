@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2019 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2020 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -155,6 +155,7 @@ ULONG
 OS4_TimerSetAlarm(OS4_TimerInstance * timer, Uint32 alarmTicks)
 {
     const ULONG seconds = alarmTicks / 1000;
+    struct TimeVal now;
 
     //dprintf("Called for timer %p, ticks %u\n", timer, alarmTicks);
 
@@ -162,7 +163,8 @@ OS4_TimerSetAlarm(OS4_TimerInstance * timer, Uint32 alarmTicks)
     timer->timerRequest->Time.Seconds = seconds;
     timer->timerRequest->Time.Microseconds  = (alarmTicks - (seconds * 1000)) * 1000;
 
-    SDL2_ITimer->AddTime(&timer->timerRequest->Time, &OS4_StartTime);
+    SDL2_ITimer->GetSysTime(&now);
+    SDL2_ITimer->AddTime(&timer->timerRequest->Time, &now);
 
     IExec->SetSignal(0, 1L << timer->timerPort->mp_SigBit);
     IExec->SendIO((struct IORequest *)timer->timerRequest);
@@ -182,7 +184,7 @@ OS4_TimerClearAlarm(OS4_TimerInstance * timer)
 }
 
 BOOL
-OS4_TimerWaitUntil(Uint32 ticks)
+OS4_TimerDelay(Uint32 ticks)
 {
 	OS4_TimerInstance* timer = OS4_ThreadGetTimer();
 
