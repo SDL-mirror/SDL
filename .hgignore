@@ -57,4 +57,6 @@ test/torturethread
 test/testcursor
 test/testloadso
 test/*.exe
+test/*,e1f
+test/*,ff8
 test/*.dSYM
