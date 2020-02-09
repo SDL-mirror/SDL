@@ -63,6 +63,11 @@ void OS4_InitTimerSubSystem(void)
 
     dprintf("ITimer %p\n", SDL2_ITimer);
 
+    if (!SDL2_ITimer) {
+        dprintf("Failed to get ITimer\n");
+        return;
+    }
+
     SDL2_ITimer->GetSysTime(&OS4_StartTime);
 
     struct EClockVal cv;
@@ -157,6 +162,11 @@ OS4_TimerSetAlarm(OS4_TimerInstance * timer, Uint32 alarmTicks)
     const ULONG seconds = alarmTicks / 1000;
     struct TimeVal now;
 
+    if (!SDL2_ITimer) {
+        dprintf("Timer subsystem not initialized\n");
+        return 0;
+    }
+
     //dprintf("Called for timer %p, ticks %u\n", timer, alarmTicks);
 
     timer->timerRequest->Request.io_Command = TR_ADDREQUEST;
@@ -199,6 +209,13 @@ OS4_TimerDelay(Uint32 ticks)
 void
 OS4_TimerGetTime(struct TimeVal * timeval)
 {
+    if (!SDL2_ITimer) {
+        dprintf("Timer subsystem not initialized\n");
+        timeval->Seconds = 0;
+        timeval->Microseconds = 0;
+        return;
+    }
+
     SDL2_ITimer->GetSysTime(timeval);
     SDL2_ITimer->SubTime(timeval, &OS4_StartTime);
 }
@@ -207,6 +224,11 @@ Uint64
 OS4_TimerGetCounter(void)
 {
     OS4_ClockVal value;
+
+    if (!SDL2_ITimer) {
+        dprintf("Timer subsystem not initialized\n");
+        return 0;
+    }
 
     SDL2_ITimer->ReadEClock(&value.u.cv);
 
