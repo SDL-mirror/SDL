@@ -27,7 +27,7 @@
    RISC OS - Joystick support by Alan Buckley (alan_baa@hotmail.com) - 10 April 2003
 
    Note: Currently assumes joystick is present if joystick module is loaded
-   and that there is one joystick with four buttons.
+   and that there is one joystick with eight buttons.
 */
 
 /* This is the system specific header for the SDL joystick API */
@@ -94,8 +94,8 @@ int SDL_SYS_JoystickOpen(SDL_Joystick *joystick)
 		return -1;
 	}
 
-	/* Don't know how to get exact count of buttons so assume max of 4 for now */
-	joystick->nbuttons=4;
+	/* Don't know how to get exact count of buttons so assume max of 8 for now */
+	joystick->nbuttons=8;
 
 	joystick->nhats=0;
 	joystick->nballs=0;

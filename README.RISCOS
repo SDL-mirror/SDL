@@ -83,7 +83,7 @@ The following list is an overview of how much of the SDL is implemented. The are
 video - Mostly done. Doesn't cover gamma, YUV-overlay or OpenGL.
 Window Manager - Mostly done. SetIcon not implemented.
 Events - Mostly done. Resize and some joystick events missing.
-Joystick - Currently assumes a single joystick with 4 buttons.
+Joystick - Currently assumes a single joystick with 8 buttons.
 Audio - Done
 CDROM - Not implemented.
 Threads - Done
@@ -115,7 +115,7 @@ SDL_EnableUNICODE
    Unicode translation used here is only really accurate for 7 bit characters.
 
 SDL_NumJoysticks/JoystickName etc.
-   Hardcoded to expect only 1 joystick with 4 buttons if the Joystick module is loaded.
+   Hardcoded to expect only 1 joystick with 8 buttons if the Joystick module is loaded.
 
 SDL_GetTicks
    Timer used has only a centisecond accuracy. This applies to other time related functions.
