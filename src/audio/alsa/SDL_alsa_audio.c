@@ -496,6 +496,10 @@ static int ALSA_OpenAudio(_THIS, SDL_AudioSpec *spec)
 		return(-1);
 	}
 
+	/* Switch to blocking mode for playback */
+	/* Note: this must happen before hw/sw params are set. */
+	SDL_NAME(snd_pcm_nonblock)(pcm_handle, 0);
+
 	/* Figure out what the hardware is capable of */
 	snd_pcm_hw_params_alloca(&hwparams);
 	status = SDL_NAME(snd_pcm_hw_params_any)(pcm_handle, hwparams);
@@ -627,9 +631,6 @@ static int ALSA_OpenAudio(_THIS, SDL_AudioSpec *spec)
 		return(-1);
 	}
 	SDL_memset(mixbuf, spec->silence, spec->size);
-
-	/* Switch to blocking mode for playback */
-	SDL_NAME(snd_pcm_nonblock)(pcm_handle, 0);
 
 	/* We're ready to rock and roll. :-) */
 	return(0);
