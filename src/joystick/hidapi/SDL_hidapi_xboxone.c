@@ -30,14 +30,13 @@
 #include "SDL_gamecontroller.h"
 #include "../SDL_sysjoystick.h"
 #include "SDL_hidapijoystick_c.h"
+#include "SDL_hidapi_rumble.h"
 
 
 #ifdef SDL_JOYSTICK_HIDAPI_XBOXONE
 
 /* Define this if you want to log all packets from the controller */
 /*#define DEBUG_XBOX_PROTOCOL*/
-
-#define USB_PACKET_LENGTH   64
 
 /* The amount of time to wait after hotplug to send controller init sequence */
 #define CONTROLLER_INIT_DELAY_MS    1500 /* 475 for Xbox One S, 1275 for the PDP Battlefield 1 */
@@ -119,7 +118,7 @@ typedef struct {
     Uint8 sequence;
     Uint8 last_state[USB_PACKET_LENGTH];
     SDL_bool rumble_synchronized;
-    Uint32 rumble_expiration;
+    SDL_bool rumble_synchronization_complete;
     SDL_bool has_paddles;
 } SDL_DriverXboxOne_Context;
 
@@ -180,7 +179,7 @@ ControllerNeedsRumbleSequenceSynchronized(Uint16 vendor_id, Uint16 product_id)
 }
 
 static SDL_bool
-SynchronizeRumbleSequence(hid_device *dev, SDL_DriverXboxOne_Context *ctx)
+SynchronizeRumbleSequence(SDL_HIDAPI_Device *device, SDL_DriverXboxOne_Context *ctx)
 {
     Uint16 vendor_id = ctx->vendor_id;
     Uint16 product_id = ctx->product_id;
@@ -196,7 +195,10 @@ SynchronizeRumbleSequence(hid_device *dev, SDL_DriverXboxOne_Context *ctx)
         SDL_memcpy(init_packet, xboxone_rumble_reset, sizeof(xboxone_rumble_reset));
         for (i = 0; i < 255; ++i) {
             init_packet[2] = ((ctx->sequence + i) % 255);
-            if (hid_write(dev, init_packet, sizeof(xboxone_rumble_reset)) != sizeof(xboxone_rumble_reset)) {
+            if (SDL_HIDAPI_LockRumble() < 0) {
+                return SDL_FALSE;
+            }
+            if (SDL_HIDAPI_SendRumbleAndUnlock(device, init_packet, sizeof(xboxone_rumble_reset)) != sizeof(xboxone_rumble_reset)) {
                 SDL_SetError("Couldn't write Xbox One initialization packet");
                 return SDL_FALSE;
             }
@@ -229,7 +231,7 @@ ControllerSendsWaitingForInit(Uint16 vendor_id, Uint16 product_id)
 }
 
 static SDL_bool
-SendControllerInit(hid_device *dev, SDL_DriverXboxOne_Context *ctx)
+SendControllerInit(SDL_HIDAPI_Device *device, SDL_DriverXboxOne_Context *ctx)
 {
     Uint16 vendor_id = ctx->vendor_id;
     Uint16 product_id = ctx->product_id;
@@ -261,7 +263,7 @@ SendControllerInit(hid_device *dev, SDL_DriverXboxOne_Context *ctx)
             if (init_packet[0] != 0x01) {
                 init_packet[2] = ctx->sequence++;
             }
-            if (hid_write(dev, init_packet, packet->size) != packet->size) {
+            if (hid_write(device->dev, init_packet, packet->size) != packet->size) {
                 SDL_SetError("Couldn't write Xbox One initialization packet");
                 return SDL_FALSE;
             }
@@ -275,7 +277,7 @@ SendControllerInit(hid_device *dev, SDL_DriverXboxOne_Context *ctx)
                     Uint8 data[USB_PACKET_LENGTH];
                     int size;
 
-                    while ((size = hid_read_timeout(dev, data, sizeof(data), 0)) > 0) {
+                    while ((size = hid_read_timeout(device->dev, data, sizeof(data), 0)) > 0) {
 #ifdef DEBUG_XBOX_PROTOCOL
                         DumpPacket("Xbox One INIT packet: size = %d", data, size);
 #endif
@@ -291,7 +293,7 @@ SendControllerInit(hid_device *dev, SDL_DriverXboxOne_Context *ctx)
         }
     }
 
-    SynchronizeRumbleSequence(dev, ctx);
+    SynchronizeRumbleSequence(device, ctx);
 
     return SDL_TRUE;
 }
@@ -369,29 +371,43 @@ HIDAPI_DriverXboxOne_OpenJoystick(SDL_HIDAPI_Device *device, SDL_Joystick *joyst
 }
 
 static int
-HIDAPI_DriverXboxOne_RumbleJoystick(SDL_HIDAPI_Device *device, SDL_Joystick *joystick, Uint16 low_frequency_rumble, Uint16 high_frequency_rumble, Uint32 duration_ms)
+HIDAPI_DriverXboxOne_RumbleJoystick(SDL_HIDAPI_Device *device, SDL_Joystick *joystick, Uint16 low_frequency_rumble, Uint16 high_frequency_rumble)
 {
     SDL_DriverXboxOne_Context *ctx = (SDL_DriverXboxOne_Context *)device->context;
     Uint8 rumble_packet[] = { 0x09, 0x00, 0x00, 0x09, 0x00, 0x0F, 0x00, 0x00, 0x00, 0x00, 0xFF, 0x00, 0xFF };
+    Uint8 *pending_rumble;
+    int *pending_size;
+    int maximum_size;
 
-    SynchronizeRumbleSequence(device->dev, ctx);
+    SynchronizeRumbleSequence(device, ctx);
 
-    /* Magnitude is 1..100 so scale the 16-bit input here */
-    rumble_packet[2] = ctx->sequence++;
-    rumble_packet[8] = low_frequency_rumble / 655;
-    rumble_packet[9] = high_frequency_rumble / 655;
-
-    if (hid_write(device->dev, rumble_packet, sizeof(rumble_packet)) != sizeof(rumble_packet)) {
-        return SDL_SetError("Couldn't send rumble packet");
+    if (SDL_HIDAPI_LockRumble() < 0) {
+        return -1;
     }
 
-    if ((low_frequency_rumble || high_frequency_rumble) && duration_ms) {
-        ctx->rumble_expiration = SDL_GetTicks() + SDL_min(duration_ms, SDL_MAX_RUMBLE_DURATION_MS);
-        if (!ctx->rumble_expiration) {
-            ctx->rumble_expiration = 1;
+    if (!ctx->rumble_synchronization_complete) {
+        if (!SDL_HIDAPI_GetPendingRumbleLocked(device, &pending_rumble, &pending_size, &maximum_size)) {
+            /* Rumble synchronization has drained */
+            ctx->rumble_synchronization_complete = SDL_TRUE;
         }
+    }
+
+    /* Try to overwrite any pending rumble with the new value */
+    if (ctx->rumble_synchronization_complete && 
+        SDL_HIDAPI_GetPendingRumbleLocked(device, &pending_rumble, &pending_size, &maximum_size)) {
+        /* Magnitude is 1..100 so scale the 16-bit input here */
+        pending_rumble[8] = low_frequency_rumble / 655;
+        pending_rumble[9] = high_frequency_rumble / 655;
+        SDL_HIDAPI_UnlockRumble();
     } else {
-        ctx->rumble_expiration = 0;
+        /* Magnitude is 1..100 so scale the 16-bit input here */
+        rumble_packet[2] = ctx->sequence++;
+        rumble_packet[8] = low_frequency_rumble / 655;
+        rumble_packet[9] = high_frequency_rumble / 655;
+
+        if (SDL_HIDAPI_SendRumbleAndUnlock(device, rumble_packet, sizeof(rumble_packet)) != sizeof(rumble_packet)) {
+            return SDL_SetError("Couldn't send rumble packet");
+        }
     }
     return 0;
 }
@@ -535,7 +551,7 @@ HIDAPI_DriverXboxOne_UpdateDevice(SDL_HIDAPI_Device *device)
     if (!ctx->initialized &&
         !ControllerSendsWaitingForInit(device->vendor_id, device->product_id)) {
         if (SDL_TICKS_PASSED(SDL_GetTicks(), ctx->start_time + CONTROLLER_INIT_DELAY_MS)) {
-            if (!SendControllerInit(device->dev, ctx)) {
+            if (!SendControllerInit(device, ctx)) {
                 HIDAPI_JoystickDisconnected(device, joystick->instance_id);
                 return SDL_FALSE;
             }
@@ -554,7 +570,7 @@ HIDAPI_DriverXboxOne_UpdateDevice(SDL_HIDAPI_Device *device)
 #ifdef DEBUG_XBOX_PROTOCOL
                 SDL_Log("Delay after init: %ums\n", SDL_GetTicks() - ctx->start_time);
 #endif
-                if (!SendControllerInit(device->dev, ctx)) {
+                if (!SendControllerInit(device, ctx)) {
                     HIDAPI_JoystickDisconnected(device, joystick->instance_id);
                     return SDL_FALSE;
                 }
@@ -578,13 +594,6 @@ HIDAPI_DriverXboxOne_UpdateDevice(SDL_HIDAPI_Device *device)
         }
     }
 
-    if (ctx->rumble_expiration) {
-        Uint32 now = SDL_GetTicks();
-        if (SDL_TICKS_PASSED(now, ctx->rumble_expiration)) {
-            HIDAPI_DriverXboxOne_RumbleJoystick(device, joystick, 0, 0, 0);
-        }
-    }
-
     if (size < 0) {
         /* Read error, device is disconnected */
         HIDAPI_JoystickDisconnected(device, joystick->instance_id);
@@ -595,12 +604,6 @@ HIDAPI_DriverXboxOne_UpdateDevice(SDL_HIDAPI_Device *device)
 static void
 HIDAPI_DriverXboxOne_CloseJoystick(SDL_HIDAPI_Device *device, SDL_Joystick *joystick)
 {
-    SDL_DriverXboxOne_Context *ctx = (SDL_DriverXboxOne_Context *)device->context;
-
-    if (ctx->rumble_expiration) {
-        HIDAPI_DriverXboxOne_RumbleJoystick(device, joystick, 0, 0, 0);
-    }
-
     hid_close(device->dev);
     device->dev = NULL;
 
