@@ -283,10 +283,6 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
             return;
         }
 
-        if (mHIDDeviceManager != null) {
-            mHIDDeviceManager.setFrozen(true);
-        }
-
         SDLActivity.handleNativeState();
     }
 
@@ -298,10 +294,6 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
            return;
         }
 
-        if (mHIDDeviceManager != null) {
-            mHIDDeviceManager.setFrozen(false);
-        }
-
         SDLActivity.handleNativeState();
     }
 
@@ -310,6 +302,10 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
     protected void onPause() {
         Log.v(TAG, "onPause()");
         super.onPause();
+
+        if (mHIDDeviceManager != null) {
+            mHIDDeviceManager.setFrozen(true);
+        }
         if (!mHasMultiWindow) {
             pauseNativeThread();
         }
@@ -319,6 +315,10 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
     protected void onResume() {
         Log.v(TAG, "onResume()");
         super.onResume();
+
+        if (mHIDDeviceManager != null) {
+            mHIDDeviceManager.setFrozen(false);
+        }
         if (!mHasMultiWindow) {
             resumeNativeThread();
         }
@@ -730,7 +730,7 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
                 }
             }
 
-            if (bShouldWait) {
+            if (bShouldWait && (SDLActivity.getContext() != null)) {
                 // We'll wait for the surfaceChanged() method, which will notify us
                 // when called.  That way, we know our current size is really the
                 // size we need, instead of grabbing a size that's still got
@@ -783,6 +783,7 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
     public static native void nativeSetenv(String name, String value);
     public static native void onNativeOrientationChanged(int orientation);
     public static native void nativeAddTouch(int touchId, String name);
+    public static native void nativePermissionResult(int requestCode, boolean result);
 
     /**
      * This method is called by SDL using JNI.
@@ -1026,6 +1027,9 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
      * This method is called by SDL using JNI.
      */
     public static boolean isChromebook() {
+        if (getContext() == null) {
+            return false;
+        }
         return getContext().getPackageManager().hasSystemFeature("org.chromium.arc.device_management");
     }
 
@@ -1597,6 +1601,32 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
         }
         return true;
     }
+
+    /**
+     * This method is called by SDL using JNI.
+     */
+    public static void requestPermission(String permission, int requestCode) {
+        if (Build.VERSION.SDK_INT < 23) {
+            nativePermissionResult(requestCode, true);
+            return;
+        }
+
+        Activity activity = (Activity)getContext();
+        if (activity.checkSelfPermission(permission) != PackageManager.PERMISSION_GRANTED) {
+            activity.requestPermissions(new String[]{permission}, requestCode);
+        } else {
+            nativePermissionResult(requestCode, true);
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            nativePermissionResult(requestCode, true);
+        } else {
+            nativePermissionResult(requestCode, false);
+        }
+    }
 }
 
 /**
@@ -1622,7 +1652,7 @@ class SDLMain implements Runnable {
 
         Log.v("SDL", "Finished main function");
 
-        if (SDLActivity.mSingleton.isFinishing()) {
+        if (SDLActivity.mSingleton == null || SDLActivity.mSingleton.isFinishing()) {
             // Activity is already being destroyed
         } else {
             // Let's finish the Activity

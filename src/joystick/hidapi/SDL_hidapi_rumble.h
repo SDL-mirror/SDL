@@ -20,27 +20,20 @@
 */
 #include "../../SDL_internal.h"
 
-#ifndef _SDL_openslesaudio_h
-#define _SDL_openslesaudio_h
+#ifdef SDL_JOYSTICK_HIDAPI
 
-#include "../SDL_sysaudio.h"
+/* Handle rumble on a separate thread so it doesn't block the application */
 
-/* Hidden "this" pointer for the audio functions */
-#define _THIS   SDL_AudioDevice *this
+/* Advanced API */
+int SDL_HIDAPI_LockRumble(void);
+SDL_bool SDL_HIDAPI_GetPendingRumbleLocked(SDL_HIDAPI_Device *device, Uint8 **data, int **size, int *maximum_size);
+int SDL_HIDAPI_SendRumbleAndUnlock(SDL_HIDAPI_Device *device, const Uint8 *data, int size);
+void SDL_HIDAPI_UnlockRumble(void);
 
-#define NUM_BUFFERS 2           /* -- Don't lower this! */
+/* Simple API, will replace any pending rumble with the new data */
+int SDL_HIDAPI_SendRumble(SDL_HIDAPI_Device *device, const Uint8 *data, int size);
+void SDL_HIDAPI_QuitRumble(void);
 
-struct SDL_PrivateAudioData
-{
-    Uint8   *mixbuff;
-    int      next_buffer;
-    Uint8   *pmixbuff[NUM_BUFFERS];
-    SDL_sem *playsem;
-};
-
-void openslES_ResumeDevices(void);
-void openslES_PauseDevices(void);
-
-#endif /* _SDL_openslesaudio_h */
+#endif /* SDL_JOYSTICK_HIDAPI */
 
 /* vi: set ts=4 sw=4 expandtab: */
