@@ -940,6 +940,10 @@ static SDL_Surface* QZ_SetVideoFullScreen (_THIS, SDL_Surface *current, int widt
     /* Set app state, hide cursor if necessary, ... */
     QZ_DoActivate(this);
 
+    [ window_view setNeedsDisplay:YES ];
+  	[ [ qz_window contentView ] setNeedsDisplay:YES ];
+  	[ qz_window displayIfNeeded ];
+    
     return current;
 
     /* Since the blanking window covers *all* windows (even force quit) correct recovery is crucial */
@@ -1115,7 +1119,11 @@ static SDL_Surface* QZ_SetVideoWindowed (_THIS, SDL_Surface *current, int width,
 
     /* Save flags to ensure correct teardown */
     mode_flags = current->flags;
-
+    
+    [ window_view setNeedsDisplay:YES ];
+   	[ [ qz_window contentView ] setNeedsDisplay:YES ];
+   	[ qz_window displayIfNeeded ];
+    
     /* Fade in again (asynchronously) if we came from a fullscreen mode and faded to black */
     if (fade_token != kCGDisplayFadeReservationInvalidToken) {
         CGDisplayFade (fade_token, 0.5, kCGDisplayBlendSolidColor, kCGDisplayBlendNormal, 0.0, 0.0, 0.0, FALSE);
@@ -1155,7 +1163,13 @@ static SDL_Surface* QZ_SetVideoModeInternal (_THIS, SDL_Surface *current,
 
     if (qz_window != nil) {
         nsgfx_context = [NSGraphicsContext graphicsContextWithWindow:qz_window];
-        [NSGraphicsContext setCurrentContext:nsgfx_context];
+        if (nsgfx_context != NULL) {
+        	[NSGraphicsContext setCurrentContext:nsgfx_context];
+      	}
+      	else {
+      		/* Whoops, looks like Mojave doesn't support this anymore */
+      		fprintf(stderr,"Unable to obtain graphics context for NSWindow (Mojave behavior)\n");
+      	}
     }
 
     /* Setup the new pixel format */
@@ -1500,10 +1514,17 @@ static void QZ_DrawResizeIcon (_THIS)
     }
 }
 
-static void QZ_UpdateRects (_THIS, int numRects, SDL_Rect *rects)
-{
+static SDL_VideoDevice *last_this = NULL;
+
+void QZ_UpdateRectsOnDrawRect(/*TODO: NSRect from drawRect*/) {
+	// HACK
+	SDL_VideoDevice *this = last_this;
+
+	if (this == NULL) return;
+  if (SDL_VideoSurface == NULL) return;
+
     if (SDL_VideoSurface->flags & SDL_OPENGLBLIT) {
-        QZ_GL_SwapBuffers (this);
+// TODO
     }
     else if ( [ qz_window isMiniaturized ] ) {
     
@@ -1512,8 +1533,9 @@ static void QZ_UpdateRects (_THIS, int numRects, SDL_Rect *rects)
     
     else {
         NSGraphicsContext *ctx = [NSGraphicsContext currentContext];
-        if (ctx != nsgfx_context) { /* uhoh, you might be rendering from another thread... */
-            [NSGraphicsContext setCurrentContext:nsgfx_context];
+        /* NTS: nsgfx_context == NULL will occur on Mojave, may be non-NULL on older versions of OS X */
+          if (nsgfx_context != NULL && ctx != nsgfx_context) { /* uhoh, you might be rendering from another thread... */
+                  [NSGraphicsContext setCurrentContext:nsgfx_context];
             ctx = nsgfx_context;
         }
         CGContextRef cgc = (CGContextRef) [ctx graphicsPort];
@@ -1525,6 +1547,25 @@ static void QZ_UpdateRects (_THIS, int numRects, SDL_Rect *rects)
         CGContextDrawImage (cgc, rectangle, image);
         CGImageRelease(image);
         CGContextFlush (cgc);
+    }
+}
+
+static void QZ_UpdateRects (_THIS, int numRects, SDL_Rect *rects)
+{
+	// HACK
+	last_this = this;
+
+    if (SDL_VideoSurface->flags & SDL_OPENGLBLIT) {
+        QZ_GL_SwapBuffers (this);
+	// TODO?
+    }
+    else if ( [ qz_window isMiniaturized ] ) {
+        /* Do nothing if miniaturized */
+    }
+    else {
+	[ window_view setNeedsDisplay:YES ];
+	[ [ qz_window contentView ] setNeedsDisplay:YES ];
+	[ qz_window displayIfNeeded ];
     }
 }
 
