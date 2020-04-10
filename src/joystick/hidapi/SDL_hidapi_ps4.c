@@ -26,7 +26,6 @@
 #ifdef SDL_JOYSTICK_HIDAPI
 
 #include "SDL_hints.h"
-#include "SDL_log.h"
 #include "SDL_events.h"
 #include "SDL_timer.h"
 #include "SDL_joystick.h"
@@ -100,6 +99,7 @@ typedef struct {
     SDL_bool is_bluetooth;
     SDL_bool audio_supported;
     SDL_bool rumble_supported;
+    int player_index;
     Uint8 volume;
     Uint32 last_volume_check;
     PS4StatePacket_t last_state;
@@ -182,10 +182,37 @@ static SDL_bool HIDAPI_DriverPS4_CanRumble(Uint16 vendor_id, Uint16 product_id)
     return SDL_TRUE;
 }
 
+static void
+SetLedsForPlayerIndex(DS4EffectsState_t *effects, int player_index)
+{
+    /* This list is the same as what hid-sony.c uses in the Linux kernel.
+       The first 4 values correspond to what the PS4 assigns.
+    */
+    static const Uint8 colors[7][3] = {
+        { 0x00, 0x00, 0x40 }, /* Blue */
+        { 0x40, 0x00, 0x00 }, /* Red */
+        { 0x00, 0x40, 0x00 }, /* Green */
+        { 0x20, 0x00, 0x20 }, /* Pink */
+        { 0x02, 0x01, 0x00 }, /* Orange */
+        { 0x00, 0x01, 0x01 }, /* Teal */
+        { 0x01, 0x01, 0x01 }  /* White */
+    };
+
+    if (player_index >= 0) {
+        player_index %= SDL_arraysize(colors);
+    } else {
+        player_index = 0;
+    }
+
+    effects->ucLedRed = colors[player_index][0];
+    effects->ucLedGreen = colors[player_index][1];
+    effects->ucLedBlue = colors[player_index][2];
+}
+
 static SDL_bool
 HIDAPI_DriverPS4_InitDevice(SDL_HIDAPI_Device *device)
 {
-    return HIDAPI_JoystickConnected(device, NULL);
+    return HIDAPI_JoystickConnected(device, NULL, SDL_FALSE);
 }
 
 static int
@@ -194,12 +221,22 @@ HIDAPI_DriverPS4_GetDevicePlayerIndex(SDL_HIDAPI_Device *device, SDL_JoystickID 
     return -1;
 }
 
+static int HIDAPI_DriverPS4_RumbleJoystick(SDL_HIDAPI_Device *device, SDL_Joystick *joystick, Uint16 low_frequency_rumble, Uint16 high_frequency_rumble);
+
 static void
 HIDAPI_DriverPS4_SetDevicePlayerIndex(SDL_HIDAPI_Device *device, SDL_JoystickID instance_id, int player_index)
 {
-}
+    SDL_DriverPS4_Context *ctx = (SDL_DriverPS4_Context *)device->context;
 
-static int HIDAPI_DriverPS4_RumbleJoystick(SDL_HIDAPI_Device *device, SDL_Joystick *joystick, Uint16 low_frequency_rumble, Uint16 high_frequency_rumble);
+    if (!ctx) {
+        return;
+    }
+
+    ctx->player_index = player_index;
+
+    /* This will set the new LED state based on the new player index */
+    HIDAPI_DriverPS4_RumbleJoystick(device, SDL_JoystickFromInstanceID(instance_id), 0, 0);
+}
 
 static SDL_bool
 HIDAPI_DriverPS4_OpenJoystick(SDL_HIDAPI_Device *device, SDL_Joystick *joystick)
@@ -248,6 +285,9 @@ HIDAPI_DriverPS4_OpenJoystick(SDL_HIDAPI_Device *device, SDL_Joystick *joystick)
         }
     }
 
+    /* Initialize player index (needed for setting LEDs) */
+    ctx->player_index = SDL_JoystickGetPlayerIndex(joystick);
+
     /* Initialize LED and effect state */
     HIDAPI_DriverPS4_RumbleJoystick(device, joystick, 0, 0);
 
@@ -293,9 +333,8 @@ HIDAPI_DriverPS4_RumbleJoystick(SDL_HIDAPI_Device *device, SDL_Joystick *joystic
     effects->ucRumbleLeft = (low_frequency_rumble >> 8);
     effects->ucRumbleRight = (high_frequency_rumble >> 8);
 
-    effects->ucLedRed = 0;
-    effects->ucLedGreen = 0;
-    effects->ucLedBlue = 80;
+    /* Populate the LED state with the appropriate color from our lookup table */
+    SetLedsForPlayerIndex(effects, ctx->player_index);
 
     if (ctx->is_bluetooth) {
         /* Bluetooth reports need a CRC at the end of the packet (at least on Linux) */
@@ -383,6 +422,15 @@ HIDAPI_DriverPS4_HandleStatePacket(SDL_Joystick *joystick, hid_device *dev, SDL_
         SDL_PrivateJoystickButton(joystick, SDL_CONTROLLER_BUTTON_RIGHTSTICK, (data & 0x80) ? SDL_PRESSED : SDL_RELEASED);
     }
 
+	/* Some fightsticks, ex: Victrix FS Pro will only this these digital trigger bits and not the analog values so this needs to run whenever the
+	   trigger is evaluated
+	*/
+	if ((packet->rgucButtonsHatAndCounter[1] & 0x0C) != 0) {
+		Uint8 data = packet->rgucButtonsHatAndCounter[1];
+		packet->ucTriggerLeft = (data & 0x04) && packet->ucTriggerLeft == 0 ? 255 : packet->ucTriggerLeft;
+		packet->ucTriggerRight = (data & 0x08) && packet->ucTriggerRight == 0 ? 255 : packet->ucTriggerRight;
+	}
+
     if (ctx->last_state.rgucButtonsHatAndCounter[2] != packet->rgucButtonsHatAndCounter[2]) {
         Uint8 data = (packet->rgucButtonsHatAndCounter[2] & 0x03);
 
@@ -456,7 +504,7 @@ HIDAPI_DriverPS4_UpdateDevice(SDL_HIDAPI_Device *device)
 
     if (size < 0) {
         /* Read error, device is disconnected */
-        HIDAPI_JoystickDisconnected(device, joystick->instance_id);
+        HIDAPI_JoystickDisconnected(device, joystick->instance_id, SDL_FALSE);
     }
     return (size >= 0);
 }
@@ -489,7 +537,8 @@ SDL_HIDAPI_DeviceDriver SDL_HIDAPI_DriverPS4 =
     HIDAPI_DriverPS4_OpenJoystick,
     HIDAPI_DriverPS4_RumbleJoystick,
     HIDAPI_DriverPS4_CloseJoystick,
-    HIDAPI_DriverPS4_FreeDevice
+    HIDAPI_DriverPS4_FreeDevice,
+    NULL
 };
 
 #endif /* SDL_JOYSTICK_HIDAPI_PS4 */

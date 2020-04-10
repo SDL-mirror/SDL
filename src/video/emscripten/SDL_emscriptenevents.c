@@ -206,14 +206,14 @@ static const SDL_Scancode emscripten_scancode_table[] = {
     /* 160 */   SDL_SCANCODE_UNKNOWN,
     /* 161 */   SDL_SCANCODE_UNKNOWN,
     /* 162 */   SDL_SCANCODE_UNKNOWN,
-    /* 163 */   SDL_SCANCODE_UNKNOWN,
+    /* 163 */   SDL_SCANCODE_KP_HASH, /*KaiOS phone keypad*/
     /* 164 */   SDL_SCANCODE_UNKNOWN,
     /* 165 */   SDL_SCANCODE_UNKNOWN,
     /* 166 */   SDL_SCANCODE_UNKNOWN,
     /* 167 */   SDL_SCANCODE_UNKNOWN,
     /* 168 */   SDL_SCANCODE_UNKNOWN,
     /* 169 */   SDL_SCANCODE_UNKNOWN,
-    /* 170 */   SDL_SCANCODE_UNKNOWN,
+    /* 170 */   SDL_SCANCODE_KP_MULTIPLY, /*KaiOS phone keypad*/
     /* 171 */   SDL_SCANCODE_UNKNOWN,
     /* 172 */   SDL_SCANCODE_UNKNOWN,
     /* 173 */   SDL_SCANCODE_MINUS, /*FX*/
@@ -484,6 +484,16 @@ Emscripten_HandleKey(int eventType, const EmscriptenKeyboardEvent *keyEvent, voi
     /* .keyCode is deprecated, but still the most reliable way to get keys */
     if (keyEvent->keyCode < SDL_arraysize(emscripten_scancode_table)) {
         scancode = emscripten_scancode_table[keyEvent->keyCode];
+
+        if (keyEvent->keyCode == 0) {
+            /* KaiOS Left Soft Key and Right Soft Key, they act as OK/Next/Menu and Cancel/Back/Clear */
+            if (SDL_strncmp(keyEvent->key, "SoftLeft", 9) == 0) {
+                scancode = SDL_SCANCODE_AC_FORWARD;
+            }
+            if (SDL_strncmp(keyEvent->key, "SoftRight", 10) == 0) {
+                scancode = SDL_SCANCODE_AC_BACK;
+            }
+        }
 
         if (scancode != SDL_SCANCODE_UNKNOWN) {
 

@@ -47,7 +47,6 @@
 #endif
 #endif
 
-#include "SDL_log.h"
 #include "SDL_platform.h"
 #include "SDL_thread.h"
 #include "../SDL_thread_c.h"
@@ -80,7 +79,7 @@ RunThread(void *data)
 #ifdef __ANDROID__
     Android_JNI_SetupThread();
 #endif
-    SDL_RunThread(data);
+    SDL_RunThread((SDL_Thread *) data);
     return NULL;
 }
 
@@ -92,7 +91,7 @@ static SDL_bool checked_setname = SDL_FALSE;
 static int (*ppthread_setname_np)(pthread_t, const char*) = NULL;
 #endif
 int
-SDL_SYS_CreateThread(SDL_Thread * thread, void *args)
+SDL_SYS_CreateThread(SDL_Thread * thread)
 {
     pthread_attr_t type;
 
@@ -121,7 +120,7 @@ SDL_SYS_CreateThread(SDL_Thread * thread, void *args)
     }
 
     /* Create the thread and go! */
-    if (pthread_create(&thread->handle, &type, RunThread, args) != 0) {
+    if (pthread_create(&thread->handle, &type, RunThread, thread) != 0) {
         return SDL_SetError("Not enough resources to create thread");
     }
 
@@ -239,9 +238,22 @@ SDL_SYS_SetThreadPriority(SDL_ThreadPriority priority)
     } else {
         int min_priority = sched_get_priority_min(policy);
         int max_priority = sched_get_priority_max(policy);
-        sched.sched_priority = (min_priority + (max_priority - min_priority) / 2);
-        if (priority == SDL_THREAD_PRIORITY_HIGH) {
-            sched.sched_priority += ((max_priority - min_priority) / 4);
+
+#if defined(__MACOSX__) || defined(__IPHONEOS__) || defined(__TVOS__)
+        if (min_priority == 15 && max_priority == 47) {
+            /* Apple has a specific set of thread priorities */
+            if (priority == SDL_THREAD_PRIORITY_HIGH) {
+                sched.sched_priority = 45;
+            } else {
+                sched.sched_priority = 37;
+            }
+        } else
+#endif /* __MACOSX__ || __IPHONEOS__ || __TVOS__ */
+        {
+            sched.sched_priority = (min_priority + (max_priority - min_priority) / 2);
+            if (priority == SDL_THREAD_PRIORITY_HIGH) {
+                sched.sched_priority += ((max_priority - min_priority) / 4);
+            }
         }
     }
     if (pthread_setschedparam(thread, policy, &sched) != 0) {

@@ -26,7 +26,6 @@
 #ifdef SDL_JOYSTICK_HIDAPI
 
 #include "SDL_hints.h"
-#include "SDL_log.h"
 #include "SDL_events.h"
 #include "SDL_timer.h"
 #include "SDL_joystick.h"
@@ -197,6 +196,7 @@ typedef struct {
     SDL_bool m_bInputOnly;
     SDL_bool m_bHasHomeLED;
     SDL_bool m_bUsingBluetooth;
+    SDL_bool m_bIsGameCube;
     SDL_bool m_bUseButtonLabels;
     Uint8 m_nCommandNumber;
     SwitchCommonOutputPacket_t m_RumblePacket;
@@ -225,7 +225,24 @@ typedef struct {
 } SDL_DriverSwitch_Context;
 
 
-static SDL_bool IsGameCubeFormFactor(int vendor_id, int product_id)
+static SDL_bool
+HasHomeLED(int vendor_id, int product_id)
+{
+    /* The Power A Nintendo Switch Pro controllers don't have a Home LED */
+    if (vendor_id == 0 && product_id == 0) {
+        return SDL_FALSE;
+    }
+
+    /* HORI Wireless Switch Pad */
+    if (vendor_id == 0x0f0d && product_id == 0x00f6) {
+        return SDL_FALSE;
+    }
+
+    return SDL_TRUE;
+}
+
+static SDL_bool
+IsGameCubeFormFactor(int vendor_id, int product_id)
 {
     static Uint32 gamecube_formfactor[] = {
         MAKE_VIDPID(0x0e6f, 0x0185),    /* PDP Wired Fight Pad Pro for Nintendo Switch */
@@ -245,6 +262,15 @@ static SDL_bool IsGameCubeFormFactor(int vendor_id, int product_id)
 static SDL_bool
 HIDAPI_DriverSwitch_IsSupportedDevice(const char *name, SDL_GameControllerType type, Uint16 vendor_id, Uint16 product_id, Uint16 version, int interface_number, int interface_class, int interface_subclass, int interface_protocol)
 {
+    /* The HORI Wireless Switch Pad enumerates as a HID device when connected via USB
+       with the same VID/PID as when connected over Bluetooth but doesn't actually
+       support communication over USB. The most reliable way to block this without allowing the
+       controller to continually attempt to reconnect is to filter it out by manufactuer/product string.
+       Note that the controller does have a different product string when connected over Bluetooth.
+     */
+    if (SDL_strcmp( name, "HORI Wireless Switch Pad" ) == 0) {
+        return SDL_FALSE;
+    }
     return (type == SDL_CONTROLLER_TYPE_NINTENDO_SWITCH_PRO);
 }
 
@@ -446,7 +472,7 @@ static SDL_bool WriteRumble(SDL_DriverSwitch_Context *ctx)
 
     /* Refresh the rumble state periodically */
     if (ctx->m_bRumbleActive) {
-        ctx->m_unRumbleRefresh = SDL_GetTicks() + 1000;
+        ctx->m_unRumbleRefresh = SDL_GetTicks() + 30;
         if (!ctx->m_unRumbleRefresh) {
             ctx->m_unRumbleRefresh = 1;
         }
@@ -468,7 +494,7 @@ static SDL_bool BTrySetupUSB(SDL_DriverSwitch_Context *ctx)
         return SDL_FALSE;
     }
     if (!WriteProprietary(ctx, k_eSwitchProprietaryCommandIDs_HighSpeed, NULL, 0, SDL_TRUE)) {
-        /* The 8BitDo M30 doesn't respond to this command, but otherwise works correctly */
+        /* The 8BitDo M30 and SF30 Pro don't respond to this command, but otherwise work correctly */
         /*return SDL_FALSE;*/
     }
     if (!WriteProprietary(ctx, k_eSwitchProprietaryCommandIDs_Handshake, NULL, 0, SDL_TRUE)) {
@@ -514,7 +540,7 @@ static SDL_bool SetSlotLED(SDL_DriverSwitch_Context *ctx, Uint8 slot)
     return WriteSubcommand(ctx, k_eSwitchSubcommandIDs_SetPlayerLights, &led_data, sizeof(led_data), NULL);
 }
 
-static SDL_bool LoadStickCalibration(SDL_DriverSwitch_Context *ctx)
+static SDL_bool LoadStickCalibration(SDL_DriverSwitch_Context *ctx, Uint8 input_mode)
 {
     Uint8 *pStickCal;
     size_t stick, axis;
@@ -567,7 +593,7 @@ static SDL_bool LoadStickCalibration(SDL_DriverSwitch_Context *ctx)
         }
     }
 
-    if (ctx->m_bUsingBluetooth) {
+    if (input_mode == k_eSwitchInputReportIDs_SimpleControllerState) {
         for (stick = 0; stick < 2; ++stick) {
             for(axis = 0; axis < 2; ++axis) {
                 ctx->m_StickExtents[stick].axis[axis].sMin = (Sint16)(SDL_MIN_SINT16 * 0.5f);
@@ -629,18 +655,30 @@ static void SDLCALL SDL_GameControllerButtonReportingHintChanged(void *userdata,
 
 static Uint8 RemapButton(SDL_DriverSwitch_Context *ctx, Uint8 button)
 {
-    if (ctx->m_bUseButtonLabels) {
-        switch (button) {
-        case SDL_CONTROLLER_BUTTON_A:
-            return SDL_CONTROLLER_BUTTON_B;
-        case SDL_CONTROLLER_BUTTON_B:
-            return SDL_CONTROLLER_BUTTON_A;
-        case SDL_CONTROLLER_BUTTON_X:
-            return SDL_CONTROLLER_BUTTON_Y;
-        case SDL_CONTROLLER_BUTTON_Y:
-            return SDL_CONTROLLER_BUTTON_X;
-        default:
-            break;
+    if (!ctx->m_bUseButtonLabels) {
+        /* Use button positions */
+        if (ctx->m_bIsGameCube) {
+            switch (button) {
+            case SDL_CONTROLLER_BUTTON_B:
+                return SDL_CONTROLLER_BUTTON_X;
+            case SDL_CONTROLLER_BUTTON_X:
+                return SDL_CONTROLLER_BUTTON_B;
+            default:
+                break;
+            }
+        } else {
+            switch (button) {
+            case SDL_CONTROLLER_BUTTON_A:
+                return SDL_CONTROLLER_BUTTON_B;
+            case SDL_CONTROLLER_BUTTON_B:
+                return SDL_CONTROLLER_BUTTON_A;
+            case SDL_CONTROLLER_BUTTON_X:
+                return SDL_CONTROLLER_BUTTON_Y;
+            case SDL_CONTROLLER_BUTTON_Y:
+                return SDL_CONTROLLER_BUTTON_X;
+            default:
+                break;
+            }
         }
     }
     return button;
@@ -649,7 +687,7 @@ static Uint8 RemapButton(SDL_DriverSwitch_Context *ctx, Uint8 button)
 static SDL_bool
 HIDAPI_DriverSwitch_InitDevice(SDL_HIDAPI_Device *device)
 {
-    return HIDAPI_JoystickConnected(device, NULL);
+    return HIDAPI_JoystickConnected(device, NULL, SDL_FALSE);
 }
 
 static int
@@ -686,8 +724,7 @@ HIDAPI_DriverSwitch_OpenJoystick(SDL_HIDAPI_Device *device, SDL_Joystick *joysti
     /* Find out whether or not we can send output reports */
     ctx->m_bInputOnly = SDL_IsJoystickNintendoSwitchProInputOnly(device->vendor_id, device->product_id);
     if (!ctx->m_bInputOnly) {
-        /* The Power A Nintendo Switch Pro controllers don't have a Home LED */
-        ctx->m_bHasHomeLED = (device->vendor_id != 0 && device->product_id != 0) ? SDL_TRUE : SDL_FALSE;
+        ctx->m_bHasHomeLED = HasHomeLED(device->vendor_id, device->product_id);
 
         /* Initialize rumble data */
         SetNeutralRumble(&ctx->m_RumblePacket.rumbleData[0]);
@@ -698,7 +735,24 @@ HIDAPI_DriverSwitch_OpenJoystick(SDL_HIDAPI_Device *device, SDL_Joystick *joysti
             ctx->m_bUsingBluetooth = SDL_TRUE;
         }
 
-        if (!LoadStickCalibration(ctx)) {
+        /* Determine the desired input mode (needed before loading stick calibration) */
+        if (ctx->m_bUsingBluetooth) {
+            input_mode = k_eSwitchInputReportIDs_SimpleControllerState;
+        } else {
+            input_mode = k_eSwitchInputReportIDs_FullControllerState;
+        }
+
+        /* The official Nintendo Switch Pro Controller supports FullControllerState over bluetooth
+         * just fine. We really should use that, or else the epowerlevel code in
+         * HandleFullControllerState is completely pointless. We need full state if we want battery
+         * level and we only care about battery level over bluetooth anyway.
+         */
+        if (device->vendor_id == USB_VENDOR_NINTENDO &&
+            device->product_id == USB_PRODUCT_NINTENDO_SWITCH_PRO) {
+            input_mode = k_eSwitchInputReportIDs_FullControllerState;
+        }
+
+        if (!LoadStickCalibration(ctx, input_mode)) {
             SDL_SetError("Couldn't load stick calibration");
             goto error;
         }
@@ -708,12 +762,7 @@ HIDAPI_DriverSwitch_OpenJoystick(SDL_HIDAPI_Device *device, SDL_Joystick *joysti
             goto error;
         }
 
-        /* Set the desired input mode */
-        if (ctx->m_bUsingBluetooth) {
-            input_mode = k_eSwitchInputReportIDs_SimpleControllerState;
-        } else {
-            input_mode = k_eSwitchInputReportIDs_FullControllerState;
-        }
+        /* Set desired input mode */
         if (!SetInputMode(ctx, input_mode)) {
             SDL_SetError("Couldn't set input mode");
             goto error;
@@ -737,11 +786,11 @@ HIDAPI_DriverSwitch_OpenJoystick(SDL_HIDAPI_Device *device, SDL_Joystick *joysti
 
     if (IsGameCubeFormFactor(device->vendor_id, device->product_id)) {
         /* This is a controller shaped like a GameCube controller, with a large central A button */
-        ctx->m_bUseButtonLabels = SDL_TRUE;
-    } else {
-        SDL_AddHintCallback(SDL_HINT_GAMECONTROLLER_USE_BUTTON_LABELS,
-                            SDL_GameControllerButtonReportingHintChanged, ctx);
+        ctx->m_bIsGameCube = SDL_TRUE;
     }
+
+    SDL_AddHintCallback(SDL_HINT_GAMECONTROLLER_USE_BUTTON_LABELS,
+                        SDL_GameControllerButtonReportingHintChanged, ctx);
 
     /* Initialize the joystick capabilities */
     joystick->nbuttons = SDL_CONTROLLER_BUTTON_MAX;
@@ -805,10 +854,10 @@ static void HandleInputOnlyControllerState(SDL_Joystick *joystick, SDL_DriverSwi
 
     if (packet->rgucButtons[0] != ctx->m_lastInputOnlyState.rgucButtons[0]) {
         Uint8 data = packet->rgucButtons[0];
-        SDL_PrivateJoystickButton(joystick, RemapButton(ctx, SDL_CONTROLLER_BUTTON_X), (data & 0x01) ? SDL_PRESSED : SDL_RELEASED);
-        SDL_PrivateJoystickButton(joystick, RemapButton(ctx, SDL_CONTROLLER_BUTTON_A), (data & 0x02) ? SDL_PRESSED : SDL_RELEASED);
-        SDL_PrivateJoystickButton(joystick, RemapButton(ctx, SDL_CONTROLLER_BUTTON_B), (data & 0x04) ? SDL_PRESSED : SDL_RELEASED);
-        SDL_PrivateJoystickButton(joystick, RemapButton(ctx, SDL_CONTROLLER_BUTTON_Y), (data & 0x08) ? SDL_PRESSED : SDL_RELEASED);
+        SDL_PrivateJoystickButton(joystick, RemapButton(ctx, SDL_CONTROLLER_BUTTON_A), (data & 0x04) ? SDL_PRESSED : SDL_RELEASED);
+        SDL_PrivateJoystickButton(joystick, RemapButton(ctx, SDL_CONTROLLER_BUTTON_B), (data & 0x02) ? SDL_PRESSED : SDL_RELEASED);
+        SDL_PrivateJoystickButton(joystick, RemapButton(ctx, SDL_CONTROLLER_BUTTON_X), (data & 0x08) ? SDL_PRESSED : SDL_RELEASED);
+        SDL_PrivateJoystickButton(joystick, RemapButton(ctx, SDL_CONTROLLER_BUTTON_Y), (data & 0x01) ? SDL_PRESSED : SDL_RELEASED);
         SDL_PrivateJoystickButton(joystick, SDL_CONTROLLER_BUTTON_LEFTSHOULDER, (data & 0x10) ? SDL_PRESSED : SDL_RELEASED);
         SDL_PrivateJoystickButton(joystick, SDL_CONTROLLER_BUTTON_RIGHTSHOULDER, (data & 0x20) ? SDL_PRESSED : SDL_RELEASED);
 
@@ -1099,7 +1148,7 @@ HIDAPI_DriverSwitch_UpdateDevice(SDL_HIDAPI_Device *device)
 
     if (size < 0) {
         /* Read error, device is disconnected */
-        HIDAPI_JoystickDisconnected(device, joystick->instance_id);
+        HIDAPI_JoystickDisconnected(device, joystick->instance_id, SDL_FALSE);
     }
     return (size >= 0);
 }
@@ -1142,7 +1191,8 @@ SDL_HIDAPI_DeviceDriver SDL_HIDAPI_DriverSwitch =
     HIDAPI_DriverSwitch_OpenJoystick,
     HIDAPI_DriverSwitch_RumbleJoystick,
     HIDAPI_DriverSwitch_CloseJoystick,
-    HIDAPI_DriverSwitch_FreeDevice
+    HIDAPI_DriverSwitch_FreeDevice,
+    NULL
 };
 
 #endif /* SDL_JOYSTICK_HIDAPI_SWITCH */

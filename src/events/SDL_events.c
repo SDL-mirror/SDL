@@ -33,6 +33,13 @@
 #include "../video/SDL_sysvideo.h"
 #include "SDL_syswm.h"
 
+#undef SDL_PRIs64
+#ifdef __WIN32__
+#define SDL_PRIs64  "I64d"
+#else
+#define SDL_PRIs64  "lld"
+#endif
+
 /* An arbitrary limit so we don't have unbounded growth */
 #define SDL_MAX_QUEUED_EVENTS   65535
 
@@ -671,10 +678,14 @@ SDL_PumpEvents(void)
 {
     SDL_VideoDevice *_this = SDL_GetVideoDevice();
 
+    /* Release any keys held down from last frame */
+    SDL_ReleaseAutoReleaseKeys();
+
     /* Get events from the video subsystem */
     if (_this) {
         _this->PumpEvents(_this);
     }
+
 #if !SDL_JOYSTICK_DISABLED
     /* Check for joystick state change */
     if ((!SDL_disabled_events[SDL_JOYAXISMOTION >> 8] || SDL_JoystickEventState(SDL_QUERY))) {

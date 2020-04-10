@@ -67,7 +67,6 @@ struct _SDL_Joystick
     SDL_bool attached;
     SDL_bool is_game_controller;
     SDL_bool delayed_guide_button; /* SDL_TRUE if this device has the guide button event delayed */
-    SDL_bool force_recentering; /* SDL_TRUE if this device needs to have its state reset to 0 */
     SDL_JoystickPowerLevel epowerlevel; /* power level of this joystick, SDL_JOYSTICK_POWER_UNKNOWN if not supported */
     struct _SDL_JoystickDriver *driver;
 
@@ -151,8 +150,10 @@ extern SDL_JoystickDriver SDL_DUMMY_JoystickDriver;
 extern SDL_JoystickDriver SDL_EMSCRIPTEN_JoystickDriver;
 extern SDL_JoystickDriver SDL_HAIKU_JoystickDriver;
 extern SDL_JoystickDriver SDL_HIDAPI_JoystickDriver;
+extern SDL_JoystickDriver SDL_RAWINPUT_JoystickDriver;
 extern SDL_JoystickDriver SDL_IOS_JoystickDriver;
 extern SDL_JoystickDriver SDL_LINUX_JoystickDriver;
+extern SDL_JoystickDriver SDL_VIRTUAL_JoystickDriver;
 extern SDL_JoystickDriver SDL_WINDOWS_JoystickDriver;
 
 #endif /* SDL_sysjoystick_h_ */
