@@ -744,7 +744,7 @@ SDL_DYNAPI_PROC(SDL_bool,SDL_HasColorKey,(SDL_Surface *a),(a),return)
 #undef SDL_CreateThreadWithStackSize
 #endif
 
-#if defined(__WIN32__) && !defined(HAVE_LIBC)
+#if defined(__WIN32__)
 SDL_DYNAPI_PROC(SDL_Thread*,SDL_CreateThreadWithStackSize,(SDL_ThreadFunction a, const char *b, const size_t c, void *d, pfnSDL_CurrentBeginThread e, pfnSDL_CurrentEndThread f),(a,b,c,d,e,f),return)
 #elif defined(__OS2__)
 SDL_DYNAPI_PROC(SDL_Thread*,SDL_CreateThreadWithStackSize,(SDL_ThreadFunction a, const char *b, const size_t c, void *d, pfnSDL_CurrentBeginThread e, pfnSDL_CurrentEndThread f),(a,b,c,d,e,f),return)
@@ -807,3 +807,14 @@ SDL_DYNAPI_PROC(void,SDL_OnApplicationDidChangeStatusBarOrientation,(void),(),)
 #ifdef __ANDROID__
 SDL_DYNAPI_PROC(int,SDL_GetAndroidSDKVersion,(void),(),return)
 #endif
+SDL_DYNAPI_PROC(int,SDL_isupper,(int a),(a),return)
+SDL_DYNAPI_PROC(int,SDL_islower,(int a),(a),return)
+SDL_DYNAPI_PROC(int,SDL_JoystickAttachVirtual,(SDL_JoystickType a, int b, int c, int d),(a,b,c,d),return)
+SDL_DYNAPI_PROC(int,SDL_JoystickDetachVirtual,(int a),(a),return)
+SDL_DYNAPI_PROC(SDL_bool,SDL_JoystickIsVirtual,(int a),(a),return)
+SDL_DYNAPI_PROC(int,SDL_JoystickSetVirtualAxis,(SDL_Joystick *a, int b, Sint16 c),(a,b,c),return)
+SDL_DYNAPI_PROC(int,SDL_JoystickSetVirtualButton,(SDL_Joystick *a, int b, Uint8 c),(a,b,c),return)
+SDL_DYNAPI_PROC(int,SDL_JoystickSetVirtualHat,(SDL_Joystick *a, int b, Uint8 c),(a,b,c),return)
+SDL_DYNAPI_PROC(char*,SDL_GetErrorMsg,(char *a, int b),(a,b),return)
+SDL_DYNAPI_PROC(void,SDL_LockSensors,(void),(),)
+SDL_DYNAPI_PROC(void,SDL_UnlockSensors,(void),(),)

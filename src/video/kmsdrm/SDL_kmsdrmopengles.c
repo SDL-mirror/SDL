@@ -23,8 +23,6 @@
 
 #if SDL_VIDEO_DRIVER_KMSDRM && SDL_VIDEO_OPENGL_EGL
 
-#include "SDL_log.h"
-
 #include "SDL_kmsdrmvideo.h"
 #include "SDL_kmsdrmopengles.h"
 #include "SDL_kmsdrmdyn.h"
@@ -37,7 +35,8 @@
 
 int
 KMSDRM_GLES_LoadLibrary(_THIS, const char *path) {
-    return SDL_EGL_LoadLibrary(_this, path, ((SDL_VideoData *)_this->driverdata)->gbm, EGL_PLATFORM_GBM_MESA);
+    NativeDisplayType display = (NativeDisplayType)((SDL_VideoData *)_this->driverdata)->gbm;
+    return SDL_EGL_LoadLibrary(_this, path, display, EGL_PLATFORM_GBM_MESA);
 }
 
 SDL_EGL_CreateContext_impl(KMSDRM)

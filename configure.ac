@@ -20,9 +20,9 @@ dnl Set various version strings - taken gratefully from the GTk sources
 #
 SDL_MAJOR_VERSION=2
 SDL_MINOR_VERSION=0
-SDL_MICRO_VERSION=11
-SDL_INTERFACE_AGE=0
-SDL_BINARY_AGE=11
+SDL_MICRO_VERSION=13
+SDL_INTERFACE_AGE=1
+SDL_BINARY_AGE=13
 SDL_VERSION=$SDL_MAJOR_VERSION.$SDL_MINOR_VERSION.$SDL_MICRO_VERSION
 
 AC_SUBST(SDL_MAJOR_VERSION)
@@ -34,6 +34,7 @@ AC_SUBST(SDL_VERSION)
 
 # libtool versioning
 LT_INIT([win32-dll])
+LT_LANG([Windows Resource])
 
 LT_RELEASE=$SDL_MAJOR_VERSION.$SDL_MINOR_VERSION
 LT_CURRENT=`expr $SDL_MICRO_VERSION - $SDL_INTERFACE_AGE`
@@ -55,7 +56,7 @@ AC_PROG_CC
 AC_PROG_CXX
 AC_PROG_INSTALL
 AC_PROG_MAKE_SET
-AC_CHECK_TOOL(WINDRES, [windres], [:])
+AC_LIBTOOL_RC
 PKG_PROG_PKG_CONFIG
 
 dnl Make sure that srcdir is a full pathname
@@ -1332,7 +1333,7 @@ AC_HELP_STRING([--enable-arm-simd], [use SIMD assembly blitters on ARM [[default
         CFLAGS="$save_CFLAGS"
         
         if test x$have_arm_simd = xyes; then
-            AC_DEFINE(SDL_ARM_SIMD_BLITTERS)
+            AC_DEFINE(SDL_ARM_SIMD_BLITTERS, 1, [ ])
 dnl            SOURCES="$SOURCES $srcdir/src/video/arm/pixman-arm-simd*.c"
             SOURCES="$SOURCES $srcdir/src/video/arm/pixman-arm-simd*.S"
             WARN_ABOUT_ARM_SIMD_ASM_MIT="yes"
@@ -1344,8 +1345,8 @@ dnl Check for ARM NEON instruction support using gas syntax
 CheckNEON()
 {
     AC_ARG_ENABLE(arm-neon,
-AC_HELP_STRING([--enable-arm-neon], [use NEON assembly blitters on ARM [[default=yes]]]),
-                  enable_arm_neon=$enableval, enable_arm_neon=yes)
+AC_HELP_STRING([--enable-arm-neon], [use NEON assembly blitters on ARM [[default=no]]]),
+                  enable_arm_neon=$enableval, enable_arm_neon=no)
     if test x$enable_video = xyes -a x$enable_assembly = xyes -a x$enable_arm_neon = xyes; then
         save_CFLAGS="$CFLAGS"
         have_arm_neon=no
@@ -1371,7 +1372,7 @@ AC_HELP_STRING([--enable-arm-neon], [use NEON assembly blitters on ARM [[default
         CFLAGS="$save_CFLAGS"
         
         if test x$have_arm_neon = xyes; then
-            AC_DEFINE(SDL_ARM_NEON_BLITTERS)
+            AC_DEFINE(SDL_ARM_NEON_BLITTERS, 1, [ ])
 dnl            SOURCES="$SOURCES $srcdir/src/video/arm/pixman-arm-neon*.c"
             SOURCES="$SOURCES $srcdir/src/video/arm/pixman-arm-neon*.S"
             WARN_ABOUT_ARM_NEON_ASM_MIT="yes"
@@ -1526,7 +1527,7 @@ AS_HELP_STRING([--enable-video-wayland-qt-touch], [QtWayland server support for 
         video_wayland=no
         if  test x$video_opengl_egl = xyes && \
             test x$video_opengles_v2 = xyes; then
-            if $PKG_CONFIG --exists wayland-client wayland-scanner wayland-protocols wayland-egl wayland-cursor egl xkbcommon ; then
+            if $PKG_CONFIG --exists wayland-client wayland-scanner wayland-egl wayland-cursor egl xkbcommon ; then
                 WAYLAND_CFLAGS=`$PKG_CONFIG --cflags wayland-client wayland-egl wayland-cursor xkbcommon`
                 WAYLAND_LIBS=`$PKG_CONFIG --libs wayland-client wayland-egl wayland-cursor xkbcommon`
                 WAYLAND_SCANNER=`$PKG_CONFIG --variable=wayland_scanner wayland-scanner`
@@ -1927,7 +1928,7 @@ int event_type = XI_TouchBegin;
 XITouchClassInfo *t;
                     ],[
                     have_xinput2_multitouch=yes
-                    AC_DEFINE([SDL_VIDEO_DRIVER_X11_XINPUT2_SUPPORTS_MULTITOUCH], 1, [])
+                    AC_DEFINE([SDL_VIDEO_DRIVER_X11_XINPUT2_SUPPORTS_MULTITOUCH], 1, [ ])
                     SUMMARY_video_x11="${SUMMARY_video_x11} xinput2_multitouch"
                     ])
                 AC_MSG_RESULT($have_xinput2_multitouch)
@@ -2035,6 +2036,9 @@ AS_HELP_STRING([--enable-video-x11-vm], [use X11 VM extension for fullscreen [[d
                 SUMMARY_video_x11="${SUMMARY_video_x11} xvidmode"
             fi
         fi
+    else
+        # Prevent Mesa from including X11 headers
+        EXTRA_CFLAGS="$EXTRA_CFLAGS -DMESA_EGL_NO_X11_HEADERS -DEGL_NO_X11"
     fi
 }
 
@@ -3137,11 +3141,11 @@ XINPUT_STATE_EX s1;
 
     AC_CHECK_HEADER(mmdeviceapi.h, have_wasapi=yes)
     if test x$have_wasapi = xyes; then
-        AC_DEFINE(HAVE_MMDEVICEAPI_H,1,[])
+        AC_DEFINE(HAVE_MMDEVICEAPI_H, 1, [ ])
     fi
     AC_CHECK_HEADER(audioclient.h,,have_wasapi=no)
     if test x$have_wasapi = xyes; then
-        AC_DEFINE(HAVE_AUDIOCLIENT_H,1,[])
+        AC_DEFINE(HAVE_AUDIOCLIENT_H, 1, [ ])
     fi
 
     AC_ARG_ENABLE(wasapi,
@@ -3334,6 +3338,10 @@ CheckHIDAPI()
         *-*-*bsd* )
             onlylibusb=yes
             ;;
+        # RAWINPUT is only available on Win32, but can be enabled if HIDAPI is
+        *-*-cygwin* | *-*-mingw32*)
+            userawinput=yes
+            ;;
     esac
 
     AC_ARG_ENABLE(hidapi,
@@ -3359,6 +3367,9 @@ AS_HELP_STRING([--enable-hidapi], [use HIDAPI for low level joystick drivers [[d
 
         if test x$hidapi_support = xyes; then
             AC_DEFINE(SDL_JOYSTICK_HIDAPI, 1, [ ])
+            if test x$userawinput = xyes; then
+                AC_DEFINE(SDL_JOYSTICK_RAWINPUT, 1, [ ])
+            fi
             EXTRA_CFLAGS="$EXTRA_CFLAGS -I$srcdir/src/hidapi/hidapi"
             SOURCES="$SOURCES $srcdir/src/joystick/hidapi/*.c"
             SOURCES="$SOURCES $srcdir/src/hidapi/SDL_hidapi.c"
@@ -3450,6 +3461,19 @@ AS_HELP_STRING([--enable-foregrounding-signal], [number to use for magic foregro
                   , enable_foregrounding_signal=no)
     if test x$enable_foregrounding_signal != xno; then
         EXTRA_CFLAGS="$EXTRA_CFLAGS -DSDL_FOREGROUNDING_SIGNAL=$enable_foregrounding_signal"
+    fi
+}
+
+dnl Set up the Virtual joystick driver.
+CheckVirtualJoystick()
+{
+    AC_ARG_ENABLE(joystick-virtual,
+AS_HELP_STRING([--enable-joystick-virtual], [enable virtual joystick APIs [[default=no]]]),
+                  , enable_joystick_virtual=no)
+    if test x$enable_joystick = xyes -a x$enable_joystick_virtual = xyes; then
+        AC_DEFINE(SDL_JOYSTICK_VIRTUAL, 1, [ ])
+        SOURCES="$SOURCES $srcdir/src/joystick/virtual/*.c"
+        have_joystick_virtual=yes
     fi
 }
 
@@ -3761,11 +3785,19 @@ AS_HELP_STRING([--enable-render-d3d], [enable the Direct3D render driver [[defau
                 have_haptic=yes
             fi
         fi
+        # Set up files for the sensor library
+        if test x$enable_sensor = xyes; then
+            AC_DEFINE(SDL_SENSOR_WINDOWS, 1, [ ])
+            SOURCES="$SOURCES $srcdir/src/sensor/windows/*.c"
+            have_sensor=yes
+        fi
+        # Set up files for the power library
         if test x$enable_power = xyes; then
             AC_DEFINE(SDL_POWER_WINDOWS, 1, [ ])
             SOURCES="$SOURCES $srcdir/src/power/windows/SDL_syspower.c"
             have_power=yes
         fi
+        # Set up files for the filesystem library
         if test x$enable_filesystem = xyes; then
             AC_DEFINE(SDL_FILESYSTEM_WINDOWS, 1, [ ])
             SOURCES="$SOURCES $srcdir/src/filesystem/windows/SDL_sysfilesystem.c"
@@ -4195,6 +4227,9 @@ AS_HELP_STRING([--enable-render-d3d], [enable the Direct3D render driver [[defau
         ;;
 esac
 
+dnl Permit use of virtual joystick APIs on any platform (subject to configure options)
+CheckVirtualJoystick
+
 # Check whether to install sdl2-config
 AC_MSG_CHECKING(whether to install sdl2-config)
 AC_ARG_ENABLE([sdl2-config],
@@ -4297,10 +4332,10 @@ GEN_OBJECTS=`echo "$GEN_SOURCES" | sed 's,[[^ ]]*/\([[^ ]]*\)\.c,$(objects)/\1.l
 
 VERSION_OBJECTS=`echo $VERSION_SOURCES`
 VERSION_DEPENDS=`echo $VERSION_SOURCES`
-VERSION_OBJECTS=`echo "$VERSION_OBJECTS" | sed 's,[[^ ]]*/\([[^ ]]*\)\.rc,$(objects)/\1.o,g'`
+VERSION_OBJECTS=`echo "$VERSION_OBJECTS" | sed 's,[[^ ]]*/\([[^ ]]*\)\.rc,$(objects)/\1.lo,g'`
 VERSION_DEPENDS=`echo "$VERSION_DEPENDS" | sed "s,\\([[^ ]]*\\)/\\([[^ ]]*\\)\\.rc,\\\\
-\\$(objects)/\\2.o: \\1/\\2.rc \\$(objects)/.created\\\\
-	\\$(WINDRES) \\$< \\$@,g"`
+\\$(objects)/\\2.lo: \\1/\\2.rc \\$(objects)/.created\\\\
+	\\$(RUN_CMD_RC)\\$(LIBTOOL) --mode=compile --tag=RC \\$(RC) -i \\$< -o \\$@,g"`
 
 SDLMAIN_OBJECTS=`echo $SDLMAIN_SOURCES`
 SDLMAIN_DEPENDS=`echo $SDLMAIN_SOURCES`
@@ -4384,7 +4419,6 @@ AC_SUBST(BUILD_CFLAGS)
 AC_SUBST(EXTRA_CFLAGS)
 AC_SUBST(BUILD_LDFLAGS)
 AC_SUBST(EXTRA_LDFLAGS)
-AC_SUBST(WINDRES)
 AC_SUBST(WAYLAND_SCANNER)
 
 cat >Makefile.rules <<__EOF__
@@ -4402,7 +4436,7 @@ $WAYLAND_PROTOCOLS_DEPENDS
 __EOF__
 
 AC_CONFIG_FILES([
-    Makefile:Makefile.in:Makefile.rules sdl2-config sdl2-config.cmake SDL2.spec sdl2.pc
+    Makefile:Makefile.in:Makefile.rules sdl2-config sdl2-config.cmake sdl2-config-version.cmake SDL2.spec sdl2.pc
 ])
 AC_CONFIG_COMMANDS([sdl2_config],[chmod a+x sdl2-config])
 
@@ -4421,6 +4455,11 @@ if test x$have_x = xyes; then
     SUMMARY="${SUMMARY}X11 libraries   :${SUMMARY_video_x11}\n"
 fi
 SUMMARY="${SUMMARY}Input drivers   :${SUMMARY_input}\n"
+if test x$have_joystick_virtual = xyes; then
+    SUMMARY="${SUMMARY}Enable virtual joystick APIs : YES\n"
+else
+    SUMMARY="${SUMMARY}Enable virtual joystick APIs : NO\n"
+fi
 if test x$have_samplerate_h_hdr = xyes; then
     SUMMARY="${SUMMARY}Using libsamplerate : YES\n"
 else

@@ -113,10 +113,10 @@ struct SDL_WindowData
 {
     SDL_Window *window;
     NSWindow *nswindow;
-    NSView *sdlContentView; /* nil if window is created via CreateWindowFrom */
+    NSView *sdlContentView;
     NSMutableArray *nscontexts;
     SDL_bool created;
-    SDL_bool inWindowMove;
+    SDL_bool inWindowFullscreenTransition;
     Cocoa_WindowListener *listener;
     struct SDL_VideoData *videodata;
 #if SDL_VIDEO_OPENGL_EGL

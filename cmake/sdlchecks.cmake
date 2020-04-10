@@ -593,7 +593,7 @@ endmacro()
 # - HAVE_DLOPEN opt
 macro(CheckWayland)
   if(VIDEO_WAYLAND)
-    pkg_check_modules(WAYLAND wayland-client wayland-scanner wayland-protocols wayland-egl wayland-cursor egl xkbcommon)
+    pkg_check_modules(WAYLAND wayland-client wayland-scanner wayland-egl wayland-cursor egl xkbcommon)
 
     if(WAYLAND_FOUND)
       execute_process(
@@ -757,8 +757,10 @@ macro(CheckOpenGLX11)
 endmacro()
 
 # Requires:
-# - nada
+# - PkgCheckModules
 macro(CheckOpenGLESX11)
+  pkg_check_modules(EGL egl)
+  set(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} ${EGL_CFLAGS}")
   if(VIDEO_OPENGLES)
     check_c_source_compiles("
         #define EGL_API_FB
@@ -1107,7 +1109,7 @@ macro(CheckHIDAPI)
       set(HAVE_SDL_JOYSTICK TRUE)
       file(GLOB HIDAPI_SOURCES ${SDL2_SOURCE_DIR}/src/joystick/hidapi/*.c)
       set(SOURCE_FILES ${SOURCE_FILES} ${HIDAPI_SOURCES})
-      set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${LIBUSB_CFLAGS} -I${SDL2_SOURCE_DIR}/src/hidapi/hidapi")
+      set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${LIBUSB_CFLAGS} \"-I${SDL2_SOURCE_DIR}/src/hidapi/hidapi\"")
       if(NOT HIDAPI_SKIP_LIBUSB)
         if(HIDAPI_ONLY_LIBUSB)
           set(SOURCE_FILES ${SOURCE_FILES} ${SDL2_SOURCE_DIR}/src/hidapi/libusb/hid.c)

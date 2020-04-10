@@ -26,7 +26,6 @@
 /* SDL internals */
 #include "../SDL_sysvideo.h"
 #include "SDL_syswm.h"
-#include "SDL_log.h"
 #include "SDL_hints.h"
 #include "../../events/SDL_events_c.h"
 #include "../../events/SDL_mouse_c.h"
@@ -349,10 +348,9 @@ KMSDRM_WaitPageFlip(_THIS, SDL_WindowData *windata, int timeout) {
 /* SDL Video and Display initialization/handling functions                   */
 /* _this is a SDL_VideoDevice *                                              */
 /*****************************************************************************/
-static int
+static void
 KMSDRM_DestroySurfaces(_THIS, SDL_Window * window)
 {
-    SDL_VideoData *viddata = ((SDL_VideoData *)_this->driverdata);
     SDL_WindowData *windata = (SDL_WindowData *)window->driverdata;
 
     KMSDRM_WaitPageFlip(_this, windata, -1);
@@ -392,7 +390,9 @@ KMSDRM_CreateSurfaces(_THIS, SDL_Window * window)
     Uint32 height = dispdata->mode.vdisplay;
     Uint32 surface_fmt = GBM_FORMAT_XRGB8888;
     Uint32 surface_flags = GBM_BO_USE_SCANOUT | GBM_BO_USE_RENDERING;
+#if SDL_VIDEO_OPENGL_EGL
     EGLContext egl_context;
+#endif
 
     if (!KMSDRM_gbm_device_is_format_supported(viddata->gbm, surface_fmt, surface_flags)) {
         SDL_LogWarn(SDL_LOG_CATEGORY_VIDEO, "GBM surface format not supported. Trying anyway.");
@@ -651,7 +651,7 @@ KMSDRM_VideoQuit(_THIS)
     viddata->num_windows = 0;
 
     /* Restore saved CRTC settings */
-    if (viddata->drm_fd >= 0 && dispdata->conn && dispdata->saved_crtc) {
+    if (viddata->drm_fd >= 0 && dispdata && dispdata->conn && dispdata->saved_crtc) {
         drmModeConnector *conn = dispdata->conn;
         drmModeCrtc *crtc = dispdata->saved_crtc;
 
@@ -662,11 +662,11 @@ KMSDRM_VideoQuit(_THIS)
             SDL_LogWarn(SDL_LOG_CATEGORY_VIDEO, "Could not restore original CRTC mode");
         }
     }
-    if (dispdata->conn) {
+    if (dispdata && dispdata->conn) {
         KMSDRM_drmModeFreeConnector(dispdata->conn);
         dispdata->conn = NULL;
     }
-    if (dispdata->saved_crtc) {
+    if (dispdata && dispdata->saved_crtc) {
         KMSDRM_drmModeFreeCrtc(dispdata->saved_crtc);
         dispdata->saved_crtc = NULL;
     }
@@ -808,6 +808,10 @@ KMSDRM_CreateWindow(_THIS, SDL_Window * window)
     }
 
     viddata->windows[viddata->num_windows++] = window;
+
+    /* Focus on the newly created window */
+    SDL_SetMouseFocus(window);
+    SDL_SetKeyboardFocus(window);
 
     return 0;
 

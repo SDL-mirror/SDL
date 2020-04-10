@@ -23,12 +23,12 @@
 #ifdef SDL_JOYSTICK_HIDAPI
 
 #include "SDL_hints.h"
-#include "SDL_log.h"
 #include "SDL_events.h"
 #include "SDL_timer.h"
 #include "SDL_haptic.h"
 #include "SDL_joystick.h"
 #include "SDL_gamecontroller.h"
+#include "../../SDL_hints_c.h"
 #include "../SDL_sysjoystick.h"
 #include "SDL_hidapijoystick_c.h"
 #include "SDL_hidapi_rumble.h"
@@ -47,6 +47,7 @@ typedef struct {
     Uint8 rumble[1+MAX_CONTROLLERS];
     /* Without this variable, hid_write starts to lag a TON */
     SDL_bool rumbleUpdate;
+    SDL_bool m_bUseButtonLabels;
 } SDL_DriverGameCube_Context;
 
 static SDL_bool
@@ -93,6 +94,28 @@ static float RemapVal(float val, float A, float B, float C, float D)
         val = B;
     }
     return C + (D - C) * (val - A) / (B - A);
+}
+
+static void SDLCALL SDL_GameControllerButtonReportingHintChanged(void *userdata, const char *name, const char *oldValue, const char *hint)
+{
+    SDL_DriverGameCube_Context *ctx = (SDL_DriverGameCube_Context *)userdata;
+    ctx->m_bUseButtonLabels = SDL_GetStringBoolean(hint, SDL_TRUE);
+}
+
+static Uint8 RemapButton(SDL_DriverGameCube_Context *ctx, Uint8 button)
+{
+    if (!ctx->m_bUseButtonLabels) {
+        /* Use button positions */
+        switch (button) {
+        case SDL_CONTROLLER_BUTTON_B:
+            return SDL_CONTROLLER_BUTTON_X;
+        case SDL_CONTROLLER_BUTTON_X:
+            return SDL_CONTROLLER_BUTTON_B;
+        default:
+            break;
+        }
+    }
+    return button;
 }
 
 static SDL_bool
@@ -152,17 +175,20 @@ HIDAPI_DriverGameCube_InitDevice(SDL_HIDAPI_Device *device)
             if (curSlot[0] & 0x30) { /* 0x10 - Wired, 0x20 - Wireless */
                 if (ctx->joysticks[i] == -1) {
                     ResetAxisRange(ctx, i);
-                    HIDAPI_JoystickConnected(device, &ctx->joysticks[i]);
+                    HIDAPI_JoystickConnected(device, &ctx->joysticks[i], SDL_FALSE);
                 }
             } else {
                 if (ctx->joysticks[i] != -1) {
-                    HIDAPI_JoystickDisconnected(device, ctx->joysticks[i]);
+                    HIDAPI_JoystickDisconnected(device, ctx->joysticks[i], SDL_FALSE);
                     ctx->joysticks[i] = -1;
                 }
                 continue;
             }
         }
     }
+
+    SDL_AddHintCallback(SDL_HINT_GAMECONTROLLER_USE_BUTTON_LABELS,
+                        SDL_GameControllerButtonReportingHintChanged, ctx);
 
     return SDL_TRUE;
 
@@ -225,7 +251,7 @@ HIDAPI_DriverGameCube_UpdateDevice(SDL_HIDAPI_Device *device)
             if (curSlot[0] & 0x30) { /* 0x10 - Wired, 0x20 - Wireless */
                 if (ctx->joysticks[i] == -1) {
                     ResetAxisRange(ctx, i);
-                    HIDAPI_JoystickConnected(device, &ctx->joysticks[i]);
+                    HIDAPI_JoystickConnected(device, &ctx->joysticks[i], SDL_FALSE);
                 }
                 joystick = SDL_JoystickFromInstanceID(ctx->joysticks[i]);
 
@@ -235,7 +261,7 @@ HIDAPI_DriverGameCube_UpdateDevice(SDL_HIDAPI_Device *device)
                 }
             } else {
                 if (ctx->joysticks[i] != -1) {
-                    HIDAPI_JoystickDisconnected(device, ctx->joysticks[i]);
+                    HIDAPI_JoystickDisconnected(device, ctx->joysticks[i], SDL_FALSE);
                     ctx->joysticks[i] = -1;
                 }
                 continue;
@@ -244,7 +270,7 @@ HIDAPI_DriverGameCube_UpdateDevice(SDL_HIDAPI_Device *device)
             #define READ_BUTTON(off, flag, button) \
                 SDL_PrivateJoystickButton( \
                     joystick, \
-                    button, \
+                    RemapButton(ctx, button), \
                     (curSlot[off] & flag) ? SDL_PRESSED : SDL_RELEASED \
                 );
             READ_BUTTON(1, 0x01, 0) /* A */
@@ -352,8 +378,13 @@ HIDAPI_DriverGameCube_CloseJoystick(SDL_HIDAPI_Device *device, SDL_Joystick *joy
 static void
 HIDAPI_DriverGameCube_FreeDevice(SDL_HIDAPI_Device *device)
 {
+    SDL_DriverGameCube_Context *ctx = (SDL_DriverGameCube_Context *)device->context;
+
     hid_close(device->dev);
     device->dev = NULL;
+
+    SDL_DelHintCallback(SDL_HINT_GAMECONTROLLER_USE_BUTTON_LABELS,
+                        SDL_GameControllerButtonReportingHintChanged, ctx);
 
     SDL_free(device->context);
     device->context = NULL;
@@ -372,7 +403,8 @@ SDL_HIDAPI_DeviceDriver SDL_HIDAPI_DriverGameCube =
     HIDAPI_DriverGameCube_OpenJoystick,
     HIDAPI_DriverGameCube_RumbleJoystick,
     HIDAPI_DriverGameCube_CloseJoystick,
-    HIDAPI_DriverGameCube_FreeDevice
+    HIDAPI_DriverGameCube_FreeDevice,
+    NULL,
 };
 
 #endif /* SDL_JOYSTICK_HIDAPI_GAMECUBE */

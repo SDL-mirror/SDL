@@ -367,7 +367,6 @@ WatchJoystick(SDL_Joystick * joystick)
     Uint8 alpha=200, alpha_step = -1;
     Uint32 alpha_ticks = 0;
     SDL_JoystickID nJoystickID;
-    //int iIndex;
 
     /* Create a window to display joystick axis position */
     window = SDL_CreateWindow("Game Controller Map", SDL_WINDOWPOS_CENTERED,
@@ -474,7 +473,7 @@ WatchJoystick(SDL_Joystick * joystick)
                     if (!pAxisState->m_bMoving) {
                         Sint16 nInitialValue;
                         pAxisState->m_bMoving = SDL_JoystickGetAxisInitialState(joystick, event.jaxis.axis, &nInitialValue);
-                        pAxisState->m_nLastValue = nInitialValue;
+                        pAxisState->m_nLastValue = nValue;
                         pAxisState->m_nStartingValue = nInitialValue;
                         pAxisState->m_nFarthestValue = nInitialValue;
                     } else if (SDL_abs(nValue - pAxisState->m_nLastValue) <= MAX_ALLOWED_JITTER) {
