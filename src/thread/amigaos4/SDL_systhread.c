@@ -1,6 +1,6 @@
 /*
   Simple DirectMedia Layer
-  Copyright (C) 1997-2019 Sam Lantinga <slouken@libsdl.org>
+  Copyright (C) 1997-2020 Sam Lantinga <slouken@libsdl.org>
 
   This software is provided 'as-is', without any express or implied
   warranty.  In no event will the authors be held liable for any damages
@@ -53,7 +53,6 @@ typedef struct OS4_ThreadNode
     struct MinNode node;
     struct Task* task;
     SDL_Thread* thread;
-    void* args; // Thread parameters
     OS4_TimerInstance timer;
 } OS4_ThreadNode;
 
@@ -159,7 +158,7 @@ OS4_RunThread(STRPTR args, int32 length, APTR execbase)
 
     node->task = thisTask;
 
-    dprintf("This task %p, node %p, args %p\n", thisTask, node, node->args);
+    dprintf("This task %p, node %p, SDL_Thread %p\n", thisTask, node, node->thread);
 
     OS4_TimerCreate(&node->timer);
 
@@ -167,7 +166,7 @@ OS4_RunThread(STRPTR args, int32 length, APTR execbase)
     IExec->AddTail((struct List *)&control.children.list, (struct Node *)node);
     IExec->MutexRelease(control.children.mutex);
 
-	SDL_RunThread(node->args);
+	SDL_RunThread(node->thread);
 
     return RETURN_OK;
 }
@@ -215,7 +214,7 @@ OS4_ExitThread(int32 returnCode, int32 finalData)
 }
 
 int
-SDL_SYS_CreateThread(SDL_Thread * thread, void * args)
+SDL_SYS_CreateThread(SDL_Thread * thread)
 {
     char nameBuffer[128];
     struct Task* thisTask = IExec->FindTask(NULL);
@@ -232,7 +231,6 @@ SDL_SYS_CreateThread(SDL_Thread * thread, void * args)
     dprintf("Node %p\n", node);
 
     node->thread = thread;
-    node->args = args;
 
     BPTR inputStream = iDOS->DupFileHandle(iDOS->Input());
     BPTR outputStream = iDOS->DupFileHandle(iDOS->Output());
@@ -265,7 +263,7 @@ SDL_SYS_CreateThread(SDL_Thread * thread, void * args)
         return SDL_SetError("Not enough resources to create thread");
     }
 
-    dprintf("Created new thread '%s' (task %p, args %p)\n", thread->name, child, args);
+    dprintf("Created new thread '%s' (task %p)\n", thread->name, child);
 
     return 0;
 }
