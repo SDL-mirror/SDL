@@ -339,7 +339,7 @@ if test x$enable_libc = xyes; then
     AC_CHECK_FUNCS(malloc calloc realloc free getenv setenv putenv unsetenv qsort abs bcopy memset memcpy memmove wcslen wcslcpy wcslcat wcsdup wcsstr wcscmp wcsncmp strlen strlcpy strlcat _strrev _strupr _strlwr strchr strrchr strstr strtok_r itoa _ltoa _uitoa _ultoa strtol strtoul _i64toa _ui64toa strtoll strtoull atoi atof strcmp strncmp _stricmp strcasecmp _strnicmp strncasecmp vsscanf vsnprintf fopen64 fseeko fseeko64 sigaction setjmp nanosleep sysconf sysctlbyname getauxval poll _Exit)
 
     AC_CHECK_LIB(m, pow, [LIBS="$LIBS -lm"; EXTRA_LDFLAGS="$EXTRA_LDFLAGS -lm"])
-    AC_CHECK_FUNCS(acos acosf asin asinf atan atanf atan2 atan2f ceil ceilf copysign copysignf cos cosf exp expf fabs fabsf floor floorf fmod fmodf log logf log10 log10f pow powf scalbn scalbnf sin sinf sqrt sqrtf tan tanf)
+    AC_CHECK_FUNCS(acos acosf asin asinf atan atanf atan2 atan2f ceil ceilf copysign copysignf cos cosf exp expf fabs fabsf floor floorf trunc truncf fmod fmodf log logf log10 log10f pow powf scalbn scalbnf sin sinf sqrt sqrtf tan tanf)
 
     AC_CHECK_LIB(iconv, iconv_open, [LIBS="$LIBS -liconv"; EXTRA_LDFLAGS="$EXTRA_LDFLAGS -liconv"])
     AC_CHECK_FUNCS(iconv)
@@ -3468,15 +3468,14 @@ dnl Set up the Virtual joystick driver.
 CheckVirtualJoystick()
 {
     AC_ARG_ENABLE(joystick-virtual,
-AS_HELP_STRING([--enable-joystick-virtual], [enable virtual joystick APIs [[default=no]]]),
-                  , enable_joystick_virtual=no)
+AS_HELP_STRING([--enable-joystick-virtual], [enable virtual joystick APIs [[default=yes]]]),
+                  , enable_joystick_virtual=yes)
     if test x$enable_joystick = xyes -a x$enable_joystick_virtual = xyes; then
         AC_DEFINE(SDL_JOYSTICK_VIRTUAL, 1, [ ])
         SOURCES="$SOURCES $srcdir/src/joystick/virtual/*.c"
         have_joystick_virtual=yes
     fi
 }
-
 
 
 dnl Do this on all platforms, before everything else (other things might want to override it).
@@ -4353,7 +4352,7 @@ SDLTEST_DEPENDS=`echo "$SDLTEST_DEPENDS" | sed "s,\\([[^ ]]*\\)/\\([[^ ]]*\\)\\.
 
 # Set runtime shared library paths as needed
 
-if test "x$enable_rpath" = "xyes"; then
+if test "x$enable_rpath" = "xyes" -a "x$enable_shared" = "xyes"; then
   if test $ARCH = bsdi -o $ARCH = freebsd -o $ARCH = linux -o $ARCH = netbsd; then
     SDL_RLD_FLAGS="-Wl,-rpath,\${libdir}"
 
@@ -4377,7 +4376,7 @@ else
   SDL_RLD_FLAGS=""
 fi
 
-SDL_STATIC_LIBS="$SDL_LIBS $EXTRA_LDFLAGS"
+SDL_STATIC_LIBS="$EXTRA_LDFLAGS"
 
 # AmigaOS4 hack! This is only to pass "-use-dynld" for sdl2-config 
 SDL_LIBS="-use-dynld $SDL_LIBS"
@@ -4388,9 +4387,12 @@ AC_SUBST(SDL_LIBS)
 AC_SUBST(SDL_STATIC_LIBS)
 AC_SUBST(SDL_RLD_FLAGS)
 if test x$enable_shared = xyes; then
+    PKG_CONFIG_LIBS_PRIV="
+Libs.private:"
     ENABLE_SHARED_TRUE=
     ENABLE_SHARED_FALSE="#"
 else
+    PKG_CONFIG_LIBS_PRIV=
     ENABLE_SHARED_TRUE="#"
     ENABLE_SHARED_FALSE=
 fi
@@ -4401,6 +4403,7 @@ else
     ENABLE_STATIC_TRUE="#"
     ENABLE_STATIC_FALSE=
 fi
+AC_SUBST(PKG_CONFIG_LIBS_PRIV)
 AC_SUBST(ENABLE_SHARED_TRUE)
 AC_SUBST(ENABLE_SHARED_FALSE)
 AC_SUBST(ENABLE_STATIC_TRUE)
