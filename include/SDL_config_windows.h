@@ -195,9 +195,13 @@ typedef unsigned int uintptr_t;
 
 /* Enable various input drivers */
 #define SDL_JOYSTICK_DINPUT 1
-#define SDL_JOYSTICK_XINPUT 1
 #define SDL_JOYSTICK_HIDAPI 1
-#define SDL_JOYSTICK_RAWINPUT 1
+#define SDL_JOYSTICK_RAWINPUT   1
+#define SDL_JOYSTICK_VIRTUAL    1
+#if _MSC_VER >= 1911
+#define SDL_JOYSTICK_WGI    1   /* This requires Windows SDK 10.0.16299.0 or newer */
+#endif
+#define SDL_JOYSTICK_XINPUT 1
 #define SDL_HAPTIC_DINPUT   1
 #define SDL_HAPTIC_XINPUT   1
 
@@ -220,8 +224,8 @@ typedef unsigned int uintptr_t;
 #ifndef SDL_VIDEO_RENDER_D3D
 #define SDL_VIDEO_RENDER_D3D    1
 #endif
-#ifndef SDL_VIDEO_RENDER_D3D11
-#define SDL_VIDEO_RENDER_D3D11  0
+#if _MSC_VER >= 1911
+#define SDL_VIDEO_RENDER_D3D11  1
 #endif
 
 /* Enable OpenGL support */
@@ -259,3 +263,5 @@ typedef unsigned int uintptr_t;
 #endif
 
 #endif /* SDL_config_windows_h_ */
+
+/* vi: set ts=4 sw=4 expandtab: */

@@ -647,6 +647,7 @@ ENABLE_STATIC_FALSE
 ENABLE_STATIC_TRUE
 ENABLE_SHARED_FALSE
 ENABLE_SHARED_TRUE
+PKG_CONFIG_LIBS_PRIV
 SDL_RLD_FLAGS
 SDL_STATIC_LIBS
 SDL_LIBS
@@ -769,7 +770,6 @@ infodir
 docdir
 oldincludedir
 includedir
-runstatedir
 localstatedir
 sharedstatedir
 sysconfdir
@@ -981,7 +981,6 @@ datadir='${datarootdir}'
 sysconfdir='${prefix}/etc'
 sharedstatedir='${prefix}/com'
 localstatedir='${prefix}/var'
-runstatedir='${localstatedir}/run'
 includedir='${prefix}/include'
 oldincludedir='/usr/include'
 docdir='${datarootdir}/doc/${PACKAGE}'
@@ -1234,15 +1233,6 @@ do
   | -silent | --silent | --silen | --sile | --sil)
     silent=yes ;;
 
-  -runstatedir | --runstatedir | --runstatedi | --runstated \
-  | --runstate | --runstat | --runsta | --runst | --runs \
-  | --run | --ru | --r)
-    ac_prev=runstatedir ;;
-  -runstatedir=* | --runstatedir=* | --runstatedi=* | --runstated=* \
-  | --runstate=* | --runstat=* | --runsta=* | --runst=* | --runs=* \
-  | --run=* | --ru=* | --r=*)
-    runstatedir=$ac_optarg ;;
-
   -sbindir | --sbindir | --sbindi | --sbind | --sbin | --sbi | --sb)
     ac_prev=sbindir ;;
   -sbindir=* | --sbindir=* | --sbindi=* | --sbind=* | --sbin=* \
@@ -1380,7 +1370,7 @@ fi
 for ac_var in	exec_prefix prefix bindir sbindir libexecdir datarootdir \
 		datadir sysconfdir sharedstatedir localstatedir includedir \
 		oldincludedir docdir infodir htmldir dvidir pdfdir psdir \
-		libdir localedir mandir runstatedir
+		libdir localedir mandir
 do
   eval ac_val=\$$ac_var
   # Remove trailing slashes.
@@ -1533,7 +1523,6 @@ Fine tuning of the installation directories:
   --sysconfdir=DIR        read-only single-machine data [PREFIX/etc]
   --sharedstatedir=DIR    modifiable architecture-independent data [PREFIX/com]
   --localstatedir=DIR     modifiable single-machine data [PREFIX/var]
-  --runstatedir=DIR       modifiable per-process data [LOCALSTATEDIR/run]
   --libdir=DIR            object code libraries [EPREFIX/lib]
   --includedir=DIR        C header files [PREFIX/include]
   --oldincludedir=DIR     C header files for non-gcc [/usr/include]
@@ -1705,7 +1694,7 @@ Optional Features:
                           number to use for magic foregrounding signal or 'no'
                           [[default=no]]
   --enable-joystick-virtual
-                          enable virtual joystick APIs [[default=no]]
+                          enable virtual joystick APIs [[default=yes]]
   --enable-render-d3d     enable the Direct3D render driver [[default=yes]]
   --enable-sdl2-config    Install sdl2-config [default=yes]
 
@@ -17132,7 +17121,7 @@ if test "x$ac_cv_lib_m_pow" = xyes; then :
   LIBS="$LIBS -lm"; EXTRA_LDFLAGS="$EXTRA_LDFLAGS -lm"
 fi
 
-    for ac_func in acos acosf asin asinf atan atanf atan2 atan2f ceil ceilf copysign copysignf cos cosf exp expf fabs fabsf floor floorf fmod fmodf log logf log10 log10f pow powf scalbn scalbnf sin sinf sqrt sqrtf tan tanf
+    for ac_func in acos acosf asin asinf atan atanf atan2 atan2f ceil ceilf copysign copysignf cos cosf exp expf fabs fabsf floor floorf trunc truncf fmod fmodf log logf log10 log10f pow powf scalbn scalbnf sin sinf sqrt sqrtf tan tanf
 do :
   as_ac_var=`$as_echo "ac_cv_func_$ac_func" | $as_tr_sh`
 ac_fn_c_check_func "$LINENO" "$ac_func" "$as_ac_var"
@@ -19504,7 +19493,8 @@ $as_echo "$have_arm_simd" >&6; }
         CFLAGS="$save_CFLAGS"
 
         if test x$have_arm_simd = xyes; then
-            $as_echo "#define SDL_ARM_SIMD_BLITTERS 1" >>confdefs.h
+
+$as_echo "#define SDL_ARM_SIMD_BLITTERS 1" >>confdefs.h
 
             SOURCES="$SOURCES $srcdir/src/video/arm/pixman-arm-simd*.S"
             WARN_ABOUT_ARM_SIMD_ASM_MIT="yes"
@@ -19555,7 +19545,8 @@ $as_echo "$have_arm_neon" >&6; }
         CFLAGS="$save_CFLAGS"
 
         if test x$have_arm_neon = xyes; then
-            $as_echo "#define SDL_ARM_NEON_BLITTERS 1" >>confdefs.h
+
+$as_echo "#define SDL_ARM_NEON_BLITTERS 1" >>confdefs.h
 
             SOURCES="$SOURCES $srcdir/src/video/arm/pixman-arm-neon*.S"
             WARN_ABOUT_ARM_NEON_ASM_MIT="yes"
@@ -21295,7 +21286,8 @@ _ACEOF
 if ac_fn_c_try_compile "$LINENO"; then :
 
                     have_xinput2_multitouch=yes
-                    $as_echo "#define SDL_VIDEO_DRIVER_X11_XINPUT2_SUPPORTS_MULTITOUCH 1" >>confdefs.h
+
+$as_echo "#define SDL_VIDEO_DRIVER_X11_XINPUT2_SUPPORTS_MULTITOUCH 1" >>confdefs.h
 
                     SUMMARY_video_x11="${SUMMARY_video_x11} xinput2_multitouch"
 
@@ -23890,7 +23882,8 @@ fi
 
 
     if test x$have_wasapi = xyes; then
-        $as_echo "#define HAVE_MMDEVICEAPI_H 1" >>confdefs.h
+
+$as_echo "#define HAVE_MMDEVICEAPI_H 1" >>confdefs.h
 
     fi
     ac_fn_c_check_header_mongrel "$LINENO" "audioclient.h" "ac_cv_header_audioclient_h" "$ac_includes_default"
@@ -23902,7 +23895,8 @@ fi
 
 
     if test x$have_wasapi = xyes; then
-        $as_echo "#define HAVE_AUDIOCLIENT_H 1" >>confdefs.h
+
+$as_echo "#define HAVE_AUDIOCLIENT_H 1" >>confdefs.h
 
     fi
 
@@ -24721,7 +24715,7 @@ CheckVirtualJoystick()
 if test "${enable_joystick_virtual+set}" = set; then :
   enableval=$enable_joystick_virtual;
 else
-  enable_joystick_virtual=no
+  enable_joystick_virtual=yes
 fi
 
     if test x$enable_joystick = xyes -a x$enable_joystick_virtual = xyes; then
@@ -24732,7 +24726,6 @@ $as_echo "#define SDL_JOYSTICK_VIRTUAL 1" >>confdefs.h
         have_joystick_virtual=yes
     fi
 }
-
 
 
 CheckWarnAll
@@ -25823,7 +25816,7 @@ SDLTEST_DEPENDS=`echo "$SDLTEST_DEPENDS" | sed "s,\\([^ ]*\\)/\\([^ ]*\\)\\.c,\\
 
 # Set runtime shared library paths as needed
 
-if test "x$enable_rpath" = "xyes"; then
+if test "x$enable_rpath" = "xyes" -a "x$enable_shared" = "xyes"; then
   if test $ARCH = bsdi -o $ARCH = freebsd -o $ARCH = linux -o $ARCH = netbsd; then
     SDL_RLD_FLAGS="-Wl,-rpath,\${libdir}"
 
@@ -25864,15 +25857,18 @@ else
   SDL_RLD_FLAGS=""
 fi
 
-SDL_STATIC_LIBS="$SDL_LIBS $EXTRA_LDFLAGS"
+SDL_STATIC_LIBS="$EXTRA_LDFLAGS"
 
 # AmigaOS4 hack! This is only to pass "-use-dynld" for sdl2-config
 SDL_LIBS="-use-dynld $SDL_LIBS $EXTRA_LDFLAGS"
 
 if test x$enable_shared = xyes; then
+    PKG_CONFIG_LIBS_PRIV="
+Libs.private:"
     ENABLE_SHARED_TRUE=
     ENABLE_SHARED_FALSE="#"
 else
+    PKG_CONFIG_LIBS_PRIV=
     ENABLE_SHARED_TRUE="#"
     ENABLE_SHARED_FALSE=
 fi
@@ -25883,6 +25879,7 @@ else
     ENABLE_STATIC_TRUE="#"
     ENABLE_STATIC_FALSE=
 fi
+
 
 
 

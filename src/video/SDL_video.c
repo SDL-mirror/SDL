@@ -1381,10 +1381,10 @@ SDL_UpdateFullscreenMode(SDL_Window * window, SDL_bool fullscreen)
     /* Without this hack, SDL would trigger us to open a window before screen which causes unnecessary
     work, because then we would have to close the window first and re-open it on the custom screen */
     #define CREATE_FLAGS \
-        (SDL_WINDOW_OPENGL | SDL_WINDOW_BORDERLESS | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_ALWAYS_ON_TOP | SDL_WINDOW_SKIP_TASKBAR | SDL_WINDOW_POPUP_MENU | SDL_WINDOW_UTILITY | SDL_WINDOW_TOOLTIP | SDL_WINDOW_FULLSCREEN)
+        (SDL_WINDOW_OPENGL | SDL_WINDOW_BORDERLESS | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_ALWAYS_ON_TOP | SDL_WINDOW_SKIP_TASKBAR | SDL_WINDOW_POPUP_MENU | SDL_WINDOW_UTILITY | SDL_WINDOW_TOOLTIP | SDL_WINDOW_VULKAN | SDL_WINDOW_MINIMIZED | SDL_WINDOW_METAL | SDL_WINDOW_FULLSCREEN)
 #else
     #define CREATE_FLAGS \
-        (SDL_WINDOW_OPENGL | SDL_WINDOW_BORDERLESS | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_ALWAYS_ON_TOP | SDL_WINDOW_SKIP_TASKBAR | SDL_WINDOW_POPUP_MENU | SDL_WINDOW_UTILITY | SDL_WINDOW_TOOLTIP | SDL_WINDOW_VULKAN | SDL_WINDOW_MINIMIZED)
+        (SDL_WINDOW_OPENGL | SDL_WINDOW_BORDERLESS | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_ALWAYS_ON_TOP | SDL_WINDOW_SKIP_TASKBAR | SDL_WINDOW_POPUP_MENU | SDL_WINDOW_UTILITY | SDL_WINDOW_TOOLTIP | SDL_WINDOW_VULKAN | SDL_WINDOW_MINIMIZED | SDL_WINDOW_METAL)
 #endif
 
 static SDL_INLINE SDL_bool
@@ -1474,7 +1474,7 @@ SDL_CreateWindow(const char *title, int x, int y, int w, int h, Uint32 flags)
 
     /* Some platforms have OpenGL enabled by default */
 #if (SDL_VIDEO_OPENGL && __MACOSX__) || __IPHONEOS__ || __ANDROID__ || __NACL__
-    if (!_this->is_dummy && !(flags & SDL_WINDOW_VULKAN) && !SDL_IsVideoContextExternal()) {
+    if (!_this->is_dummy && !(flags & SDL_WINDOW_VULKAN) && !(flags & SDL_WINDOW_METAL) && !SDL_IsVideoContextExternal()) {
         flags |= SDL_WINDOW_OPENGL;
     }
 #endif
@@ -1502,6 +1502,24 @@ SDL_CreateWindow(const char *title, int x, int y, int w, int h, Uint32 flags)
             return NULL;
         }
         if (SDL_Vulkan_LoadLibrary(NULL) < 0) {
+            return NULL;
+        }
+    }
+
+    if (flags & SDL_WINDOW_METAL) {
+        if (!_this->Metal_CreateView) {
+            SDL_SetError("Metal support is either not configured in SDL "
+                         "or not available in current SDL video driver "
+                         "(%s) or platform", _this->name);
+            return NULL;
+        }
+        if (flags & SDL_WINDOW_OPENGL) {
+            SDL_SetError("Metal and OpenGL not supported on same window");
+            return NULL;
+        }
+        if (flags & SDL_WINDOW_VULKAN) {
+            SDL_SetError("Metal and Vulkan not supported on same window. "
+                         "To use MoltenVK, set SDL_WINDOW_VULKAN only.");
             return NULL;
         }
     }
@@ -1723,8 +1741,23 @@ SDL_RecreateWindow(SDL_Window * window, Uint32 flags)
         return -1;
     }
 
+    if ((window->flags & SDL_WINDOW_METAL) != (flags & SDL_WINDOW_METAL)) {
+        SDL_SetError("Can't change SDL_WINDOW_METAL window flag");
+        return -1;
+    }
+
     if ((window->flags & SDL_WINDOW_VULKAN) && (flags & SDL_WINDOW_OPENGL)) {
         SDL_SetError("Vulkan and OpenGL not supported on same window");
+        return -1;
+    }
+
+    if ((window->flags & SDL_WINDOW_METAL) && (flags & SDL_WINDOW_OPENGL)) {
+        SDL_SetError("Metal and OpenGL not supported on same window");
+        return -1;
+    }
+
+    if ((window->flags & SDL_WINDOW_METAL) && (flags & SDL_WINDOW_VULKAN)) {
+        SDL_SetError("Metal and Vulkan not supported on same window");
         return -1;
     }
 
@@ -2798,6 +2831,8 @@ SDL_DestroyWindow(SDL_Window * window)
     if (window->surface) {
         window->surface->flags &= ~SDL_DONTFREE;
         SDL_FreeSurface(window->surface);
+        window->surface = NULL;
+        window->surface_valid = SDL_FALSE;
     }
     if (_this->DestroyWindowFramebuffer) {
         _this->DestroyWindowFramebuffer(_this, window);
@@ -3590,12 +3625,14 @@ SDL_GL_MakeCurrent(SDL_Window * window, SDL_GLContext ctx)
 
     if (!ctx) {
         window = NULL;
-    } else {
+    } else if (window) {
         CHECK_WINDOW_MAGIC(window, -1);
 
         if (!(window->flags & SDL_WINDOW_OPENGL)) {
             return SDL_SetError("The specified window isn't an OpenGL window");
         }
+    } else if (!_this->gl_allow_no_surface) {
+        return SDL_SetError("Use of OpenGL without a window is not supported on this platform");
     }
 
     retval = _this->GL_MakeCurrent(_this, window, ctx);
@@ -4272,6 +4309,11 @@ SDL_Metal_CreateView(SDL_Window * window)
 {
     CHECK_WINDOW_MAGIC(window, NULL);
 
+    if (!(window->flags & SDL_WINDOW_METAL)) {
+        SDL_SetError("The specified window isn't a Metal window");
+        return NULL;
+    }
+
     if (_this->Metal_CreateView) {
         return _this->Metal_CreateView(_this, window);
     } else {
@@ -4285,6 +4327,33 @@ SDL_Metal_DestroyView(SDL_MetalView view)
 {
     if (_this && view && _this->Metal_DestroyView) {
         _this->Metal_DestroyView(_this, view);
+    }
+}
+
+void *
+SDL_Metal_GetLayer(SDL_MetalView view)
+{
+    if (_this && _this->Metal_GetLayer) {
+        if (view) {
+            return _this->Metal_GetLayer(_this, view);
+        } else {
+            SDL_InvalidParamError("view");
+            return NULL;
+        }
+    } else {
+        SDL_SetError("Metal is not supported.");
+        return NULL;
+    }
+}
+
+void SDL_Metal_GetDrawableSize(SDL_Window * window, int *w, int *h)
+{
+    CHECK_WINDOW_MAGIC(window,);
+
+    if (_this->Metal_GetDrawableSize) {
+        _this->Metal_GetDrawableSize(_this, window, w, h);
+    } else {
+        SDL_GetWindowSize(window, w, h);
     }
 }
 
