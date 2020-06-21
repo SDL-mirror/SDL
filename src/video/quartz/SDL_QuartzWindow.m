@@ -224,7 +224,7 @@ void QZ_UpdateRectsOnDrawRect(/*TODO: NSRect from drawRect*/);
 
 - (void)drawRect:(NSRect)dirtyRect
 {
-	QZ_UpdateRectsOnDrawRect();
+    QZ_UpdateRectsOnDrawRect();
 }
 
 - (void)resetCursorRects
