@@ -26,15 +26,13 @@
 #include "SDL_x11dga_c.h"
 #include "SDL_x11gl_c.h"
 
-#if defined(__IRIX__)
+#if defined(__IRIX__) || defined(__OpenBSD__)
 /* IRIX doesn't have a GL library versioning system */
 #define DEFAULT_OPENGL	"libGL.so"
 #elif defined(__MACOSX__)
 #define DEFAULT_OPENGL	"/usr/X11R6/lib/libGL.1.dylib"
 #elif defined(__QNXNTO__)
 #define DEFAULT_OPENGL	"libGL.so.3"
-#elif defined(__OpenBSD__)
-#define DEFAULT_OPENGL	"libGL.so.4.0"
 #else
 #define DEFAULT_OPENGL	"libGL.so.1"
 #endif
