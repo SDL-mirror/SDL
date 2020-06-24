@@ -47,7 +47,7 @@ static int Audio_Available(void)
 	struct sio_hdl *this_hdl;
 	int available = 0;
 
-	if ( (this_hdl = sio_open(NULL, SIO_PLAY, 0)) != NULL ) {
+	if ( (this_hdl = sio_open(SIO_DEVANY, SIO_PLAY, 0)) != NULL ) {
 		sio_close(this_hdl);
 		available = 1;
 	}
@@ -105,17 +105,7 @@ AudioBootStrap SNDIO_bootstrap = {
 /* This function waits until it is possible to write a full sound buffer */
 static void SNDIO_WaitAudio(_THIS)
 {
-	/* Check to see if the thread-parent process is still alive */
-	{ static int cnt = 0;
-		/* Note that this only works with thread implementations 
-		   that use a different process id for each thread.
-		*/
-		if (parent && (((++cnt)%10) == 0)) { /* Check every 10 loops */
-			if ( kill(parent, 0) < 0 ) {
-				this->enabled = 0;
-			}
-		}
-	}
+	/* nothing, we're using the blocking api */
 }
 
 static void SNDIO_PlayAudio(_THIS)
@@ -153,8 +143,7 @@ static void SNDIO_CloseAudio(_THIS)
 
 static int SNDIO_OpenAudio(_THIS, SDL_AudioSpec *spec)
 {
-	struct sio_par par, reqpar;
-	int newrate;
+	struct sio_par par;
 
 	mixbuf = NULL;
 
@@ -204,38 +193,9 @@ static int SNDIO_OpenAudio(_THIS, SDL_AudioSpec *spec)
 	par.round = spec->samples;
 	par.appbufsz = par.round * 2;
 
-	reqpar = par;
-
 	if (sio_setpar(hdl, &par) == 0) {
 		SDL_SetError("sio_setpar() failed");
 		return(-1);
-	}
-
-	if (sio_getpar(hdl, &par) == 0) {
-		SDL_SetError("sio_getpar() failed");
-		return(-1);
-	}
-
-	/* if wanted rate not found, find a multiple/factor */
-	if (par.rate != spec->freq) {
-		newrate = par.rate;
-		if ((newrate > spec->freq && newrate % spec->freq != 0) ||
-		     (newrate < spec->freq && spec->freq % newrate != 0)) {
-			if ((spec->freq < 44100 && 44100 % spec->freq == 0) ||
-			     (spec->freq > 44100 && spec->freq % 44100 == 0)) {
-				newrate = 44100;
-			}
-		}
-		/* only change sample rate */
-		par = reqpar;
-		par.rate = newrate;
-		/* keep same latency */
-		par.round = spec->samples * par.rate / reqpar.rate;
-		par.appbufsz = par.round * 2;
-		if (sio_setpar(hdl, &par) == 0) {
-			SDL_SetError("sio_setpar() failed");
-			return(-1);
-		}
 	}
 
 	if (sio_getpar(hdl, &par) == 0) {
@@ -272,9 +232,6 @@ static int SNDIO_OpenAudio(_THIS, SDL_AudioSpec *spec)
 		return(-1);
 	}
 	SDL_memset(mixbuf, spec->silence, spec->size);
-
-	/* Get the parent process id (we're the parent of the audio thread) */
-	parent = getpid();
 
 	if ( sio_start(hdl) == 0 ) {
 		SDL_SetError("sio_start() failed");
