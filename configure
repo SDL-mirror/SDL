@@ -23222,7 +23222,7 @@ CheckARM()
 if test "${enable_arm_simd+set}" = set; then
   enableval=$enable_arm_simd; enable_arm_simd=$enableval
 else
-  enable_arm_simd=yes
+  enable_arm_simd=no
 fi
 
     if test x$enable_video = xyes -a x$enable_assembly = xyes -a x$enable_arm_simd = xyes; then
