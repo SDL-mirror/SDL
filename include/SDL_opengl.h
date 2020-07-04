@@ -35,6 +35,7 @@
 #endif
 #ifndef NO_SDL_GLEXT
 #define __glext_h_  /* Don't let gl.h include glext.h */
+#define __gl_glext_h_  /* Don't let gl.h include glext.h */
 #endif
 #if defined(__MACOSX__)
 #include <OpenGL/gl.h>	/* Header File For The OpenGL Library */
@@ -48,6 +49,7 @@
 #endif
 #ifndef NO_SDL_GLEXT
 #undef __glext_h_
+#undef __gl_glext_h_
 #endif
 
 /** @name GLext.h
