@@ -1694,8 +1694,8 @@ Optional Features:
   --enable-mintaudio      support Atari audio driver [default=yes]
   --enable-nasm           use nasm assembly blitters on x86 [default=yes]
   --enable-altivec        use altivec assembly blitters on PPC [default=yes]
-  --enable-arm-simd       use SIMD assembly blitters on ARM [default=yes]
-  --enable-arm-neon       use NEON assembly blitters on ARM [default=yes]
+  --enable-arm-simd       use SIMD assembly blitters on ARM [default=no]
+  --enable-arm-neon       use NEON assembly blitters on ARM [default=no]
   --enable-ipod           configure SDL to work with iPodLinux [default=no]
   --enable-video-nanox    use nanox video driver [default=no]
   --enable-nanox-debug    print debug messages [default=no]
@@ -23299,7 +23299,7 @@ CheckNEON()
 if test "${enable_arm_neon+set}" = set; then
   enableval=$enable_arm_neon; enable_arm_neon=$enableval
 else
-  enable_arm_neon=yes
+  enable_arm_neon=no
 fi
 
     if test x$enable_video = xyes -a x$enable_assembly = xyes -a x$enable_arm_neon = xyes; then
