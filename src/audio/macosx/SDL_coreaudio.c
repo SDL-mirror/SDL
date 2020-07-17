@@ -193,7 +193,7 @@ void Core_CloseAudio(_THIS)
         return;
     }
 
-    result = CloseComponent(outputAudioUnit);
+    result = AudioComponentInstanceDispose(outputAudioUnit);
     if (result != noErr) {
         SDL_SetError("Core_CloseAudio: CloseComponent");
         return;
@@ -212,8 +212,8 @@ void Core_CloseAudio(_THIS)
 int Core_OpenAudio(_THIS, SDL_AudioSpec *spec)
 {
     OSStatus result = noErr;
-    Component comp;
-    ComponentDescription desc;
+    AudioComponent comp;
+    AudioComponentDescription desc;
     struct AURenderCallbackStruct callback;
     AudioStreamBasicDescription requestedDesc;
 
@@ -233,23 +233,23 @@ int Core_OpenAudio(_THIS, SDL_AudioSpec *spec)
     requestedDesc.mBytesPerFrame = requestedDesc.mBitsPerChannel * requestedDesc.mChannelsPerFrame / 8;
     requestedDesc.mBytesPerPacket = requestedDesc.mBytesPerFrame * requestedDesc.mFramesPerPacket;
 
-
     /* Locate the default output audio unit */
+    SDL_memset(&desc, '\0', sizeof (desc));
     desc.componentType = kAudioUnitType_Output;
     desc.componentSubType = kAudioUnitSubType_DefaultOutput;
     desc.componentManufacturer = kAudioUnitManufacturer_Apple;
     desc.componentFlags = 0;
     desc.componentFlagsMask = 0;
     
-    comp = FindNextComponent (NULL, &desc);
+    comp = AudioComponentFindNext(NULL, &desc);
     if (comp == NULL) {
-        SDL_SetError ("Failed to start CoreAudio: FindNextComponent returned NULL");
+        SDL_SetError ("Failed to start CoreAudio: AudioComponentFindNext returned NULL");
         return -1;
     }
     
     /* Open & initialize the default output audio unit */
-    result = OpenAComponent (comp, &outputAudioUnit);
-    CHECK_RESULT("OpenAComponent")
+    result = AudioComponentInstanceNew (comp, &outputAudioUnit);
+    CHECK_RESULT("AudioComponentInstanceNew")
 
     result = AudioUnitInitialize (outputAudioUnit);
     CHECK_RESULT("AudioUnitInitialize")
