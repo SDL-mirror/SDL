@@ -231,7 +231,7 @@ unsigned int WIMP_SetupWindow(_THIS, SDL_Surface *surface)
    window_block[5] = 0;
    window_block[6] = -1;			  /* Open on top of window stack */
 
-   window_block[7] = 0x80040042;      /* Window flags */
+   window_block[7] = 0x80040242;      /* Window flags */
    if (!(surface->flags & SDL_NOFRAME)) {
       window_block[7] |= 0x5000000;
       if (riscos_closeaction != 0) window_block[7] |= 0x2000000;
@@ -239,8 +239,8 @@ unsigned int WIMP_SetupWindow(_THIS, SDL_Surface *surface)
 
    /* TODO: Take into account surface->flags */
 
-   window_block[8] = 0xff070207;      /* Window colours */
-   window_block[9] = 0x000c0103;
+   window_block[8] = 0xff070207;      /* Window colours and extra flags */
+   window_block[9] = 0x020c0103;
    window_block[10] = 0;                    /* Work area minimum */
    window_block[11] = -surface->h << 1;
    window_block[12] = surface->w << 1;   /* Work area maximum */

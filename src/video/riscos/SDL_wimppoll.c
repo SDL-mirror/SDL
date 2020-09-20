@@ -219,6 +219,20 @@ void WIMP_Poll(_THIS, int waitTime)
 			*/
 			break;
 
+		case 10: /* Window scroll */
+			if (message[0] == sdlWindow)
+			{
+				if (message[9] < 0) {
+					SDL_PrivateMouseButton(SDL_PRESSED, SDL_BUTTON_WHEELDOWN, 0, 0);
+					SDL_PrivateMouseButton(SDL_RELEASED, SDL_BUTTON_WHEELDOWN, 0, 0);
+				} else if (message[9] > 0) {
+					SDL_PrivateMouseButton(SDL_PRESSED, SDL_BUTTON_WHEELUP, 0, 0);
+					SDL_PrivateMouseButton(SDL_RELEASED, SDL_BUTTON_WHEELUP, 0, 0);
+				}
+			} else
+				sysEvent = 1;
+			break;
+
 		case 11: /* Lose Caret */
 			 hasFocus = 0;
 			 if (message[0] == sdlWindow) SDL_PrivateAppActive(0, SDL_APPINPUTFOCUS);

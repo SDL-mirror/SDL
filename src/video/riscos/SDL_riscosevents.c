@@ -262,6 +262,10 @@ void WIMP_PollMouse(_THIS)
 static Sint16 last_x = -1, last_y = -1;
 static int last_buttons = 0;
 
+static inline void HandleMouseButton(int changed, int last, int mask, int button) {
+    if (changed & mask) SDL_PrivateMouseButton((last & mask) ? SDL_PRESSED : SDL_RELEASED, button, 0, 0);
+}
+
 /* Share routine between WIMP and FULLSCREEN for polling mouse and
    passing on events */
 void RISCOS_PollMouseHelper(_THIS, int fullscreen)
@@ -352,9 +356,14 @@ void RISCOS_PollMouseHelper(_THIS, int fullscreen)
           {
              int changed = last_buttons ^ regs.r[2];
              last_buttons = regs.r[2];
-             if (changed & 4) SDL_PrivateMouseButton((last_buttons & 4) ? SDL_PRESSED : SDL_RELEASED, SDL_BUTTON_LEFT, 0, 0);
-             if (changed & 2) SDL_PrivateMouseButton((last_buttons & 2) ? SDL_PRESSED : SDL_RELEASED, SDL_BUTTON_MIDDLE, 0, 0);
-             if (changed & 1) SDL_PrivateMouseButton((last_buttons & 1) ? SDL_PRESSED : SDL_RELEASED, SDL_BUTTON_RIGHT, 0, 0);
+             HandleMouseButton(changed, last_buttons, 1, SDL_BUTTON_RIGHT);
+             HandleMouseButton(changed, last_buttons, 2, SDL_BUTTON_MIDDLE);
+             HandleMouseButton(changed, last_buttons, 4, SDL_BUTTON_LEFT);
+             HandleMouseButton(changed, last_buttons, 8, SDL_BUTTON_X1);
+             HandleMouseButton(changed, last_buttons, 16, SDL_BUTTON_X2);
+             HandleMouseButton(changed, last_buttons, 32, SDL_BUTTON_X2 + 1);
+             HandleMouseButton(changed, last_buttons, 64, SDL_BUTTON_X2 + 2);
+             HandleMouseButton(changed, last_buttons, 128, SDL_BUTTON_X2 + 3);
           }
        }
     }
