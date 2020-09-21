@@ -188,10 +188,10 @@ void FULLSCREEN_WarpWMCursor(_THIS, Uint16 x, Uint16 y)
 	int os_x, os_y;
 	int topLeftY;
 
-	topLeftY = (this->hidden->height << this->hidden->yeig) - 1; /* As per RISCOS_PollMouseHelper */
+	topLeftY = this->hidden->screen_height << this->hidden->yeig; /* As per RISCOS_PollMouseHelper */
 
-	os_x = x << this->hidden->xeig;
-	os_y = topLeftY - (y << this->hidden->yeig);
+	os_x = x << 1;
+	os_y = topLeftY - (y << 1);
 
 	move_block[0] = 3; /* Move cursor */
 	move_block[1] = os_x & 0xFF;
@@ -224,8 +224,8 @@ void WIMP_WarpWMCursor(_THIS, Uint16 x, Uint16 y)
 	_kernel_swi(Wimp_GetWindowState, &regs, &regs);
 
 	/* 90 DPI mapping from SDL pixels to OS units */
-	 osX = (x << 1) + window_state[1];
-	 osY = window_state[4] - (y << 1);
+	osX = (x << 1) + window_state[1];
+	osY = (window_state[4] - 2) - (y << 1);
 
 	block[0] = 3;
 	block[1] = osX & 0xFF;
@@ -258,8 +258,8 @@ SDL_GrabMode RISCOS_GrabInput(_THIS, SDL_GrabMode mode)
       {
          /* Clip to whole screen */
 
-         int r = (this->hidden->screen_width << this->hidden->xeig) - 1;
-         int t = (this->hidden->screen_height << this->hidden->yeig) - 1;
+         int r = this->hidden->screen_width << this->hidden->xeig;
+         int t = this->hidden->screen_height << this->hidden->yeig;
 
 	 block[1] = 0; block[2] = 0; /* Left*/
          block[3] = 0; block[4] = 0; /* Bottom */

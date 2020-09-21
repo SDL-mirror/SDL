@@ -712,12 +712,14 @@ const RISCOS_SDL_PixelFormat *FULLSCREEN_SetMode(int width, int height, int bpp)
 void FULLSCREEN_SetupBanks(_THIS)
 {
    _kernel_swi_regs regs;
-   int block[5];
+   int block[7];
    block[0] = 148; /* Write screen start */
    block[1] = 149; /* Display screen start */
-   block[2] = 4;  /* X eig factor */
-   block[3] = 5;  /* Y eig factor */
-   block[4] = -1;  /* End of list of variables to request */
+   block[2] = 4;   /* X eig factor */
+   block[3] = 5;   /* Y eig factor */
+   block[4] = 11;  /* Screen Width - 1 */
+   block[5] = 12;  /* Screen Height - 1 */
+   block[6] = -1;  /* End of list of variables to request */
 
    regs.r[0] = (int)block;
    regs.r[1] = (int)block;
@@ -727,6 +729,8 @@ void FULLSCREEN_SetupBanks(_THIS)
    this->hidden->bank[1] = (void *)block[1];
    this->hidden->xeig = block[2];
    this->hidden->yeig = block[3];
+   this->hidden->screen_width = block[4];
+   this->hidden->screen_height = block[5];
 }
 
 /* Toggle to full screen mode from the WIMP */

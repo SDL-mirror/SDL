@@ -293,7 +293,7 @@ void RISCOS_PollMouseHelper(_THIS, int fullscreen)
           if (fullscreen)
           {
              topLeftX = 0;
-             topLeftY = (this->hidden->height << this->hidden->yeig) - 1;
+             topLeftY = this->hidden->screen_height << this->hidden->yeig;
           } else
           {
              int window_state[9];
@@ -304,7 +304,7 @@ void RISCOS_PollMouseHelper(_THIS, int fullscreen)
 		     _kernel_swi(Wimp_GetWindowState, &regs, &regs);
 
              topLeftX = window_state[1];
-             topLeftY = window_state[4];
+             topLeftY = window_state[4] - 2;
           }
 
           /* Convert co-ordinates to workspace */
