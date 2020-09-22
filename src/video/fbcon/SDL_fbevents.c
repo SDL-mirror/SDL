@@ -260,7 +260,7 @@ int FB_OpenKeyboard(_THIS)
 		}
 		ioctl(tty0_fd, VT_OPENQRY, &current_vt);
 		close(tty0_fd);
-		if ( (geteuid() == 0) && (current_vt > 0) ) {
+		if ( current_vt > 0 ) {
 			for ( i=0; vcs[i] && (keyboard_fd < 0); ++i ) {
 				char vtpath[12];
 
