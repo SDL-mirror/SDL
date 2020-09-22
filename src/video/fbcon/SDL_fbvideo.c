@@ -589,6 +589,9 @@ static int FB_VideoInit(_THIS, SDL_PixelFormat *vformat)
 		return(-1);
 	}
 
+	/* Clear the mapped area */
+	memset(mapped_mem, 0, mapped_memlen);
+
 	/* Determine the current screen depth */
 	if ( ioctl(console_fd, FBIOGET_VSCREENINFO, &vinfo) < 0 ) {
 		SDL_SetError("Couldn't get console pixel format");
