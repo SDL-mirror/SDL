@@ -138,6 +138,7 @@ typedef struct SDL_Surface {
 #define SDL_ANYFORMAT	0x10000000	/**< Allow any video depth/pixel-format */
 #define SDL_HWPALETTE	0x20000000	/**< Surface has exclusive palette */
 #define SDL_DOUBLEBUF	0x40000000	/**< Set up double-buffered video mode */
+#define SDL_TRIPLEBUF	0x40000100	/**< Set up triple-buffered video mode */
 #define SDL_FULLSCREEN	0x80000000	/**< Surface is a full screen display */
 #define SDL_OPENGL      0x00000002      /**< Create an OpenGL rendering context */
 #define SDL_OPENGLBLIT	0x0000000A	/**< Create an OpenGL rendering context and use it for blitting */

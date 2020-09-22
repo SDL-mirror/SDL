@@ -30,6 +30,7 @@
 
 #include "SDL_mouse.h"
 #include "SDL_mutex.h"
+#include "SDL_thread.h"
 #include "../SDL_sysvideo.h"
 #if SDL_INPUT_TSLIB
 #include "tslib.h"
@@ -83,7 +84,15 @@ struct SDL_PrivateVideoData {
 	char *mapped_io;
 	long mapped_iolen;
 	int flip_page;
-	char *flip_address[2];
+	char *flip_address[3];
+#if !SDL_THREADS_DISABLED
+	int current_page;
+	int new_page;
+	SDL_mutex *triplebuf_mutex;
+	SDL_cond *triplebuf_cond;
+	SDL_Thread *triplebuf_thread;
+	int triplebuf_thread_stop;
+#endif
 	int rotate;
 	int shadow_fb;				/* Tells whether a shadow is being used. */
 	FB_bitBlit *blitFunc;
@@ -130,6 +139,14 @@ struct SDL_PrivateVideoData {
 #define mapped_iolen		(this->hidden->mapped_iolen)
 #define flip_page		(this->hidden->flip_page)
 #define flip_address		(this->hidden->flip_address)
+#if !SDL_THREADS_DISABLED
+#define current_page		(this->hidden->current_page)
+#define new_page			(this->hidden->new_page)
+#define triplebuf_mutex		(this->hidden->triplebuf_mutex)
+#define triplebuf_cond		(this->hidden->triplebuf_cond)
+#define triplebuf_thread	(this->hidden->triplebuf_thread)
+#define triplebuf_thread_stop	(this->hidden->triplebuf_thread_stop)
+#endif
 #define rotate			(this->hidden->rotate)
 #define shadow_fb		(this->hidden->shadow_fb)
 #define blitFunc		(this->hidden->blitFunc)
