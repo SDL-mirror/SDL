@@ -1910,15 +1910,12 @@ static int FB_SetColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors)
 static void FB_VideoQuit(_THIS)
 {
 	int i, j;
+	const char *dontClearPixels = SDL_getenv("SDL_FBCON_DONT_CLEAR");
 
 	if ( this->screen ) {
-		/* Clear screen and tell SDL not to free the pixels */
-
-		const char *dontClearPixels = SDL_getenv("SDL_FBCON_DONT_CLEAR");
-
 		/* If the framebuffer is not to be cleared, make sure that we won't
 		 * display the previous frame when disabling double buffering. */
-		if ( dontClearPixels && flip_page == 0 ) {
+		if ( dontClearPixels && (this->screen->flags & SDL_DOUBLEBUF) && flip_page == 0 ) {
 			SDL_memcpy(flip_address[0], flip_address[1], this->screen->pitch * this->screen->h);
 		}
 
@@ -1972,7 +1969,13 @@ static void FB_VideoQuit(_THIS)
 
 		/* Restore the original video mode and palette */
 		if ( FB_InGraphicsMode(this) ) {
-			FB_RestorePalette(this);
+			if (dontClearPixels) {
+				/* Restore only panning, keep current mode */
+				ioctl(console_fd, FBIOGET_VSCREENINFO, &saved_vinfo);
+				saved_vinfo.yoffset = saved_vinfo.xoffset = 0;
+			} else {
+				FB_RestorePalette(this);
+			}
 			ioctl(console_fd, FBIOPUT_VSCREENINFO, &saved_vinfo);
 		}
 
