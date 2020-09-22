@@ -389,7 +389,8 @@ static int EV_IsJoystick(int fd)
 		return(0);
 	}
 	if (!(test_bit(EV_KEY, evbit) && test_bit(EV_ABS, evbit) &&
-	      test_bit(ABS_X, absbit) && test_bit(ABS_Y, absbit) &&
+	     (test_bit(ABS_X, absbit) && test_bit(ABS_Y, absbit) ||
+		  test_bit(ABS_HAT0X, absbit) && test_bit(ABS_HAT0Y, absbit)) &&
 	     (test_bit(BTN_TRIGGER, keybit) || test_bit(BTN_A, keybit) || test_bit(BTN_1, keybit)))) return 0;
 	return(1);
 }
