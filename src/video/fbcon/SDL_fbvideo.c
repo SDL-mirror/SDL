@@ -1427,7 +1427,7 @@ static int FB_FlipHWSurface(_THIS, SDL_Surface *surface)
 	}
 
 	/* Wait for vertical retrace and then flip display */
-	cache_vinfo.yoffset = flip_page*surface->h;
+	cache_vinfo.yoffset = flip_page * cache_vinfo.yres;
 	if ( FB_IsSurfaceBusy(this->screen) ) {
 		FB_WaitBusySurfaces(this);
 	}
