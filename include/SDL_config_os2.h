@@ -122,7 +122,7 @@
 #define SDL_VIDEO_DRIVER_OS2FS	1
 
 /* Enable OpenGL support */
-/* Nothing yet for OS/2. */
+/* #undef SDL_VIDEO_OPENGL */				/* Nothing yet */
 
 /* Enable assembly routines where available */
 #define SDL_ASSEMBLY_ROUTINES	1

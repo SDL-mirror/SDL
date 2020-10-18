@@ -2850,7 +2850,7 @@ static int os2fslib_VideoInit(_THIS, SDL_PixelFormat *vformat)
 #ifdef DEBUG_BUILD
     printf("[os2fslib_VideoInit] : Yikes, not enough memory for new video buffer!\n"); fflush(stdout);
 #endif
-    SDL_SetError("Not enough memory for new video buffer!\n");
+    SDL_OutOfMemory();
     return -1;
   }
 

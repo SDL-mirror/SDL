@@ -185,7 +185,7 @@ int DART_OpenAudio(_THIS, SDL_AudioSpec *spec)
   { // Not enough memory!
     // Close DART, and exit with error code!
     mciSendCommand(iDeviceOrd, MCI_CLOSE, MCI_WAIT, &GenericParms, 0);
-    SDL_SetError("Not enough memory for audio buffer descriptors");
+    SDL_OutOfMemory();
     return(-1);
   }
   // Now that we have the place for buffer list, we can ask DART for the
@@ -266,10 +266,9 @@ int DART_OpenAudio(_THIS, SDL_AudioSpec *spec)
 }
 
 
-
 void DART_ThreadInit(_THIS)
 {
-  return;
+  /* nothing. */
 }
 
 /* This function waits until it is possible to write a full sound buffer */
@@ -289,7 +288,6 @@ void DART_WaitAudio(_THIS)
   }
   // If there is no empty buffer, wait for one to be empty!
   DosWaitEventSem(_this->hidden->hevAudioBufferPlayed, 1000); // Wait max 1 sec!!! Important!
-  return;
 }
 
 void DART_PlayAudio(_THIS)
