@@ -57,7 +57,7 @@ static int bWindowResized = 0;
 #pragma pack(1)
 typedef struct BMPINFO
 {
-   BITMAPINFO;
+   BITMAPINFO bi;
    RGB  clr;
 } BMPINFO, *PBMPINFO;
 #pragma pack()
@@ -1160,7 +1160,7 @@ static void PMThreadFunc(void *pParm)
 
   hab=WinInitialize(0);
   hmq=WinCreateMsgQueue(hab,0);
-  if (hmq==0)
+  if (hmq == NULLHANDLE)
   {
 #ifdef DEBUG_BUILD
     printf("[PMThreadFunc] : Could not create message queue!\n");
@@ -1372,17 +1372,17 @@ WMcursor *os2fslib_CreateWMCursor_Win(_THIS, Uint8 *data, Uint8 *mask,
 
   hps = WinGetPS(_this->hidden->hwndClient);
 
-  bmi.cbFix = sizeof(BITMAPINFOHEADER);
-  bmi.cx = maxx;
-  bmi.cy = 2*maxy;
-  bmi.cPlanes = 1;
-  bmi.cBitCount = 1;
-  bmi.argbColor[0].bBlue = 0x00;
-  bmi.argbColor[0].bGreen = 0x00;
-  bmi.argbColor[0].bRed = 0x00;
-  bmi.argbColor[1].bBlue = 0x00;
-  bmi.argbColor[1].bGreen = 0x00;
-  bmi.argbColor[1].bRed = 0xff;
+  bmi.bi.cbFix = sizeof(BITMAPINFOHEADER);
+  bmi.bi.cx = maxx;
+  bmi.bi.cy = 2*maxy;
+  bmi.bi.cPlanes = 1;
+  bmi.bi.cBitCount = 1;
+  bmi.bi.argbColor[0].bBlue = 0x00;
+  bmi.bi.argbColor[0].bGreen = 0x00;
+  bmi.bi.argbColor[0].bRed = 0x00;
+  bmi.bi.argbColor[1].bBlue = 0x00;
+  bmi.bi.argbColor[1].bGreen = 0x00;
+  bmi.bi.argbColor[1].bRed = 0xff;
 
   SDL_memset(&bmih, 0, sizeof(BITMAPINFOHEADER));
   bmih.cbFix = sizeof(BITMAPINFOHEADER);
@@ -1740,11 +1740,11 @@ void os2fslib_SetIcon(_THIS, SDL_Surface *icon, Uint8 *mask)
 
   hps = WinGetPS(_this->hidden->hwndClient);
 
-  bmi.cbFix = sizeof(BITMAPINFOHEADER);
-  bmi.cx = w;
-  bmi.cy = 2*h;
-  bmi.cPlanes = 1;
-  bmi.cBitCount = 32;
+  bmi.bi.cbFix = sizeof(BITMAPINFOHEADER);
+  bmi.bi.cx = w;
+  bmi.bi.cy = 2*h;
+  bmi.bi.cPlanes = 1;
+  bmi.bi.cBitCount = 32;
 
   SDL_memset(&bmih, 0, sizeof(BITMAPINFOHEADER));
   bmih.cbFix = sizeof(BITMAPINFOHEADER);
