@@ -1361,14 +1361,12 @@ WMcursor *os2fslib_CreateWMCursor_Win(_THIS, Uint8 *data, Uint8 *mask,
   pResult = (WMcursor *) SDL_malloc(sizeof(WMcursor));
   if (!pResult) return (WMcursor *) NULL;
 
-  pchTemp = (char *) SDL_malloc((maxx + 7)/8 * maxy*2);
+  pchTemp = (char *) SDL_calloc(1, (maxx + 7)/8 * maxy*2);
   if (!pchTemp)
   {
     SDL_free(pResult);
     return (WMcursor *) NULL;
   }
-
-  SDL_memset(pchTemp, 0, (maxx + 7)/8 * maxy*2);
 
   hps = WinGetPS(_this->hidden->hwndClient);
 
@@ -1657,11 +1655,9 @@ void os2fslib_SetIcon(_THIS, SDL_Surface *icon, Uint8 *mask)
   if ((w>maxx) || (h>maxy))
     return;
 
-  pchTemp = (char *) SDL_malloc(w * h*2 * 4);
+  pchTemp = (char *) SDL_calloc(1, w * h*2 * 4);
   if (!pchTemp)
     return;
-
-  SDL_memset(pchTemp, 0, w * h*2 * 4);
 
   // Convert surface to RGB, if it's not RGB yet!
   icon_rgb = SDL_CreateRGBSurface(SDL_SWSURFACE, icon->w, icon->h,
@@ -2934,12 +2930,11 @@ static SDL_VideoDevice *os2fslib_CreateDevice(int devindex)
 #endif
 
   /* Initialize all variables that we clean on shutdown */
-  device = (SDL_VideoDevice *)SDL_malloc(sizeof(SDL_VideoDevice));
+  device = (SDL_VideoDevice *)SDL_calloc(1, sizeof(SDL_VideoDevice));
   if ( device )
   {
-    SDL_memset(device, 0, (sizeof *device));
     // Also allocate memory for private data
-    device->hidden = (struct SDL_PrivateVideoData *) SDL_malloc((sizeof(struct SDL_PrivateVideoData)));
+    device->hidden = (struct SDL_PrivateVideoData *) SDL_calloc(1, sizeof(struct SDL_PrivateVideoData));
   }
   if ( (device == NULL) || (device->hidden == NULL) )
   {
@@ -2948,7 +2943,6 @@ static SDL_VideoDevice *os2fslib_CreateDevice(int devindex)
       SDL_free(device);
     return NULL;
   }
-  SDL_memset(device->hidden, 0, (sizeof *device->hidden));
 
   /* Set the function pointers */
 #ifdef DEBUG_BUILD
