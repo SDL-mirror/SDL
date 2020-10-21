@@ -23,8 +23,8 @@
 
 #define _ULS_CALLCONV_
 #define CALLCONV _System
-#include <unidef.h>                    // Unicode API
-#include <uconv.h>                     // Unicode API (codepage conversion)
+#include <unidef.h> /* Unicode API */
+#include <uconv.h>  /* Unicode API (codepage conversion) */
 
 #include <process.h>
 #include <time.h>
@@ -36,6 +36,18 @@
 #include "../../events/SDL_events_c.h"
 
 #include "SDL_os2fslib.h"
+
+#if !defined(DEBUG_BUILD)
+#define dbgprintf(...)  do {} while (0)
+#elif defined(__GNUC__) && !(defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L)
+#define dbgprintf(fmt, args...)  do {  \
+  printf(fmt, ##args); fflush(stdout); \
+} while (0)
+#else
+#define dbgprintf(...)           do {  \
+  printf(__VA_ARGS__); fflush(stdout); \
+} while (0)
+#endif
 
 static ULONG ulFCFToUse =
         FCF_TITLEBAR |
@@ -63,114 +75,101 @@ typedef struct BMPINFO
 #pragma pack()
 
 
-// Backdoors:
+/* Backdoors: */
 DECLSPEC void SDLCALL SDL_OS2FSLIB_SetFCFToUse(ULONG ulFCF)
 {
   ulFCFToUse = ulFCF;
 }
 
-// Configuration defines:
+/* Configuration defines: */
 
-// We have to report empty alpha mask, otherwise SDL will select
-// alpha blitters, and this will have unwanted results, as we don't
-// support alpha channel in FSLib yet.
+/* We have to report empty alpha mask, otherwise SDL will select
+ * alpha blitters, and this will have unwanted results, as we don't
+ * support alpha channel in FSLib yet. */
 #define REPORT_EMPTY_ALPHA_MASK
 
-// Experimental: Move every FSLib_BitBlt() call into window message
-// processing function.
-// This may fix dirt left on desktop. Or not.
-//#define BITBLT_IN_WINMESSAGEPROC
+/* Experimental: Move every FSLib_BitBlt() call into window message
+ * processing function.
+ * This may fix dirt left on desktop. Or not. */
+/*#define BITBLT_IN_WINMESSAGEPROC */
 
-// Experimental-2: Use WinLockWindowUpdate() in around bitblts!
-// This is not enabled, because it seems to cause more problems
-// than good.
-//#define USE_WINLOCKWINDOWUPDATE_AROUND_BITBLTS
+/* Experimental-2: Use WinLockWindowUpdate() in around bitblts!
+ * This is not enabled, because it seems to cause more problems
+ * than good. */
+/*#define USE_WINLOCKWINDOWUPDATE_AROUND_BITBLTS */
 
-// Use the following to show resized image instead of black stuff
-// even if the surface is resizable.
-//#define RESIZE_EVEN_IF_RESIZABLE
+/* Use the following to show resized image instead of black stuff
+ * even if the surface is resizable. */
+/*#define RESIZE_EVEN_IF_RESIZABLE */
 
 /* The translation table from a VK keysym to a SDL keysym */
 static SDLKey HWScanKeyMap[256];
 static SDL_keysym *TranslateKey(int vkey, int chcode, int scancode, SDL_keysym *keysym, int iPressed);
-static int  iShiftIsPressed;
+static int iShiftIsPressed;
 
 #ifdef BITBLT_IN_WINMESSAGEPROC
-#define WM_UPDATERECTSREQUEST   WM_USER+50
+#define WM_UPDATERECTSREQUEST WM_USER+50
 #endif
 
 #ifdef USE_WINLOCKWINDOWUPDATE_AROUND_BITBLTS
-#define FSLIB_BITBLT(hwnd, buffer, top, left, width, height) \
-    { \
-      WinLockWindowUpdate(HWND_DESKTOP, HWND_DESKTOP); \
-      FSLib_BitBlt(hwnd, buffer, top, left, width, height); \
-      WinLockWindowUpdate(HWND_DESKTOP, NULL); \
-    }
+#define FSLIB_BITBLT(hwnd, buffer, top, left, width, height) { \
+    WinLockWindowUpdate(HWND_DESKTOP, HWND_DESKTOP);           \
+    FSLib_BitBlt(hwnd, buffer, top, left, width, height);      \
+    WinLockWindowUpdate(HWND_DESKTOP, NULL); \
+}
 #else
-#define FSLIB_BITBLT(hwnd, buffer, top, left, width, height) \
+#define FSLIB_BITBLT(hwnd, buffer, top, left, width, height)   \
     FSLib_BitBlt(hwnd, buffer, top, left, width, height);
 #endif
 
-/////////////////////////////////////////////////////////////////////
-//
-// SetAccessableWindowPos
-//
-// Same as WinSetWindowPos(), but takes care for the window to be
-// always on the screen, the titlebar will be accessable everytime.
-//
-/////////////////////////////////////////////////////////////////////
+/* SetAccessableWindowPos
+ *
+ * Same as WinSetWindowPos(), but takes care for the window to be
+ * always on the screen, the titlebar will be accessable everytime.
+ */
 static BOOL SetAccessableWindowPos(HWND hwnd, HWND hwndInsertBehind,
                                    LONG x, LONG y,
                                    LONG cx, LONG cy,
                                    ULONG fl)
 {
   SWP swpDesktop, swp;
-  // Get desktop area
+  /* Get desktop area */
   WinQueryWindowPos(HWND_DESKTOP, &swpDesktop);
 
-  if ((fl & SWP_MOVE) && (fl & SWP_SIZE))
-  {
-    // If both moving and sizing, then change size and pos now!!
-    if (x+cx>swpDesktop.cx)
+  if ((fl & SWP_MOVE) && (fl & SWP_SIZE)) {
+    /* If both moving and sizing, then change size and pos now */
+    if (x+cx > swpDesktop.cx)
       x = swpDesktop.cx - cx;
-    if (x<0)
-      x = 0;
-    if (y<0)
-      y = 0;
-    if (y+cy>swpDesktop.cy)
+    if (x < 0) x = 0;
+    if (y < 0) y = 0;
+    if (y+cy > swpDesktop.cy)
       y = swpDesktop.cy - cy;
     return WinSetWindowPos(hwnd, hwndInsertBehind, x, y, cx, cy, fl);
-  } else
-  if (fl & SWP_MOVE)
-  {
-    // Just moving
+  }
+  if (fl & SWP_MOVE) {
+    /* Just moving */
     WinQueryWindowPos(hwnd, &swp);
-    if (x+swp.cx>swpDesktop.cx)
+    if (x+swp.cx > swpDesktop.cx)
       x = swpDesktop.cx - swp.cx;
-    if (x<0)
-      x = 0;
-    if (y<0)
-      y = 0;
-    if (y+swp.cy>swpDesktop.cy)
+    if (x < 0) x = 0;
+    if (y < 0) y = 0;
+    if (y+swp.cy > swpDesktop.cy)
       y = swpDesktop.cy - swp.cy;
     return WinSetWindowPos(hwnd, hwndInsertBehind, x, y, cx, cy, fl);
-  } else
-  if (fl & SWP_SIZE)
-  {
-    // Just sizing
+  }
+  if (fl & SWP_SIZE) {
+    /* Just sizing */
     WinQueryWindowPos(hwnd, &swp);
     x = swp.x;
     y = swp.y;
     if (x+cx>swpDesktop.cx)
       x = swpDesktop.cx - cx;
-    if (x<0)
-      x = 0;
-    if (y<0)
-      y = 0;
-    if (y+cy>swpDesktop.cy)
+    if (x < 0) x = 0;
+    if (y < 0) y = 0;
+    if (y + cy>swpDesktop.cy)
       y = swpDesktop.cy - cy;
     return WinSetWindowPos(hwnd, hwndInsertBehind, x, y, cx, cy, fl | SWP_MOVE);
-  } else
+  }
   return WinSetWindowPos(hwnd, hwndInsertBehind, x, y, cx, cy, fl);
 }
 
@@ -187,15 +186,14 @@ static UniChar NativeCharToUniChar(int chcode)
   size_t   iToCount;
   size_t   iNonIdentical;
 
-  // Create unicode convert object
+  /* Create unicode convert object */
   rc = UniCreateUconvObject(L"", &ucoTemp);
-  if (rc!=ULS_SUCCESS)
-  {
-    // Could not create convert object!
+  if (rc != ULS_SUCCESS) {
+    /* Could not create convert object */
     return ucResult;
   }
 
-  // Convert language code string to unicode string
+  /* Convert language code string to unicode string */
   achFrom[0] = (char) chcode;
   achFrom[1] = 0;
   iFromCount = sizeof(char) * 2;
@@ -210,37 +208,29 @@ static UniChar NativeCharToUniChar(int chcode)
                      &iToCount,
                      &iNonIdentical);
 
-  if (rc!=ULS_SUCCESS)
-  {
-    // Could not convert language code to UCS string!
+  if (rc != ULS_SUCCESS) {
+    /* Could not convert language code to UCS string */
     UniFreeUconvObject(ucoTemp);
     return ucResult;
   }
 
   UniFreeUconvObject(ucoTemp);
 
-#ifdef DEBUG_BUILD
-  printf("%02x converted to %02x\n", (int) chcode, (int) (aucTo[0]));
-#endif
-
+  dbgprintf("%02x converted to %02x\n", (int) chcode, (int) (aucTo[0]));
   return aucTo[0];
 }
 
-/////////////////////////////////////////////////////////////////////
-//
-// TranslateKey
-//
-// This creates SDL Keycodes from VK_ and hardware scan codes
-//
-/////////////////////////////////////////////////////////////////////
+/* TranslateKey
+ *
+ * This creates SDL Keycodes from VK_ and hardware scan codes
+ */
 static SDL_keysym *TranslateKey(int vkey, int chcode, int scancode, SDL_keysym *keysym, int iPressed)
 {
   keysym->scancode = (unsigned char) scancode;
   keysym->mod = KMOD_NONE;
   keysym->unicode = 0;
 
-  if (iPressed && SDL_TranslateUNICODE)
-  {
+  if (iPressed && SDL_TranslateUNICODE) {
     if (chcode)
       keysym->unicode = NativeCharToUniChar(chcode);
     else
@@ -249,807 +239,615 @@ static SDL_keysym *TranslateKey(int vkey, int chcode, int scancode, SDL_keysym *
 
   keysym->sym = HWScanKeyMap[scancode];
 
-  // Now stuffs based on state of shift key(s)!
-  if (vkey == VK_SHIFT)
-  {
+  /* Now stuffs based on state of shift key(s) */
+  if (vkey == VK_SHIFT) {
     iShiftIsPressed = iPressed;
   }
 
-  if ((iShiftIsPressed) && (SDL_TranslateUNICODE))
-  {
-    // Change syms, if Unicode stuff is required
-    // I think it's silly, but it's SDL...
-    switch (keysym->sym)
-    {
-      case SDLK_BACKQUOTE:
-        keysym->sym = '~';
-        break;
-      case SDLK_1:
-        keysym->sym = SDLK_EXCLAIM;
-        break;
-      case SDLK_2:
-        keysym->sym = SDLK_AT;
-        break;
-      case SDLK_3:
-        keysym->sym = SDLK_HASH;
-        break;
-      case SDLK_4:
-        keysym->sym = SDLK_DOLLAR;
-        break;
-      case SDLK_5:
-        keysym->sym = '%';
-        break;
-      case SDLK_6:
-        keysym->sym = SDLK_CARET;
-        break;
-      case SDLK_7:
-        keysym->sym = SDLK_AMPERSAND;
-        break;
-      case SDLK_8:
-        keysym->sym = SDLK_ASTERISK;
-        break;
-      case SDLK_9:
-        keysym->sym = SDLK_LEFTPAREN;
-        break;
-      case SDLK_0:
-        keysym->sym = SDLK_RIGHTPAREN;
-        break;
-      case SDLK_MINUS:
-        keysym->sym = SDLK_UNDERSCORE;
-        break;
-      case SDLK_PLUS:
-        keysym->sym = SDLK_EQUALS;
-        break;
+  if (iShiftIsPressed && SDL_TranslateUNICODE) {
+    /* Change syms, if Unicode stuff is required
+     * I think it's silly, but it's SDL... */
+    switch (keysym->sym) {
+    case SDLK_BACKQUOTE:
+      keysym->sym = '~';
+      break;
+    case SDLK_1:
+      keysym->sym = SDLK_EXCLAIM;
+      break;
+    case SDLK_2:
+      keysym->sym = SDLK_AT;
+      break;
+    case SDLK_3:
+      keysym->sym = SDLK_HASH;
+      break;
+    case SDLK_4:
+      keysym->sym = SDLK_DOLLAR;
+      break;
+    case SDLK_5:
+      keysym->sym = '%';
+      break;
+    case SDLK_6:
+      keysym->sym = SDLK_CARET;
+      break;
+    case SDLK_7:
+      keysym->sym = SDLK_AMPERSAND;
+      break;
+    case SDLK_8:
+      keysym->sym = SDLK_ASTERISK;
+      break;
+    case SDLK_9:
+      keysym->sym = SDLK_LEFTPAREN;
+      break;
+    case SDLK_0:
+      keysym->sym = SDLK_RIGHTPAREN;
+      break;
+    case SDLK_MINUS:
+      keysym->sym = SDLK_UNDERSCORE;
+      break;
+    case SDLK_PLUS:
+      keysym->sym = SDLK_EQUALS;
+      break;
 
-      case SDLK_LEFTBRACKET:
-        keysym->sym = '{';
-        break;
-      case SDLK_RIGHTBRACKET:
+    case SDLK_LEFTBRACKET:
+      keysym->sym = '{';
+      break;
+    case SDLK_RIGHTBRACKET:
         keysym->sym = '}';
         break;
 
-      case SDLK_SEMICOLON:
-        keysym->sym = SDLK_COLON;
-        break;
-      case SDLK_QUOTE:
-        keysym->sym = SDLK_QUOTEDBL;
-        break;
-      case SDLK_BACKSLASH:
-        keysym->sym = '|';
-        break;
+    case SDLK_SEMICOLON:
+      keysym->sym = SDLK_COLON;
+      break;
+    case SDLK_QUOTE:
+      keysym->sym = SDLK_QUOTEDBL;
+      break;
+    case SDLK_BACKSLASH:
+      keysym->sym = '|';
+      break;
 
-      case SDLK_COMMA:
-        keysym->sym = SDLK_LESS;
-        break;
-      case SDLK_PERIOD:
-        keysym->sym = SDLK_GREATER;
-        break;
-      case SDLK_SLASH:
-        keysym->sym = SDLK_QUESTION;
-        break;
+    case SDLK_COMMA:
+      keysym->sym = SDLK_LESS;
+      break;
+    case SDLK_PERIOD:
+      keysym->sym = SDLK_GREATER;
+      break;
+    case SDLK_SLASH:
+      keysym->sym = SDLK_QUESTION;
+      break;
 
-      default:
-        break;
+    default:
+      break;
     }
   }
   return keysym;
 }
 
 #define CONVERTMOUSEPOSITION()  \
-        /* We have to inverse the mouse position, because every non-os/2 system */                                                \
-        /* has a coordinate system where the (0;0) is the top-left corner,      */                                                \
-        /* while on os/2 it's the bottom left corner!                           */                                                \
-        if (FSLib_QueryFSMode(hwnd))                                                                                              \
-        {                                                                                                                         \
-          /* We're in FS mode!                                                        */                                          \
-          /* In FS mode our window is as big as fullscreen mode, but not necessary as */                                          \
-          /* big as the source buffer (can be bigger)                                 */                                          \
-          /* So, limit mouse pos to source buffer size!                               */                                          \
-          if (ppts->x<0) ppts->x = 0;                                                                                             \
-          if (ppts->y<0) ppts->y = 0;                                                                                             \
-          if (ppts->x>=pVideo->hidden->SrcBufferDesc.uiXResolution) ppts->x = pVideo->hidden->SrcBufferDesc.uiXResolution-1;      \
-          if (ppts->y>=pVideo->hidden->SrcBufferDesc.uiYResolution) ppts->y = pVideo->hidden->SrcBufferDesc.uiYResolution-1;      \
-          pVideo->hidden->iSkipWMMOUSEMOVE++; /* Don't take next WM_MOUSEMOVE into account!  */                                   \
-          ptl.x = ppts->x; ptl.y = ppts->y;                                                                                       \
-          WinMapWindowPoints(pVideo->hidden->hwndClient, HWND_DESKTOP, &ptl, 1);                                                  \
-          WinSetPointerPos(HWND_DESKTOP, ptl.x, ptl.y);                                                                           \
-          /* Then convert OS/2 position to SDL position */                                                                        \
-          ppts->y = pVideo->hidden->SrcBufferDesc.uiYResolution - ppts->y - 1;                                                    \
-        } else                                                                                                                    \
-        {                                                                                                                         \
-          SWP swpClient;                                                                                                          \
-          /* We're in windowed mode! */                                                                                           \
-          WinQueryWindowPos(pVideo->hidden->hwndClient, &swpClient);                                                              \
-          /* Convert OS/2 mouse position to SDL position, and also scale it! */                                                   \
-          (ppts->x) = (ppts->x) * pVideo->hidden->SrcBufferDesc.uiXResolution / swpClient.cx;                                       \
-          (ppts->y) = (ppts->y) * pVideo->hidden->SrcBufferDesc.uiYResolution / swpClient.cy;                                       \
-          (ppts->y) = pVideo->hidden->SrcBufferDesc.uiYResolution - (ppts->y)  - 1;                                                 \
-        }
+  /* We have to inverse the mouse position, because every non-os/2 system */                                            \
+  /* has a coordinate system where the (0;0) is the top-left corner,      */                                            \
+  /* while on os/2 it's the bottom left corner.                           */                                            \
+  if (FSLib_QueryFSMode(hwnd)) {                                                                                        \
+    /* We're in FS mode!                                                        */                                      \
+    /* In FS mode our window is as big as fullscreen mode, but not necessary as */                                      \
+    /* big as the source buffer (can be bigger)                                 */                                      \
+    /* So, limit mouse pos to source buffer size.                               */                                      \
+    if (ppts->x<0) ppts->x = 0;                                                                                         \
+    if (ppts->y<0) ppts->y = 0;                                                                                         \
+    if (ppts->x>=pVideo->hidden->SrcBufferDesc.uiXResolution) ppts->x = pVideo->hidden->SrcBufferDesc.uiXResolution-1;  \
+    if (ppts->y>=pVideo->hidden->SrcBufferDesc.uiYResolution) ppts->y = pVideo->hidden->SrcBufferDesc.uiYResolution-1;  \
+    pVideo->hidden->iSkipWMMOUSEMOVE++; /* Don't take next WM_MOUSEMOVE into account!  */                               \
+    ptl.x = ppts->x; ptl.y = ppts->y;                                                                                   \
+    WinMapWindowPoints(pVideo->hidden->hwndClient, HWND_DESKTOP, &ptl, 1);                                              \
+    WinSetPointerPos(HWND_DESKTOP, ptl.x, ptl.y);                                                                       \
+    /* Then convert OS/2 position to SDL position */                                                                    \
+    ppts->y = pVideo->hidden->SrcBufferDesc.uiYResolution - ppts->y - 1;                                                \
+  } else {                                                                                                              \
+    SWP swpClient;                                                                                                      \
+    /* We're in windowed mode. */                                                                                       \
+    WinQueryWindowPos(pVideo->hidden->hwndClient, &swpClient);                                                          \
+    /* Convert OS/2 mouse position to SDL position, and also scale it. */                                               \
+    (ppts->x) = (ppts->x) * pVideo->hidden->SrcBufferDesc.uiXResolution / swpClient.cx;                                 \
+    (ppts->y) = (ppts->y) * pVideo->hidden->SrcBufferDesc.uiYResolution / swpClient.cy;                                 \
+    (ppts->y) = pVideo->hidden->SrcBufferDesc.uiYResolution - (ppts->y)  - 1;                                           \
+  }
 
 
-
-/////////////////////////////////////////////////////////////////////
-//
-// WndProc
-//
-// This is the message processing window procedure for the
-// SDLWindowClass, which is the client window in our application.
-// It handles switching back and away from the app (taking care of
-// going out and back to and from fullscreen mode), sending keystrokes
-// and mouse events to where it has to be sent, etc...
-//
-/////////////////////////////////////////////////////////////////////
-static MRESULT EXPENTRY WndProc( HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
+/* WndProc
+ *
+ * This is the message processing window procedure for the
+ * SDLWindowClass, which is the client window in our application.
+ * It handles switching back and away from the app (taking care of
+ * going out and back to and from fullscreen mode), sending keystrokes
+ * and mouse events to where it has to be sent, etc...
+ */
+static MRESULT EXPENTRY WndProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 {
   HPS ps;
   RECTL rcl;
   SDL_VideoDevice *pVideo = NULL;
 
-  switch (msg)
-  {
-    case WM_CHAR:  // Keypress notification
-#ifdef DEBUG_BUILD
-//      printf("WM_CHAR\n"); fflush(stdout);
+  switch (msg) {
+  case WM_CHAR:  /* Keypress notification */
+    /*dbgprintf("WM_CHAR\n");*/
+    pVideo = WinQueryWindowPtr(hwnd, 0);
+    if (pVideo) {
+#if 0
+      /* We skip repeated keys: */
+      if (CHARMSG(&msg)->cRepeat > 1) {
+        dbgprintf("Repeated key (%d), skipping...\n", CHARMSG(&msg)->cRepeat);
+        return (MRESULT) TRUE;
+      }
 #endif
-      pVideo = WinQueryWindowPtr(hwnd, 0);
-      if (pVideo)
-      {
-        /*
-        // We skip repeated keys:
-        if (CHARMSG(&msg)->cRepeat>1)
-        {
-#ifdef DEBUG_BUILD
-//          printf("Repeated key (%d), skipping...\n", CHARMSG(&msg)->cRepeat); fflush(stdout);
-#endif
-          return (MRESULT) TRUE;
+
+      /* If it's not repeated, then let's see if its pressed or released. */
+      if (SHORT1FROMMP(mp1) & KC_KEYUP) {
+        /* a key has been released */
+        SDL_keysym keysym;
+
+        /*dbgprintf("WM_CHAR, keyup, code is [0x%0x]\n", CHAR4FROMMP(mp1));*/ /* HW scan code */
+
+        /* One problem is with F1, which gets only the keyup message because
+         * it is a system key.
+         * So, when we get keyup message, we simulate keydown too. */
+        /* UPDATE:
+         * This problem should be solved now, that the accelerator keys are
+         * disabled for this window. */
+#if 0
+        if (SHORT2FROMMP(mp2)==VK_F1) {
+        SDL_PrivateKeyboard(SDL_PRESSED, TranslateKey(SHORT2FROMMP(mp2), /* VK_ code */
+                                                      SHORT1FROMMP(mp2), /* Character code */
+                                                      CHAR4FROMMP(mp1),  /* HW Scan code */
+                                                      &keysym,0));
         }
-        */
-
-        // If it's not repeated, then let's see if its pressed or released!
-        if (SHORT1FROMMP(mp1) & KC_KEYUP)
-        {
-          // A key has been released
-          SDL_keysym keysym;
-
-#ifdef DEBUG_BUILD
-//          printf("WM_CHAR, keyup, code is [0x%0x]\n", CHAR4FROMMP(mp1)); // HW scan code
 #endif
-
-          // One problem is with F1, which gets only the keyup message because
-          // it is a system key.
-          // So, when we get keyup message, we simulate keydown too!
-          // UPDATE:
-          //  This problem should be solved now, that the accelerator keys are
-          //  disabled for this window!
-          /*
-          if (SHORT2FROMMP(mp2)==VK_F1)
-          {
-            SDL_PrivateKeyboard(SDL_PRESSED, TranslateKey(SHORT2FROMMP(mp2), // VK_ code
-                                                           SHORT1FROMMP(mp2), // Character code
-                                                           CHAR4FROMMP(mp1),  // HW Scan code
-                                                           &keysym,0));
-          }*/
-
-          SDL_PrivateKeyboard(SDL_RELEASED, TranslateKey(SHORT2FROMMP(mp2), // VK_ code
-                                                         SHORT1FROMMP(mp2), // Character code
-                                                         CHAR4FROMMP(mp1),  // HW Scan code
+        SDL_PrivateKeyboard(SDL_RELEASED, TranslateKey(SHORT2FROMMP(mp2), /* VK_ code */
+                                                         SHORT1FROMMP(mp2), /* Character code */
+                                                         CHAR4FROMMP(mp1),  /* HW Scan code */
                                                          &keysym,0));
-          
+      } else {
+        /* a key has been pressed */
+        SDL_keysym keysym;
+
+        /*dbgprintf("WM_CHAR, keydown, code is [0x%0x]\n", CHAR4FROMMP(mp1));*/ /* HW scan code */
+        /* Check for fastkeys: ALT+HOME to toggle FS mode
+         *                     ALT+END to close app     */
+        if ((SHORT1FROMMP(mp1) & KC_ALT) &&
+            (SHORT2FROMMP(mp2) == VK_HOME)) {
+          dbgprintf(" Pressed ALT+HOME!\n");
+          /* Only switch between fullscreen and back if it's not
+           * a resizable mode. */
+          if (!pVideo->hidden->pSDLSurface ||
+              (pVideo->hidden->pSDLSurface && !(pVideo->hidden->pSDLSurface->flags & SDL_RESIZABLE)) )
+            FSLib_ToggleFSMode(hwnd, !FSLib_QueryFSMode(hwnd));
+          else
+            dbgprintf(" Resizable mode, so discarding ALT+HOME!\n");
+        } else
+        if ((SHORT1FROMMP(mp1) & KC_ALT) &&
+            (SHORT2FROMMP(mp2) == VK_END)) {
+          dbgprintf(" Pressed ALT+END!\n");
+          /* Close window, and get out of loop.
+           * Also send event to SDL application, but we won't
+           * wait for it to be processed. */
+          SDL_PrivateQuit();
+          WinPostMsg(hwnd, WM_QUIT, 0, 0);
         } else
         {
-          // A key has been pressed
-          SDL_keysym keysym;
-
-#ifdef DEBUG_BUILD
-//          printf("WM_CHAR, keydown, code is [0x%0x]\n", CHAR4FROMMP(mp1)); // HW scan code
-#endif
-          // Check for fastkeys: ALT+HOME to toggle FS mode
-          //                     ALT+END to close app
-          if ((SHORT1FROMMP(mp1) & KC_ALT) &&
-              (SHORT2FROMMP(mp2) == VK_HOME))
-          {
-#ifdef DEBUG_BUILD
-            printf(" Pressed ALT+HOME!\n"); fflush(stdout);
-#endif
-            // Only switch between fullscreen and back if it's not
-            // a resizable mode!
-            if (
-                (!pVideo->hidden->pSDLSurface) ||
-                ((pVideo->hidden->pSDLSurface)
-                 && ((pVideo->hidden->pSDLSurface->flags & SDL_RESIZABLE)==0)
-                )
-               )
-              FSLib_ToggleFSMode(hwnd, !FSLib_QueryFSMode(hwnd));
-#ifdef DEBUG_BUILD
-            else
-              printf(" Resizable mode, so discarding ALT+HOME!\n"); fflush(stdout);
-#endif
-          } else
-          if ((SHORT1FROMMP(mp1) & KC_ALT) &&
-              (SHORT2FROMMP(mp2) == VK_END))
-          {
-#ifdef DEBUG_BUILD
-            printf(" Pressed ALT+END!\n"); fflush(stdout);
-#endif
-            // Close window, and get out of loop!
-            // Also send event to SDL application, but we won't
-            // wait for it to be processed!
-            SDL_PrivateQuit();
-            WinPostMsg(hwnd, WM_QUIT, 0, 0);
-          } else
-          {
-            
-            SDL_PrivateKeyboard(SDL_PRESSED, TranslateKey(SHORT2FROMMP(mp2), // VK_ code
-                                                          SHORT1FROMMP(mp2), // Character code
-                                                          CHAR4FROMMP(mp1),  // HW Scan code
-                                                          &keysym,1));
-            
-          }
+          SDL_PrivateKeyboard(SDL_PRESSED, TranslateKey(SHORT2FROMMP(mp2), /* VK_ code */
+                                                        SHORT1FROMMP(mp2), /* Character code */
+                                                        CHAR4FROMMP(mp1),  /* HW Scan code */
+                                                        &keysym,1));
         }
       }
-      return (MRESULT) TRUE;
+    }
+    return (MRESULT) TRUE;
 
-    case WM_TRANSLATEACCEL:
-      {
-        PQMSG pqmsg;
-        pqmsg = (PQMSG) mp1;
-        if (mp1)
-        {
-          if (pqmsg->msg == WM_CHAR)
-          {
-            // WM_CHAR message!
-            // Let's filter the ALT keypress and all other acceleration keys!
-            return (MRESULT) FALSE;
-          }
+  case WM_TRANSLATEACCEL:
+    {
+      PQMSG pqmsg;
+      pqmsg = (PQMSG) mp1;
+      if (mp1) {
+        if (pqmsg->msg == WM_CHAR) {
+          /* WM_CHAR message
+           * Let's filter the ALT keypress and all other acceleration keys. */
+          return (MRESULT) FALSE;
         }
-        break; // Default processing (pass to parent until frame control)
       }
+      break; /* Default processing (pass to parent until frame control) */
+    }
 
-    case WM_PAINT:  // Window redraw!
-#ifdef DEBUG_BUILD
-      printf("WM_PAINT (0x%x)\n", hwnd); fflush(stdout);
-#endif
-      ps = WinBeginPaint(hwnd,0,&rcl);
-      pVideo = FSLib_GetUserParm(hwnd);
-      if (pVideo)
+  case WM_PAINT:  /* Window redraw */
+    dbgprintf("WM_PAINT (0x%x)\n", hwnd);
+    ps = WinBeginPaint(hwnd,0,&rcl);
+    pVideo = FSLib_GetUserParm(hwnd);
+    if (pVideo) {
+      if (!pVideo->hidden->pSDLSurface) {
+        RECTL rclRect;
+        /* So, don't blit now */
+        dbgprintf("WM_PAINT : Skipping blit while resizing (Pre!)!\n");
+        WinQueryWindowRect(hwnd, &rclRect);
+        /* Fill with black */
+        WinFillRect(ps, &rclRect, CLR_BLACK);
+      } else
       {
-        if (!pVideo->hidden->pSDLSurface)
-        {
-          RECTL rclRect;
-          // So, don't blit now!
-#ifdef DEBUG_BUILD
-          printf("WM_PAINT : Skipping blit while resizing (Pre!)!\n"); fflush(stdout);
-#endif
-          WinQueryWindowRect(hwnd, &rclRect);
-          // Fill with black
-          WinFillRect(ps, &rclRect, CLR_BLACK);
-        } else
-        {
-          if (DosRequestMutexSem(pVideo->hidden->hmtxUseSrcBuffer, 1000)==NO_ERROR)
-          {
-            int iTop, iLeft, iWidth, iHeight;
-            int iXScaleError, iYScaleError;
-            int iXScaleError2, iYScaleError2;
-            SWP swp;
-            
-            // Re-blit the modified area!
-            // For this, we have to calculate the points, scaled!
-            WinQueryWindowPos(hwnd, &swp);
-#ifdef DEBUG_BUILD
-            printf("WM_PAINT : WinSize: %d %d, BufSize: %d %d\n",
-                   swp.cx,
-                   swp.cy,
-                   pVideo->hidden->SrcBufferDesc.uiXResolution,
-                   pVideo->hidden->SrcBufferDesc.uiYResolution
-                  );
-            fflush(stdout);
-#endif
+        if (DosRequestMutexSem(pVideo->hidden->hmtxUseSrcBuffer, 1000) == NO_ERROR) {
+          int iTop, iLeft, iWidth, iHeight;
+          int iXScaleError, iYScaleError;
+          int iXScaleError2, iYScaleError2;
+          SWP swp;
+
+          /* Re-blit the modified area.
+           * For this, we have to calculate the points, scaled. */
+          WinQueryWindowPos(hwnd, &swp);
+          dbgprintf("WM_PAINT : WinSize: %d %d, BufSize: %d %d\n",
+                    swp.cx, swp.cy,
+                    pVideo->hidden->SrcBufferDesc.uiXResolution,
+                    pVideo->hidden->SrcBufferDesc.uiYResolution);
 
 #ifndef RESIZE_EVEN_IF_RESIZABLE
-            // But only blit if the window is not resizable, or if
-            // the window is resizable and the source buffer size is the
-            // same as the destination buffer size!
-            if ((!pVideo->hidden->pSDLSurface) ||
-                ((pVideo->hidden->pSDLSurface) &&
-                 (pVideo->hidden->pSDLSurface->flags & SDL_RESIZABLE) &&
-                 ((swp.cx != pVideo->hidden->SrcBufferDesc.uiXResolution) ||
-                  (swp.cy != pVideo->hidden->SrcBufferDesc.uiYResolution)
-                 ) &&
-                 (!FSLib_QueryFSMode(hwnd))
-                )
-               )
-            {
-              RECTL rclRect;
-              // Resizable surface and in resizing!
-              // So, don't blit now!
-#ifdef DEBUG_BUILD
-              printf("WM_PAINT : Skipping blit while resizing!\n"); fflush(stdout);
+          /* But only blit if the window is not resizable, or if
+           * the window is resizable and the source buffer size is the
+           * same as the destination buffer size. */
+          if (!pVideo->hidden->pSDLSurface ||
+              (pVideo->hidden->pSDLSurface && (pVideo->hidden->pSDLSurface->flags & SDL_RESIZABLE) &&
+               ((swp.cx != pVideo->hidden->SrcBufferDesc.uiXResolution)  ||
+                (swp.cy != pVideo->hidden->SrcBufferDesc.uiYResolution)) &&
+               !FSLib_QueryFSMode(hwnd)) )
+          {
+            RECTL rclRect;
+            /* Resizable surface and in resizing. So, don't blit now. */
+            dbgprintf("WM_PAINT : Skipping blit while resizing!\n");
+            WinQueryWindowRect(hwnd, &rclRect);
+            /* Fill with black */
+            WinFillRect(ps, &rclRect, CLR_BLACK);
+          } else
 #endif
-              WinQueryWindowRect(hwnd, &rclRect);
-              // Fill with black
-              WinFillRect(ps, &rclRect, CLR_BLACK);
-            } else
-#endif
-            {
-  
-              iXScaleError = (pVideo->hidden->SrcBufferDesc.uiXResolution-1) / swp.cx;
-              iYScaleError = (pVideo->hidden->SrcBufferDesc.uiYResolution-1) / swp.cy;
-              if (iXScaleError<0) iXScaleError = 0;
-              if (iYScaleError<0) iYScaleError = 0;
-              iXScaleError2 = (swp.cx-1)/(pVideo->hidden->SrcBufferDesc.uiXResolution);
-              iYScaleError2 = (swp.cy-1)/(pVideo->hidden->SrcBufferDesc.uiYResolution);
-              if (iXScaleError2<0) iXScaleError2 = 0;
-              if (iYScaleError2<0) iYScaleError2 = 0;
-      
-              iTop = (swp.cy - rcl.yTop) * pVideo->hidden->SrcBufferDesc.uiYResolution / swp.cy - iYScaleError;
-              iLeft = rcl.xLeft * pVideo->hidden->SrcBufferDesc.uiXResolution / swp.cx - iXScaleError;
-              iWidth = ((rcl.xRight-rcl.xLeft) * pVideo->hidden->SrcBufferDesc.uiXResolution + swp.cx-1)
+          {
+            iXScaleError = (pVideo->hidden->SrcBufferDesc.uiXResolution-1) / swp.cx;
+            iYScaleError = (pVideo->hidden->SrcBufferDesc.uiYResolution-1) / swp.cy;
+            if (iXScaleError<0) iXScaleError = 0;
+            if (iYScaleError<0) iYScaleError = 0;
+            iXScaleError2 = (swp.cx-1)/(pVideo->hidden->SrcBufferDesc.uiXResolution);
+            iYScaleError2 = (swp.cy-1)/(pVideo->hidden->SrcBufferDesc.uiYResolution);
+            if (iXScaleError2<0) iXScaleError2 = 0;
+            if (iYScaleError2<0) iYScaleError2 = 0;
+
+            iTop = (swp.cy - rcl.yTop) * pVideo->hidden->SrcBufferDesc.uiYResolution / swp.cy - iYScaleError;
+            iLeft = rcl.xLeft * pVideo->hidden->SrcBufferDesc.uiXResolution / swp.cx - iXScaleError;
+            iWidth = ((rcl.xRight-rcl.xLeft) * pVideo->hidden->SrcBufferDesc.uiXResolution + swp.cx-1)
                 / swp.cx + 2*iXScaleError;
-              iHeight = ((rcl.yTop-rcl.yBottom) * pVideo->hidden->SrcBufferDesc.uiYResolution + swp.cy-1)
+            iHeight = ((rcl.yTop-rcl.yBottom) * pVideo->hidden->SrcBufferDesc.uiYResolution + swp.cy-1)
                 / swp.cy + 2*iYScaleError;
-      
-              iWidth+=iXScaleError2;
-              iHeight+=iYScaleError2;
-      
-              if (iTop<0) iTop = 0;
-              if (iLeft<0) iLeft = 0;
-              if (iTop+iHeight>pVideo->hidden->SrcBufferDesc.uiYResolution) iHeight = pVideo->hidden->SrcBufferDesc.uiYResolution-iTop;
-              if (iLeft+iWidth>pVideo->hidden->SrcBufferDesc.uiXResolution) iWidth = pVideo->hidden->SrcBufferDesc.uiXResolution-iLeft;
-    
-#ifdef DEBUG_BUILD
-              printf("WM_PAINT : BitBlt: %d %d -> %d %d (Buf %d x %d)\n",
-                     iTop, iLeft, iWidth, iHeight,
-                     pVideo->hidden->SrcBufferDesc.uiXResolution,
-                     pVideo->hidden->SrcBufferDesc.uiYResolution
-                    );
-              fflush(stdout);
+
+            iWidth+=iXScaleError2;
+            iHeight+=iYScaleError2;
+
+            if (iTop <  0) iTop = 0;
+            if (iLeft < 0) iLeft = 0;
+            if (iTop+iHeight>pVideo->hidden->SrcBufferDesc.uiYResolution) iHeight = pVideo->hidden->SrcBufferDesc.uiYResolution-iTop;
+            if (iLeft+iWidth>pVideo->hidden->SrcBufferDesc.uiXResolution) iWidth = pVideo->hidden->SrcBufferDesc.uiXResolution-iLeft;
+
+            dbgprintf("WM_PAINT : BitBlt: %d %d -> %d %d (Buf %d x %d)\n",
+                      iTop, iLeft, iWidth, iHeight,
+                      pVideo->hidden->SrcBufferDesc.uiXResolution,
+                      pVideo->hidden->SrcBufferDesc.uiYResolution);
+
+            FSLIB_BITBLT(hwnd, pVideo->hidden->pchSrcBuffer, iTop, iLeft, iWidth, iHeight);
+          }
+
+          DosReleaseMutexSem(pVideo->hidden->hmtxUseSrcBuffer);
+        }
+      }
+    }
+    else {
+      dbgprintf("WM_PAINT : No pVideo!\n");
+    }
+    WinEndPaint(ps);
+    dbgprintf("WM_PAINT : Done.\n");
+    return 0;
+
+  case WM_SIZE:
+    dbgprintf("WM_SIZE : (%d %d)\n", SHORT1FROMMP(mp2), SHORT2FROMMP(mp2));
+    iWindowSizeX = SHORT1FROMMP(mp2);
+    iWindowSizeY = SHORT2FROMMP(mp2);
+    bWindowResized = 1;
+
+    /* Make sure the window will be redrawn */
+    WinInvalidateRegion(hwnd, NULLHANDLE, TRUE);
+    break;
+
+  case WM_FSLIBNOTIFICATION:
+    dbgprintf("WM_FSLIBNOTIFICATION\n");
+    if ((int)mp1 == FSLN_TOGGLEFSMODE) {
+      /* FS mode changed, reblit image */
+      pVideo = FSLib_GetUserParm(hwnd);
+      if (pVideo) {
+        if (!pVideo->hidden->pSDLSurface) {
+          /* Resizable surface and in resizing. So, don't blit now. */
+          dbgprintf("WM_FSLIBNOTIFICATION : Can not blit if there is no surface, doing nothing.\n");
+        } else {
+          if (DosRequestMutexSem(pVideo->hidden->hmtxUseSrcBuffer, 1000) == NO_ERROR) {
+            if (pVideo->hidden->pSDLSurface) {
+#ifndef RESIZE_EVEN_IF_RESIZABLE
+              SWP swp;
+
+              /* But only blit if the window is not resizable, or if
+               * the window is resizable and the source buffer size is the
+               * same as the destination buffer size. */
+              WinQueryWindowPos(hwnd, &swp);
+              if (!pVideo->hidden->pSDLSurface ||
+                  (pVideo->hidden->pSDLSurface && (pVideo->hidden->pSDLSurface->flags & SDL_RESIZABLE) &&
+                    ((swp.cx != pVideo->hidden->SrcBufferDesc.uiXResolution)  ||
+                     (swp.cy != pVideo->hidden->SrcBufferDesc.uiYResolution)) &&
+                   !FSLib_QueryFSMode(hwnd)) )
+              {
+                /* Resizable surface and in resizing. So, don't blit now. */
+                dbgprintf("WM_FSLIBNOTIFICATION : Cannot blit while resizing, doing nothing.\n");
+              } else
 #endif
-                    
-              FSLIB_BITBLT(hwnd, pVideo->hidden->pchSrcBuffer, iTop, iLeft, iWidth, iHeight);
+              {
+                dbgprintf("WM_FSLIBNOTIFICATION : Blitting!\n");
+                FSLIB_BITBLT(hwnd, pVideo->hidden->pchSrcBuffer,
+                             0, 0,
+                             pVideo->hidden->SrcBufferDesc.uiXResolution,
+                             pVideo->hidden->SrcBufferDesc.uiYResolution);
+              }
             }
-  
+            else
+              dbgprintf("WM_FSLIBNOTIFICATION : No public surface!\n");
+
             DosReleaseMutexSem(pVideo->hidden->hmtxUseSrcBuffer);
           }
         }
       }
-#ifdef DEBUG_BUILD
-      else
-      {
-        printf("WM_PAINT : No pVideo!\n"); fflush(stdout);
-      }
-#endif
-      WinEndPaint(ps);
-#ifdef DEBUG_BUILD
-      printf("WM_PAINT : Done.\n");
-      fflush(stdout);
-#endif
-      return 0;
+    }
+    return (MPARAM) 1;
 
-    case WM_SIZE:
-      {
-#ifdef DEBUG_BUILD
-        printf("WM_SIZE : (%d %d)\n",
-               SHORT1FROMMP(mp2), SHORT2FROMMP(mp2)); fflush(stdout);
-#endif
-        iWindowSizeX = SHORT1FROMMP(mp2);
-        iWindowSizeY = SHORT2FROMMP(mp2);
-        bWindowResized = 1;
-
-        // Make sure the window will be redrawn
-        WinInvalidateRegion(hwnd, NULLHANDLE, TRUE);
-      }
-      break;
-
-    case WM_FSLIBNOTIFICATION:
-#ifdef DEBUG_BUILD
-        printf("WM_FSLIBNOTIFICATION\n"); fflush(stdout);
-#endif
-      if ((int)mp1 == FSLN_TOGGLEFSMODE)
-      {
-        // FS mode changed, reblit image!
-        pVideo = FSLib_GetUserParm(hwnd);
-        if (pVideo)
-        {
-          if (!pVideo->hidden->pSDLSurface)
-          {
-            // Resizable surface and in resizing!
-            // So, don't blit now!
-#ifdef DEBUG_BUILD
-            printf("WM_FSLIBNOTIFICATION : Can not blit if there is no surface, doing nothing.\n"); fflush(stdout);
-#endif
-          } else
-          {
-            if (DosRequestMutexSem(pVideo->hidden->hmtxUseSrcBuffer, 1000)==NO_ERROR)
-            {
-              if (pVideo->hidden->pSDLSurface)
-              {
-#ifndef RESIZE_EVEN_IF_RESIZABLE
-                SWP swp;
-
-                // But only blit if the window is not resizable, or if
-                // the window is resizable and the source buffer size is the
-                // same as the destination buffer size!
-                WinQueryWindowPos(hwnd, &swp);
-                if ((!pVideo->hidden->pSDLSurface) ||
-                    (
-                     (pVideo->hidden->pSDLSurface) &&
-                     (pVideo->hidden->pSDLSurface->flags & SDL_RESIZABLE) &&
-                     ((swp.cx != pVideo->hidden->SrcBufferDesc.uiXResolution) ||
-                      (swp.cy != pVideo->hidden->SrcBufferDesc.uiYResolution)
-                     ) &&
-                     (!FSLib_QueryFSMode(hwnd))
-                    )
-                   )
-                {
-                  // Resizable surface and in resizing!
-                  // So, don't blit now!
-#ifdef DEBUG_BUILD
-                  printf("WM_FSLIBNOTIFICATION : Cannot blit while resizing, doing nothing.\n"); fflush(stdout);
-#endif
-                } else
-#endif
-                {
-#ifdef DEBUG_BUILD
-                  printf("WM_FSLIBNOTIFICATION : Blitting!\n"); fflush(stdout);
-#endif
-                  FSLIB_BITBLT(hwnd, pVideo->hidden->pchSrcBuffer,
-                               0, 0,
-                               pVideo->hidden->SrcBufferDesc.uiXResolution,
-                               pVideo->hidden->SrcBufferDesc.uiYResolution);
-                }
-              }
-#ifdef DEBUG_BUILD
-              else
-                printf("WM_FSLIBNOTIFICATION : No public surface!\n"); fflush(stdout);
-#endif
-  
-              DosReleaseMutexSem(pVideo->hidden->hmtxUseSrcBuffer);
-            }
-          }
-        }
-      }
-      return (MPARAM) 1;
-
-    case WM_ACTIVATE:
-#ifdef DEBUG_BUILD
-      printf("WM_ACTIVATE\n"); fflush(stdout);
-#endif
-
-      pVideo = FSLib_GetUserParm(hwnd);
-      if (pVideo)
-      {
-        pVideo->hidden->fInFocus = (int) mp1;
-        if (pVideo->hidden->fInFocus)
-        {
-          // Went into focus
-          if ((pVideo->hidden->iMouseVisible) && (!bMouseCaptured))
-            WinSetPointer(HWND_DESKTOP, WinQuerySysPointer(HWND_DESKTOP, SPTR_ARROW, FALSE));
-          else
-            WinSetPointer(HWND_DESKTOP, NULLHANDLE);
-
-          if (bMouseCapturable)
-          {
-            // Re-capture the mouse, if we captured it before!
-            WinSetCapture(HWND_DESKTOP, hwnd);
-            bMouseCaptured = 1;
-            {
-              SWP swpClient;
-              POINTL ptl;
-              // Center the mouse to the middle of the window!
-              WinQueryWindowPos(pVideo->hidden->hwndClient, &swpClient);
-              ptl.x = 0; ptl.y = 0;
-              WinMapWindowPoints(pVideo->hidden->hwndClient, HWND_DESKTOP, &ptl, 1);
-              pVideo->hidden->iSkipWMMOUSEMOVE++; /* Don't take next WM_MOUSEMOVE into account!  */
-              WinSetPointerPos(HWND_DESKTOP,
-                               ptl.x + swpClient.cx/2,
-                               ptl.y + swpClient.cy/2);
-            }
-          }
-        } else
-        {
-          // Went out of focus
+  case WM_ACTIVATE:
+    dbgprintf("WM_ACTIVATE\n");
+    pVideo = FSLib_GetUserParm(hwnd);
+    if (pVideo) {
+      pVideo->hidden->fInFocus = (int) mp1;
+      if (pVideo->hidden->fInFocus) {
+        /* Went into focus */
+        if ((pVideo->hidden->iMouseVisible) && (!bMouseCaptured))
           WinSetPointer(HWND_DESKTOP, WinQuerySysPointer(HWND_DESKTOP, SPTR_ARROW, FALSE));
+        else
+          WinSetPointer(HWND_DESKTOP, NULLHANDLE);
 
-          if (bMouseCaptured)
-          {
-            // Release the mouse
-            WinSetCapture(HWND_DESKTOP, hwnd);
-            bMouseCaptured = 0;
-          }
-        }
-      }
-#ifdef DEBUG_BUILD
-      printf("WM_ACTIVATE done\n"); fflush(stdout);
-#endif
-
-      break;
-
-    case WM_BUTTON1DOWN:
-#ifdef DEBUG_BUILD
-      printf("WM_BUTTON1DOWN\n"); fflush(stdout);
-#endif
-
-      pVideo = FSLib_GetUserParm(hwnd);
-      if (pVideo)
-      {
-        SDL_PrivateMouseButton(SDL_PRESSED,
-                               SDL_BUTTON_LEFT,
-                               0, 0); // Don't report mouse movement!
-
-        if (bMouseCapturable)
-        {
-          // We should capture the mouse!
-          if (!bMouseCaptured)
-          {
-            WinSetCapture(HWND_DESKTOP, hwnd);
-            WinSetPointer(HWND_DESKTOP, NULLHANDLE);
-            bMouseCaptured = 1;
-            {
-              SWP swpClient;
-              POINTL ptl;
-              // Center the mouse to the middle of the window!
-              WinQueryWindowPos(pVideo->hidden->hwndClient, &swpClient);
-              ptl.x = 0; ptl.y = 0;
-              WinMapWindowPoints(pVideo->hidden->hwndClient, HWND_DESKTOP, &ptl, 1);
-              pVideo->hidden->iSkipWMMOUSEMOVE++; /* Don't take next WM_MOUSEMOVE into account!  */
-              WinSetPointerPos(HWND_DESKTOP,
-                               ptl.x + swpClient.cx/2,
-                               ptl.y + swpClient.cy/2);
-            }
-          }
-        }
-      }
-      break;
-    case WM_BUTTON1UP:
-#ifdef DEBUG_BUILD
-      printf("WM_BUTTON1UP\n"); fflush(stdout);
-#endif
-      SDL_PrivateMouseButton(SDL_RELEASED,
-                             SDL_BUTTON_LEFT,
-                             0, 0); // Don't report mouse movement!
-      break;
-    case WM_BUTTON2DOWN:
-#ifdef DEBUG_BUILD
-      printf("WM_BUTTON2DOWN\n"); fflush(stdout);
-#endif
-
-      pVideo = FSLib_GetUserParm(hwnd);
-      if (pVideo)
-      {
-        SDL_PrivateMouseButton(SDL_PRESSED,
-                               SDL_BUTTON_RIGHT,
-                               0, 0); // Don't report mouse movement!
-
-        if (bMouseCapturable)
-        {
-          // We should capture the mouse!
-          if (!bMouseCaptured)
-          {
-            WinSetCapture(HWND_DESKTOP, hwnd);
-            WinSetPointer(HWND_DESKTOP, NULLHANDLE);
-            bMouseCaptured = 1;
-            {
-              SWP swpClient;
-              POINTL ptl;
-              // Center the mouse to the middle of the window!
-              WinQueryWindowPos(pVideo->hidden->hwndClient, &swpClient);
-              ptl.x = 0; ptl.y = 0;
-              WinMapWindowPoints(pVideo->hidden->hwndClient, HWND_DESKTOP, &ptl, 1);
-              pVideo->hidden->iSkipWMMOUSEMOVE++; /* Don't take next WM_MOUSEMOVE into account!  */
-              WinSetPointerPos(HWND_DESKTOP,
-                               ptl.x + swpClient.cx/2,
-                               ptl.y + swpClient.cy/2);
-            }
-          }
-        }
-
-      }
-      break;
-    case WM_BUTTON2UP:
-#ifdef DEBUG_BUILD
-      printf("WM_BUTTON2UP\n"); fflush(stdout);
-#endif
-      SDL_PrivateMouseButton(SDL_RELEASED,
-                             SDL_BUTTON_RIGHT,
-                             0, 0); // Don't report mouse movement!
-      break;
-    case WM_BUTTON3DOWN:
-#ifdef DEBUG_BUILD
-      printf("WM_BUTTON3DOWN\n"); fflush(stdout);
-#endif
-
-      pVideo = FSLib_GetUserParm(hwnd);
-      if (pVideo)
-      {
-        SDL_PrivateMouseButton(SDL_PRESSED,
-                               SDL_BUTTON_MIDDLE,
-                               0, 0); // Don't report mouse movement!
-        
-        if (bMouseCapturable)
-        {
-          // We should capture the mouse!
-          if (!bMouseCaptured)
-          {
-            WinSetCapture(HWND_DESKTOP, hwnd);
-            WinSetPointer(HWND_DESKTOP, NULLHANDLE);
-            bMouseCaptured = 1;
-            {
-              SWP swpClient;
-              POINTL ptl;
-              // Center the mouse to the middle of the window!
-              WinQueryWindowPos(pVideo->hidden->hwndClient, &swpClient);
-              ptl.x = 0; ptl.y = 0;
-              WinMapWindowPoints(pVideo->hidden->hwndClient, HWND_DESKTOP, &ptl, 1);
-              pVideo->hidden->iSkipWMMOUSEMOVE++; /* Don't take next WM_MOUSEMOVE into account!  */
-              WinSetPointerPos(HWND_DESKTOP,
-                               ptl.x + swpClient.cx/2,
-                               ptl.y + swpClient.cy/2);
-            }
-          }
-        }
-      }
-      break;
-    case WM_BUTTON3UP:
-#ifdef DEBUG_BUILD
-      printf("WM_BUTTON3UP\n"); fflush(stdout);
-#endif
-      SDL_PrivateMouseButton(SDL_RELEASED,
-                             SDL_BUTTON_MIDDLE,
-                             0, 0); // Don't report mouse movement!
-      break;
-    case WM_MOUSEMOVE:
-#ifdef DEBUG_BUILD
-//      printf("WM_MOUSEMOVE\n"); fflush(stdout);
-#endif
-
-      pVideo = FSLib_GetUserParm(hwnd);
-      if (pVideo)
-      {
-        if (pVideo->hidden->iSkipWMMOUSEMOVE)
-        {
-          pVideo->hidden->iSkipWMMOUSEMOVE--;
-        } else
-        {
-          POINTS *ppts = (POINTS *) (&mp1);
-          POINTL ptl;
-
-          if (bMouseCaptured)
+        if (bMouseCapturable) {
+          /* Re-capture the mouse, if we captured it before */
+          WinSetCapture(HWND_DESKTOP, hwnd);
+          bMouseCaptured = 1;
           {
             SWP swpClient;
-
+            POINTL ptl;
+            /* Center the mouse to the middle of the window */
             WinQueryWindowPos(pVideo->hidden->hwndClient, &swpClient);
-
-            // Send relative mouse position, and re-center the mouse
-            // Reposition the mouse to the center of the screen/window
-            SDL_PrivateMouseMotion(0, // Buttons not changed
-                                   1, // Relative position
-                                   ppts->x - (swpClient.cx/2),
-                                   (swpClient.cy/2) - ppts->y);
-
             ptl.x = 0; ptl.y = 0;
             WinMapWindowPoints(pVideo->hidden->hwndClient, HWND_DESKTOP, &ptl, 1);
-            pVideo->hidden->iSkipWMMOUSEMOVE++; /* Don't take next WM_MOUSEMOVE into account!  */
-            // Center the mouse to the middle of the window!
+            pVideo->hidden->iSkipWMMOUSEMOVE++; /* Don't take next WM_MOUSEMOVE into account  */
+            WinSetPointerPos(HWND_DESKTOP, ptl.x + swpClient.cx/2, ptl.y + swpClient.cy/2);
+          }
+        }
+      } else {
+        /* Went out of focus */
+        WinSetPointer(HWND_DESKTOP, WinQuerySysPointer(HWND_DESKTOP, SPTR_ARROW, FALSE));
+        if (bMouseCaptured) {
+          /* Release the mouse */
+          WinSetCapture(HWND_DESKTOP, hwnd);
+          bMouseCaptured = 0;
+        }
+      }
+    }
+    dbgprintf("WM_ACTIVATE done\n");
+    break;
+
+  case WM_BUTTON1DOWN:
+    dbgprintf("WM_BUTTON1DOWN\n");
+    pVideo = FSLib_GetUserParm(hwnd);
+    if (pVideo) {
+      SDL_PrivateMouseButton(SDL_PRESSED, SDL_BUTTON_LEFT, 0, 0); /* Don't report mouse movement */
+      if (bMouseCapturable) {
+        /* We should capture the mouse */
+        if (!bMouseCaptured) {
+          WinSetCapture(HWND_DESKTOP, hwnd);
+          WinSetPointer(HWND_DESKTOP, NULLHANDLE);
+          bMouseCaptured = 1;
+          {
+            SWP swpClient;
+            POINTL ptl;
+            /* Center the mouse to the middle of the window */
+            WinQueryWindowPos(pVideo->hidden->hwndClient, &swpClient);
+            ptl.x = 0; ptl.y = 0;
+            WinMapWindowPoints(pVideo->hidden->hwndClient, HWND_DESKTOP, &ptl, 1);
+            pVideo->hidden->iSkipWMMOUSEMOVE++; /* Don't take next WM_MOUSEMOVE into account. */
+            WinSetPointerPos(HWND_DESKTOP, ptl.x + swpClient.cx/2, ptl.y + swpClient.cy/2);
+          }
+        }
+      }
+    }
+    break;
+
+  case WM_BUTTON1UP:
+    dbgprintf("WM_BUTTON1UP\n");
+    SDL_PrivateMouseButton(SDL_RELEASED, SDL_BUTTON_LEFT, 0, 0); /* Don't report mouse movement */
+    break;
+
+  case WM_BUTTON2DOWN:
+    dbgprintf("WM_BUTTON2DOWN\n");
+    pVideo = FSLib_GetUserParm(hwnd);
+    if (pVideo) {
+      SDL_PrivateMouseButton(SDL_PRESSED, SDL_BUTTON_RIGHT, 0, 0); /* Don't report mouse movement */
+      if (bMouseCapturable) {
+        /* We should capture the mouse */
+        if (!bMouseCaptured) {
+          WinSetCapture(HWND_DESKTOP, hwnd);
+          WinSetPointer(HWND_DESKTOP, NULLHANDLE);
+          bMouseCaptured = 1;
+          {
+            SWP swpClient;
+            POINTL ptl;
+            /* Center the mouse to the middle of the window */
+            WinQueryWindowPos(pVideo->hidden->hwndClient, &swpClient);
+            ptl.x = 0; ptl.y = 0;
+            WinMapWindowPoints(pVideo->hidden->hwndClient, HWND_DESKTOP, &ptl, 1);
+            pVideo->hidden->iSkipWMMOUSEMOVE++; /* Don't take next WM_MOUSEMOVE into account */
+            WinSetPointerPos(HWND_DESKTOP, ptl.x + swpClient.cx/2, ptl.y + swpClient.cy/2);
+          }
+        }
+      }
+    }
+    break;
+
+  case WM_BUTTON2UP:
+    dbgprintf("WM_BUTTON2UP\n");
+    SDL_PrivateMouseButton(SDL_RELEASED, SDL_BUTTON_RIGHT, 0, 0); /* Don't report mouse movement */
+    break;
+
+  case WM_BUTTON3DOWN:
+    dbgprintf("WM_BUTTON3DOWN\n");
+    pVideo = FSLib_GetUserParm(hwnd);
+    if (pVideo) {
+      SDL_PrivateMouseButton(SDL_PRESSED, SDL_BUTTON_MIDDLE, 0, 0); /* Don't report mouse movement */
+      if (bMouseCapturable) {
+        /* We should capture the mouse */
+        if (!bMouseCaptured) {
+          WinSetCapture(HWND_DESKTOP, hwnd);
+          WinSetPointer(HWND_DESKTOP, NULLHANDLE);
+          bMouseCaptured = 1;
+          {
+            SWP swpClient;
+            POINTL ptl;
+            /* Center the mouse to the middle of the window */
+            WinQueryWindowPos(pVideo->hidden->hwndClient, &swpClient);
+            ptl.x = 0; ptl.y = 0;
+            WinMapWindowPoints(pVideo->hidden->hwndClient, HWND_DESKTOP, &ptl, 1);
+            pVideo->hidden->iSkipWMMOUSEMOVE++; /* Don't take next WM_MOUSEMOVE into account  */
             WinSetPointerPos(HWND_DESKTOP,
                              ptl.x + swpClient.cx/2,
                              ptl.y + swpClient.cy/2);
-          } else
-          {
-            CONVERTMOUSEPOSITION();
-
-            // Send absolute mouse position
-            SDL_PrivateMouseMotion(0, // Buttons not changed
-                                   0, // Absolute position
-                                   ppts->x,
-                                   ppts->y);
           }
         }
-        if ((pVideo->hidden->iMouseVisible) && (!bMouseCaptured))
-        {
-#ifdef DEBUG_BUILD
-//          printf("WM_MOUSEMOVE : ptr = %p\n", hptrGlobalPointer); fflush(stdout);
-#endif
-
-          if (hptrGlobalPointer)
-            WinSetPointer(HWND_DESKTOP, hptrGlobalPointer);
-          else
-            WinSetPointer(HWND_DESKTOP, WinQuerySysPointer(HWND_DESKTOP, SPTR_ARROW, FALSE));
-        }
-        else
-        {
-          WinSetPointer(HWND_DESKTOP, NULLHANDLE);
-        }
       }
-#ifdef DEBUG_BUILD
-//      printf("WM_MOUSEMOVE done\n"); fflush(stdout);
-#endif
+    }
+    break;
 
-      return (MRESULT) FALSE;
-    case WM_CLOSE: // Window close
-#ifdef DEBUG_BUILD
-      printf("WM_CLOSE\n"); fflush(stdout);
-#endif
+  case WM_BUTTON3UP:
+    dbgprintf("WM_BUTTON3UP\n");
+    SDL_PrivateMouseButton(SDL_RELEASED, SDL_BUTTON_MIDDLE, 0, 0); /* Don't report mouse movement */
+    break;
 
-      pVideo = FSLib_GetUserParm(hwnd);
-      if (pVideo)
+  case WM_MOUSEMOVE:
+    /*dbgprintf("WM_MOUSEMOVE\n");*/
+    pVideo = FSLib_GetUserParm(hwnd);
+    if (pVideo) {
+      if (pVideo->hidden->iSkipWMMOUSEMOVE) {
+        pVideo->hidden->iSkipWMMOUSEMOVE--;
+      } else
       {
-        // Send Quit message to the SDL application!
-        SDL_PrivateQuit();
-        return 0;
+        POINTS *ppts = (POINTS *) (&mp1);
+        POINTL ptl;
+
+        if (bMouseCaptured) {
+          SWP swpClient;
+
+          WinQueryWindowPos(pVideo->hidden->hwndClient, &swpClient);
+
+          /* Send relative mouse position, and re-center the mouse
+             Reposition the mouse to the center of the screen/window */
+          SDL_PrivateMouseMotion(0 /* buttons not changed */, 1 /* relative position */,
+                                 ppts->x - (swpClient.cx/2), (swpClient.cy/2) - ppts->y);
+
+          ptl.x = 0; ptl.y = 0;
+          WinMapWindowPoints(pVideo->hidden->hwndClient, HWND_DESKTOP, &ptl, 1);
+          pVideo->hidden->iSkipWMMOUSEMOVE++; /* Don't take next WM_MOUSEMOVE into account  */
+          /* Center the mouse to the middle of the window */
+          WinSetPointerPos(HWND_DESKTOP,
+                           ptl.x + swpClient.cx/2,
+                           ptl.y + swpClient.cy/2);
+        } else {
+          CONVERTMOUSEPOSITION();
+          /* Send absolute mouse position */
+          SDL_PrivateMouseMotion(0 /* buttons not changed */, 0 /* absolute position */, ppts->x, ppts->y);
+        }
       }
-      break;
+      if ((pVideo->hidden->iMouseVisible) && (!bMouseCaptured)) {
+        /*dbgprintf("WM_MOUSEMOVE : ptr = %p\n", hptrGlobalPointer);*/
+        if (hptrGlobalPointer)
+          WinSetPointer(HWND_DESKTOP, hptrGlobalPointer);
+        else
+          WinSetPointer(HWND_DESKTOP, WinQuerySysPointer(HWND_DESKTOP, SPTR_ARROW, FALSE));
+      }
+      else {
+        WinSetPointer(HWND_DESKTOP, NULLHANDLE);
+      }
+    }
+    /*dbgprintf("WM_MOUSEMOVE done\n");*/
+    return (MRESULT) FALSE;
+
+  case WM_CLOSE: /* Window close */
+    dbgprintf("WM_CLOSE\n");
+    pVideo = FSLib_GetUserParm(hwnd);
+    if (pVideo) {
+      /* Send Quit message to the SDL application */
+      SDL_PrivateQuit();
+      return 0;
+    }
+    break;
 
 #ifdef BITBLT_IN_WINMESSAGEPROC
-    case WM_UPDATERECTSREQUEST:
-      pVideo = FSLib_GetUserParm(hwnd);
-      if ((pVideo) && (pVideo->hidden->pSDLSurface))
-      {
-        if (DosRequestMutexSem(pVideo->hidden->hmtxUseSrcBuffer, SEM_INDEFINITE_WAIT)==NO_ERROR)
-        {
-          int numrects;
-          SDL_Rect *rects;
-          int i;
-          SWP swp;
+  case WM_UPDATERECTSREQUEST:
+    pVideo = FSLib_GetUserParm(hwnd);
+    if ((pVideo) && (pVideo->hidden->pSDLSurface)) {
+      if (DosRequestMutexSem(pVideo->hidden->hmtxUseSrcBuffer, SEM_INDEFINITE_WAIT) == NO_ERROR) {
+        int numrects;
+        SDL_Rect *rects;
+        int i;
+        SWP swp;
 
-          numrects = (int) mp1;
-          rects = (SDL_Rect *) mp2;
+        numrects = (int) mp1;
+        rects = (SDL_Rect *) mp2;
 
-          WinQueryWindowPos(hwnd, &swp);
+        WinQueryWindowPos(hwnd, &swp);
 #ifndef RESIZE_EVEN_IF_RESIZABLE
-          if ((!pVideo->hidden->pSDLSurface) ||
-              (
-               (pVideo->hidden->pSDLSurface) &&
-               (pVideo->hidden->pSDLSurface->flags & SDL_RESIZABLE) &&
-               ((swp.cx != pVideo->hidden->SrcBufferDesc.uiXResolution) ||
-                (swp.cy != pVideo->hidden->SrcBufferDesc.uiYResolution)
-               ) &&
-               (!FSLib_QueryFSMode(hwnd))
-              )
-             )
-          {
-            // Resizable surface and in resizing!
-            // So, don't blit now!
-#ifdef DEBUG_BUILD
-            printf("[WM_UPDATERECTSREQUEST] : Skipping blit while resizing!\n"); fflush(stdout);
+        if (!pVideo->hidden->pSDLSurface ||
+            (pVideo->hidden->pSDLSurface && (pVideo->hidden->pSDLSurface->flags & SDL_RESIZABLE) &&
+             ((swp.cx != pVideo->hidden->SrcBufferDesc.uiXResolution)  ||
+              (swp.cy != pVideo->hidden->SrcBufferDesc.uiYResolution)) &&
+             !FSLib_QueryFSMode(hwnd)) )
+        {
+          /* Resizable surface and in resizing. So, don't blit now. */
+          dbgprintf("[WM_UPDATERECTSREQUEST] : Skipping blit while resizing!\n");
+        } else
 #endif
-          } else
-#endif
-          {
-#ifdef DEBUG_BUILD
-            printf("[WM_UPDATERECTSREQUEST] : Blitting!\n"); fflush(stdout);
-#endif
-          
-            // Blit the changed areas
-            for (i=0; i<numrects; i++)
-              FSLIB_BITBLT(hwnd, pVideo->hidden->pchSrcBuffer,
-                           rects[i].y, rects[i].x, rects[i].w, rects[i].h);
-          }
-          DosReleaseMutexSem(pVideo->hidden->hmtxUseSrcBuffer);
+        {
+          dbgprintf("[WM_UPDATERECTSREQUEST] : Blitting!\n");
+          /* Blit the changed areas */
+          for (i=0; i<numrects; i++)
+            FSLIB_BITBLT(hwnd, pVideo->hidden->pchSrcBuffer,
+                         rects[i].y, rects[i].x, rects[i].w, rects[i].h);
         }
+        DosReleaseMutexSem(pVideo->hidden->hmtxUseSrcBuffer);
       }
-      return 0;
+    }
+    return 0;
 #endif
 
-    default:
-#ifdef DEBUG_BUILD
-      printf("Unhandled: %x\n", msg); fflush(stdout);
-#endif
-
-      break;
+  default:
+    dbgprintf("Unhandled: %x\n", msg);
+    break;
   }
-  // Run the default window procedure for unhandled stuffs
+
+  /* Run the default window procedure for unhandled stuff */
   return WinDefWindowProc(hwnd, msg, mp1, mp2);
 }
 
-/////////////////////////////////////////////////////////////////////
-//
-// FrameWndProc
-//
-// This is the message processing window procedure for the
-// frame window of SDLWindowClass.
-//
-/////////////////////////////////////////////////////////////////////
-static MRESULT EXPENTRY FrameWndProc( HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
+/* FrameWndProc
+ *
+ * This is the message processing window procedure for the
+ * frame window of SDLWindowClass.
+ */
+static MRESULT EXPENTRY FrameWndProc(HWND hwnd, ULONG msg, MPARAM mp1, MPARAM mp2)
 {
   PFNWP pOldFrameProc;
   MRESULT result;
@@ -1064,16 +862,13 @@ static MRESULT EXPENTRY FrameWndProc( HWND hwnd, ULONG msg, MPARAM mp1, MPARAM m
 
   pOldFrameProc = pVideo->hidden->pfnOldFrameProc;
 
-  if ((pVideo->hidden->bProportionalResize) &&
-      (msg==WM_ADJUSTWINDOWPOS) &&
-      (!FSLib_QueryFSMode(pVideo->hidden->hwndClient))
-     )
+  if (pVideo->hidden->bProportionalResize && (msg == WM_ADJUSTWINDOWPOS) &&
+      !FSLib_QueryFSMode(pVideo->hidden->hwndClient))
   {
     pswpTemp = (PSWP) mp1;
 
     /* Resizing? */
-    if (pswpTemp->fl & SWP_SIZE)
-    {
+    if (pswpTemp->fl & SWP_SIZE) {
       /* Calculate client size */
       rclTemp.xLeft = pswpTemp->x;
       rclTemp.xRight = pswpTemp->x + pswpTemp->cx;
@@ -1085,14 +880,11 @@ static MRESULT EXPENTRY FrameWndProc( HWND hwnd, ULONG msg, MPARAM mp1, MPARAM m
       ncy = cy = rclTemp.yTop - rclTemp.yBottom;
 
       /* Calculate new size to keep it proportional */
-
-      if ((pVideo->hidden->ulResizingFlag & TF_LEFT) || (pVideo->hidden->ulResizingFlag & TF_RIGHT))
-      {
+      if ((pVideo->hidden->ulResizingFlag & TF_LEFT) || (pVideo->hidden->ulResizingFlag & TF_RIGHT)) {
         /* The window is resized horizontally */
         ncy = pVideo->hidden->SrcBufferDesc.uiYResolution * cx / pVideo->hidden->SrcBufferDesc.uiXResolution;
       } else
-      if ((pVideo->hidden->ulResizingFlag & TF_TOP) || (pVideo->hidden->ulResizingFlag & TF_BOTTOM))
-      {
+      if ((pVideo->hidden->ulResizingFlag & TF_TOP) || (pVideo->hidden->ulResizingFlag & TF_BOTTOM)) {
         /* The window is resized vertically */
         ncx = pVideo->hidden->SrcBufferDesc.uiXResolution * cy / pVideo->hidden->SrcBufferDesc.uiYResolution;
       }
@@ -1107,12 +899,10 @@ static MRESULT EXPENTRY FrameWndProc( HWND hwnd, ULONG msg, MPARAM mp1, MPARAM m
       /* Store new size/position info */
       pswpTemp->cx = rclTemp.xRight - rclTemp.xLeft;
 
-      if (!(pVideo->hidden->ulResizingFlag & TF_TOP))
-      {
+      if (!(pVideo->hidden->ulResizingFlag & TF_TOP)) {
         pswpTemp->y = pswpTemp->y + pswpTemp->cy - (rclTemp.yTop - rclTemp.yBottom);
         pswpTemp->cy = rclTemp.yTop - rclTemp.yBottom;
-      } else
-      {
+      } else {
         pswpTemp->cy = rclTemp.yTop - rclTemp.yBottom;
       }
     }
@@ -1120,8 +910,7 @@ static MRESULT EXPENTRY FrameWndProc( HWND hwnd, ULONG msg, MPARAM mp1, MPARAM m
 
   result = (*pOldFrameProc)(hwnd, msg, mp1, mp2);
 
-  if ((pVideo->hidden->bProportionalResize) && (msg==WM_QUERYTRACKINFO))
-  {
+  if (pVideo->hidden->bProportionalResize && msg == WM_QUERYTRACKINFO) {
     ti = (PTRACKINFO) mp2;
 
     /* Store the direction of resizing */
@@ -1133,15 +922,13 @@ static MRESULT EXPENTRY FrameWndProc( HWND hwnd, ULONG msg, MPARAM mp1, MPARAM m
   return result;
 }
 
-/////////////////////////////////////////////////////////////////////
-//
-// PMThreadFunc
-//
-// This function implements the PM-Thread, which initializes the
-// application window itself, the DIVE, and start message processing.
-//
-/////////////////////////////////////////////////////////////////////
-int iNumOfPMThreadInstances = 0; // Global!
+/* PMThreadFunc
+ *
+ * This function implements the PM-Thread, which initializes the
+ * application window itself, the DIVE, and start message processing.
+ */
+int iNumOfPMThreadInstances = 0; /* Global! */
+
 static void PMThreadFunc(void *pParm)
 {
   SDL_VideoDevice *pVideo = pParm;
@@ -1150,36 +937,24 @@ static void PMThreadFunc(void *pParm)
   QMSG msg;
   ULONG fcf;
 
-#ifdef DEBUG_BUILD
-  printf("[PMThreadFunc] : Starting\n"); fflush(stdout);
-#endif
+  dbgprintf("[PMThreadFunc] : Starting\n");
 
   iNumOfPMThreadInstances++;
 
-  // Initialize PM, create a message queue.
-
-  hab=WinInitialize(0);
-  hmq=WinCreateMsgQueue(hab,0);
-  if (hmq == NULLHANDLE)
-  {
-#ifdef DEBUG_BUILD
-    printf("[PMThreadFunc] : Could not create message queue!\n");
-    printf("                 It might be that the application using SDL is not a PM app!\n");
-    fflush(stdout);
-#endif
+  /* Initialize PM, create a message queue. */
+  hab = WinInitialize(0);
+  hmq = WinCreateMsgQueue(hab, 0);
+  if (hmq == NULLHANDLE) {
+    dbgprintf("[PMThreadFunc] : Could not create message queue!\n"
+              "                 It might be that the application using SDL is not a PM app!\n");
     pVideo->hidden->iPMThreadStatus = 2;
-  } else
-  {
+  } else {
     int rc;
     RECTL rectl;
 
-    fcf = ulFCFToUse; // Get from global setting
+    fcf = ulFCFToUse; /* Get from global setting */
 
-#ifdef DEBUG_BUILD
-    printf("[PMThreadFunc] : FSLib_CreateWindow()!\n");
-    fflush(stdout);
-#endif
-
+    dbgprintf("[PMThreadFunc] : FSLib_CreateWindow()!\n");
     rc = FSLib_CreateWindow(HWND_DESKTOP, 0, &fcf,
                             "SDL Application",
                             NULLHANDLE, 0,
@@ -1188,42 +963,26 @@ static void PMThreadFunc(void *pParm)
                             &(pVideo->hidden->hwndClient),
                             &(pVideo->hidden->hwndFrame));
 
-#ifdef DEBUG_BUILD
-    printf("[PMThreadFunc] : FSLib_CreateWindow() rc = %d\n", rc);
-    fflush(stdout);
-#endif
-
-    if (!rc)
-    {
-#ifdef DEBUG_BUILD
-      printf("[PMThreadFunc] : Could not create FSLib window!\n");
-      fflush(stdout);
-#endif
+    dbgprintf("[PMThreadFunc] : FSLib_CreateWindow() rc = %d\n", rc);
+    if (!rc) {
+      dbgprintf("[PMThreadFunc] : Could not create FSLib window!\n");
       pVideo->hidden->iPMThreadStatus = 3;
-    } else
-    {
-#ifdef DEBUG_BUILD
-      printf("[PMThreadFunc] : FSLib_AddUserParm()!\n");
-      fflush(stdout);
-#endif
-
-      // Store pVideo pointer in window data for client window, so
-      // it will know the instance to which it belongs to.
+    } else {
+      dbgprintf("[PMThreadFunc] : FSLib_AddUserParm()!\n");
+      /* Store pVideo pointer in window data for client window, so
+       * it will know the instance to which it belongs to. */
       FSLib_AddUserParm(pVideo->hidden->hwndClient, pVideo);
 
-      // Now set default image width height and fourcc!
-#ifdef DEBUG_BUILD
-      printf("[PMThreadFunc] : SetWindowPos()!\n");
-      fflush(stdout);
-#endif
+      /* Now set default image width height and fourcc */
+      dbgprintf("[PMThreadFunc] : SetWindowPos()!\n");
 
-      // Set the position and size of the main window,
-      // and make it visible!
-      // Calculate frame window size from client window size
+      /* Set the position and size of the main window,
+       * and make it visible!
+       * Calculate frame window size from client window size */
       rectl.xLeft = 0;
       rectl.yBottom = 0;
-      rectl.xRight = pVideo->hidden->SrcBufferDesc.uiXResolution; // Noninclusive
-      rectl.yTop = pVideo->hidden->SrcBufferDesc.uiYResolution; // Noninclusive
+      rectl.xRight = pVideo->hidden->SrcBufferDesc.uiXResolution; /* Noninclusive */
+      rectl.yTop = pVideo->hidden->SrcBufferDesc.uiYResolution;   /* Noninclusive */
       WinCalcFrameRect(pVideo->hidden->hwndFrame, &rectl, FALSE);
 
       SetAccessableWindowPos(pVideo->hidden->hwndFrame,
@@ -1234,71 +993,61 @@ static void PMThreadFunc(void *pParm)
                              (rectl.yTop-rectl.yBottom),
                              SWP_SIZE | SWP_ACTIVATE | SWP_SHOW | SWP_MOVE);
 
-      // Subclass frame procedure and store old window proc address
+      /* Subclass frame procedure and store old window proc address */
       pVideo->hidden->pfnOldFrameProc =
         WinSubclassWindow(pVideo->hidden->hwndFrame, FrameWndProc);
       WinSetWindowULong(pVideo->hidden->hwndFrame, QWL_USER, (ULONG) pVideo);
 
-#ifdef DEBUG_BUILD
-      printf("[PMThreadFunc] : Entering message loop\n"); fflush(stdout);
-#endif
+      dbgprintf("[PMThreadFunc] : Entering message loop\n");
       pVideo->hidden->iPMThreadStatus = 1;
-  
+
       while (WinGetMsg(hab, (PQMSG)&msg, 0, 0, 0))
         WinDispatchMsg(hab, (PQMSG) &msg);
 
-#ifdef DEBUG_BUILD
-      printf("[PMThreadFunc] : Leaving message loop\n"); fflush(stdout);
-#endif
-      // We should release the captured the mouse!
-      if (bMouseCaptured)
-      {
+      dbgprintf("[PMThreadFunc] : Leaving message loop\n");
+      /* We should release the captured the mouse */
+      if (bMouseCaptured) {
         WinSetCapture(HWND_DESKTOP, NULLHANDLE);
         bMouseCaptured = 0;
       }
-      // Destroy our window
+      /* Destroy our window */
       WinDestroyWindow(pVideo->hidden->hwndFrame); pVideo->hidden->hwndFrame=NULLHANDLE;
-      // Show pointer to make sure it will not be left hidden.
+      /* Show pointer to make sure it will not be left hidden. */
       WinSetPointer(HWND_DESKTOP, WinQuerySysPointer(HWND_DESKTOP, SPTR_ARROW, FALSE));
       WinShowPointer(HWND_DESKTOP, TRUE);
     }
-    // Uninitialize PM
+    /* Uninitialize PM */
     WinDestroyMsgQueue(hmq);
-    // All done!
+    /* All done */
     pVideo->hidden->iPMThreadStatus = 0;
   }
+
   WinTerminate(hab);
-  /* Commented out, should not be needed anymore, because we send it
-     from WM_CLOSE.
+
+  /* Commented out, should not be needed anymore, because we send it from WM_CLOSE.
   // Notify SDL that it should really die now...
   SDL_PrivateQuit(); SDL_PrivateQuit(); SDL_PrivateQuit(); //... :))
   */
-#ifdef DEBUG_BUILD
-  printf("[PMThreadFunc] : End, status is %d!\n", pVideo->hidden->iPMThreadStatus); fflush(stdout);
-#endif
+  dbgprintf("[PMThreadFunc] : End, status is %d!\n", pVideo->hidden->iPMThreadStatus);
 
   iNumOfPMThreadInstances--;
 
-  // HACK to prevent zombie and hanging SDL applications, which does not take
-  // care of closing the window for some reason:
-  // There are some apps which do not process messages, so do a lot of things
-  // without noticing that the application should close. To close these,
-  // I've thought about the following:
-  // If the window is closed (the execution came here), I wait a bit to
-  // give time to the app to finish its execution. If it does not, I kill it
-  // using DosExit(). Brute force, but should work.
-  if (pVideo->hidden->iPMThreadStatus==0)
-  {
-    DosSleep(5000); // Wait 5 secs
-    // If a new PM thread has been spawned (reinitializing video mode), then all right.
-    // Otherwise, we have a problem, the app doesn't want to stop. Kill!
-    if (iNumOfPMThreadInstances==0)
-    {
-#ifdef DEBUG_BUILD
-      printf("[PMThreadFunc] : It seems that the application haven't terminated itself\n"); fflush(stdout);
-      printf("[PMThreadFunc] : in the last 5 seconds, so we go berserk.\n"); fflush(stdout);
-      printf("[PMThreadFunc] : Brute force mode. :) Killing process! Dieeeee...\n"); fflush(stdout);
-#endif
+  /* HACK to prevent zombie and hanging SDL applications, which does not take
+   * care of closing the window for some reason:
+   * There are some apps which do not process messages, so do a lot of things
+   * without noticing that the application should close. To close these,
+   * I've thought about the following:
+   * If the window is closed (the execution came here), I wait a bit to
+   * give time to the app to finish its execution. If it does not, I kill it
+   * using DosExit(). Brute force, but should work. */
+  if (pVideo->hidden->iPMThreadStatus == 0) {
+    DosSleep(5000); /* Wait 5 secs */
+    /* If a new PM thread has been spawned (reinitializing video mode), then all right.
+     * Otherwise, we have a problem, the app doesn't want to stop. Kill! */
+    if (iNumOfPMThreadInstances == 0) {
+      dbgprintf("[PMThreadFunc] : It seems that the application haven't terminated itself\n"
+                "[PMThreadFunc] : in the last 5 seconds, so we go berserk.\n"
+                "[PMThreadFunc] : Brute force mode. :) Killing process! Dieeeee...\n");
       DosExit(EXIT_PROCESS, -1);
     }
   }
@@ -1315,8 +1064,7 @@ struct WMcursor
 /* Free a window manager cursor */
 void os2fslib_FreeWMCursor(_THIS, WMcursor *cursor)
 {
-  if (cursor)
-  {
+  if (cursor) {
     GpiDeleteBitmap(cursor->hbm);
     WinDestroyPointer(cursor->hptr);
     SDL_free(cursor->pchData);
@@ -1327,12 +1075,12 @@ void os2fslib_FreeWMCursor(_THIS, WMcursor *cursor)
 /* Local functions to convert the SDL cursor mask into OS/2 format */
 static void memnot(Uint8 *dst, Uint8 *src, int len)
 {
-  while ( len-- > 0 )
+  while (len-- > 0)
     *dst++ = ~*src++;
 }
 static void memxor(Uint8 *dst, Uint8 *src1, Uint8 *src2, int len)
 {
-  while ( len-- > 0 )
+  while (len-- > 0)
     *dst++ = (*src1++)^(*src2++);
 }
 
@@ -1354,18 +1102,17 @@ WMcursor *os2fslib_CreateWMCursor_Win(_THIS, Uint8 *data, Uint8 *mask,
   maxx = WinQuerySysValue(HWND_DESKTOP, SV_CXPOINTER);
   maxy = WinQuerySysValue(HWND_DESKTOP, SV_CYPOINTER);
 
-  // Check for max size!
-  if ((w>maxx) || (h>maxy))
-    return (WMcursor *) NULL;
+  /* Check for max size */
+  if (w > maxx || h > maxy)
+    return NULL;
 
   pResult = (WMcursor *) SDL_malloc(sizeof(WMcursor));
-  if (!pResult) return (WMcursor *) NULL;
+  if (!pResult) return NULL;
 
   pchTemp = (char *) SDL_calloc(1, (maxx + 7)/8 * maxy*2);
-  if (!pchTemp)
-  {
+  if (!pchTemp) {
     SDL_free(pResult);
-    return (WMcursor *) NULL;
+    return NULL;
   }
 
   hps = WinGetPS(_this->hidden->hwndClient);
@@ -1392,8 +1139,7 @@ WMcursor *os2fslib_CreateWMCursor_Win(_THIS, Uint8 *data, Uint8 *mask,
   run = (w+7)/8;
   pad = (maxx+7)/8 - run;
 
-  for (i=0; i<h; i++)
-  {
+  for (i = 0; i < h; i++) {
     xptr = pchTemp + (maxx+7)/8 * (maxy-1-i);
     aptr = pchTemp + (maxx+7)/8 * (maxy+maxy-1-i);
     memxor(xptr, data, mask, run);
@@ -1408,8 +1154,7 @@ WMcursor *os2fslib_CreateWMCursor_Win(_THIS, Uint8 *data, Uint8 *mask,
     aptr += pad;
   }
   pad += run;
-  for (i=h ; i<maxy; i++ )
-  {
+  for (i = h ; i < maxy; i++) {
     xptr = pchTemp + (maxx+7)/8 * (maxy-1-i);
     aptr = pchTemp + (maxx+7)/8 * (maxy+maxy-1-i);
 
@@ -1422,65 +1167,46 @@ WMcursor *os2fslib_CreateWMCursor_Win(_THIS, Uint8 *data, Uint8 *mask,
   hbm = GpiCreateBitmap(hps, (PBITMAPINFOHEADER2)&bmih, CBM_INIT, (PBYTE) pchTemp, (PBITMAPINFO2)&bmi);
   hptr = WinCreatePointer(HWND_DESKTOP, hbm, TRUE, hot_x, maxy - hot_y - 1);
 
-#ifdef DEBUG_BUILD
-  printf("HotSpot          : %d ; %d\n", hot_x, hot_y);
-  printf("HPS returned     : %x\n", (ULONG)hps);
-  printf("HBITMAP returned : %x\n", (ULONG)hbm);
-  printf("HPOINTER returned: %x\n", (ULONG)hptr);
-#endif
+  dbgprintf("HotSpot          : %d ; %d\n", hot_x, hot_y);
+  dbgprintf("HPS returned     : %x\n", (ULONG)hps);
+  dbgprintf("HBITMAP returned : %x\n", (ULONG)hbm);
+  dbgprintf("HPOINTER returned: %x\n", (ULONG)hptr);
 
   WinReleasePS(hps);
 
-#ifdef DEBUG_BUILD
-  printf("[CreateWMCursor] : ptr = %p\n", hptr); fflush(stdout);
-#endif
+  dbgprintf("[CreateWMCursor] : ptr = %p\n", hptr);
 
   pResult->hptr = hptr;
   pResult->hbm = hbm;
   pResult->pchData = pchTemp;
 
-#ifdef DEBUG_BUILD
-  printf("[CreateWMCursor] : ptr = %p return.\n", hptr); fflush(stdout);
-#endif
-
+  dbgprintf("[CreateWMCursor] : ptr = %p return.\n", hptr);
   return (WMcursor *) pResult;
 }
 
 WMcursor *os2fslib_CreateWMCursor_FS(_THIS, Uint8 *data, Uint8 *mask,
                                      int w, int h, int hot_x, int hot_y)
 {
-#ifdef DEBUG_BUILD
-  printf("[CreateWMCursor_FS] : returning pointer NULL\n"); fflush(stdout);
-#endif
-
-  // In FS mode we'll use software cursor
-  return (WMcursor *) NULL;
+  dbgprintf("[CreateWMCursor_FS] : returning pointer NULL\n");
+  /* In FS mode we'll use software cursor */
+  return NULL;
 }
 
 /* Show the specified cursor, or hide if cursor is NULL */
 int os2fslib_ShowWMCursor(_THIS, WMcursor *cursor)
 {
-#ifdef DEBUG_BUILD
-  printf("[ShowWMCursor] : ptr = %p\n", cursor); fflush(stdout);
-#endif
-
-  if (cursor)
-  {
+  dbgprintf("[ShowWMCursor] : ptr = %p\n", cursor);
+  if (cursor) {
     WinSetPointer(HWND_DESKTOP, cursor->hptr);
     hptrGlobalPointer = cursor->hptr;
     _this->hidden->iMouseVisible = 1;
-  }
-  else
-  {
+  } else {
     WinSetPointer(HWND_DESKTOP, FALSE);
     hptrGlobalPointer = NULLHANDLE;
     _this->hidden->iMouseVisible = 0;
   }
 
-#ifdef DEBUG_BUILD
-  printf("[ShowWMCursor] : ptr = %p, DONE\n", cursor); fflush(stdout);
-#endif
-
+  dbgprintf("[ShowWMCursor] : ptr = %p, DONE\n", cursor);
   return 1;
 }
 
@@ -1499,13 +1225,9 @@ void os2fslib_WarpWMCursor(_THIS, Uint16 x, Uint16 y)
   lx = ptlPoints.x + (x*swpClient.cx) / _this->hidden->SrcBufferDesc.uiXResolution;
   ly = ptlPoints.y + swpClient.cy - ((y*swpClient.cy) / _this->hidden->SrcBufferDesc.uiYResolution) - 1;
 
-  SDL_PrivateMouseMotion(0, // Buttons not changed
-                         0, // Absolute position
-                         x,
-                         y);
+  SDL_PrivateMouseMotion(0 /* buttons not changed */, 0 /* absolute position */, x, y);
 
   WinSetPointerPos(HWND_DESKTOP, lx, ly);
-
 }
 
 /* If not NULL, this is called when a mouse motion event occurs */
@@ -1514,10 +1236,7 @@ void os2fslib_MoveWMCursor(_THIS, int x, int y)
   /*
   SDL_Rect rect;
 
-#ifdef DEBUG_BUILD
-  printf("[MoveWMCursor] : at %d ; %d\n", x, y); fflush(stdout);
-#endif
-
+  dbgprintf("[MoveWMCursor] : at %d ; %d\n", x, y);
   rect.x = x;
   rect.y = y;
   rect.w = 32;
@@ -1540,34 +1259,23 @@ void os2fslib_CheckMouseMode(_THIS)
 
 static void os2fslib_PumpEvents(_THIS)
 {
-  // Notify SDL that if window has been resized!
-  if (
-      (_this->hidden->pSDLSurface) &&
-      (_this->hidden->pSDLSurface->flags & SDL_RESIZABLE) &&
-      (
-       (_this->hidden->SrcBufferDesc.uiXResolution!=iWindowSizeX) ||
-       (_this->hidden->SrcBufferDesc.uiYResolution!=iWindowSizeY)
-      ) &&
-      (iWindowSizeX>0) &&
-      (iWindowSizeY>0)
-     )
+  /* Notify SDL that if window has been resized */
+  if (_this->hidden->pSDLSurface && (_this->hidden->pSDLSurface->flags & SDL_RESIZABLE) &&
+      (_this->hidden->SrcBufferDesc.uiXResolution != iWindowSizeX ||
+       _this->hidden->SrcBufferDesc.uiYResolution != iWindowSizeY) &&
+      iWindowSizeX > 0 && iWindowSizeY > 0)
   {
     static time_t prev_time;
     time_t curr_time;
 
     curr_time = time(NULL);
-    if ((difftime(curr_time, prev_time)>=0.25) ||
-        (bWindowResized))
-    {
-      // Make sure we won't flood the event queue with resize events,
-      // only send them at 250 msecs!
-      // (or when the window is resized)
-#ifdef DEBUG_BUILD
-      printf("[os2fslib_PumpEvents] : Calling PrivateResize (%d %d).\n",
-             iWindowSizeX, iWindowSizeY);
-      fflush(stdout);
-#endif
-      // Tell SDL the new size
+    if (difftime(curr_time, prev_time) >= 0.25 || bWindowResized) {
+      /* Make sure we won't flood the event queue with resize events,
+       * only send them at 250 msecss
+       * (or when the window is resized) */
+      dbgprintf("[os2fslib_PumpEvents] : Calling PrivateResize (%d %d).\n",
+                iWindowSizeX, iWindowSizeY);
+      /* Tell SDL the new size */
       SDL_PrivateResize(iWindowSizeX, iWindowSizeY);
       prev_time = curr_time;
       bWindowResized = 0;
@@ -1578,44 +1286,37 @@ static void os2fslib_PumpEvents(_THIS)
 /* We don't actually allow hardware surfaces other than the main one */
 static int os2fslib_AllocHWSurface(_THIS, SDL_Surface *surface)
 {
-  return(-1);
+  return -1;
 }
+
 static void os2fslib_FreeHWSurface(_THIS, SDL_Surface *surface)
 {
-  return;
 }
 
 /* We need to wait for vertical retrace on page flipped displays */
 static int os2fslib_LockHWSurface(_THIS, SDL_Surface *surface)
 {
-  return(0);
+  return 0;
 }
 
 static void os2fslib_UnlockHWSurface(_THIS, SDL_Surface *surface)
 {
-  return;
 }
 
 static int os2fslib_SetColors(_THIS, int firstcolor, int ncolors, SDL_Color *colors)
 {
   printf("[os2fslib_SetColors] : TODO!\n"); fflush(stdout);
-  // TODO: Implement paletted modes
-  return(1);
+  /* TODO: Implement paletted modes. */
+  return 1;
 }
 
 static void os2fslib_DestroyIcon(HWND hwndFrame)
 {
-  if (hptrCurrentIcon)
-  {
+  if (hptrCurrentIcon) {
     WinDestroyPointer(hptrCurrentIcon);
     hptrCurrentIcon = NULLHANDLE;
-
-    WinSendMsg(hwndFrame,
-               WM_SETICON,
-               NULL,
-               NULL);
+    WinSendMsg(hwndFrame, WM_SETICON, NULL, NULL);
   }
-
 }
 
 /* Set the window icon image */
@@ -1633,16 +1334,13 @@ void os2fslib_SetIcon(_THIS, SDL_Surface *icon, Uint8 *mask)
   int maxx, maxy, w, h, x, y;
   SDL_Rect bounds;
 
-#ifdef DEBUG_BUILD
-  printf("[os2fslib_SetIcon] : Creating and setting new icon\n"); fflush(stdout);
-#endif
-
+  dbgprintf("[os2fslib_SetIcon] : Creating and setting new icon\n");
   hwndFrame = WinQueryWindow(_this->hidden->hwndClient, QW_PARENT);
 
-  // Make sure the old icon resource will be free'd!
+  /* Make sure the old icon resource will be free'd */
   os2fslib_DestroyIcon(hwndFrame);
 
-  if ((!icon) || (!mask))
+  if (!icon || !mask)
     return;
 
   w = icon->w;
@@ -1651,19 +1349,18 @@ void os2fslib_SetIcon(_THIS, SDL_Surface *icon, Uint8 *mask)
   maxx = WinQuerySysValue(HWND_DESKTOP, SV_CXICON);
   maxy = WinQuerySysValue(HWND_DESKTOP, SV_CYICON);
 
-  // Check for max size!
-  if ((w>maxx) || (h>maxy))
+  /* Check for max size */
+  if (w > maxx || h > maxy)
     return;
 
   pchTemp = (char *) SDL_calloc(1, w * h*2 * 4);
   if (!pchTemp)
     return;
 
-  // Convert surface to RGB, if it's not RGB yet!
+  /* Convert surface to RGB, if it's not RGB yet */
   icon_rgb = SDL_CreateRGBSurface(SDL_SWSURFACE, icon->w, icon->h,
                                   32, 0, 0, 0, 0);
-  if ( icon_rgb == NULL )
-  {
+  if (icon_rgb == NULL) {
     SDL_free(pchTemp);
     return;
   }
@@ -1671,8 +1368,7 @@ void os2fslib_SetIcon(_THIS, SDL_Surface *icon, Uint8 *mask)
   bounds.y = 0;
   bounds.w = icon->w;
   bounds.h = icon->h;
-  if ( SDL_LowerBlit(icon, &bounds, icon_rgb, &bounds) < 0 )
-  {
+  if (SDL_LowerBlit(icon, &bounds, icon_rgb, &bounds) < 0) {
     SDL_FreeSurface(icon_rgb);
     SDL_free(pchTemp);
     return;
@@ -1680,32 +1376,28 @@ void os2fslib_SetIcon(_THIS, SDL_Surface *icon, Uint8 *mask)
 
   /* Copy pixels upside-down from RGB surface into BMP, masked with the icon mask */
 
-  // Pixels
+  /* Pixels */
   pptr = (char *) (icon_rgb->pixels);
-  // Mask
+  /* Mask */
   mptr = mask;
 
-  for (y=0; y<h; y++)
-  {
+  for (y = 0; y < h; y++) {
     unsigned char uchMaskByte;
 
-    // Destination
+    /* Destination */
     dptr = pchTemp + w*4 * (h-y-1);
-    // Destination mask
+    /* Destination mask */
     dmptr = pchTemp + w*h*4 + w*4 * (h-y-1);
 
-    for (x=0; x<w; x++)
-    {
-      if (x%8==0)
-      {
+    for (x = 0; x < w; x++) {
+      if (x % 8 == 0) {
         uchMaskByte = (unsigned char) (*mptr);
         mptr++;
       } else
         uchMaskByte <<= 1;
 
-      if (uchMaskByte & 0x80)
-      {
-        // Copy RGB
+      if (uchMaskByte & 0x80) {
+        /* Copy RGB */
         *dptr++ = *pptr++;
         *dptr++ = *pptr++;
         *dptr++ = *pptr++;
@@ -1715,9 +1407,8 @@ void os2fslib_SetIcon(_THIS, SDL_Surface *icon, Uint8 *mask)
         *dmptr++ = 0;
         *dmptr++ = 0;
         *dmptr++ = 0;
-      } else
-      {
-        // Set pixels to fully transparent
+      } else {
+        /* Set pixels to fully transparent */
         *dptr++ = 0; pptr++;
         *dptr++ = 0; pptr++;
         *dptr++ = 0; pptr++;
@@ -1731,7 +1422,7 @@ void os2fslib_SetIcon(_THIS, SDL_Surface *icon, Uint8 *mask)
     }
   }
 
-  // There is no more need for the RGB surface
+  /* There is no more need for the RGB surface */
   SDL_FreeSurface(icon_rgb);
 
   hps = WinGetPS(_this->hidden->hwndClient);
@@ -1754,14 +1445,11 @@ void os2fslib_SetIcon(_THIS, SDL_Surface *icon, Uint8 *mask)
 
   WinReleasePS(hps);
 
-  // Free pixel array
+  /* Free pixel array */
   SDL_free(pchTemp);
 
-  // Change icon in frame window
-  WinSendMsg(hwndFrame,
-             WM_SETICON,
-             (MPARAM) hptrIcon,
-             NULL);
+  /* Change icon in frame window */
+  WinSendMsg(hwndFrame, WM_SETICON, (MPARAM) hptrIcon, NULL);
 
   /*
   // Change icon in switchlist
@@ -1776,37 +1464,33 @@ void os2fslib_SetIcon(_THIS, SDL_Surface *icon, Uint8 *mask)
     WinQuerySwitchEntry(hswitchFrame, &swctl);
 
     swctl.hwndIcon = hptrIcon;
-
     WinChangeSwitchEntry(hswitchFrame, &swctl);
   }
   */
 
-  // Store icon handle in global variable
+  /* Store icon handle in global variable */
   hptrCurrentIcon = hptrIcon;
 }
 
-// ------------------------ REAL FUNCTIONS -----------------
-
+/* ------------------------ REAL FUNCTIONS ----------------- */
 
 static void os2fslib_SetCursorManagementFunctions(_THIS, int iForWindowedMode)
 {
-  if (iForWindowedMode)
-  {
+  if (iForWindowedMode) {
     _this->FreeWMCursor = os2fslib_FreeWMCursor;
     _this->CreateWMCursor = os2fslib_CreateWMCursor_Win;
     _this->ShowWMCursor = os2fslib_ShowWMCursor;
     _this->WarpWMCursor = os2fslib_WarpWMCursor;
     _this->MoveWMCursor = os2fslib_MoveWMCursor;
-    _this->CheckMouseMode = NULL;//os2fslib_CheckMouseMode;
-  } else
-  {
-    // We'll have software mouse cursor in FS mode!
+    _this->CheckMouseMode = NULL;/*os2fslib_CheckMouseMode;*/
+  } else {
+    /* We'll have software mouse cursor in FS mode */
     _this->FreeWMCursor = os2fslib_FreeWMCursor;
     _this->CreateWMCursor = os2fslib_CreateWMCursor_FS;
     _this->ShowWMCursor = os2fslib_ShowWMCursor;
     _this->WarpWMCursor = os2fslib_WarpWMCursor;
     _this->MoveWMCursor = os2fslib_MoveWMCursor;
-    _this->CheckMouseMode = NULL;//os2fslib_CheckMouseMode;
+    _this->CheckMouseMode = NULL;/*os2fslib_CheckMouseMode;*/
   }
 }
 
@@ -1817,10 +1501,10 @@ static void os2fslib_InitOSKeymap(_THIS)
   iShiftIsPressed = 0;
 
   /* Map the VK and CH keysyms */
-  for ( i=0; i<=255; ++i )
+  for (i = 0; i <= 255; ++i)
     HWScanKeyMap[i] = SDLK_UNKNOWN;
 
-  // First line of keyboard:
+  /* First line of keyboard: */
   HWScanKeyMap[0x1] = SDLK_ESCAPE;
   HWScanKeyMap[0x3b] = SDLK_F1;
   HWScanKeyMap[0x3c] = SDLK_F2;
@@ -1838,7 +1522,7 @@ static void os2fslib_InitOSKeymap(_THIS)
   HWScanKeyMap[0x46] = SDLK_SCROLLOCK;
   HWScanKeyMap[0x5f] = SDLK_PAUSE;
 
-  // Second line of keyboard:
+  /* Second line of keyboard: */
   HWScanKeyMap[0x29] = SDLK_BACKQUOTE;
   HWScanKeyMap[0x2] = SDLK_1;
   HWScanKeyMap[0x3] = SDLK_2;
@@ -1861,7 +1545,7 @@ static void os2fslib_InitOSKeymap(_THIS)
   HWScanKeyMap[0x37] = SDLK_KP_MULTIPLY;
   HWScanKeyMap[0x4a] = SDLK_KP_MINUS;
 
-  // Third line of keyboard:
+  /* Third line of keyboard: */
   HWScanKeyMap[0xf] = SDLK_TAB;
   HWScanKeyMap[0x10] = SDLK_q;
   HWScanKeyMap[0x11] = SDLK_w;
@@ -1884,7 +1568,7 @@ static void os2fslib_InitOSKeymap(_THIS)
   HWScanKeyMap[0x49] = SDLK_KP9;
   HWScanKeyMap[0x4e] = SDLK_KP_PLUS;
 
-  // Fourth line of keyboard:
+  /* Fourth line of keyboard: */
   HWScanKeyMap[0x3a] = SDLK_CAPSLOCK;
   HWScanKeyMap[0x1e] = SDLK_a;
   HWScanKeyMap[0x1f] = SDLK_s;
@@ -1902,9 +1586,9 @@ static void os2fslib_InitOSKeymap(_THIS)
   HWScanKeyMap[0x4c] = SDLK_KP5;
   HWScanKeyMap[0x4d] = SDLK_KP6;
 
-  // Fifth line of keyboard:
+  /* Fifth line of keyboard: */
   HWScanKeyMap[0x2a] = SDLK_LSHIFT;
-  HWScanKeyMap[0x56] = SDLK_WORLD_1; // Code 161, letter i' on hungarian keyboard
+  HWScanKeyMap[0x56] = SDLK_WORLD_1; /* Code 161, letter i' on hungarian keyboard */
   HWScanKeyMap[0x2c] = SDLK_z;
   HWScanKeyMap[0x2d] = SDLK_x;
   HWScanKeyMap[0x2e] = SDLK_c;
@@ -1922,12 +1606,12 @@ static void os2fslib_InitOSKeymap(_THIS)
   HWScanKeyMap[0x51] = SDLK_KP3;
   HWScanKeyMap[0x5a] = SDLK_KP_ENTER;
 
-  // Sixth line of keyboard:
+  /* Sixth line of keyboard: */
   HWScanKeyMap[0x1d] = SDLK_LCTRL;
-  HWScanKeyMap[0x7e] = SDLK_LSUPER; // Windows key
+  HWScanKeyMap[0x7e] = SDLK_LSUPER; /* Windows key */
   HWScanKeyMap[0x38] = SDLK_LALT;
   HWScanKeyMap[0x39] = SDLK_SPACE;
-  HWScanKeyMap[0x5e] = SDLK_RALT;// Actually, altgr on my keyboard...
+  HWScanKeyMap[0x5e] = SDLK_RALT; /* Actually, altgr on my keyboard... */
   HWScanKeyMap[0x7f] = SDLK_RSUPER;
   HWScanKeyMap[0x7c] = SDLK_MENU;
   HWScanKeyMap[0x5b] = SDLK_RCTRL;
@@ -1937,7 +1621,6 @@ static void os2fslib_InitOSKeymap(_THIS)
   HWScanKeyMap[0x52] = SDLK_KP0;
   HWScanKeyMap[0x53] = SDLK_KP_PERIOD;
 }
-
 
 /* Iconify the window.
  This function returns 1 if there is a window manager and the
@@ -1949,25 +1632,25 @@ int os2fslib_IconifyWindow(_THIS)
   HMQ hmq;
   ERRORID hmqerror;
 
-  // If there is no more window, nothing we can do!
+  /* If there is no more window, nothing we can do */
   if (_this->hidden->iPMThreadStatus!=1) return 0;
 
-  // Cannot do anything in fullscreen mode!
+  /* Cannot do anything in fullscreen mode */
   if (FSLib_QueryFSMode(_this->hidden->hwndClient))
     return 0;
 
-  // Make sure this thread is prepared for using the Presentation Manager!
+  /* Make sure this thread is prepared for using the Presentation Manager */
   hab = WinInitialize(0);
-  hmq = WinCreateMsgQueue(hab,0);
-  // Remember if there was an error at WinCreateMsgQueue(), because we don't
-  // want to destroy somebody else's queue later. :)
+  hmq = WinCreateMsgQueue(hab, 0);
+  /* Remember if there was an error at WinCreateMsgQueue(), because we don't
+   * want to destroy somebody else's queue later. :) */
   hmqerror = WinGetLastError(hab);
 
   WinSetWindowPos(_this->hidden->hwndFrame, HWND_TOP,
-                 0, 0, 0, 0, SWP_MINIMIZE);
+                  0, 0, 0, 0, SWP_MINIMIZE);
 
-  // Now destroy the message queue, if we've created it!
-  if (ERRORIDERROR(hmqerror)==0)
+  /* Now destroy the message queue, if we've created it */
+  if (ERRORIDERROR(hmqerror) == 0)
     WinDestroyMsgQueue(hmq);
 
   return 1;
@@ -1979,48 +1662,36 @@ static SDL_GrabMode os2fslib_GrabInput(_THIS, SDL_GrabMode mode)
   HMQ hmq;
   ERRORID hmqerror;
 
-
-  // If there is no more window, nothing we can do!
-  if (_this->hidden->iPMThreadStatus!=1)
+  /* If there is no more window, nothing we can do */
+  if (_this->hidden->iPMThreadStatus != 1)
     return SDL_GRAB_OFF;
 
-  // Make sure this thread is prepared for using the Presentation Manager!
+  /* Make sure this thread is prepared for using the Presentation Manager */
   hab = WinInitialize(0);
-  hmq = WinCreateMsgQueue(hab,0);
-  // Remember if there was an error at WinCreateMsgQueue(), because we don't
-  // want to destroy somebody else's queue later. :)
+  hmq = WinCreateMsgQueue(hab, 0);
+  /* Remember if there was an error at WinCreateMsgQueue(), because we don't
+   * want to destroy somebody else's queue later. :) */
   hmqerror = WinGetLastError(hab);
 
-
-  if (mode == SDL_GRAB_OFF)
-  {
-#ifdef DEBUG_BUILD
-    printf("[os2fslib_GrabInput] : Releasing mouse\n"); fflush(stdout);
-#endif
-
-    // Release the mouse
+  if (mode == SDL_GRAB_OFF) {
+    dbgprintf("[os2fslib_GrabInput] : Releasing mouse\n");
+    /* Release the mouse */
     bMouseCapturable = 0;
-    if (bMouseCaptured)
-    {
+    if (bMouseCaptured) {
       WinSetCapture(HWND_DESKTOP, NULLHANDLE);
       bMouseCaptured = 0;
     }
-  } else
-  {
-#ifdef DEBUG_BUILD
-    printf("[os2fslib_GrabInput] : Capturing mouse\n"); fflush(stdout);
-#endif
-
-    // Capture the mouse
+  } else {
+    dbgprintf("[os2fslib_GrabInput] : Capturing mouse\n");
+    /* Capture the mouse */
     bMouseCapturable = 1;
-    if (WinQueryFocus(HWND_DESKTOP) == _this->hidden->hwndClient)
-    {
+    if (WinQueryFocus(HWND_DESKTOP) == _this->hidden->hwndClient) {
       WinSetCapture(HWND_DESKTOP, _this->hidden->hwndClient);
       bMouseCaptured = 1;
       {
         SWP swpClient;
         POINTL ptl;
-        // Center the mouse to the middle of the window!
+        /* Center the mouse to the middle of the window */
         WinQueryWindowPos(_this->hidden->hwndClient, &swpClient);
         ptl.x = 0; ptl.y = 0;
         WinMapWindowPoints(_this->hidden->hwndClient, HWND_DESKTOP, &ptl, 1);
@@ -2032,8 +1703,8 @@ static SDL_GrabMode os2fslib_GrabInput(_THIS, SDL_GrabMode mode)
     }
   }
 
-  // Now destroy the message queue, if we've created it!
-  if (ERRORIDERROR(hmqerror)==0)
+  /* Now destroy the message queue, if we've created it */
+  if (ERRORIDERROR(hmqerror) == 0)
     WinDestroyMsgQueue(hmq);
 
   return mode;
@@ -2046,30 +1717,28 @@ static void os2fslib_SetCaption(_THIS, const char *title, const char *icon)
   HMQ hmq;
   ERRORID hmqerror;
 
-  // If there is no more window, nothing we can do!
-  if (_this->hidden->iPMThreadStatus!=1) return;
+  /* If there is no more window, nothing we can do */
+  if (_this->hidden->iPMThreadStatus != 1) return;
 
-  // Make sure this thread is prepared for using the Presentation Manager!
+  /* Make sure this thread is prepared for using the Presentation Manager */
   hab = WinInitialize(0);
-  hmq = WinCreateMsgQueue(hab,0);
-  // Remember if there was an error at WinCreateMsgQueue(), because we don't
-  // want to destroy somebody else's queue later. :)
+  hmq = WinCreateMsgQueue(hab, 0);
+  /* Remember if there was an error at WinCreateMsgQueue(), because we don't
+   * want to destroy somebody else's queue later. :) */
   hmqerror = WinGetLastError(hab);
 
   WinSetWindowText(_this->hidden->hwndFrame, (char *) title);
 
-  // Now destroy the message queue, if we've created it!
-  if (ERRORIDERROR(hmqerror)==0)
+  /* Now destroy the message queue, if we've created it */
+  if (ERRORIDERROR(hmqerror) == 0)
     WinDestroyMsgQueue(hmq);
 }
 
 static int os2fslib_ToggleFullScreen(_THIS, int on)
 {
-#ifdef DEBUG_BUILD
-  printf("[os2fslib_ToggleFullScreen] : %d\n", on); fflush(stdout);
-#endif
-  // If there is no more window, nothing we can do!
-  if (_this->hidden->iPMThreadStatus!=1) return 0;
+  dbgprintf("[os2fslib_ToggleFullScreen] : %d\n", on);
+  /* If there is no more window, nothing we can do */
+  if (_this->hidden->iPMThreadStatus != 1) return 0;
 
   FSLib_ToggleFSMode(_this->hidden->hwndClient, on);
   /* Cursor manager functions to Windowed/FS mode*/
@@ -2089,46 +1758,40 @@ static void os2fslib_UpdateMouse(_THIS)
   ERRORID hmqerror;
   SWP swpClient;
 
-  // If there is no more window, nothing we can do!
-  if (_this->hidden->iPMThreadStatus!=1) return;
+  /* If there is no more window, nothing we can do */
+  if (_this->hidden->iPMThreadStatus != 1) return;
 
-
-  // Make sure this thread is prepared for using the Presentation Manager!
+  /* Make sure this thread is prepared for using the Presentation Manager */
   hab = WinInitialize(0);
-  hmq = WinCreateMsgQueue(hab,0);
-  // Remember if there was an error at WinCreateMsgQueue(), because we don't
-  // want to destroy somebody else's queue later. :)
+  hmq = WinCreateMsgQueue(hab, 0);
+  /* Remember if there was an error at WinCreateMsgQueue(), because we don't
+   * want to destroy somebody else's queue later. :) */
   hmqerror = WinGetLastError(hab);
 
-  
-
-  if (_this->hidden->fInFocus)
-  {
-    // If our app is in focus
+  if (_this->hidden->fInFocus) {
+    /* If our app is in focus */
     SDL_PrivateAppActive(1, SDL_APPMOUSEFOCUS);
     SDL_PrivateAppActive(1, SDL_APPINPUTFOCUS);
     SDL_PrivateAppActive(1, SDL_APPACTIVE);
     WinQueryPointerPos(HWND_DESKTOP, &ptl);
     WinMapWindowPoints(HWND_DESKTOP, _this->hidden->hwndClient, &ptl, 1);
     WinQueryWindowPos(_this->hidden->hwndClient, &swpClient);
-    // Convert OS/2 mouse position to SDL position, and also scale it!
+    /* Convert OS/2 mouse position to SDL position, and also scale it */
     ptl.x = ptl.x * _this->hidden->SrcBufferDesc.uiXResolution / swpClient.cx;
     ptl.y = ptl.y * _this->hidden->SrcBufferDesc.uiYResolution / swpClient.cy;
     ptl.y = _this->hidden->SrcBufferDesc.uiYResolution - ptl.y - 1;
     SDL_PrivateMouseMotion(0, 0, (Sint16) (ptl.x), (Sint16) (ptl.y));
-  } else
-  {
-    // If we're not in focus
+  } else {
+    /* If we're not in focus */
     SDL_PrivateAppActive(0, SDL_APPMOUSEFOCUS);
     SDL_PrivateAppActive(0, SDL_APPINPUTFOCUS);
     SDL_PrivateAppActive(0, SDL_APPACTIVE);
     SDL_PrivateMouseMotion(0, 0, (Sint16) -1, (Sint16) -1);
   }
 
-  // Now destroy the message queue, if we've created it!
-  if (ERRORIDERROR(hmqerror)==0)
+  /* Now destroy the message queue, if we've created it */
+  if (ERRORIDERROR(hmqerror) == 0)
     WinDestroyMsgQueue(hmq);
-
 }
 
 /* This pointer should exist in the native video subsystem and should
@@ -2136,70 +1799,56 @@ static void os2fslib_UpdateMouse(_THIS)
  */
 static void os2fslib_UpdateRects(_THIS, int numrects, SDL_Rect *rects)
 {
-  // If there is no more window, nothing we can do!
-  if (_this->hidden->iPMThreadStatus!=1) return;
+  /* If there is no more window, nothing we can do */
+  if (_this->hidden->iPMThreadStatus != 1) return;
 
 #ifdef BITBLT_IN_WINMESSAGEPROC
   WinSendMsg(_this->hidden->hwndClient,
-                 WM_UPDATERECTSREQUEST,
-                 (MPARAM) numrects,
-                 (MPARAM) rects);
+             WM_UPDATERECTSREQUEST,
+             (MPARAM) numrects,
+             (MPARAM) rects);
 #else
-  if (DosRequestMutexSem(_this->hidden->hmtxUseSrcBuffer, SEM_INDEFINITE_WAIT)==NO_ERROR)
-  {
+  if (DosRequestMutexSem(_this->hidden->hmtxUseSrcBuffer, SEM_INDEFINITE_WAIT) == NO_ERROR) {
     int i;
 
-    if (_this->hidden->pSDLSurface)
-    {
+    if (_this->hidden->pSDLSurface) {
 #ifndef RESIZE_EVEN_IF_RESIZABLE
       SWP swp;
-      // But only blit if the window is not resizable, or if
-      // the window is resizable and the source buffer size is the
-      // same as the destination buffer size!
+      /* But only blit if the window is not resizable, or if
+       * the window is resizable and the source buffer size is the
+        same as the destination buffer size */
       WinQueryWindowPos(_this->hidden->hwndClient, &swp);
-      if ((_this->hidden->pSDLSurface) &&
-          (_this->hidden->pSDLSurface->flags & SDL_RESIZABLE) &&
-          ((swp.cx != _this->hidden->SrcBufferDesc.uiXResolution) ||
-           (swp.cy != _this->hidden->SrcBufferDesc.uiYResolution)
-          ) &&
-          (!FSLib_QueryFSMode(_this->hidden->hwndClient))
-         )
+      if (_this->hidden->pSDLSurface && (_this->hidden->pSDLSurface->flags & SDL_RESIZABLE) &&
+          ((swp.cx != _this->hidden->SrcBufferDesc.uiXResolution)  ||
+           (swp.cy != _this->hidden->SrcBufferDesc.uiYResolution)) &&
+          !FSLib_QueryFSMode(_this->hidden->hwndClient) )
       {
-        // Resizable surface and in resizing!
-        // So, don't blit now!
-#ifdef DEBUG_BUILD
-        printf("[UpdateRects] : Skipping blit while resizing!\n"); fflush(stdout);
-#endif
+        /* Resizable surface and in resizing. So, don't blit now. */
+        dbgprintf("[UpdateRects] : Skipping blit while resizing!\n");
       } else
 #endif
       {
-      /*
+        /*
         // Blit the whole window
         FSLIB_BITBLT(_this->hidden->hwndClient, _this->hidden->pchSrcBuffer,
                      0, 0,
                      _this->hidden->SrcBufferDesc.uiXResolution,
                      _this->hidden->SrcBufferDesc.uiYResolution);
-                     */
-#ifdef DEBUG_BUILD
-          printf("[os2fslib_UpdateRects] : Blitting!\n"); fflush(stdout);
-#endif
-  
-        // Blit the changed areas
-        for (i=0; i<numrects; i++)
+        */
+        dbgprintf("[os2fslib_UpdateRects] : Blitting!\n");
+        /* Blit the changed areas */
+        for (i = 0; i < numrects; i++)
           FSLIB_BITBLT(_this->hidden->hwndClient, _this->hidden->pchSrcBuffer,
                        rects[i].y, rects[i].x, rects[i].w, rects[i].h);
       }
     }
-#ifdef DEBUG_BUILD
-     else
-       printf("[os2fslib_UpdateRects] : No public surface!\n"); fflush(stdout);
-#endif
+    else
+      dbgprintf("[os2fslib_UpdateRects] : No public surface!\n");
+
     DosReleaseMutexSem(_this->hidden->hmtxUseSrcBuffer);
   }
-#ifdef DEBUG_BUILD
   else
-    printf("[os2fslib_UpdateRects] : Error in mutex!\n"); fflush(stdout);
-#endif
+    dbgprintf("[os2fslib_UpdateRects] : Error in mutex!\n");
 #endif
 }
 
@@ -2209,72 +1858,53 @@ static void os2fslib_UpdateRects(_THIS, int numrects, SDL_Rect *rects)
  */
 static void os2fslib_VideoQuit(_THIS)
 {
-#ifdef DEBUG_BUILD
-  printf("[os2fslib_VideoQuit]\n"); fflush(stdout);
-#endif
-  // Close PM stuff if running!
-  if (_this->hidden->iPMThreadStatus == 1)
-  {
+  dbgprintf("[os2fslib_VideoQuit]\n");
+  /* Close PM stuff if running */
+  if (_this->hidden->iPMThreadStatus == 1) {
     int iTimeout;
     WinPostMsg(_this->hidden->hwndFrame, WM_QUIT, (MPARAM) 0, (MPARAM) 0);
-    // HACK: We had this line before:
-    //DosWaitThread((TID *) &(_this->hidden->tidPMThread), DCWW_WAIT);
-    // We don't use it, because the PMThread will never stop, or if it stops,
-    // it will kill the whole process as a emergency fallback.
-    // So, we only check for the iPMThreadStatus stuff!
-#ifdef DEBUG_BUILD
-    printf("[os2fslib_VideoQuit] : Waiting for PM thread to die\n"); fflush(stdout);
-#endif
+    /* HACK: We had this line before:
+     * DosWaitThread((TID *) &(_this->hidden->tidPMThread), DCWW_WAIT);
+     * We don't use it, because the PMThread will never stop, or if it stops,
+     * it will kill the whole process as a emergency fallback.
+     * So, we only check for the iPMThreadStatus stuff. */
+    dbgprintf("[os2fslib_VideoQuit] : Waiting for PM thread to die\n");
 
-    iTimeout=0;
-    while ((_this->hidden->iPMThreadStatus == 1) && (iTimeout<100))
-    {
+    iTimeout = 0;
+    while (_this->hidden->iPMThreadStatus == 1 && iTimeout < 100) {
       iTimeout++;
       DosSleep(64);
     }
+    dbgprintf("[os2fslib_VideoQuit] : End of wait.\n");
 
-#ifdef DEBUG_BUILD
-    printf("[os2fslib_VideoQuit] : End of wait.\n"); fflush(stdout);
-#endif
-
-    if (_this->hidden->iPMThreadStatus == 1)
-    {
-#ifdef DEBUG_BUILD
-      printf("[os2fslib_VideoQuit] : Killing PM thread!\n"); fflush(stdout);
-#endif
-      
+    if (_this->hidden->iPMThreadStatus == 1) {
+      dbgprintf("[os2fslib_VideoQuit] : Killing PM thread!\n");
       _this->hidden->iPMThreadStatus = 0;
       DosKillThread(_this->hidden->tidPMThread);
 
-      if (_this->hidden->hwndFrame)
-      {
-#ifdef DEBUG_BUILD
-        printf("[os2fslib_VideoQuit] : Destroying PM window!\n"); fflush(stdout);
-#endif
-
-        WinDestroyWindow(_this->hidden->hwndFrame); _this->hidden->hwndFrame=NULLHANDLE;
+      if (_this->hidden->hwndFrame) {
+        dbgprintf("[os2fslib_VideoQuit] : Destroying PM window!\n");
+        WinDestroyWindow(_this->hidden->hwndFrame);
+        _this->hidden->hwndFrame = NULLHANDLE;
       }
     }
-
   }
 
-  // Free result of an old ListModes() call, because there is
-  // no FreeListModes() call in SDL!
-  if (_this->hidden->pListModesResult)
-  {
-    SDL_free(_this->hidden->pListModesResult); _this->hidden->pListModesResult = NULL;
+  /* Free result of an old ListModes() call, because there is
+   * no FreeListModes() call in SDL. */
+  if (_this->hidden->pListModesResult) {
+    SDL_free(_this->hidden->pListModesResult);
+    _this->hidden->pListModesResult = NULL;
   }
 
-  // Free list of available fullscreen modes
-  if (_this->hidden->pAvailableFSLibVideoModes)
-  {
+  /* Free list of available fullscreen modes */
+  if (_this->hidden->pAvailableFSLibVideoModes) {
     FSLib_FreeVideoModeList(_this->hidden->pAvailableFSLibVideoModes);
     _this->hidden->pAvailableFSLibVideoModes = NULL;
   }
 
-  // Free application icon if we had one
-  if (hptrCurrentIcon)
-  {
+  /* Free application icon if we had one */
+  if (hptrCurrentIcon) {
     WinDestroyPointer(hptrCurrentIcon);
     hptrCurrentIcon = NULLHANDLE;
   }
@@ -2300,73 +1930,63 @@ static SDL_Surface *os2fslib_SetVideoMode(_THIS, SDL_Surface *current,
   RECTL rectl;
   SDL_Surface *pResult;
 
-  // If there is no more window, nothing we can do!
+  /* If there is no more window, nothing we can do */
   if (_this->hidden->iPMThreadStatus!=1) return NULL;
 
-#ifdef DEBUG_BUILD
-  printf("[os2fslib_SetVideoMode] : Request for %dx%d @ %dBPP, flags=0x%x\n", width, height, bpp, flags); fflush(stdout);
-#endif
+  dbgprintf("[os2fslib_SetVideoMode] : Request for %dx%d @ %dBPP, flags=0x%x\n", width, height, bpp, flags);
 
-  // We don't support palette modes!
-  if (bpp==8) bpp=32;
+  /* We don't support palette modes */
+  if (bpp == 8) bpp = 32;
 
-  // Also, we don't support resizable modes in fullscreen mode.
+  /* Also, we don't support resizable modes in fullscreen mode. */
   if (flags & SDL_RESIZABLE)
     flags &= ~SDL_FULLSCREEN;
 
-  // No double buffered mode
+  /* No double buffered mode */
   if (flags & SDL_DOUBLEBUF)
     flags &= ~SDL_DOUBLEBUF;
 
-  // And, we don't support HWSURFACE yet.
-  if (flags & SDL_HWSURFACE)
-  {
+  /* And, we don't support HWSURFACE yet. */
+  if (flags & SDL_HWSURFACE) {
     flags &= ~SDL_HWSURFACE;
     flags |= SDL_SWSURFACE;
   }
 
-#ifdef DEBUG_BUILD
-  printf("[os2fslib_SetVideoMode] : Changed request to %dx%d @ %dBPP, flags=0x%x\n", width, height, bpp, flags); fflush(stdout);
-#endif
+  dbgprintf("[os2fslib_SetVideoMode] : Changed request to %dx%d @ %dBPP, flags=0x%x\n", width, height, bpp, flags);
 
-  // First check if there is such a video mode they want!
+  /* First check if there is such a video mode they want */
   pModeInfoFound = NULL;
 
-  // For fullscreen mode we don't support every resolution!
-  // So, go through the video modes, and check for such a resolution!
+  /* For fullscreen mode we don't support every resolution!
+   * So, go through the video modes, and check for such a resolution. */
   pModeInfoFound = NULL;
   pModeInfo = _this->hidden->pAvailableFSLibVideoModes;
 
-  while (pModeInfo)
-  {
-    // Check all available fullscreen modes for this resolution
+  while (pModeInfo) {
+    /* Check all available fullscreen modes for this resolution */
     if ((pModeInfo->uiXResolution == width) &&
         (pModeInfo->uiYResolution == height) &&
-        (pModeInfo->uiBPP!=8)) // palettized modes not yet supported
+        (pModeInfo->uiBPP != 8)) /* palettized modes not yet supported */
     {
-      // If good resolution, try to find the exact BPP, or at least
-      // something similar...
+      /* If good resolution, try to find the exact BPP, or at least
+       * something similar... */
       if (!pModeInfoFound)
         pModeInfoFound = pModeInfo;
       else
-      if ((pModeInfoFound->uiBPP!=bpp) &&
-          (pModeInfoFound->uiBPP<pModeInfo->uiBPP))
+      if ((pModeInfoFound->uiBPP != bpp) &&
+          (pModeInfoFound->uiBPP < pModeInfo->uiBPP))
         pModeInfoFound = pModeInfo;
     }
     pModeInfo = pModeInfo->pNext;
   }
 
-  // If we did not find a good fullscreen mode, then try a similar
-  if (!pModeInfoFound)
-  {
-#ifdef DEBUG_BUILD
-    printf("[os2fslib_SetVideoMode] : Requested video mode not found, looking for a similar one!\n"); fflush(stdout);
-#endif
-    // Go through the video modes again, and find a similar resolution!
+  /* If we did not find a good fullscreen mode, then try a similar */
+  if (!pModeInfoFound) {
+    dbgprintf("[os2fslib_SetVideoMode] : Requested video mode not found, looking for a similar one!\n");
+    /* Go through the video modes again, and find a similar resolution. */
     pModeInfo = _this->hidden->pAvailableFSLibVideoModes;
-    while (pModeInfo)
-    {
-      // Check all available fullscreen modes for this resolution
+    while (pModeInfo) {
+      /* Check all available fullscreen modes for this resolution */
       if ((pModeInfo->uiXResolution >= width) &&
           (pModeInfo->uiYResolution >= height) &&
           (pModeInfo->uiBPP == bpp))
@@ -2374,10 +1994,10 @@ static SDL_Surface *os2fslib_SetVideoMode(_THIS, SDL_Surface *current,
         if (!pModeInfoFound)
           pModeInfoFound = pModeInfo;
         else
-        if (((pModeInfoFound->uiXResolution-width)*(pModeInfoFound->uiYResolution-height))>
+        if (((pModeInfoFound->uiXResolution-width)*(pModeInfoFound->uiYResolution-height)) >
             ((pModeInfo->uiXResolution-width)*(pModeInfo->uiYResolution-height)))
         {
-          // Found a mode which is closer than the current one
+          /* Found a mode which is closer than the current one */
           pModeInfoFound = pModeInfo;
         }
       }
@@ -2385,53 +2005,39 @@ static SDL_Surface *os2fslib_SetVideoMode(_THIS, SDL_Surface *current,
     }
   }
 
-  // If we did not find a good fullscreen mode, then return NULL
-  if (!pModeInfoFound)
-  {
-#ifdef DEBUG_BUILD
-    printf("[os2fslib_SetVideoMode] : Requested video mode not found!\n"); fflush(stdout);
-#endif
+  /* If we did not find a good fullscreen mode, then return NULL */
+  if (!pModeInfoFound) {
+    dbgprintf("[os2fslib_SetVideoMode] : Requested video mode not found!\n");
     return NULL;
   }
 
-#ifdef DEBUG_BUILD
-  printf("[os2fslib_SetVideoMode] : Found mode!\n"); fflush(stdout);
-#endif
+  dbgprintf("[os2fslib_SetVideoMode] : Found mode!\n");
 
-  // We'll possibly adjust the structure, so copy out the values
-  // into TempModeInfo!
+  /* We'll possibly adjust the structure, so copy out the values
+   * into TempModeInfo */
   SDL_memcpy(&TempModeInfo, pModeInfoFound, sizeof(TempModeInfo));
   pModeInfoFound = &TempModeInfo;
 
-  if (flags & SDL_RESIZABLE)
-  {
-#ifdef DEBUG_BUILD
-    printf("[os2fslib_SetVideoMode] : Requested mode is resizable, changing width/height\n"); fflush(stdout);
-#endif
-    // Change width and height to requested one!
+  if (flags & SDL_RESIZABLE) {
+    dbgprintf("[os2fslib_SetVideoMode] : Requested mode is resizable, changing width/height\n");
+    /* Change width and height to requested one */
     TempModeInfo.uiXResolution = width;
     TempModeInfo.uiYResolution = height;
     TempModeInfo.uiScanLineSize = width * ((TempModeInfo.uiBPP+7)/8);
   }
 
-  // We can try create new surface!
+  /* We can try create new surface */
 
-  // Make sure this thread is prepared for using the Presentation Manager!
+  /* Make sure this thread is prepared for using the Presentation Manager */
   hab = WinInitialize(0);
-  hmq = WinCreateMsgQueue(hab,0);
-  // Remember if there was an error at WinCreateMsgQueue(), because we don't
-  // want to destroy somebody else's queue later. :)
+  hmq = WinCreateMsgQueue(hab, 0);
+  /* Remember if there was an error at WinCreateMsgQueue(), because we don't
+   * want to destroy somebody else's queue later. :) */
   hmqerror = WinGetLastError(hab);
 
-  
-
-  if (DosRequestMutexSem(_this->hidden->hmtxUseSrcBuffer, SEM_INDEFINITE_WAIT)==NO_ERROR)
-  {
-#ifdef DEBUG_BUILD
-    printf("[os2fslib_SetVideoMode] : Creating new SW surface\n"); fflush(stdout);
-#endif
-
-    // Create new software surface!
+  if (DosRequestMutexSem(_this->hidden->hmtxUseSrcBuffer, SEM_INDEFINITE_WAIT) == NO_ERROR) {
+    dbgprintf("[os2fslib_SetVideoMode] : Creating new SW surface\n");
+    /* Create new software surface */
     pResult = SDL_CreateRGBSurface(SDL_SWSURFACE,
                                    pModeInfoFound->uiXResolution,
                                    pModeInfoFound->uiYResolution,
@@ -2441,18 +2047,14 @@ static SDL_Surface *os2fslib_SetVideoMode(_THIS, SDL_Surface *current,
                                    ((unsigned int) pModeInfoFound->PixelFormat.ucBlueMask) << pModeInfoFound->PixelFormat.ucBluePosition,
                                    ((unsigned int) pModeInfoFound->PixelFormat.ucAlphaMask) << pModeInfoFound->PixelFormat.ucAlphaPosition);
 
-    if (pResult == NULL)
-    {
+    if (pResult == NULL) {
       DosReleaseMutexSem(_this->hidden->hmtxUseSrcBuffer);
       SDL_OutOfMemory();
       return NULL;
     }
 
-#ifdef DEBUG_BUILD
-    printf("[os2fslib_SetVideoMode] : Adjusting pixel format\n"); fflush(stdout);
-#endif
-
-    // Adjust pixel format mask!
+    dbgprintf("[os2fslib_SetVideoMode] : Adjusting pixel format\n");
+    /* Adjust pixel format mask */
     pResult->format->Rmask = ((unsigned int) pModeInfoFound->PixelFormat.ucRedMask) << pModeInfoFound->PixelFormat.ucRedPosition;
     pResult->format->Rshift = pModeInfoFound->PixelFormat.ucRedPosition;
     pResult->format->Rloss = pModeInfoFound->PixelFormat.ucRedAdjust;
@@ -2472,43 +2074,34 @@ static SDL_Surface *os2fslib_SetVideoMode(_THIS, SDL_Surface *current,
         pResult->format->Aloss = 0;
 #endif
 
-    // Adjust surface flags
+    /* Adjust surface flags */
     pResult->flags |= (flags & SDL_FULLSCREEN);
     pResult->flags |= (flags & SDL_RESIZABLE);
 
-    // It might be that the software surface pitch is not the same as
-    // the pitch we have, so adjust that!
+    /* It might be that the software surface pitch is not the same as
+     * the pitch we have, so adjust that. */
     pModeInfoFound->uiScanLineSize = pResult->pitch;
 
-    // Store new source buffer parameters!
+    /* Store new source buffer parameters. */
     SDL_memcpy(&(_this->hidden->SrcBufferDesc), pModeInfoFound, sizeof(*pModeInfoFound));
     _this->hidden->pchSrcBuffer = pResult->pixels;
 
-#ifdef DEBUG_BUILD
-    printf("[os2fslib_SetVideoMode] : Telling FSLib the stuffs\n"); fflush(stdout);
-#endif
+    dbgprintf("[os2fslib_SetVideoMode] : Telling FSLib the stuffs\n");
 
-    // Tell the FSLib window the new source image format
+    /* Tell the FSLib window the new source image format */
     FSLib_SetSrcBufferDesc(_this->hidden->hwndClient, &(_this->hidden->SrcBufferDesc));
 
-    if (
-        ((flags & SDL_RESIZABLE)==0) ||
-        (bFirstCall)
-       )
-    {
+    if (!(flags & SDL_RESIZABLE) || bFirstCall) {
       bFirstCall = 0;
-#ifdef DEBUG_BUILD
-      printf("[os2fslib_SetVideoMode] : Modifying window size\n"); fflush(stdout);
-#endif
-
-      // Calculate frame window size from client window size
+      dbgprintf("[os2fslib_SetVideoMode] : Modifying window size\n");
+      /* Calculate frame window size from client window size */
       rectl.xLeft = 0;
       rectl.yBottom = 0;
-      rectl.xRight = pModeInfoFound->uiXResolution; // Noninclusive
-      rectl.yTop = pModeInfoFound->uiYResolution; // Noninclusive
+      rectl.xRight = pModeInfoFound->uiXResolution; /* Noninclusive */
+      rectl.yTop = pModeInfoFound->uiYResolution;   /* Noninclusive */
       WinCalcFrameRect(_this->hidden->hwndFrame, &rectl, FALSE);
 
-      // Set the new size of the main window
+      /* Set the new size of the main window */
       SetAccessableWindowPos(_this->hidden->hwndFrame,
                              HWND_TOP,
                              0, 0,
@@ -2517,22 +2110,14 @@ static SDL_Surface *os2fslib_SetVideoMode(_THIS, SDL_Surface *current,
                              SWP_SIZE | SWP_ACTIVATE | SWP_SHOW);
     }
 
-    // Set fullscreen mode flag, and switch to fullscreen if needed!
-    if (flags & SDL_FULLSCREEN)
-    {
-#ifdef DEBUG_BUILD
-      printf("[os2fslib_SetVideoMode] : Also trying to switch to fullscreen\n");
-      fflush(stdout);
-#endif
+    /* Set fullscreen mode flag, and switch to fullscreen if needed */
+    if (flags & SDL_FULLSCREEN) {
+      dbgprintf("[os2fslib_SetVideoMode] : Also trying to switch to fullscreen\n");
       FSLib_ToggleFSMode(_this->hidden->hwndClient, 1);
       /* Cursor manager functions to FS mode*/
       os2fslib_SetCursorManagementFunctions(_this, 0);
-    } else
-    {
-#ifdef DEBUG_BUILD
-      printf("[os2fslib_SetVideoMode] : Also trying to switch to desktop mode\n");
-      fflush(stdout);
-#endif
+    } else {
+      dbgprintf("[os2fslib_SetVideoMode] : Also trying to switch to desktop mode\n");
       FSLib_ToggleFSMode(_this->hidden->hwndClient, 0);
       /* Cursor manager functions to Windowed mode*/
       os2fslib_SetCursorManagementFunctions(_this, 1);
@@ -2541,43 +2126,30 @@ static SDL_Surface *os2fslib_SetVideoMode(_THIS, SDL_Surface *current,
     _this->hidden->pSDLSurface = pResult;
 
     DosReleaseMutexSem(_this->hidden->hmtxUseSrcBuffer);
-  } else
-  {
-#ifdef DEBUG_BUILD
-    printf("[os2fslib_SetVideoMode] : Could not get hmtxUseSrcBuffer!\n"); fflush(stdout);
-#endif
-    
+  } else {
+    dbgprintf("[os2fslib_SetVideoMode] : Could not get hmtxUseSrcBuffer!\n");
     pResult = NULL;
   }
 
-  // As we have the new surface, we don't need the current one anymore!
-  if ((pResult) && (current))
-  {
-#ifdef DEBUG_BUILD
-    printf("[os2fslib_SetVideoMode] : Freeing old surface\n"); fflush(stdout);
-#endif
+  /* As we have the new surface, we don't need the current one anymore */
+  if (pResult && current) {
+    dbgprintf("[os2fslib_SetVideoMode] : Freeing old surface\n");
     SDL_FreeSurface(current);
   }
 
-  // Redraw window
+  /* Redraw window */
   WinInvalidateRegion(_this->hidden->hwndClient, NULLHANDLE, TRUE);
 
-  // Now destroy the message queue, if we've created it!
-  if (ERRORIDERROR(hmqerror)==0)
-  {
-#ifdef DEBUG_BUILD
-    printf("[os2fslib_SetVideoMode] : Destroying message queue\n"); fflush(stdout);
-#endif
+  /* Now destroy the message queue, if we've created it */
+  if (ERRORIDERROR(hmqerror) == 0) {
+    dbgprintf("[os2fslib_SetVideoMode] : Destroying message queue\n");
     WinDestroyMsgQueue(hmq);
   }
 
-#ifdef DEBUG_BUILD
-  printf("[os2fslib_SetVideoMode] : Done\n"); fflush(stdout);
-#endif
-
   /* We're done */
+  dbgprintf("[os2fslib_SetVideoMode] : Done\n");
 
-  // Return with the new surface!
+  /* Return with the new surface */
   return pResult;
 }
 
@@ -2586,103 +2158,74 @@ static SDL_Surface *os2fslib_SetVideoMode(_THIS, SDL_Surface *current,
  */
 static SDL_Rect **os2fslib_ListModes(_THIS, SDL_PixelFormat *format, Uint32 flags)
 {
-#ifdef DEBUG_BUILD
-  printf("[os2fslib_ListModes] : ListModes of %d Bpp\n", format->BitsPerPixel);
-#endif
-  // Destroy result of previous call, if there is any
-  if (_this->hidden->pListModesResult)
-  {
+  dbgprintf("[os2fslib_ListModes] : ListModes of %d Bpp\n", format->BitsPerPixel);
+  /* Destroy result of previous call, if there is any */
+  if (_this->hidden->pListModesResult) {
     SDL_free(_this->hidden->pListModesResult); _this->hidden->pListModesResult = NULL;
   }
 
-  // For resizable and windowed mode we support every resolution!
-  if ((flags & SDL_RESIZABLE) && ((flags & SDL_FULLSCREEN) == 0))
+  /* For resizable and windowed mode we support every resolution */
+  if ((flags & SDL_RESIZABLE) && !(flags & SDL_FULLSCREEN))
     return (SDL_Rect **)-1;
 
-  // Check if they need fullscreen or non-fullscreen video modes!
-  if ((flags & SDL_FULLSCREEN) == 0)
-
-  {
-    // For windowed mode we support every resolution!
+  /* Check if they need fullscreen or non-fullscreen video modes */
+  if (!(flags & SDL_FULLSCREEN)) {
+    /* For windowed mode we support every resolution */
     return (SDL_Rect **)-1;
-  } else
-  {
+  } else {
     FSLib_VideoMode_p pFSMode;
-    // For fullscreen mode we don't support every resolution!
-    // Now create a new list
+    /* For fullscreen mode we don't support every resolution.
+     * Now create a new list. */
     pFSMode = _this->hidden->pAvailableFSLibVideoModes;
-    while (pFSMode)
-    {
-      if (pFSMode->uiBPP == format->BitsPerPixel)
-      {
+    while (pFSMode) {
+      if (pFSMode->uiBPP == format->BitsPerPixel) {
         SDL_Rect *pRect = (SDL_Rect *) SDL_malloc(sizeof(SDL_Rect));
-        if (pRect)
-        {
-          // Fill description
+        if (pRect) {
+          /* Fill description */
           pRect->x = 0;
           pRect->y = 0;
           pRect->w = pFSMode->uiXResolution;
           pRect->h = pFSMode->uiYResolution;
-#ifdef DEBUG_BUILD
-//          printf("!!! Seems to be good!\n");
-//        printf("F: %dx%d\n", pRect->w, pRect->h);
-#endif
-          // And insert into list of pRects
-          if (!(_this->hidden->pListModesResult))
-          {
-#ifdef DEBUG_BUILD
-//            printf("!!! Inserting to beginning\n");
-#endif
 
-            // We're the first one to be inserted!
+          /* And insert into list of pRects */
+          if (!(_this->hidden->pListModesResult)) {
+            /*dbgprintf("!!! Inserting to beginning\n");*/
+            /* We're the first one to be inserted */
             _this->hidden->pListModesResult = (SDL_Rect**) SDL_malloc(2*sizeof(SDL_Rect*));
-            if (_this->hidden->pListModesResult)
-            {
+            if (_this->hidden->pListModesResult) {
               _this->hidden->pListModesResult[0] = pRect;
               _this->hidden->pListModesResult[1] = NULL;
-            } else
-            {
+            }
+            else {
               SDL_free(pRect);
             }
-          } else
-          {
-            // We're not the first ones, so find the place where we
-            // have to insert ourselves
+          } else {
+            /* We're not the first ones, so find the place where we
+             * have to insert ourselves */
             SDL_Rect **pNewList;
             int iPlace, iNumOfSlots, i;
 
-#ifdef DEBUG_BUILD
-//            printf("!!! Searching where to insert\n");
-#endif
-
-            iPlace = -1; iNumOfSlots = 1; // Count the last NULL too!
-            for (i=0; _this->hidden->pListModesResult[i]; i++)
-            {
+            /*dbgprintf("!!! Searching where to insert\n");*/
+            iPlace = -1; iNumOfSlots = 1; /* Count the last NULL too */
+            for (i = 0; _this->hidden->pListModesResult[i]; i++) {
               iNumOfSlots++;
-              if (iPlace==-1)
-              {
-                if ((_this->hidden->pListModesResult[i]->w*_this->hidden->pListModesResult[i]->h)<
-                    (pRect->w*pRect->h))
-                {
+              if (iPlace == -1) {
+                if ((_this->hidden->pListModesResult[i]->w * _this->hidden->pListModesResult[i]->h) <
+                    (pRect->w * pRect->h)) {
                   iPlace = i;
                 }
               }
             }
-            if (iPlace==-1) iPlace = iNumOfSlots-1;
+            if (iPlace == -1) iPlace = iNumOfSlots-1;
 
-#ifdef DEBUG_BUILD
-//            printf("!!! From %d slots, it will be at %d\n", iNumOfSlots, iPlace);
-#endif
-
+            /*dbgprintf("!!! From %d slots, it will be at %d\n", iNumOfSlots, iPlace);*/
             pNewList = (SDL_Rect**) SDL_realloc(_this->hidden->pListModesResult, (iNumOfSlots+1)*sizeof(SDL_Rect*));
-            if (pNewList)
-            {
-              for (i=iNumOfSlots;i>iPlace;i--)
+            if (pNewList) {
+              for (i = iNumOfSlots; i > iPlace; i--)
                 pNewList[i] = pNewList[i-1];
               pNewList[iPlace] = pRect;
               _this->hidden->pListModesResult = pNewList;
-            } else
-            {
+            } else {
               SDL_free(pRect);
             }
           }
@@ -2691,9 +2234,7 @@ static SDL_Rect **os2fslib_ListModes(_THIS, SDL_PixelFormat *format, Uint32 flag
       pFSMode = pFSMode->pNext;
     }
   }
-#ifdef DEBUG_BUILD
-//  printf("Returning list\n");
-#endif
+  /*dbgprintf("Returning list\n");*/
   return _this->hidden->pListModesResult;
 }
 
@@ -2704,19 +2245,13 @@ static int os2fslib_VideoInit(_THIS, SDL_PixelFormat *vformat)
 {
   FSLib_VideoMode_p pDesktopMode;
 
-#ifdef DEBUG_BUILD
-  printf("[os2fslib_VideoInit] : Enter\n"); fflush(stdout);
-#endif
-
-  // Report the best pixel format. For this,
-  // we'll use the current desktop format.
+  dbgprintf("[os2fslib_VideoInit] : Enter\n");
+  /* Report the best pixel format. For this,
+   * we'll use the current desktop format. */
   pDesktopMode = FSLib_GetDesktopVideoMode();
-  if (!pDesktopMode)
-  {
+  if (!pDesktopMode) {
     SDL_SetError("Could not query desktop video mode!");
-#ifdef DEBUG_BUILD
-    printf("[os2fslib_VideoInit] : Could not query desktop video mode!\n");
-#endif
+    dbgprintf("[os2fslib_VideoInit] : Could not query desktop video mode!\n");
     return -1;
   }
 
@@ -2747,10 +2282,10 @@ static int os2fslib_VideoInit(_THIS, SDL_PixelFormat *vformat)
       vformat->Aloss = 0;
 #endif
 
-  // Fill in some window manager capabilities
+  /* Fill in some window manager capabilities */
   _this->info.wm_available = 1;
 
-  // Initialize some internal variables
+  /* Initialize some internal variables */
   _this->hidden->pListModesResult = NULL;
   _this->hidden->fInFocus = 0;
   _this->hidden->iSkipWMMOUSEMOVE = 0;
@@ -2758,8 +2293,7 @@ static int os2fslib_VideoInit(_THIS, SDL_PixelFormat *vformat)
 
   if (getenv("SDL_USE_PROPORTIONAL_WINDOW"))
     _this->hidden->bProportionalResize = 1;
-  else
-  {
+  else {
     PPIB pib;
     PTIB tib;
     char *pchFileName, *pchTemp;
@@ -2773,24 +2307,20 @@ static int os2fslib_VideoInit(_THIS, SDL_PixelFormat *vformat)
 
     DosGetInfoBlocks(&tib, &pib);
     pchTemp = pchFileName = pib->pib_pchcmd;
-    while (*pchTemp)
-    {
-      if (*pchTemp=='\\')
+    while (*pchTemp) {
+      if (*pchTemp == '\\')
         pchFileName = pchTemp+1;
       pchTemp++;
     }
-    if (getenv("HOME"))
-    {
+    if (getenv("HOME")) {
       sprintf(achConfigFile, "%s\\.sdl.proportionals", getenv("HOME"));
       hFile = fopen(achConfigFile, "rt");
-      if (!hFile)
-      {
+      if (!hFile) {
         /* Seems like the file cannot be opened or does not exist.
          * Let's try to create it with defaults!
          */
         hFile = fopen(achConfigFile, "wt");
-        if (hFile)
-        {
+        if (hFile) {
           fprintf(hFile, "; This file is a config file of SDL/2, containing\n");
           fprintf(hFile, "; the list of executables that must have proportional\n");
           fprintf(hFile, "; windows.\n");
@@ -2810,18 +2340,14 @@ static int os2fslib_VideoInit(_THIS, SDL_PixelFormat *vformat)
         hFile = fopen(achConfigFile, "rt");
       }
 
-      if (hFile)
-      {
-        while (fgets(achConfigFile, sizeof(achConfigFile), hFile))
-        {
+      if (hFile) {
+        while (fgets(achConfigFile, sizeof(achConfigFile), hFile)) {
           /* Cut \n from end of string */
-
           while (achConfigFile[strlen(achConfigFile)-1] == '\n')
             achConfigFile[strlen(achConfigFile)-1] = 0;
 
           /* Compare... */
-          if (stricmp(achConfigFile, pchFileName)==0)
-          {
+          if (stricmp(achConfigFile, pchFileName) == 0) {
             /* Found it in config file! */
             _this->hidden->bProportionalResize = 1;
             break;
@@ -2834,49 +2360,40 @@ static int os2fslib_VideoInit(_THIS, SDL_PixelFormat *vformat)
 
   DosCreateMutexSem(NULL, &(_this->hidden->hmtxUseSrcBuffer), 0, FALSE);
 
-  // Now create our window with a default size
+  /* Now create our window with a default size */
 
-  // For this, we select the first available fullscreen mode as
-  // current window size!
+  /* For this, we select the first available fullscreen mode as
+   * current window size. */
   SDL_memcpy(&(_this->hidden->SrcBufferDesc), _this->hidden->pAvailableFSLibVideoModes, sizeof(_this->hidden->SrcBufferDesc));
-  // Allocate new video buffer!
+  /* Allocate new video buffer */
   _this->hidden->pchSrcBuffer = (char *) SDL_malloc(_this->hidden->pAvailableFSLibVideoModes->uiScanLineSize * _this->hidden->pAvailableFSLibVideoModes->uiYResolution);
-  if (!_this->hidden->pchSrcBuffer)
-  {
-#ifdef DEBUG_BUILD
-    printf("[os2fslib_VideoInit] : Yikes, not enough memory for new video buffer!\n"); fflush(stdout);
-#endif
+  if (!_this->hidden->pchSrcBuffer) {
+    dbgprintf("[os2fslib_VideoInit] : Yikes, not enough memory for new video buffer!\n");
     SDL_OutOfMemory();
     return -1;
   }
 
-  // For this, we need a message processing thread.
-  // We'll create a new thread for this, which will do everything
-  // what is related to PM
+  /* For this, we need a message processing thread.
+   * We'll create a new thread for this, which will do everything
+   * what is related to PM */
   _this->hidden->iPMThreadStatus = 0;
   _this->hidden->tidPMThread = _beginthread(PMThreadFunc, NULL, 65536, (void *) _this);
-  if (_this->hidden->tidPMThread <= 0)
-  {
-#ifdef DEBUG_BUILD
-    printf("[os2fslib_VideoInit] : Could not create PM thread!\n");
-#endif
+  if (_this->hidden->tidPMThread <= 0) {
+    dbgprintf("[os2fslib_VideoInit] : Could not create PM thread!\n");
     SDL_SetError("Could not create PM thread");
     return -1;
   }
 #ifdef USE_DOSSETPRIORITY
-  // Burst the priority of PM Thread!
+  /* Burst the priority of PM Thread */
   DosSetPriority(PRTYS_THREAD, PRTYC_TIMECRITICAL, 0, _this->hidden->tidPMThread);
 #endif
-  // Wait for the PM thread to initialize!
-  while (_this->hidden->iPMThreadStatus==0)
+  /* Wait for the PM thread to initialize */
+  while (_this->hidden->iPMThreadStatus == 0)
     DosSleep(32);
-  // If the PM thread could not set up everything, then
-  // report an error!
-  if (_this->hidden->iPMThreadStatus!=1)
-  {
-#ifdef DEBUG_BUILD
-    printf("[os2fslib_VideoInit] : PMThread reported an error : %d\n", _this->hidden->iPMThreadStatus);
-#endif
+  /* If the PM thread could not set up everything, then
+   * report an error */
+  if (_this->hidden->iPMThreadStatus != 1) {
+    dbgprintf("[os2fslib_VideoInit] : PMThread reported an error : %d\n", _this->hidden->iPMThreadStatus);
     SDL_SetError("Error initializing PM thread");
     return -1;
   }
@@ -2887,10 +2404,8 @@ static int os2fslib_VideoInit(_THIS, SDL_PixelFormat *vformat)
 
 static void os2fslib_DeleteDevice(_THIS)
 {
-#ifdef DEBUG_BUILD
-  printf("[os2fslib_DeleteDevice]\n"); fflush(stdout);
-#endif
-  // Free used memory
+  dbgprintf("[os2fslib_DeleteDevice]\n");
+  /* Free used memory */
   FSLib_FreeVideoModeList(_this->hidden->pAvailableFSLibVideoModes);
   if (_this->hidden->pListModesResult)
     SDL_free(_this->hidden->pListModesResult);
@@ -2904,9 +2419,8 @@ static void os2fslib_DeleteDevice(_THIS)
 
 static int os2fslib_Available(void)
 {
-
-  // If we can run, it means that we could load FSLib,
-  // so we assume that it's available then!
+  /* If we can run, it means that we could load FSLib,
+   * so we assume that it's available then. */
   return 1;
 }
 
@@ -2917,37 +2431,32 @@ static void os2fslib_MorphToPM()
 
   DosGetInfoBlocks(&tib, &pib);
 
-  // Change flag from VIO to PM:
-  if (pib->pib_ultype==2) pib->pib_ultype = 3;
+  /* Change flag from VIO to PM: */
+  if (pib->pib_ultype == 2)
+      pib->pib_ultype = 3;
 }
 
 static SDL_VideoDevice *os2fslib_CreateDevice(int devindex)
 {
   SDL_VideoDevice *device;
 
-#ifdef DEBUG_BUILD
-  printf("[os2fslib_CreateDevice] : Enter\n"); fflush(stdout);
-#endif
+  dbgprintf("[os2fslib_CreateDevice] : Enter\n");
 
   /* Initialize all variables that we clean on shutdown */
-  device = (SDL_VideoDevice *)SDL_calloc(1, sizeof(SDL_VideoDevice));
-  if ( device )
-  {
-    // Also allocate memory for private data
+  device = (SDL_VideoDevice *) SDL_calloc(1, sizeof(SDL_VideoDevice));
+  if (device) {
+    /* Also allocate memory for private data */
     device->hidden = (struct SDL_PrivateVideoData *) SDL_calloc(1, sizeof(struct SDL_PrivateVideoData));
   }
-  if ( (device == NULL) || (device->hidden == NULL) )
-  {
+  if (device == NULL || device->hidden == NULL) {
     SDL_OutOfMemory();
-    if ( device )
+    if (device)
       SDL_free(device);
     return NULL;
   }
 
   /* Set the function pointers */
-#ifdef DEBUG_BUILD
-  printf("[os2fslib_CreateDevice] : VideoInit is %p\n", os2fslib_VideoInit); fflush(stdout);
-#endif
+  dbgprintf("[os2fslib_CreateDevice] : VideoInit is %p\n", os2fslib_VideoInit);
 
   /* Initialization/Query functions */
   device->VideoInit = os2fslib_VideoInit;
@@ -2983,30 +2492,25 @@ static SDL_VideoDevice *os2fslib_CreateDevice(int devindex)
   /* The function used to dispose of this structure */
   device->free = os2fslib_DeleteDevice;
 
-  // Make sure we'll be able to use Win* API even if the application
-  // was linked to be a VIO application!
+  /* Make sure we'll be able to use Win* API even if the application
+   * was linked to be a VIO application. */
   os2fslib_MorphToPM();
 
-  // Now initialize FSLib, and query available video modes!
-  if (!FSLib_Initialize())
-  {
-    // Could not initialize FSLib!
-#ifdef DEBUG_BUILD
-    printf("[os2fslib_CreateDevice] : Could not initialize FSLib!\n");
-#endif
+  /* Now initialize FSLib, and query available video modes */
+  if (!FSLib_Initialize()) {
+    /* Could not initialize FSLib */
+    dbgprintf("[os2fslib_CreateDevice] : Could not initialize FSLib!\n");
     SDL_SetError("Could not initialize FSLib!");
     SDL_free(device->hidden);
     SDL_free(device);
     return NULL;
   }
-  device->hidden->pAvailableFSLibVideoModes =
-    FSLib_GetVideoModeList();
+  device->hidden->pAvailableFSLibVideoModes = FSLib_GetVideoModeList();
 
   return device;
 }
 
 VideoBootStrap OS2FSLib_bootstrap = {
-        "os2fslib", "OS/2 Video Output using FSLib",
-        os2fslib_Available, os2fslib_CreateDevice
+    "os2fslib", "OS/2 Video Output using FSLib",
+    os2fslib_Available, os2fslib_CreateDevice
 };
-
