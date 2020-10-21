@@ -27,7 +27,6 @@
 #include <uconv.h>  /* Unicode API (codepage conversion) */
 
 #include <process.h>
-#include <time.h>
 
 #include "SDL_video.h"
 #include "SDL_mouse.h"
@@ -1265,11 +1264,11 @@ static void os2fslib_PumpEvents(_THIS)
        _this->hidden->SrcBufferDesc.uiYResolution != iWindowSizeY) &&
       iWindowSizeX > 0 && iWindowSizeY > 0)
   {
-    static time_t prev_time;
-    time_t curr_time;
+    static ULONG prev_time;
+    ULONG curr_time;
 
-    curr_time = time(NULL);
-    if (difftime(curr_time, prev_time) >= 0.25 || bWindowResized) {
+    DosQuerySysInfo(QSV_MS_COUNT, QSV_MS_COUNT, &curr_time, sizeof(curr_time));
+    if (prev_time > curr_time || curr_time - prev_time >= 250 || bWindowResized) {
       /* Make sure we won't flood the event queue with resize events,
        * only send them at 250 msecss
        * (or when the window is resized) */
