@@ -27,7 +27,9 @@
 #include "SDL_config.h"
 
 #ifdef __WIN32__
+#ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
+#endif
 #ifndef NOMINMAX
 #define NOMINMAX	/* Don't defined min() and max() */
 #endif
@@ -59,8 +61,9 @@
  */
 /*@{*/
 #ifndef NO_SDL_GLEXT
-#if !defined(__glext_h_) && !defined(GL_GLEXT_LEGACY)
+#if !(defined(__glext_h_) || defined(__gl_glext_h_)) && !defined(GL_GLEXT_LEGACY)
 #define __glext_h_
+#define __gl_glext_h_
 
 #ifdef __cplusplus
 extern "C" {
@@ -6567,6 +6570,6 @@ typedef void (APIENTRYP PFNGLSTRINGMARKERGREMEDYPROC) (GLsizei len, const GLvoid
 }
 #endif
 
-#endif
+#endif /* GL_GLEXT_LEGACY */
 #endif /* NO_SDL_GLEXT */
 /*@}*/
