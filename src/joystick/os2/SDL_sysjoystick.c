@@ -126,15 +126,17 @@ typedef struct SYS_JoyData_s
 static SYS_JoyData_t SYS_JoyData[MAX_JOYSTICKS];
 
 /* Structure used to convert data from OS/2 driver format to SDL format */
+struct _transaxes
+{
+	int offset;					/* Center Offset */
+	float scale1;				/* Center to left/up Scale */
+	float scale2;				/* Center to right/down Scale */
+};
+
 struct joystick_hwdata
 {
 	Sint8		id;
-	struct _transaxes
-	{
-		int offset;				/* Center Offset */
-		float scale1;			/* Center to left/up Scale */
-		float scale2;			/* Center to right/down Scale */
-	} transaxes[MAX_AXES];
+	struct _transaxes	transaxes[MAX_AXES];
 };
 
 /* Structure used to get values from Joystick Environment Variable */
