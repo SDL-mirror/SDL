@@ -50,11 +50,16 @@ Changes include:
 </P>
 <P>
   Video, blit, Linux: ARM assembly to address performance of blit and
-  fill routines, thanks to Ben Avison (bug <a href="https://bugzilla.libsdl.org/show_bug.cgi?id=4365">4365</a>.)
+  fill routines, thanks to Ben Avison (disabled by default) (bug <a href="https://bugzilla.libsdl.org/show_bug.cgi?id=4365">4365</a>.)
 </P>
 <P>
   Video: fix integer overflow in SDL_CalculatePitch (CVE-2019-7637,
   bug <a href="https://bugzilla.libsdl.org/show_bug.cgi?id=4497">4497</a>.)
+</P>
+<P>
+  Video, Linux, fbcon: fix double buffering with non-fullscreen
+  resolution, implement triple-buffering and other improvements,
+  thanks to Paul Cercueil.
 </P>
 <P>
   Mouse: fix SDL_ResetMouse() using a bogus mouse button causing a
@@ -81,7 +86,7 @@ Changes include:
   Haiku/BeOS, audio: fix error in buffer size setting (bug <a href="https://bugzilla.libsdl.org/show_bug.cgi?id=1679">1679</a>.)
 </P>
 <P>
-  OpenBSD: fix dynamic loading of X libs (bug <a href="https://bugzilla.libsdl.org/show_bug.cgi?id=1434">1434</a>.)
+  OpenBSD: fix dynamic loading of X and OpenGL libs (bugs <a href="https://bugzilla.libsdl.org/show_bug.cgi?id=1434">1434</a>, <a href="https://bugzilla.libsdl.org/show_bug.cgi?id=5208">5208</a>.)
 </P>
 <P>
   X11video: fix missing symbol X11_KeyToUnicode in .so file (bug <a href="https://bugzilla.libsdl.org/show_bug.cgi?id=1390">1390</a>.
@@ -115,6 +120,9 @@ Changes include:
   X11video: unblock SDL_WM_GrabInput() GrabNotViewable case (bug <a href="https://bugzilla.libsdl.org/show_bug.cgi?id=1155">1155</a>.)
 </P>
 <P>
+  Mac OS X: fix macOS 10.14 (Mojave) opengl issues (bug <a href="https://bugzilla.libsdl.org/show_bug.cgi?id=4788">4788</a>.)
+</P>
+<P>
   Mac OS X: fix crash on any input in Quartz code (bug <a href="https://bugzilla.libsdl.org/show_bug.cgi?id=2560">2560</a>.)
 </P>
 <P>
@@ -128,6 +136,9 @@ Changes include:
 </P>
 <P>
   Mac OS X, joystick: update to support Saitek p2500 gamepad (bug <a href="https://bugzilla.libsdl.org/show_bug.cgi?id=2025">2025</a>)
+</P>
+<P>
+  Mac OS X: fixed audio on macOS 11.0 beta ("Big Sur")
 </P>
 <P>
   Mac OS X, main: updates for -psn_XXX command line arg for Finder
@@ -145,13 +156,25 @@ Changes include:
   Windows: Visual Studio project file updates.
 </P>
 <P>
-  OS/2: Watcom makefile updates.
+  OS/2: fixes and Watcom makefile updates.
+</P>
+<P>
+  Linux, joystick: fix invalid coef when axis&nbsp;min &gt; axis&nbsp;max.
+</P>
+<P>
+  Linux, joystick: enhance detection of gamepads.
+</P>
+<P>
+  Linux, joystick: allow for custom joystick names.
 </P>
 <P>
   FreeBSD, joystick: compile fixes.
 </P>
 <P>
   BSD, joystick: increase the number of uhid devices to scan (bug <a href="https://bugzilla.libsdl.org/show_bug.cgi?id=1561">1561</a>)
+</P>
+<P>
+  Linux, ALSA: fix excessive I/O causing high CPU usage (bug <a href="https://bugzilla.libsdl.org/show_bug.cgi?id=4941">4941</a>.)
 </P>
 <P>
   Linux, evdev: ignore joystick axis events if they aren't in a sane
@@ -249,6 +272,10 @@ Changes include:
 <P>
   headers, SDL_syswm.h, SDL_stdinc.h: include system headers before
   packing alignment changes (bug <a href="https://bugzilla.libsdl.org/show_bug.cgi?id=4149">4149</a>.)
+</P>
+<P>
+  headers, SDL_opengl.h: made compatible with glext.h from newer Mesa
+  versions (bug <a href="https://bugzilla.libsdl.org/show_bug.cgi?id=5216">5216</a>.)
 </P>
 </BLOCKQUOTE>
 
