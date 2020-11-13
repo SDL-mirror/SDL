@@ -414,8 +414,10 @@ static __inline__ int CPU_haveARMSIMD(void)
 			if (aux.a_type == AT_PLATFORM)
 			{
 				const char *plat = (const char *) aux.a_un.a_val;
-				arm_simd = strncmp(plat, "v6l", 3) == 0 ||
-				           strncmp(plat, "v7l", 3) == 0;
+				if (plat) {
+					arm_simd = strncmp(plat, "v6l", 3) == 0 ||
+						strncmp(plat, "v7l", 3) == 0;
+				}
 			}
 		}
 		close(fd);
