@@ -16,6 +16,8 @@ Changes include:
 - Video, blit: correct vec_perm() application on little-endian 64-bit
   PowerPC (bug 4791. cf.: RedHat bug 1392465.)
 - Video, blit: use fast path for RGB 565 -> 32-bit XRGB 8888
+- Video, blit: backport fast paths for 24/32-bit blitting from SDL2
+  (bug 5328)
 - Video, blit: fix RGBA<->RGBA blit broken with the optimization from
   bug 11 (bug 2976.)
 - Video, blit, Linux: ARM assembly to address performance of blit and
