@@ -33,21 +33,6 @@
 #include "../SDL_sysaudio.h"
 #include "SDL_coreaudio.h"
 
-#if (MAC_OS_X_VERSION_MIN_REQUIRED < 1060) || \
-    (!defined(AUDIO_UNIT_VERSION) || ((AUDIO_UNIT_VERSION + 0) < 1060))
-typedef struct ComponentDescription	AudioComponentDesc_t;
-typedef Component			AudioComponent_t;
-#define AudioComponentInstanceNew_fn		OpenAComponent
-#define AudioComponentInstanceDispose_fn	CloseComponent
-#define AudioComponentFindNext_fn		FindNextComponent
-#else
-typedef AudioComponentDescription	AudioComponentDesc_t;
-typedef AudioComponent			AudioComponent_t;
-#define AudioComponentInstanceNew_fn		AudioComponentInstanceNew
-#define AudioComponentInstanceDispose_fn	AudioComponentInstanceDispose
-#define AudioComponentFindNext_fn		AudioComponentFindNext
-#endif
-
 
 /* Audio driver functions */
 
@@ -129,7 +114,7 @@ static OSStatus     audioCallback (void                            *inRefCon,
         }
         return 0;
     }
-    
+
     /* No SDL conversion should be needed here, ever, since we accept
        any input format in OpenAudio, and leave the conversion to CoreAudio.
      */
@@ -147,12 +132,11 @@ static OSStatus     audioCallback (void                            *inRefCon,
                 /* Generate the data */
                 SDL_memset(buffer, this->spec.silence, bufferSize);
                 SDL_mutexP(this->mixer_lock);
-                (*this->spec.callback)(this->spec.userdata,
-                            buffer, bufferSize);
+                (*this->spec.callback)(this->spec.userdata, buffer, bufferSize);
                 SDL_mutexV(this->mixer_lock);
                 bufferOffset = 0;
             }
-        
+
             len = bufferSize - bufferOffset;
             if (len > remaining)
                 len = remaining;
@@ -213,7 +197,7 @@ void Core_CloseAudio(_THIS)
         SDL_SetError("Core_CloseAudio: CloseComponent");
         return;
     }
-    
+
     SDL_free(buffer);
 }
 
@@ -222,7 +206,6 @@ void Core_CloseAudio(_THIS)
         SDL_SetError("Failed to start CoreAudio: " msg); \
         return -1; \
     }
-
 
 int Core_OpenAudio(_THIS, SDL_AudioSpec *spec)
 {
@@ -237,7 +220,7 @@ int Core_OpenAudio(_THIS, SDL_AudioSpec *spec)
     requestedDesc.mFormatFlags = kLinearPCMFormatFlagIsPacked;
     requestedDesc.mChannelsPerFrame = spec->channels;
     requestedDesc.mSampleRate = spec->freq;
-    
+
     requestedDesc.mBitsPerChannel = spec->format & 0xFF;
     if (spec->format & 0x8000)
         requestedDesc.mFormatFlags |= kLinearPCMFormatFlagIsSignedInteger;
@@ -255,20 +238,20 @@ int Core_OpenAudio(_THIS, SDL_AudioSpec *spec)
     desc.componentManufacturer = kAudioUnitManufacturer_Apple;
     desc.componentFlags = 0;
     desc.componentFlagsMask = 0;
-    
+
     comp = AudioComponentFindNext_fn (NULL, &desc);
     if (comp == NULL) {
         SDL_SetError ("Failed to start CoreAudio: AudioComponentFindNext returned NULL");
         return -1;
     }
-    
+
     /* Open & initialize the default output audio unit */
     result = AudioComponentInstanceNew_fn (comp, &outputAudioUnit);
     CHECK_RESULT("AudioComponentInstanceNew")
 
     result = AudioUnitInitialize (outputAudioUnit);
     CHECK_RESULT("AudioUnitInitialize")
-                
+
     /* Set the input format of the audio unit. */
     result = AudioUnitSetProperty (outputAudioUnit,
                                kAudioUnitProperty_StreamFormat,
@@ -291,15 +274,14 @@ int Core_OpenAudio(_THIS, SDL_AudioSpec *spec)
 
     /* Calculate the final parameters for this audio specification */
     SDL_CalculateAudioSpec(spec);
-    
+
     /* Allocate a sample buffer */
     bufferOffset = bufferSize = this->spec.size;
     buffer = SDL_malloc(bufferSize);
 
     /* Finally, start processing of the audio unit */
     result = AudioOutputUnitStart (outputAudioUnit);
-    CHECK_RESULT("AudioOutputUnitStart")    
-    
+    CHECK_RESULT("AudioOutputUnitStart")
 
     /* We're running! */
     return(1);
