@@ -142,7 +142,7 @@ static SDL_Cursor *create_arrow_cursor()
 int main(int argc, char *argv[])
 {
 	SDL_Surface *screen;
-	SDL_bool quit = SDL_FALSE, first_time = SDL_TRUE;
+	SDL_bool quit = SDL_FALSE;
 	SDL_Cursor *cursor[3];
 	int current;
 
