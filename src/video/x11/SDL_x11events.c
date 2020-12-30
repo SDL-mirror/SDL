@@ -485,6 +485,13 @@ printf("Mode: NotifyUngrab\n");
 
 	    /* Gaining input focus? */
 	    case FocusIn: {
+	    if (xevent.xfocus.mode == NotifyGrab || xevent.xfocus.mode == NotifyUngrab) {
+		/* Someone is handling a global hotkey, ignore it */
+#ifdef DEBUG_XEVENTS
+		printf("FocusIn (NotifyGrab/NotifyUngrab, ignoring)\n");
+#endif
+		break;
+	    }
 #ifdef DEBUG_XEVENTS
 printf("FocusIn!\n");
 #endif
@@ -503,6 +510,13 @@ printf("FocusIn!\n");
 
 	    /* Losing input focus? */
 	    case FocusOut: {
+	    if (xevent.xfocus.mode == NotifyGrab || xevent.xfocus.mode == NotifyUngrab) {
+		/* Someone is handling a global hotkey, ignore it */
+#ifdef DEBUG_XEVENTS
+		printf("FocusOut (NotifyGrab/NotifyUngrab, ignoring)\n");
+#endif
+		break;
+	    }
 #ifdef DEBUG_XEVENTS
 printf("FocusOut!\n");
 #endif

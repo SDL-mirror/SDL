@@ -52,6 +52,7 @@ Changes include:
 - X11video: fix SDL_VIDEORESIZE events not received when resizing
   window from the corner (inverted logic in X11 ConfigureNotify, i.e.
   resize handling - bug 1430.)
+- X11video: properly handle input focus events (bug 5426.)
 - X11video: unblock SDL_WM_GrabInput() GrabNotViewable case (bug 1155.)
 - Mac OS X: fix macOS 10.14 (Mojave) opengl issues (bug 4788.)
 - Mac OS X: fix crash on any input in Quartz code (bug 2560.)
