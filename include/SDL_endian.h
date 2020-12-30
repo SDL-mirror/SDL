@@ -31,7 +31,7 @@
 #include "SDL_stdinc.h"
 
 /** @name SDL_ENDIANs
- *  The two types of endianness 
+ *  The two types of endianness
  */
 /*@{*/
 #define SDL_LIL_ENDIAN	1234
@@ -94,6 +94,12 @@ static __inline__ Uint16 SDL_Swap16(Uint16 x)
 	__asm__("rlwimi %0,%2,8,16,23" : "=&r" (result) : "0" (x >> 8), "r" (x));
 	return (Uint16)result;
 }
+#elif defined(__GNUC__) && defined(__aarch64__)
+static __inline__ Uint16 SDL_Swap16(Uint16 x)
+{
+	__asm__("rev16 %w1, %w0" : "=r"(x) : "r"(x));
+	return x;
+}
 #elif defined(__GNUC__) && (defined(__m68k__) && !defined(__mcoldfire__))
 static __inline__ Uint16 SDL_Swap16(Uint16 x)
 {
@@ -135,6 +141,12 @@ static __inline__ Uint32 SDL_Swap32(Uint32 x)
 	__asm__("rlwimi %0,%2,24,0,7"   : "=&r" (result) : "0" (result),    "r" (x));
 	return result;
 }
+#elif defined(__GNUC__) && defined(__aarch64__)
+static __inline__ Uint32 SDL_Swap32(Uint32 x)
+{
+	__asm__("rev %w1, %w0": "=r"(x):"r"(x));
+	return x;
+}
 #elif defined(__GNUC__) && (defined(__m68k__) && !defined(__mcoldfire__))
 static __inline__ Uint32 SDL_Swap32(Uint32 x)
 {
@@ -174,7 +186,7 @@ static __inline__ Uint64 SDL_Swap64(Uint64 x)
 	v.u = x;
 	__asm__("bswapl %0 ; bswapl %1 ; xchgl %0,%1" 
 	        : "=r" (v.s.a), "=r" (v.s.b) 
-	        : "0" (v.s.a), "1" (v.s.b)); 
+	        : "0" (v.s.a), "1" (v.s.b));
 	return v.u;
 }
 #elif defined(__GNUC__) && defined(__x86_64__)
