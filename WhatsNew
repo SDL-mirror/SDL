@@ -70,6 +70,8 @@ Changes include:
 - Windows: Visual Studio project file updates.
 - OS/2: fixes and Watcom makefile updates.
 - Linux, joystick: fix invalid coef when axis min > axis max.
+- Linux, joystick: remove deadzone and output axis values in correct
+  range (bug 5241.)
 - Linux, joystick: enhance detection of gamepads.
 - Linux, joystick: allow for custom joystick names.
 - FreeBSD, joystick: compile fixes.

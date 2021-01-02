@@ -25,6 +25,7 @@
 
 /* This is the system specific header for the SDL joystick API */
 
+#include <math.h>
 #include <sys/stat.h>
 #include <unistd.h>
 #include <fcntl.h>
@@ -290,7 +291,8 @@ struct joystick_hwdata {
 	Uint8 abs_map[ABS_MAX];
 	struct axis_correct {
 		int used;
-		int coef[3];
+		int minimum;
+		int maximum;
 	} abs_correct[ABS_MAX];
 #endif
 };
@@ -672,7 +674,7 @@ static SDL_bool JS_ConfigJoystick(SDL_Joystick *joystick, int fd)
 
 static SDL_bool EV_ConfigJoystick(SDL_Joystick *joystick, int fd)
 {
-	int i, t;
+	int i;
 	unsigned long keybit[NBITS(KEY_MAX)] = { 0 };
 	unsigned long absbit[NBITS(ABS_MAX)] = { 0 };
 	unsigned long relbit[NBITS(REL_MAX)] = { 0 };
@@ -726,19 +728,8 @@ static SDL_bool EV_ConfigJoystick(SDL_Joystick *joystick, int fd)
 				    joystick->hwdata->abs_correct[i].used = 0;
 				} else {
 				    joystick->hwdata->abs_correct[i].used = 1;
-				    joystick->hwdata->abs_correct[i].coef[0] =
-					(absinfo.maximum + absinfo.minimum) / 2 - absinfo.flat;
-				    joystick->hwdata->abs_correct[i].coef[1] =
-					(absinfo.maximum + absinfo.minimum) / 2 + absinfo.flat;
-				    if (absinfo.maximum > absinfo.minimum)
-				        t = ((absinfo.maximum - absinfo.minimum) / 2 - 2 * absinfo.flat);
-				    else
-				        t = ((absinfo.maximum - absinfo.minimum) / 2 + 2 * absinfo.flat);
-				    if ( t != 0 ) {
-					joystick->hwdata->abs_correct[i].coef[2] = (1 << 29) / t;
-				    } else {
-					joystick->hwdata->abs_correct[i].coef[2] = 0;
-				    }
+				    joystick->hwdata->abs_correct[i].minimum = absinfo.minimum;
+				    joystick->hwdata->abs_correct[i].maximum = absinfo.maximum;
 				}
 				++joystick->naxes;
 			}
@@ -1063,16 +1054,18 @@ static __inline__ int EV_AxisCorrect(SDL_Joystick *joystick, int which, int valu
 
 	correct = &joystick->hwdata->abs_correct[which];
 	if ( correct->used ) {
-		if ( value > correct->coef[0] ) {
-			if ( value < correct->coef[1] ) {
-				return 0;
-			}
-			value -= correct->coef[1];
-		} else {
-			value -= correct->coef[0];
-		}
-		value *= correct->coef[2];
-		value >>= 14;
+		const int original_value = value;
+		const float ideal_minimum = -32768;
+		const float ideal_maximum = +32767;
+		const float ideal_range = ideal_maximum - ideal_minimum;
+		const float actual_range = (correct->maximum - correct->minimum);
+		const float coefficient = ideal_range / actual_range;
+		const float new_float = (original_value - correct->minimum) * coefficient + ideal_minimum;
+		const int new_integer = round(new_float);
+		/*
+		if (which == 0) printf("Axis %d: old=%+6d new=%+6d\n", which, value, new_integer);
+		*/
+		value = new_integer;
 	}
 
 	/* Clamp and return */
