@@ -150,7 +150,7 @@ struct _joycfg
 };
 
 /* OS/2 Implementation Function Prototypes */
-static APIRET joyPortOpen(HFILE * hGame);
+static int joyPortOpen(HFILE * hGame);
 static void joyPortClose(HFILE * hGame);
 static int joyGetData(char *joyenv, char *name, char stopchar, size_t maxchars);
 static int joyGetEnv(struct _joycfg * joydata);
@@ -177,9 +177,9 @@ int SDL_SYS_JoystickInit(void)
 	Uint8 ucNewJoystickMask;				/* Mask for Joystick Detection */
 	struct _joycfg joycfg;					/* Joy Configuration from envvar */
 
+	/* Open GAME$ port */
+	if (joyPortOpen(&hJoyPort) < 0) return 0;	/* Cannot open... report no joystick */
 	/* Get Max Number of Devices */
-	rc = joyPortOpen(&hJoyPort); /* Open GAME$ port */
-	if (rc != 0) return 0;	/* Cannot open... report no joystick */
 	ulDataLen = sizeof(stGameParms);
 	rc = DosDevIOCtl(hJoyPort, IOCTL_CAT_USER, GAME_GET_PARMS,
 			 NULL, 0, NULL, &stGameParms, ulDataLen, &ulDataLen); /* Ask device info */
@@ -370,7 +370,7 @@ int SDL_SYS_JoystickInit(void)
 		}
 	}
 	/* Return the number of devices found */
-	return(numdevs);
+	return numdevs;
 }
 
 /***********************************************************/
@@ -379,7 +379,7 @@ int SDL_SYS_JoystickInit(void)
 const char *SDL_SYS_JoystickName(int index)
 {
 	/* No need to verify if device exists, already done in upper layer */
-	return(SYS_JoyData[index].szDeviceName);
+	return SYS_JoyData[index].szDeviceName;
 }
 
 /******************************************************************************/
@@ -398,7 +398,7 @@ int SDL_SYS_JoystickOpen(SDL_Joystick *joystick)
 	if (joystick->hwdata == NULL)
 	{
 		SDL_OutOfMemory();
-		return (-1);
+		return -1;
 	}
 	/* Reset Hardware Data */
 	SDL_memset(joystick->hwdata, 0, sizeof(*joystick->hwdata));
@@ -413,14 +413,12 @@ int SDL_SYS_JoystickOpen(SDL_Joystick *joystick)
 		if ((i < 2) || i < SYS_JoyData[index].axes)
 		{
 			joystick->hwdata->transaxes[i].offset = ((AXIS_MAX + AXIS_MIN)>>1) - SYS_JoyData[index].axes_med[i];
-			//joystick->hwdata->transaxes[i].scale = (float)((AXIS_MAX - AXIS_MIN)/(SYS_JoyData[index].axes_max[i]-SYS_JoyData[index].axes_min[i]));
 			joystick->hwdata->transaxes[i].scale1 = (float)abs((AXIS_MIN/SYS_JoyData[index].axes_min[i]));
 			joystick->hwdata->transaxes[i].scale2 = (float)abs((AXIS_MAX/SYS_JoyData[index].axes_max[i]));
 		}
 		else
 		{
 			joystick->hwdata->transaxes[i].offset = 0;
-			//joystick->hwdata->transaxes[i].scale = 1.0; /* Just in case */
 			joystick->hwdata->transaxes[i].scale1 = 1.0; /* Just in case */
 			joystick->hwdata->transaxes[i].scale2 = 1.0; /* Just in case */
 		}
@@ -603,7 +601,7 @@ void SDL_SYS_JoystickQuit(void)
 /*****************************************/
 /* Open Joystick Port, if not opened yet */
 /*****************************************/
-static APIRET joyPortOpen(HFILE * hGame)
+static int joyPortOpen(HFILE * hGame)
 {
 	APIRET	rc;				/* Generic Return Code */
 	ULONG		ulAction;		/* ? */
