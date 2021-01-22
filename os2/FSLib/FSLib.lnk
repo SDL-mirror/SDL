@@ -1,0 +1,17 @@
+#
+# This is a Watcom linker file to build FSLib.DLL
+#
+system os2v2 DLL INITINSTANCE TERMINSTANCE
+name FSLib
+file FSLib.obj
+OPTION MAP=FSLib
+OPTION DESCRIPTION 'Fullscreen switchable window support'
+OPTION QUIET
+OPTION ELIMINATE
+OPTION MANYAUTODATA
+OPTION OSNAME='OS/2 and eComStation'
+OPTION SHOWDEAD
+LIBPATH %os2tk%\lib
+LIBPATH %scitech_lib%\lib\release\ow10
+LIB n_ga.lib
+LIB pm.lib

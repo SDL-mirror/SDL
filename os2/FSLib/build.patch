@@ -1,0 +1,193 @@
+--- FSLib.c~	2007-01-16 11:55:20.000000000 +0200
++++ FSLib.c	2020-10-20 04:02:10.000000000 +0300
+@@ -66,7 +66,7 @@ static HMQ               hmq;
+ 
+ static int               tidSNAPThread;
+ static int               iSNAPThreadStatus;
+-static HMTX              hmtxUseSNAP = NULL;
++static HMTX              hmtxUseSNAP = NULLHANDLE;
+ static HEV               hevSNAPCommandAvailable;  // Posted when there is a command for the SNAP-Thread!
+ static HEV               hevSNAPResultReady;       // Posted when the result is ready for the command.
+ static int               iSNAPCommand;             // Command code
+@@ -120,6 +120,8 @@ static void SNAP_SetVideoMode(GA_modeInf
+ static void SNAP_ThreadFunc(void *pParm);
+ 
+ static int  FSLib_RegisterWindowClass();
++static void FSLib_FindBestFSMode(FSLib_VideoMode_p pSrcBufferDesc,
++				 GA_modeInfo *pFSModeInfo);
+ 
+ static void SNAP_StopVideoModeUsage()
+ {
+@@ -359,14 +361,14 @@ static void SNAP_StopPresentationManager
+     printf("[SNAP_StopPresentationManager] : Error at WinQueryDesktopWindow()!\n");
+ #endif
+   hdc = WinQueryWindowDC(hwnd);                    // Get HDC of desktop
+-  if (hdc==NULL)
++  if (hdc==NULLHANDLE)
+   {
+ #ifdef DEBUG_BUILD
+     printf("[SNAP_StopPresentationManager] : Error at WinQueryWindowDC(), trying other...!\n");
+ #endif
+     hdc = WinOpenWindowDC(hwnd);                    // Get HDC of desktop
+ #ifdef DEBUG_BUILD
+-    if (hdc==NULL)
++    if (hdc==NULLHANDLE)
+       printf("[SNAP_StopPresentationManager] : Error at WinOpenWindowDC()!\n");
+ #endif
+   }
+@@ -387,18 +389,18 @@ static void SNAP_RestartPresentationMana
+ 
+   hwnd = WinQueryDesktopWindow(hab, 0);
+ #ifdef DEBUG_BUILD
+-  if (hwnd==NULL)
++  if (hwnd==NULLHANDLE)
+     printf("[SNAP_RestartPresentationManager] : Error at WinQueryDesktopWindow()!\n");
+ #endif
+   hdc = WinQueryWindowDC(hwnd);                    // Get HDC of desktop
+-  if (hdc==NULL)
++  if (hdc==NULLHANDLE)
+   {
+ #ifdef DEBUG_BUILD
+     printf("[SNAP_RestartPresentationManager] : Error at WinQueryWindowDC(), trying other...!\n");
+ #endif
+     hdc = WinOpenWindowDC(hwnd);                    // Get HDC of desktop
+ #ifdef DEBUG_BUILD
+-    if (hdc==NULL)
++    if (hdc==NULLHANDLE)
+       printf("[SNAP_RestartPresentationManager] : Error at WinOpenWindowDC()!\n");
+ #endif
+   }
+@@ -577,7 +579,7 @@ static void SNAP_ThreadUninitialize(int 
+ #ifdef DEBUG_BUILD
+       printf("[SNAP_ThreadFunc] :   GA_unloadDriver()...\n");
+ #endif
+-      GA_unloadDriver(dc); dc = NULL;
++      GA_unloadDriver(dc); dc = NULLHANDLE;
+     }
+     if ((hmq) && (!iEmergency))
+     {
+@@ -795,7 +797,7 @@ static void SNAP_ThreadFunc(void *pParm)
+ #ifdef DEBUG_BUILD
+     printf("[SNAP_ThreadFunc] : Could not query init funcs\n");
+ #endif
+-    GA_unloadDriver(dc); dc = NULL;
++    GA_unloadDriver(dc); dc = NULLHANDLE;
+     WinDestroyMsgQueue(hmq);
+     WinTerminate(hab);
+     iSNAPThreadStatus = SNAPTHREADSTATUS_STOPPED_ERROR;
+@@ -810,7 +812,7 @@ static void SNAP_ThreadFunc(void *pParm)
+ #ifdef DEBUG_BUILD
+     printf("[SNAP_ThreadFunc] : Could not query driver funcs\n");
+ #endif
+-    GA_unloadDriver(dc); dc = NULL;
++    GA_unloadDriver(dc); dc = NULLHANDLE;
+     WinDestroyMsgQueue(hmq);
+     WinTerminate(hab);
+     iSNAPThreadStatus = SNAPTHREADSTATUS_STOPPED_ERROR;
+@@ -860,7 +862,7 @@ static void SNAP_ThreadFunc(void *pParm)
+   // Create semaphores
+   if ((rc = DosCreateMutexSem(NULL, &hmtxUseSNAP, 0, FALSE))!=NO_ERROR)
+   {
+-    GA_unloadDriver(dc); dc = NULL;
++    GA_unloadDriver(dc); dc = NULLHANDLE;
+ #ifdef DEBUG_BUILD
+     printf("[SNAP_ThreadFunc] : Could not create mutex semaphore! rc = %d\n", rc);
+ #endif
+@@ -873,7 +875,7 @@ static void SNAP_ThreadFunc(void *pParm)
+   if ((rc = DosCreateEventSem(NULL, &hevSNAPCommandAvailable, 0, FALSE))!=NO_ERROR)
+   {
+     DosCloseMutexSem(hmtxUseSNAP); hmtxUseSNAP = NULLHANDLE;
+-    GA_unloadDriver(dc); dc = NULL;
++    GA_unloadDriver(dc); dc = NULLHANDLE;
+ #ifdef DEBUG_BUILD
+     printf("[SNAP_ThreadFunc] : Could not create event semaphore! rc = %d\n", rc);
+ #endif
+@@ -887,7 +889,7 @@ static void SNAP_ThreadFunc(void *pParm)
+   {
+     DosCloseEventSem(hevSNAPCommandAvailable); hevSNAPCommandAvailable = NULLHANDLE;
+     DosCloseMutexSem(hmtxUseSNAP); hmtxUseSNAP = NULLHANDLE;
+-    GA_unloadDriver(dc); dc = NULL;
++    GA_unloadDriver(dc); dc = NULLHANDLE;
+ #ifdef DEBUG_BUILD
+     printf("[SNAP_ThreadFunc] : Could not create event semaphore! rc = %d\n", rc);
+ #endif
+@@ -907,7 +909,7 @@ static void SNAP_ThreadFunc(void *pParm)
+     DosCloseEventSem(hevSNAPResultReady); hevSNAPResultReady = NULLHANDLE;
+     DosCloseEventSem(hevSNAPCommandAvailable); hevSNAPCommandAvailable = NULLHANDLE;
+     DosCloseMutexSem(hmtxUseSNAP); hmtxUseSNAP = NULLHANDLE;
+-    GA_unloadDriver(dc); dc = NULL;
++    GA_unloadDriver(dc); dc = NULLHANDLE;
+     WinDestroyMsgQueue(hmq);
+     WinTerminate(hab);
+     iSNAPThreadStatus = SNAPTHREADSTATUS_STOPPED_ERROR;
+@@ -1012,7 +1014,7 @@ DECLSPEC int               FSLIBCALL FSL
+   // Register new class
+   if (!FSLib_RegisterWindowClass())
+   {
+-    DosCloseMutexSem(hmtxUseHWNDList); hmtxUseHWNDList = NULL;
++    DosCloseMutexSem(hmtxUseHWNDList); hmtxUseHWNDList = NULLHANDLE;
+     SNAP_Uninitialize();
+ #ifdef DEBUG_BUILD
+     printf("[FSLib_Initialize] : Could not register new window class!\n");
+@@ -1053,7 +1055,7 @@ DECLSPEC void              FSLIBCALL FSL
+ #ifdef DEBUG_BUILD
+     printf("[FSLib_Uninitialize] : Destroying semaphore\n");
+ #endif
+-    DosCloseMutexSem(hmtxUseHWNDList); hmtxUseHWNDList = NULL;
++    DosCloseMutexSem(hmtxUseHWNDList); hmtxUseHWNDList = NULLHANDLE;
+     // Uninitialize SNAP
+ #ifdef DEBUG_BUILD
+     printf("[FSLib_Uninitialize] : Uninitializing SNAP\n");
+@@ -1092,7 +1094,7 @@ static void FSLib_EmergencyUninitialize(
+ #ifdef DEBUG_BUILD
+     printf("[FSLib_EmergencyUninitialize] : Destroying mutex semaphore\n");
+ #endif
+-    DosCloseMutexSem(hmtxUseHWNDList); hmtxUseHWNDList = NULL;
++    DosCloseMutexSem(hmtxUseHWNDList); hmtxUseHWNDList = NULLHANDLE;
+ 
+     // We don't have to uninitialize SNAP here, it will be done by
+     // SNAPThread's Exception handler
+@@ -1288,23 +1290,23 @@ static MRESULT EXPENTRY FSLib_WndProc(HW
+ 	fflush(stdout);
+ #endif
+ 	// Set up window storage initial values
+-	WinSetWindowULong(hwnd, FSLIB_WINDOWDATA_PVOID_USERDATA, (ULONG) 0);
++	WinSetWindowULong(hwnd, FSLIB_WINDOWDATA_PVOID_USERDATA, 0);
+ 	DosCreateMutexSem(NULL, &hmtxUseWindowData, 0, FALSE);
+ 	WinSetWindowULong(hwnd, FSLIB_WINDOWDATA_HMTX_USEWINDOWDATA, (ULONG) hmtxUseWindowData);
+-	WinSetWindowULong(hwnd, FSLIB_WINDOWDATA_PFNWP_USERWINDOWFN, (ULONG) 0);
++	WinSetWindowULong(hwnd, FSLIB_WINDOWDATA_PFNWP_USERWINDOWFN, 0);
+ 	pFSModeInfo = (GA_modeInfo *) malloc(sizeof(GA_modeInfo));
+         memcpy(pFSModeInfo, &desktopModeInfo, sizeof(GA_modeInfo));
+ 	WinSetWindowULong(hwnd, FSLIB_WINDOWDATA_PGAMODEINFO_FSMODEINFO, (ULONG) pFSModeInfo);
+-	WinSetWindowULong(hwnd, FSLIB_WINDOWDATA_INT_VRNDISABLED, (ULONG) 1); // True
+-	WinSetWindowULong(hwnd, FSLIB_WINDOWDATA_INT_RUNINFSMODE, (ULONG) 0); // False
+-	WinSetWindowULong(hwnd, FSLIB_WINDOWDATA_PRECTL_VISIBLEAREA, (ULONG) NULL);
+-	WinSetWindowULong(hwnd, FSLIB_WINDOWDATA_INT_NUMOFVISIBLEAREARECTANGLES, (ULONG) 0);
+-        WinSetWindowULong(hwnd, FSLIB_WINDOWDATA_INT_MAXNUMOFVISIBLEAREARECTANGLES, (ULONG) 0);
++	WinSetWindowULong(hwnd, FSLIB_WINDOWDATA_INT_VRNDISABLED, 1); // True
++	WinSetWindowULong(hwnd, FSLIB_WINDOWDATA_INT_RUNINFSMODE, 0); // False
++	WinSetWindowULong(hwnd, FSLIB_WINDOWDATA_PRECTL_VISIBLEAREA, 0);
++	WinSetWindowULong(hwnd, FSLIB_WINDOWDATA_INT_NUMOFVISIBLEAREARECTANGLES, 0);
++        WinSetWindowULong(hwnd, FSLIB_WINDOWDATA_INT_MAXNUMOFVISIBLEAREARECTANGLES, 0);
+ 	pSrcBufferDesc = (FSLib_VideoMode_p) malloc(sizeof(FSLib_VideoMode));
+         FSLib_GAmodeInfo2FSLibVideoMode(pFSModeInfo, pSrcBufferDesc);
+ 	WinSetWindowULong(hwnd, FSLIB_WINDOWDATA_PVOID_SRCBUFFERDESC, (ULONG) pSrcBufferDesc);
+-        WinSetWindowULong(hwnd, FSLIB_WINDOWDATA_INT_WINDOWACTIVE, (ULONG) 0); // False
+-        WinSetWindowULong(hwnd, FSLIB_WINDOWDATA_INT_DIRTYWINDOW, (ULONG) 0); // False
++        WinSetWindowULong(hwnd, FSLIB_WINDOWDATA_INT_WINDOWACTIVE, 0); // False
++        WinSetWindowULong(hwnd, FSLIB_WINDOWDATA_INT_DIRTYWINDOW, 0); // False
+         pswpFrameSWP = (PSWP) malloc(sizeof(SWP));
+         WinSetWindowULong(hwnd, FSLIB_WINDOWDATA_PSWP_FRAMESWP, (ULONG) pswpFrameSWP);
+ 
+@@ -1518,8 +1520,8 @@ static MRESULT EXPENTRY FSLib_WndProc(HW
+             printf("[FSLib_WndProc] : WM_VRNENABLED : Redrawing dirty window.\n");
+ 	    fflush(stdout);
+ #endif
+-            WinSetWindowULong(hwnd, FSLIB_WINDOWDATA_INT_DIRTYWINDOW, (ULONG) 0); // False
+-            WinInvalidateRect(hwnd, NULL, TRUE);
++            WinSetWindowULong(hwnd, FSLIB_WINDOWDATA_INT_DIRTYWINDOW, 0); // False
++            WinInvalidateRect(hwnd, NULLHANDLE, TRUE);
+           }
+ 
+ #ifdef DEBUG_BUILD

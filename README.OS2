@@ -3,78 +3,86 @@
 SDL on OS/2
 ===========
 
-Last updated on May. 17, 2006.
-
 
 1. How to compile?
 ------------------
 
-To compile this, you'll need the followings installed:
-- The OS/2 Developer's Toolkit
-- The OpenWatcom compiler 
-  (http://www.openwatcom.org)
+Open Watcom 1.9 (http://www.openwatcom.org) or newer is tested.
+For the new Open Watcom V2 fork, see: https://github.com/open-watcom/ and
+https://open-watcom.github.io
 
-First of all, you have to unzip the Watcom-OS2.zip file. This will result in a 
-file called "makefile" and a file called "setvars.cmd" in this folder (and some
-more files...).
+WATCOM ervironment variable must to be set to the Open Watcom install
+directory. To compile, run: wmake -f Makefile.os2
 
-Please edit the second, fourth and fifth lines of setvars.cmd file
-to set the folders where the toolkit, the OW compiler and the FSLib are. 
-You won't need NASM yet (The Netwide Assembler), you can leave that line.
-Run setvars.cmd, and you should get a shell in which you can
-compile SDL.
-
-Check the "makefile" file. There is a line in there which determines if the 
+Check the "Makefile.os2" file. There is a line in there which determines if the
 resulting SDL.DLL will be a 'debug' or a 'release' build. The 'debug' version 
 is full of printf()'s, so if something goes wrong, its output can help a lot
 for debugging.
 
-Then run "wmake".
-This should create the SDL12.DLL and the corresponding SDL12.LIB file here.
 
-To test applications, it's a good idea to use the 'debug' build of SDL, and
-redirect the standard output and standard error output to files, to see what
-happens internally in SDL.
-(like: testsprite >stdout.txt 2>stderr.txt)
+2. Video drivers
+----------------
 
-To rebuild SDL, use the following commands in this folder:
-wmake clean
-wmake
+See SDL_config_os2.h for two OS/2 video drivers:
+
+- SDL_VIDEO_DRIVER_OS2FS:  The old OS/2 Video Output using FSLib.
+  Disabled by default.  Requires FSLib.dll and preinstalled SciTech SNAP
+  graphics drivers.
+
+- SDL_VIDEO_DRIVER_OS2GROP:  New OS/2 video output driver using 'GrOp'
+  library.  Enabled by default.
+
+You can set the SDL_VIDEODRIVER environment variable to select/control
+the video output drivers. E.g.:
+  SET SDL_VIDEODRIVER=DIVE
+
+Valid values for the GrOp driver:
+
+- DIVE:  This is the default. Allows you to easily scale the window.
+  For full-screen mode uses the current video mode and maximized PM
+  window with scaled image.
+
+- VMAN:  Low-level access to the video system.
+  For full-screen mode uses the current video mode and maximized PM
+  window with centered image.
+
+- VMANFS:  More productive. Uses real fullscreen mode.
+  Video mode switching in VMAN subsystem is unstable and may cause
+  system hang. Use it at your own risk!
+
+Valid values for the FSLib driver:
+
+- FSLIB:  Chooses the FSLib driver, if was enabled at compile time.
+
+OpenGL is not supported by any of the drivers.
+
+You may significantly increase video output speed with OS4 kernel and patched
+files vman.dll and dive.dll or with latest versions of ACPI support and video
+driver Panorama.
+
+You may significantly increase video output speed with OS4 kernel and patched
+files vman.dll and dive.dll or with latest versions of ACPI support and video
+driver Panorama.
+
+Latest versions of OS/4 kernel:
+  http://gus.biysk.ru/os4/
+ (Info: https://www.os2world.com/wiki/index.php/Phoenix_OS/4)
+
+Patched files vman.dll and dive.dll:
+  http://gus.biysk.ru/os4/test/pached_dll/PATCHED_DLL.RAR
 
 
-
-2. How to compile the testapps?
--------------------------------
-
-Once you have SDL12.DLL compiled, navigate into the 'test' folder, copy in 
-there the newly built SDL12.DLL, and copy in there FSLib.DLL.
-
-Then run "wmake" in there to compile some of the testapps.
-
-
-
-3. What is missing?
--------------------
-
-The following things are missing from this SDL implementation:
-- MMX, SSE and 3DNOW! optimized video blitters?
-- HW Video surfaces
-- OpenGL support
-
-
-
-4. Special Keys / Full-Screen support
+3. Special Keys / Full-Screen support
 -------------------------------------
 
 There are two special hot-keys implemented:
 - Alt+Home switches between fullscreen and windowed mode
 - Alt+End simulates closing the window (can be used as a Panic key)
-Only the LEFT Alt key will work.
+  Only the LEFT Alt key will work.
 
 
-
-5. Joysticks on SDL/2
----------------------
+4. Joysticks in SDL
+-------------------
 
 The Joystick detection only works for standard joysticks (2 buttons, 2 axes
 and the like). Therefore, if you use a non-standard joystick, you should
@@ -108,8 +116,8 @@ of the Joystick Port hardware, not OS/2.
 
 
 
-6. Proportional windows
------------------------
+5. Proportional windows (FSLib driver only)
+-------------------------------------------
 
 For some SDL applications it can be handy to have proportional windows, so
 the windows will keep their aspect ratio when resized.
@@ -130,27 +138,18 @@ This can be achieved in two ways:
   at the first run.
 
 
-
-7. Audio in SDL applications
+6. Audio in SDL applications
 ----------------------------
 
-Audio effects are one of the most important features in games. Creating audio
-effects in sync with the game and without hickups and pauses in the audio are
-very important things.
+The OS/2 port of SDL can be instructed to run the audio thread in high
+priority, which makes sure that there will be enough time for the processing
+of the audio data.
 
-However there are multithreaded SDL applications that have tight loops as their
-main logic loop. This kills performance in OS/2, and takes too much CPU from
-other threads in the same process, for example from the thread to create the 
-sound effects.
-
-For this reason, the OS/2 port of SDL can be instructed to run the audio thread
-in high priority, which makes sure that there will be enough time for the 
-processing of the audio data.
-
-At default, SDL/2 runs the audio thread at ForegroundServer+0 priority. Well 
+By default, SDL runs the audio thread at ForegroundServer+0 priority. Well
 written and well behaving SDL applications should work well in this mode.
-For other applications, you can tell SDL/2 to run the audio thread at 
-TimeCritical priority by setting an env.variable before starting the SDL app:
+For other applications, you can tell SDL to run the audio thread at
+TimeCritical priority by setting an environment variable before starting the
+SDL app:
 
     SET SDL_USE_TIMECRITICAL_AUDIO=1
 
@@ -159,35 +158,19 @@ tight infinite loop in this thread, this will make the whole system
 unresponsive, so use it with care, and only for applications that need it!
 
 
-
-8. Next steps...
-----------------
-
-Things to do:
-- Implement missing stuffs (look for 'TODO' string in source code!)
-- Finish video driver (the 'wincommon' can be a good example for missing
-  things like application icon and so on...)
-- Enable MMX/SSE/SSE2 acceleration functions
-- Rewrite CDROM support using DOS Ioctl for better support.
-
-
-
-9. Contacts
+7. Authors
 -----------
 
-   You can contact the developers for bugs:
-
-   Area					Developer		email
-   General (Audio/Video/System)		Doodle			doodle@scenergy.dfmk.hu
-   CDROM and Joystick			Caetano			daniel@caetano.eng.br
-
-   Notice however that SDL/2 is 'in development' stage so ... if you want to help,
-please, be our guest and contact us!
+- Andrey Vasilkin <digi@os2.snc.ru> Video (GrOp library)
+- Doodle <doodle@scenergy.dfmk.hu>  General (Audio/Video/System)
+- Caetano <daniel@caetano.eng.br>   CDROM and Joystick
 
 
-
-10. Changelog of the OS/2 port
+8. Changelog of the OS/2 port
 ------------------------------
+
+Version 1.2.16 - 2021-01-22
+ - Imported new video driver (os2grop) by Andrey Vasilkin
 
 Version 1.2.10 - 2006-05-17  - Doodle
  - Small modifications for v1.2.10 release
@@ -277,5 +260,3 @@ Version 1.2.7 - 2004-07-02a - Caetano
 	- Added CDROM support to tree (SDL-1.2.7\src\cdrom\os2\SDL_syscdrom.c)
 	- Modified makefile (SDL-1.2.7\src\makefiles.wat and SDL-1.2.7\watcom.mif) to build with CDROM support
 	- Added the "extra" SDL_types.h forgotten in 2004-07-02 version.
-
-<End-Of-File>

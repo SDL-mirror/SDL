@@ -1,0 +1,35 @@
+TARGETS = checkkeys.exe graywin.exe loopwave.exe testalpha.exe testbitmap.exe &
+          testblitspeed.exe testcdrom.exe testcursor.exe testdyngl.exe &
+          testerror.exe testfile.exe testgamma.exe testgl.exe testhread.exe &
+          testjoystick.exe testkeys.exe testlock.exe &
+          testoverlay2.exe testoverlay.exe testpalette.exe testplatform.exe &
+          testsem.exe testsprite.exe testtimer.exe testver.exe testvidinfo.exe &
+          testwin.exe testwm.exe threadwin.exe torturethread.exe testloadso.exe
+# testiconv.exe
+
+OBJS = $(TARGETS:.exe=.obj)
+
+all: $(TARGETS)
+
+BINPATH = .
+INCPATH = -I$(%WATCOM)/h/os2 -I$(%WATCOM)/h -I../include
+CFLAGS_DEF = $(INCPATH) -bt=os2 -d0 -q -bm -5s -fp5 -fpi87 -sg -oteanbmier
+CFLAGS_EXE = $(CFLAGS_DEF)
+CFLAGS = $(CFLAGS_EXE) -ei -5s
+
+LIBPATH = ../os2
+LIBS = SDL12.lib
+
+.obj.exe:
+  wlink SYS os2v2 libpath $(LIBPATH) lib {$(LIBS)} op q file {$<} name $*
+
+.c.obj:
+  wcc386 $(CFLAGS) -fo=$^@ $<
+
+clean: .SYMBOLIC
+  @echo * Clean tests in $(BINPATH)
+  @if exist *.obj rm *.obj
+  @if exist *.err rm *.err
+
+distclean: clean .SYMBOLIC
+  @if exist *.exe rm *.exe

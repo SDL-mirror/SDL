@@ -21,6 +21,8 @@
 */
 #include "SDL_config.h"
 
+#if SDL_VIDEO_DRIVER_OS2FS
+
 #define _ULS_CALLCONV_
 #define CALLCONV _System
 #include <unidef.h> /* Unicode API */
@@ -2513,3 +2515,4 @@ VideoBootStrap OS2FSLib_bootstrap = {
     "os2fslib", "OS/2 Video Output using FSLib",
     os2fslib_Available, os2fslib_CreateDevice
 };
+#endif /* SDL_VIDEO_DRIVER_OS2FS */

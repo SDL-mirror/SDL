@@ -401,6 +401,9 @@ extern VideoBootStrap NDS_bootstrap;
 #if SDL_VIDEO_DRIVER_RISCOS
 extern VideoBootStrap RISCOS_bootstrap;
 #endif
+#if SDL_VIDEO_DRIVER_OS2GROP
+extern VideoBootStrap OS2GROP_bootstrap;
+#endif
 #if SDL_VIDEO_DRIVER_OS2FS
 extern VideoBootStrap OS2FSLib_bootstrap;
 #endif

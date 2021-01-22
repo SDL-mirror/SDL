@@ -119,10 +119,11 @@
 
 /* Enable various video drivers */
 #define SDL_VIDEO_DRIVER_DUMMY	1
-#define SDL_VIDEO_DRIVER_OS2FS	1
+#define SDL_VIDEO_DRIVER_OS2GROP	1
+/* #undef SDL_VIDEO_DRIVER_OS2FS */
 
 /* Enable OpenGL support */
-/* #undef SDL_VIDEO_OPENGL */				/* Nothing yet */
+/* #undef SDL_VIDEO_OPENGL */
 
 /* Enable assembly routines where available */
 #define SDL_ASSEMBLY_ROUTINES	1

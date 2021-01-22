@@ -1,0 +1,144 @@
+#  OpenWatcom makefile to build SDL for OS/2
+
+!ifndef %WATCOM
+!error Environment variable WATCOM is not specified!
+!endif
+
+DLLNAME = SDL12
+VERSION = 1.2.16
+LIBHOME = os2
+
+INCPATH = -I$(%WATCOM)/h/os2 -I$(%WATCOM)/h
+INCPATH+= -Iinclude -I"os2/h"
+LIBPATH=$(LIBHOME)/lib
+LIBNAME=$(DLLNAME)
+
+DLLFILE = $(LIBHOME)/$(LIBNAME).dll
+LIBFILE = $(LIBHOME)/$(LIBNAME).lib
+LNKFILE=$(LIBNAME).lnk
+
+CFLAGS_DEF=-bt=os2 -d0 -zq -bm -5s -fp5 -fpi87 -sg -oteanbmier $(INCPATH)
+CFLAGS_DLL=$(CFLAGS_DEF) -bd
+# Create debug build or not?
+DEBUG=0
+# Enable Hermes MMX blitters?
+HERMES=1
+
+# Special flags for building SDL
+CFLAGS=$(CFLAGS_DLL) -otexan -wx -ei
+CFLAGS+= -DBUILD_SDL
+#CFLAGS+= -DCHECK_LEAKS
+CFLAGS+= -DUSE_DOSSETPRIORITY
+
+!ifeq HERMES 1
+CFLAGS+= -DSDL_HERMES_BLITTERS=1
+!endif
+# USE_ASM_MIXER_VC has no effect since SDL-1.2.10.
+#CFLAGS+= -DUSE_ASM_MIXER_VC
+
+DESCRIPTION = Simple DirectMedia Layer 1.2
+
+!ifeq DEBUG 1
+CFLAGS += -d2 -DDEBUG_BUILD
+DESCRIPTION += DEBUG
+!endif
+
+PMGRE_LIB = $(LIBPATH)/pmgre.lib
+PMGRE_EXP = os2/pmgre/pmgre.exp
+
+audioobjs = SDL_audiocvt.obj SDL_mixer.obj SDL_mixer_MMX_VC.obj SDL_wave.obj &
+            SDL_audio.obj SDL_dummyaudio.obj SDL_diskaudio.obj SDL_dart.obj
+
+cdromobjs = SDL_cdrom.obj SDL_syscdrom.obj
+cpuinfoobjs = SDL_cpuinfo.obj
+eventsobjs = SDL_active.obj SDL_events.obj SDL_expose.obj SDL_keyboard.obj &
+             SDL_mouse.obj SDL_quit.obj SDL_resize.obj
+fileobjs = SDL_rwops.obj
+joystickobjs = SDL_joystick.obj SDL_sysjoystick.obj
+loadsoobjs = SDL_sysloadso.obj
+threadobjs = SDL_thread.obj SDL_sysmutex.obj SDL_syssem.obj SDL_systhread.obj &
+             SDL_syscond.obj
+timerobjs = SDL_timer.obj SDL_systimer.obj
+videoobjs = SDL_blit.obj SDL_blit_0.obj SDL_blit_1.obj SDL_blit_A.obj &
+            SDL_blit_N.obj SDL_bmp.obj SDL_cursor.obj SDL_gamma.obj &
+            SDL_pixels.obj SDL_RLEaccel.obj SDL_stretch.obj SDL_surface.obj &
+            SDL_video.obj SDL_yuv.obj SDL_yuv_mmx.obj SDL_yuv_sw.obj &
+            SDL_os2grop.obj SDL_os2dive.obj SDL_os2vman.obj SDL_grop.obj &
+            SDL_os2fslib.obj &
+            SDL_nullevents.obj SDL_nullmouse.obj SDL_nullvideo.obj
+
+stdlibobjs = SDL_malloc.obj SDL_qsort.obj SDL_string.obj
+# SDL_iconv.obj
+
+!ifeq HERMES 1
+hermesobjs= mmx_main.obj mmxp2_32.obj x86_main.obj x86p_16.obj x86p_32.obj
+!endif
+
+object_files= SDL.obj SDL_error.obj SDL_fatal.obj &
+              $(stdlibobjs) $(audioobjs) $(cpuinfoobjs) $(eventsobjs) &
+              $(fileobjs) $(joystickobjs) $(loadsoobjs) $(threadobjs) &
+              $(timerobjs) $(hermesobjs) $(videoobjs) $(cdromobjs)
+
+.extensions:
+.extensions: .lib .dll .obj .c .asm
+
+.asm: src/hermes
+.c: src;src/audio;src/cdrom;src/cdrom/os2;src/cpuinfo;src/events;src/file;src/joystick;src/joystick/os2;src/loadso/os2;src/stdlib;src/thread;src/thread/os2;src/timer;src/timer/os2;src/video
+.c: src/audio/dummy;src/audio/disk;src/audio/dart;src/video/dummy;src/video/os2fslib;src/video/os2grop
+
+.c.obj:
+	wcc386 $(CFLAGS) -fo=$^@ $<
+.asm.obj:
+	nasm -f obj -D__OS2__ -Isrc/hermes/ -o $^@ $<
+
+all: $(DLLFILE) $(LIBFILE) .symbolic
+
+$(DLLFILE): compiling_info $(object_files) $(LNKFILE) $(PMGRE_LIB)
+	@echo * Linking: $@
+	@wlink @$(LNKFILE)
+
+$(LIBFILE): $(DLLFILE)
+	@echo * Creating LIB file: $@
+	wlib -q -b -n -c -pa -s -t -zld -ii -io $* $(DLLFILE)
+
+SDL_RLEaccel.obj:
+	wcc386 $(cflags) -w1 -fo=$^@ src/video/SDL_RLEaccel.c
+
+compiling_info : .symbolic
+	@echo * Compiling...
+
+$(PMGRE_LIB): $(PMGRE_EXP)
+	@echo * Creating PMGRE import library
+	wlib -q -b -n -c -pa -s -t -zld -ii -io $(PMGRE_LIB) @$(PMGRE_EXP)
+
+$(LNKFILE):
+	@echo * Creating linker file: $@
+	@%create $@
+	@%append $@ SYSTEM os2v2_dll INITINSTANCE TERMINSTANCE
+	@%append $@ NAME $(DLLFILE)
+	@for %i in ($(object_files)) do @%append $@ FILE %i
+	@%append $@ LIBPATH $(LIBPATH)
+	@%append $@ LIB FSLib.lib
+	@%append $@ LIB pmgre.lib
+	@%append $@ LIB mmpm2.lib
+	@%append $@ LIB libuls.lib
+	@%append $@ LIB libconv.lib
+	@%append $@ OPTION QUIET
+	@%append $@ OPTION IMPF=$^&.exp
+	@%append $@ OPTION MAP=$^&.map
+	@%append $@ OPTION DESCRIPTION '@$#libsdl org:$(VERSION)$#@$(DESCRIPTION)'
+	@%append $@ OPTION ELIMINATE
+	@%append $@ OPTION MANYAUTODATA
+	@%append $@ OPTION OSNAME='OS/2 and eComStation'
+	@%append $@ OPTION SHOWDEAD
+
+clean: .SYMBOLIC
+	@echo * Clean: $(LIBNAME) $(VERSION)
+	@if exist *.obj rm *.obj
+	@if exist *.map rm *.map
+	@if exist *.exp rm *.exp
+	@if exist $(LNKFILE) rm $(LNKFILE)
+
+distclean: clean .SYMBOLIC
+	@if exist $(DLLFILE) rm $(DLLFILE)
+	@if exist $(LIBFILE) rm $(LIBFILE)

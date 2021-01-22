@@ -117,6 +117,9 @@ static VideoBootStrap *bootstrap[] = {
 #if SDL_VIDEO_DRIVER_RISCOS
 	&RISCOS_bootstrap,
 #endif
+#if SDL_VIDEO_DRIVER_OS2GROP
+	&OS2GROP_bootstrap,
+#endif
 #if SDL_VIDEO_DRIVER_OS2FS
 	&OS2FSLib_bootstrap,
 #endif
@@ -178,6 +181,18 @@ int SDL_VideoInit (const char *driver_name, Uint32 flags)
 #if 0	/* This will be replaced with a better driver selection API */
 		if ( SDL_strrchr(driver_name, ':') != NULL ) {
 			index = atoi(SDL_strrchr(driver_name, ':')+1);
+		}
+#endif
+#if SDL_VIDEO_DRIVER_OS2GROP
+		if ( SDL_strcasecmp(driver_name,"DIVE") == 0 ||
+		     SDL_strcasecmp(driver_name,"VMAN") == 0 ||
+		     SDL_strcasecmp(driver_name,"VMANFS") == 0 ) {
+		    driver_name = "OS2";
+		}
+#endif
+#if SDL_VIDEO_DRIVER_OS2FS
+		if ( SDL_strcasecmp(driver_name,"FSLIB") == 0 ) {
+		    driver_name = "os2fslib";
 		}
 #endif
 		for ( i=0; bootstrap[i]; ++i ) {

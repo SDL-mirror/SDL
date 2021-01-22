@@ -1,0 +1,15 @@
+;; to build an EMX import lib:  emximp -o FSLib.a FSLib.imp
+FSLib_Initialize        FSLib    FSLib_Initialize        ?
+FSLib_Uninitialize      FSLib    FSLib_Uninitialize      ?
+FSLib_GetVideoModeList  FSLib    FSLib_GetVideoModeList  ?
+FSLib_FreeVideoModeList FSLib    FSLib_FreeVideoModeList ?
+FSLib_GetDesktopVideoMode FSLib    FSLib_GetDesktopVideoMode ?
+FSLib_CreateWindow      FSLib    FSLib_CreateWindow      ?
+FSLib_AddUserParm       FSLib    FSLib_AddUserParm       ?
+FSLib_GetUserParm       FSLib    FSLib_GetUserParm       ?
+FSLib_ToggleFSMode      FSLib    FSLib_ToggleFSMode      ?
+FSLib_QueryFSMode       FSLib    FSLib_QueryFSMode       ?
+FSLib_SetSrcBufferDesc  FSLib    FSLib_SetSrcBufferDesc  ?
+FSLib_IsFSLibWindow     FSLib    FSLib_IsFSLibWindow     ?
+FSLib_BitBlt            FSLib    FSLib_BitBlt            ?
+FSLib_SetPixelFormat    FSLib    FSLib_SetPixelFormat    ?
