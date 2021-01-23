@@ -1,9 +1,9 @@
 dnl Process this file with autoconf to produce a configure script.
 AC_INIT
-AC_CONFIG_SRCDIR(README)
+AC_CONFIG_SRCDIR([src/SDL.c])
 AC_CONFIG_HEADERS(include/SDL_config.h)
 AC_GNU_SOURCE
-AC_CONFIG_AUX_DIRS($srcdir/build-scripts)
+AC_CONFIG_AUX_DIR([build-scripts])
 
 dnl Set various version strings - taken gratefully from the GTk sources
 #
@@ -45,7 +45,6 @@ AC_SUBST(LT_REVISION)
 AC_SUBST(LT_AGE)
 
 dnl Detect the canonical build and host environments
-AC_CONFIG_AUX_DIR([build-scripts])
 dnl AC_CANONICAL_HOST
 AC_C_BIGENDIAN
 if test x$ac_cv_c_bigendian = xyes; then
@@ -2954,7 +2953,7 @@ case "$host" in
         ;;
     *)
         AC_MSG_ERROR([
-*** Unsupported host:  Please add to configure.in
+*** Unsupported host:  Please add to configure.ac
         ])
         ;;
 esac
