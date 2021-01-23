@@ -69,7 +69,7 @@
 #include <sys/joystick.h>
 #endif
 
-#if SDL_JOYSTICK_USBHID_MACHINE_JOYSTICK_H
+#if SDL_HAVE_MACHINE_JOYSTICK_H
 #include <machine/joystick.h>
 #endif
 
@@ -407,7 +407,7 @@ SDL_SYS_JoystickUpdate(SDL_Joystick *joy)
 	int nbutton, naxe = -1;
 	Sint32 v;
 
-#if defined(__FREEBSD__) || SDL_JOYSTICK_USBHID_MACHINE_JOYSTICK_H || defined(__FreeBSD_kernel__)
+#if defined(__FREEBSD__) || SDL_HAVE_MACHINE_JOYSTICK_H || defined(__FreeBSD_kernel__)
 	struct joystick gameport;
  
 	if (joy->hwdata->type == BSDJOY_JOY) {
@@ -455,7 +455,7 @@ SDL_SYS_JoystickUpdate(SDL_Joystick *joy)
 		}
 		return;
 	}
-#endif /* defined(__FREEBSD__) || SDL_JOYSTICK_USBHID_MACHINE_JOYSTICK_H */
+#endif /* defined(__FREEBSD__) || SDL_HAVE_MACHINE_JOYSTICK_H */
 	
 	rep = &joy->hwdata->inreport;
 

@@ -21812,7 +21812,7 @@ if ac_fn_c_try_compile "$LINENO"; then :
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
             if test x$have_machine_joystick = xyes; then
-                $as_echo "#define SDL_JOYSTICK_USBHID_MACHINE_JOYSTICK_H 1" >>confdefs.h
+                $as_echo "#define SDL_HAVE_MACHINE_JOYSTICK_H 1" >>confdefs.h
 
             fi
             { $as_echo "$as_me:${as_lineno-$LINENO}: result: $have_machine_joystick" >&5

@@ -2386,7 +2386,7 @@ CheckUSBHID()
             have_machine_joystick=yes
             ])
             if test x$have_machine_joystick = xyes; then
-                AC_DEFINE(SDL_JOYSTICK_USBHID_MACHINE_JOYSTICK_H)
+                AC_DEFINE(SDL_HAVE_MACHINE_JOYSTICK_H)
             fi
             AC_MSG_RESULT($have_machine_joystick)
 

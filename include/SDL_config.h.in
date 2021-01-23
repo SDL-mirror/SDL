@@ -220,7 +220,7 @@
 #undef SDL_JOYSTICK_RISCOS
 #undef SDL_JOYSTICK_WINMM
 #undef SDL_JOYSTICK_USBHID
-#undef SDL_JOYSTICK_USBHID_MACHINE_JOYSTICK_H
+#undef SDL_HAVE_MACHINE_JOYSTICK_H
 
 /* Enable various shared object loading systems */
 #undef SDL_LOADSO_BEOS
